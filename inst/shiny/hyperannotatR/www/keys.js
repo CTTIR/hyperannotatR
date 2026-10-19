@@ -1,4 +1,4 @@
-// Keyboard shortcuts for annotatR. Bindings never fire while a text input,
+// Keyboard shortcuts for hyperannotatR. Bindings never fire while a text input,
 // textarea, or select has focus.
 (function () {
   function inTextField() {

@@ -20,7 +20,6 @@ Physical pixel size
 }
 \seealso{
 Other images:
-\code{\link{annotatR-classes}},
 \code{\link[=at_bands]{at_bands()}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_example_image]{at_example_image()}},
@@ -32,6 +31,7 @@ Other images:
 \code{\link[=at_n_levels]{at_n_levels()}},
 \code{\link[=at_read_image]{at_read_image()}},
 \code{\link[=at_tile]{at_tile()}},
-\code{\link[=at_wavelengths]{at_wavelengths()}}
+\code{\link[=at_wavelengths]{at_wavelengths()}},
+\code{\link{hyperannotatR-classes}}
 }
 \concept{images}

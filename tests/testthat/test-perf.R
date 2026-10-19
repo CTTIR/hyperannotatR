@@ -77,7 +77,7 @@ test_that("extracting a small ROI from a large image stays tile-wise", {
 })
 
 test_that("the tile cache evicts the least-recently-used entry over the limit", {
-  withr::local_options(annotatR.cache_size = 2000) # bytes: tiny
+  withr::local_options(hyperannotatR.cache_size = 2000) # bytes: tiny
   .tile_cache_clear()
   for (i in 1:5) {
     arr <- array(as.numeric(i), dim = c(8, 8, 1))

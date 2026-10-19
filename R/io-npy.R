@@ -1,6 +1,6 @@
 # NumPy `.npy` integer-mask I/O. Ground-truth HSI masks (anatomy / state /
 # uncertain / artefact) are numpy integer arrays, so a lossless bridge is needed
-# to compare annotatR masks against them and to hand masks back to Python tools.
+# to compare hyperannotatR masks against them and to hand masks back to Python tools.
 #
 # The bridge is pure base R (no numpy/reticulate/RcppCNPy dependency), mirroring
 # the ENVI reader's `readBin`/`writeBin` approach. Only integer dtypes are
@@ -11,18 +11,18 @@
 # declares, returning an R matrix `m` with `m[i, j] == numpy_array[i-1, j-1]` and
 # `dim(m)` equal to the numpy shape.
 #
-# annotatR masks are `[y, x]` (rows = height, cols = width). A numpy array in the
+# hyperannotatR masks are `[y, x]` (rows = height, cols = width). A numpy array in the
 # standard image convention is `(height, width)` = `[y, x]`, so `at_read_npy()`
 # and `at_write_npy()` round-trip losslessly with no transpose. But some tools --
 # notably TIVITA/HyperGui HSI masks -- store the native cube order `(width,
 # height)` = `[x, y]`, the transpose. For those, pass `transpose = TRUE` so reads
-# land in annotatR's `[y, x]` convention (and writes produce `(width, height)`
+# land in hyperannotatR's `[y, x]` convention (and writes produce `(width, height)`
 # files the external tool expects). Without it, comparing against such a mask
 # aborts on the dimension guard (non-square) or silently transposes (square).
 
 .NPY_MAGIC <- c(0x93, 0x4e, 0x55, 0x4d, 0x50, 0x59)
 
-# Map an annotatR dtype name to a numpy descr and a byte size.
+# Map an hyperannotatR dtype name to a numpy descr and a byte size.
 .npy_descr <- function(dtype) {
   switch(
     dtype,
@@ -180,7 +180,7 @@ at_write_npy <- function(mask, path, dtype = c("int32", "uint8", "int16"),
 #' @param level Integer pyramid level to record. Default `0`.
 #' @param transpose Logical; transpose the array on read, for files stored in
 #'   the native cube order `(width, height)` = `[x, y]` (e.g. TIVITA/HyperGui
-#'   masks) so the result lands in annotatR's `[y, x]` convention. Default
+#'   masks) so the result lands in hyperannotatR's `[y, x]` convention. Default
 #'   `FALSE` assumes the standard image convention `(height, width)`.
 #' @param legend Optional legend tibble (`value`, `label`) overriding the sidecar
 #'   / pixel-value labelling.

@@ -29,13 +29,13 @@ The manifest (a list of class \code{at_interop_manifest}); invisibly when
 \code{destination} is given.
 }
 \description{
-Describe annotatR objects for a partner such as qupflowR without exposing
+Describe hyperannotatR objects for a partner such as qupflowR without exposing
 local paths: images are identified by content hash (\code{image_id}) and file
 basename; annotations by string ROI ids and an \code{\link[=at_annotation_revision]{at_annotation_revision()}};
 masks by type, integer dtype, background, dimensions, level and legend. The
 coordinate convention, band/wavelength table, HSI value semantics, plane,
 calibration and transform digests are recorded explicitly. QuPath hierarchy
-and native ROI shapes, which annotatR does not model, are reported as
+and native ROI shapes, which hyperannotatR does not model, are reported as
 \code{"unknown"} or \code{"approximated"}, never invented.
 }
 \examples{

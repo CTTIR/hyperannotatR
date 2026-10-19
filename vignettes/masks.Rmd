@@ -7,19 +7,19 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="annotatR logo"}
+```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="hyperannotatR logo"}
 knitr::include_graphics("../man/figures/logo.png")
 ```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
-library(annotatR)
+library(hyperannotatR)
 ```
 
 A *mask* is the artefact that turns hand-drawn regions into something a
 segmentation or classification pipeline can consume: an integer raster on the
 same pixel grid as the image, where each pixel carries the identity of the
-region it belongs to. In annotatR the mask is the core deliverable, and
+region it belongs to. In hyperannotatR the mask is the core deliverable, and
 `at_mask()` is the function that produces it from an `annot_roi`, an
 `annot_layer`, or a whole `annot_project`.
 
@@ -44,7 +44,7 @@ and `mask_type` attributes. Read the legend back with `at_mask_legend()`.
 ## The pixel-coverage contract
 
 Rasterisation is only reproducible if the pixel/geometry relationship is exact,
-so annotatR pins it down. Pixel `(i, j)` covers the half-open square
+so hyperannotatR pins it down. Pixel `(i, j)` covers the half-open square
 `[j-1, j) x [i-1, i)`, with `(0, 0)` at the top-left corner of the top-left
 pixel; its centre is therefore `(j - 0.5, i - 0.5)`. With the default
 `touches = FALSE`, a pixel is in the mask when *its centre* lies inside the
@@ -164,7 +164,7 @@ tumour = mask == next(v for v, l in value_to_label.items() if l == "tumour")
 ## Reading masks back
 
 Masks are not a dead end. `at_read_mask()` polygonises an existing mask —
-annotatR's own output, or a Cellpose/StarDist/QuPath raster — back into an
+hyperannotatR's own output, or a Cellpose/StarDist/QuPath raster — back into an
 editable `annot_layer`, recovering labels from the sidecar when it is present:
 
 ```{r read}

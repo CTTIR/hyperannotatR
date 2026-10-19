@@ -18,7 +18,7 @@
 #' Declare a TIVITA SpecCube layout profile
 #'
 #' A profile states everything needed to decode a bare `*_SpecCube.dat` file;
-#' annotatR never infers these from a file name. The default arguments describe
+#' hyperannotatR never infers these from a file name. The default arguments describe
 #' the documented 640 x 480 x 100-band layout (500-995 nm), which is a profile
 #' like any other and can be replaced for a different device.
 #'
@@ -124,7 +124,7 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
   legacy <- !is.null(nx) || !is.null(ny) || !is.null(nb) || !is.null(header)
   if (is.null(profile) && legacy) {
     # Legacy dimension arguments build an ad hoc profile. The canonical
-    # 500-995 nm grid is applied only to 100-band cubes, as in annotatR 0.1.
+    # 500-995 nm grid is applied only to 100-band cubes, as in hyperannotatR 0.1.
     nb <- nb %||% 100L
     wl <- wavelengths %||% (if (as.integer(nb) == 100L) seq(500, 995, by = 5) else NULL)
     profile <- at_tivita_profile(
@@ -152,7 +152,7 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
     .at_abort(c(
       "{.path {basename(path)}} does not match the {.val {profile$name}} SpecCube profile.",
       "x" = "Expected a file size of {format(expected, scientific = FALSE)} bytes but found {size %||% NA}.",
-      "i" = "Declare the device layout with {.fn at_tivita_profile} or a {.file <cube>.tivita.json} sidecar; annotatR does not guess."
+      "i" = "Declare the device layout with {.fn at_tivita_profile} or a {.file <cube>.tivita.json} sidecar; hyperannotatR does not guess."
     ), code = "PROFILE_MISMATCH",
     details = list(profile = profile$name, expected_bytes = expected, actual_bytes = size),
     call = call)

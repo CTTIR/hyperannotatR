@@ -34,7 +34,6 @@ Other example data:
 \code{\link[=at_example_session]{at_example_session()}}
 
 Other images:
-\code{\link{annotatR-classes}},
 \code{\link[=at_bands]{at_bands()}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_hsi_meta]{at_hsi_meta()}},
@@ -46,7 +45,8 @@ Other images:
 \code{\link[=at_pixel_size]{at_pixel_size()}},
 \code{\link[=at_read_image]{at_read_image()}},
 \code{\link[=at_tile]{at_tile()}},
-\code{\link[=at_wavelengths]{at_wavelengths()}}
+\code{\link[=at_wavelengths]{at_wavelengths()}},
+\code{\link{hyperannotatR-classes}}
 }
 \concept{example data}
 \concept{images}

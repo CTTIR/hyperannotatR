@@ -7,7 +7,7 @@ skip_if_not_installed("later")
 skip_if_not_installed("curl")
 skip_if_not(requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE))
 
-# How the child process loads the same annotatR build as this test process: the
+# How the child process loads the same hyperannotatR build as this test process: the
 # source tree for a development load, otherwise the library this copy came from
 # (e.g. a check or coverage library, whose installed R/ holds no .R sources).
 pkg_loader <- function() {
@@ -16,7 +16,7 @@ pkg_loader <- function() {
       length(list.files(file.path(src, "R"), pattern = "[.][Rr]$")) > 0L) {
     return(list(src = src, lib = NULL))
   }
-  list(src = NULL, lib = dirname(find.package("annotatR")))
+  list(src = NULL, lib = dirname(find.package("hyperannotatR")))
 }
 
 # Waits for the child's manifest list; a child that died first errors with its
@@ -39,7 +39,7 @@ start_child <- function(root, n_services = 2L, ttl = 60L) {
       pkgload::load_all(loader$src, quiet = TRUE)
     } else {
       .libPaths(c(loader$lib, .libPaths()))
-      library(annotatR)
+      library(hyperannotatR)
     }
     handles <- lapply(seq_len(n_services), function(i) {
       at_control_start(at_example_session(2), root = file.path(root, paste0("svc", i)),

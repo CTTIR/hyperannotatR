@@ -1,7 +1,7 @@
 # Request dispatcher and typed command handlers of `annotatr-control-v1`. The
 # same dispatcher serves the loopback HTTP server and in-process handles, so the
 # security, validation, revision and idempotency rules are identical on both
-# paths. Handlers only call public annotatR functions on the hub's session.
+# paths. Handlers only call public hyperannotatR functions on the hub's session.
 
 # A classified control failure carried to the response builder.
 .control_fail <- function(code, message, details = list(), class = "validation") {
@@ -42,7 +42,7 @@
 }
 
 .constant_time_equal <- function(a, b) {
-  identical(.sha256_bytes(paste0("annotatR-token:", a)), .sha256_bytes(paste0("annotatR-token:", b)))
+  identical(.sha256_bytes(paste0("hyperannotatR-token:", a)), .sha256_bytes(paste0("hyperannotatR-token:", b)))
 }
 
 # Security gate shared by every request: Host, Origin, bearer token, TTL.

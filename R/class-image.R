@@ -110,7 +110,7 @@ at_n_bands <- function(x, call = rlang::caller_env()) {
 #'       `"non_numeric"` (character).}
 #'   }
 #'   Always has `at_n_bands(x)` rows. The first four columns are unchanged
-#'   from annotatR 0.1; the remaining columns were added in 0.2.0.
+#'   from hyperannotatR 0.1; the remaining columns were added in 0.2.0.
 #' @family images
 #' @export
 at_bands <- function(x, call = rlang::caller_env()) {

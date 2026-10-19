@@ -19,7 +19,7 @@ at_read_npy(
 
 \item{transpose}{Logical; transpose the array on read, for files stored in
 the native cube order \verb{(width, height)} = \verb{[x, y]} (e.g. TIVITA/HyperGui
-masks) so the result lands in annotatR's \verb{[y, x]} convention. Default
+masks) so the result lands in hyperannotatR's \verb{[y, x]} convention. Default
 \code{FALSE} assumes the standard image convention \verb{(height, width)}.}
 
 \item{legend}{Optional legend tibble (\code{value}, \code{label}) overriding the sidecar

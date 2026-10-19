@@ -1,5 +1,5 @@
 ENVI
-description = {annotatR synthetic example cube}
+description = {hyperannotatR synthetic example cube}
 samples = 128
 lines = 128
 bands = 40

@@ -89,7 +89,7 @@ handled by policy. Image bytes are excluded unless \code{include_images = TRUE}.
 }
 \details{
 \code{mask_type} uses training terminology: \code{"labelled"} is a semantic class-code
-mask (annotatR \code{"multiclass"}), \code{"instance"} has one id per ROI (annotatR
+mask (hyperannotatR \code{"multiclass"}), \code{"instance"} has one id per ROI (hyperannotatR
 \code{"labelled"}), \code{"binary"} marks foreground. The mapping is recorded in the
 manifest.
 }

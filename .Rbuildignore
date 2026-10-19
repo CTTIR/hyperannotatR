@@ -13,10 +13,10 @@
 ^.*\.Rproj$
 ^.*\.svg$
 ^\.vscode$
-^annotatR_.*\.tar\.gz$
+^hyperannotatR_.*\.tar\.gz$
 ^hsi-workbench$
 ^planning$
-^inst/shiny/annotatR/hsi-workbench$
+^inst/shiny/hyperannotatR/hsi-workbench$
 ^\.zenodo\.json$
 ^CITATION\.cff$
 ^\.git$

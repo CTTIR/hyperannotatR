@@ -7,19 +7,19 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="annotatR logo"}
+```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="hyperannotatR logo"}
 knitr::include_graphics("../man/figures/logo.png")
 ```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
-library(annotatR)
+library(hyperannotatR)
 ```
 
 ## A handle, not a pixel array
 
 Whole-slide microscopy and hyperspectral cubes are routinely gigabytes in size,
-so annotatR never loads them wholesale. Reading an image returns an
+so hyperannotatR never loads them wholesale. Reading an image returns an
 `annot_image`: a lightweight, backend-agnostic *handle* that carries the
 metadata you need to annotate — dimensions, pyramid levels, bands, pixel size —
 together with a lazy accessor that fetches pixels only when asked.
@@ -64,7 +64,7 @@ Levels matter for two reasons. First, an overview lets you display and navigate
 the whole image without reading full resolution. Second, an ROI drawn on a
 coarse level records the `level` it was created at, so its coordinates can be
 rescaled exactly to level 0 (see `at_roi_rescale()` and `at_transform()`). Every
-geometry in annotatR is anchored to a pyramid level; the coordinate convention
+geometry in hyperannotatR is anchored to a pyramid level; the coordinate convention
 is image pixels with the origin at the top-left and `y` increasing downward.
 
 ## Backends

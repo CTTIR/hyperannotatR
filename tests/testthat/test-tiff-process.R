@@ -5,9 +5,9 @@ tiff_process_fixture <- function(mode, target) {
       if (development) {
         pkgload::load_all(root, quiet = TRUE)
       } else {
-        library(annotatR)
+        library(hyperannotatR)
       }
-      ns <- asNamespace("annotatR")
+      ns <- asNamespace("hyperannotatR")
       p <- tempfile(fileext = ".tif")
       warmup <- p
       on.exit(unlink(warmup))
@@ -22,7 +22,7 @@ tiff_process_fixture <- function(mode, target) {
         }
         if (mode == "inherited") Sys.setenv(R_DEFAULT_PACKAGES = "magick")
       }
-      p <- system.file("extdata", "example_multiplex.tif", package = "annotatR")
+      p <- system.file("extdata", "example_multiplex.tif", package = "hyperannotatR")
       warnings <- character()
       value <- withCallingHandlers(
         {
@@ -42,10 +42,10 @@ tiff_process_fixture <- function(mode, target) {
               environment(reader) <- scope
               img <- reader(p)
             } else {
-              img <- annotatR::at_read_image(p, backend = "tiff")
+              img <- hyperannotatR::at_read_image(p, backend = "tiff")
             }
             list(
-              pixels = annotatR::at_tile(img), dims = img$dims,
+              pixels = hyperannotatR::at_tile(img), dims = img$dims,
               meta = img$meta, dtype = img$dtype
             )
           }
@@ -58,8 +58,8 @@ tiff_process_fixture <- function(mode, target) {
       list(value = value, warnings = warnings)
     },
     args = list(
-      root = getNamespaceInfo(asNamespace("annotatR"), "path"),
-      development = pkgload::is_dev_package("annotatR"),
+      root = getNamespaceInfo(asNamespace("hyperannotatR"), "path"),
+      development = pkgload::is_dev_package("hyperannotatR"),
       libraries = .libPaths(), mode = mode, target = target
     ),
     timeout = 60
@@ -100,7 +100,7 @@ test_that("decoder errors and invalid execution bounds fail closed", {
   expect_error(.tiff_read_isolated(path), "TIFF|image|cannot")
   expect_error(.tiff_read_isolated(paste0(path, "missing")))
   for (value in list(NA_real_, Inf, 0, 0.1, 1.5, 2^31, "120", c(1, 2))) {
-    withr::local_options(annotatR.tiff_timeout = value)
+    withr::local_options(hyperannotatR.tiff_timeout = value)
     expect_error(.tiff_read_isolated(path), "finite integer")
   }
 })
@@ -132,7 +132,7 @@ test_that("a real child timeout cleans temporary decoder files", {
   sleeper <- tempfile(fileext = ".R")
   withr::defer(unlink(sleeper))
   writeLines("Sys.sleep(30)", sleeper)
-  withr::local_options(annotatR.tiff_timeout = 1L)
+  withr::local_options(hyperannotatR.tiff_timeout = 1L)
   decoder <- .tiff_read_isolated
   scope <- new.env(parent = environment(decoder))
   scope$system2 <- function(command, args, stdout, stderr, timeout) {

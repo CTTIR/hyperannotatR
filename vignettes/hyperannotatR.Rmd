@@ -1,22 +1,22 @@
 ---
-title: "Get started with annotatR"
+title: "Get started with hyperannotatR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Get started with annotatR}
+  %\VignetteIndexEntry{Get started with hyperannotatR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
-library(annotatR)
+library(hyperannotatR)
 ```
 
-```{r hexlogo, echo=FALSE, fig.align="center", out.width="220px", fig.alt="annotatR hex sticker"}
-knitr::include_graphics("../man/figures/annotatR-hex.png")
+```{r hexlogo, echo=FALSE, fig.align="center", out.width="220px", fig.alt="hyperannotatR hex sticker"}
+knitr::include_graphics("../man/figures/hyperannotatR-hex.png")
 ```
 
-annotatR helps you draw, organise and export regions of interest (ROIs) across
+hyperannotatR helps you draw, organise and export regions of interest (ROIs) across
 ordinary images, whole-slide microscopy and hyperspectral data cubes. Every
 annotation is stored as a validated simple-feature geometry in image pixel
 coordinates, so it survives round-trips to GeoJSON, QuPath and TIFF, and can be
@@ -57,7 +57,7 @@ This is an ordinary 512 by 512 RGB image with three bands and no spectral axis.
 A multiplex or cube image would report several bands, wavelengths and, often,
 multiple pyramid levels; the accessors above are the same regardless, which is
 what lets one annotation workflow span very different data. Coordinates follow
-the image convention used everywhere in annotatR: the origin sits at the
+the image convention used everywhere in hyperannotatR: the origin sits at the
 top-left corner, `y` increases downward, and pixel `(i, j)` has its centre at
 `(j - 0.5, i - 0.5)`. Keeping that in mind makes every ROI you draw land exactly
 where you expect.
@@ -107,7 +107,7 @@ sf::st_drop_geometry(roi_tbl)[, c("roi_id", "layer", "label", "geom_type",
                                   "level", "area_px", "n_vertices")]
 ```
 
-Notice that the circle has been stored as a many-vertex polygon: annotatR keeps
+Notice that the circle has been stored as a many-vertex polygon: hyperannotatR keeps
 every ROI as a genuine simple feature, so areas, overlaps and set operations are
 all exact. `at_rois()` also accepts `layer` and `label` arguments when you want
 to pull out a subset, and `at_summary()` rolls the same table up into per-label
@@ -168,5 +168,5 @@ Both the raster and its legend appear, ready to hand to the next stage of your
 pipeline (or to reload with `at_read_mask()`).
 
 That is the whole loop: read, annotate, inspect, rasterise, export. From here,
-the **Images and backends** vignette explains how annotatR reads pyramids and
+the **Images and backends** vignette explains how hyperannotatR reads pyramids and
 spectral cubes, and how to register a backend of your own.

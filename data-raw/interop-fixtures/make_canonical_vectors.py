@@ -1,4 +1,4 @@
-# Independent reference vectors for annotatR's canonical JSON + SHA-256 digest.
+# Independent reference vectors for hyperannotatR's canonical JSON + SHA-256 digest.
 # Canonical form: json.dumps(sort_keys=True, separators=(",", ":"), ensure_ascii=False),
 # UTF-8 bytes, no trailing newline (the qupflowR bundle_digest rule).
 import hashlib, json, sys

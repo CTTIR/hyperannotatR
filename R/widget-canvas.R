@@ -202,7 +202,7 @@ at_canvas <- function(img, project = NULL, tool = "pan", width = NULL,
   )
   htmlwidgets::createWidget(
     name = "atcanvas", x = x, width = width, height = height,
-    package = "annotatR", elementId = elementId,
+    package = "hyperannotatR", elementId = elementId,
     sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = "100%", defaultHeight = 600,
                                              browser.fill = TRUE)
   )
@@ -215,7 +215,7 @@ at_canvas <- function(img, project = NULL, tool = "pan", width = NULL,
 #' @family shiny
 #' @export
 atCanvasOutput <- function(outputId, width = "100%", height = "600px") {
-  htmlwidgets::shinyWidgetOutput(outputId, "atcanvas", width, height, package = "annotatR")
+  htmlwidgets::shinyWidgetOutput(outputId, "atcanvas", width, height, package = "hyperannotatR")
 }
 
 #' Render an annotation canvas in Shiny

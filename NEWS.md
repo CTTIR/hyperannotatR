@@ -1,4 +1,8 @@
-# annotatR (development version)
+# hyperannotatR (development version)
+
+* Renamed the R package to hyperannotatR and focused its scope on HSI.
+  Existing at_* APIs, object classes and saved version fields are retained.
+  Microscopy cell annotation and correction are owned by segmantR.
 
 * Stopping a local control listener now cancels its pending expiry callback.
   This releases the stopped service and prevents subsequent Shiny module tests
@@ -8,12 +12,12 @@
   in a clean R subprocess to avoid native callback failures after ImageMagick
   has been used. Pixel values, attributes and caller-specific conversions are
   preserved. Decoding requires an executable `Rscript` and writable temporary
-  storage. Set `options(annotatR.tiff_timeout = 120L)` to control the timeout in
+  storage. Set `options(hyperannotatR.tiff_timeout = 120L)` to control the timeout in
   whole seconds (default 120). Failed or timed-out decoding returns an error.
   This remains eager decoding; isolation does not provide bounded image memory
   or native window reads.
 
-# annotatR 0.2.0
+# hyperannotatR 0.2.0
 
 A partner contract for the qupflowR package, a testable app builder with an
 optional local control service, hyperspectral metadata and windowed readers,
@@ -35,7 +39,7 @@ remain compatible; behaviour changes are listed under *Changes*.
   (QuPath GeoJSON, GeoJSON, integer masks with legends, NPY, CSV, RDS, HSI
   manifest). Its digest follows qupflowR's canonical-JSON bundle digest rule.
 * `at_import_qupflowr()` verifies inventory, schema, major version, id joins,
-  labels, mask dimensions and legends, and returns namespaced annotatR objects
+  labels, mask dimensions and legends, and returns namespaced hyperannotatR objects
   with a conversion report.
 * `at_stage_qupflowr()` and `at_commit_qupflowr()` apply partner changes as an
   explicit, revision-checked, idempotent diff that never overwrites reviewed or
@@ -50,7 +54,7 @@ remain compatible; behaviour changes are listed under *Changes*.
 * `at_app()` builds the annotation app as a `shiny.appobj` from explicit
   arguments; all app code now lives in `R/`. `at_annotate()` is a launcher
   around it and no longer passes the session through `options()`.
-  `inst/shiny/annotatR/app.R` remains as a thin compatibility wrapper.
+  `inst/shiny/hyperannotatR/app.R` remains as a thin compatibility wrapper.
 * `at_control_start()`, `at_control_stop()`, `at_control_close()`,
   `at_control_connect()`, `at_control_capabilities()`, `at_control_state()`,
   `at_control_events()`, `at_control_command()` and
@@ -83,7 +87,7 @@ remain compatible; behaviour changes are listed under *Changes*.
   calibration provenance; `at_cubert_export_envi()` writes the portable ENVI
   fallback. Without the SDK the backend reports itself unavailable.
 * A TIFF is spectral only with declared `wavelengths`.
-* `at_tile()` enforces `options(annotatR.max_tile_bytes)`; app previews read
+* `at_tile()` enforces `options(hyperannotatR.max_tile_bytes)`; app previews read
   only the displayed bands.
 
 ## Training datasets
@@ -96,7 +100,7 @@ remain compatible; behaviour changes are listed under *Changes*.
 ## Changes
 
 * `at_write_qupath()` now writes the QuPath 0.4+ dialect by default
-  (`objectType`, `classification.color`, UUID feature ids plus annotatR ids in
+  (`objectType`, `classification.color`, UUID feature ids plus hyperannotatR ids in
   `properties.metadata`), verified with QuPath 0.7.0. Use
   `dialect = "legacy"` for the 0.1 form. `at_read_qupath()` reads both,
   including derived classes, measurements, planes, nuclei and ellipse flags.
@@ -107,9 +111,9 @@ remain compatible; behaviour changes are listed under *Changes*.
 * Navigating in the app keeps the edited project in its own queue entry, and
   Shift+Enter stores the current project before advancing.
 * App export file names are sanitised and unique.
-* `R CMD build` excludes a local `inst/shiny/annotatR/hsi-workbench/` directory.
+* `R CMD build` excludes a local `inst/shiny/hyperannotatR/hsi-workbench/` directory.
 
-# annotatR 0.0.1
+# hyperannotatR 0.0.1
 
 Initial development release.
 

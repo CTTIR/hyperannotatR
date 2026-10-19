@@ -1,7 +1,7 @@
 test_that("at_project builds provenance and normalises layers", {
   proj <- demo_project()
   expect_s3_class(proj, "annot_project")
-  expect_identical(proj$provenance$annotatR_version, as.character(utils::packageVersion("annotatR")))
+  expect_identical(proj$provenance$annotatR_version, as.character(utils::packageVersion("hyperannotatR")))
   expect_named(proj$layers, c("tissue", "tumour"))
 })
 

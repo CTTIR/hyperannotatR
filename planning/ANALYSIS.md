@@ -4,7 +4,7 @@ Prepared 2026-09-10 against `f69bf201f651c845ab496f76e25638bc919d4b13`. Implemen
 
 ## Assessment
 
-annotatR already has useful foundations: an explicit image coordinate convention, a compact ROI/layer/project/session model, a backend registry, substantial test coverage by scenario count, and multiple mask/export workflows. Most planned improvements can build on those interfaces.
+hyperannotatR already has useful foundations: an explicit image coordinate convention, a compact ROI/layer/project/session model, a backend registry, substantial test coverage by scenario count, and multiple mask/export workflows. Most planned improvements can build on those interfaces.
 
 The main risk is that different parts of the implementation do not consistently enforce the same contracts. The app can associate a project with the wrong queue entry; persistence strips state without reliably reconstructing it; exporters transform coordinates without updating their coordinate-level metadata; optimized and general rasterizers can disagree. These errors can produce plausible outputs, making visual inspection and a green unit suite insufficient.
 

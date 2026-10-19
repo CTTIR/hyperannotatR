@@ -12,7 +12,7 @@ A list with \code{protocol}, \code{protocol_version}, \code{annotatr_version},
 \code{limits}, \code{security}, \code{schemas} (file name -> SHA-256) and \code{digest}.
 }
 \description{
-Describe the \code{annotatr-control-v1} protocol this annotatR version speaks,
+Describe the \code{annotatr-control-v1} protocol this hyperannotatR version speaks,
 without starting anything: endpoints, typed operations, limits, security
 rules and the digests of the shipped JSON Schemas. A client compares this
 (or the \verb{/v1/handshake} response) with its own expectations before sending

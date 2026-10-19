@@ -57,7 +57,7 @@ Inject failure before writing, during checkpoint creation, and during final repl
 
 ## Geometry, masks, and independent expected results
 
-Maintain fixtures small enough to inspect directly, primarily 10×10 grids and a few non-square grids. Store expected integer matrices as fixtures or derive them from independent mathematical expressions. Do not derive expected results with annotatR's own rasterizer.
+Maintain fixtures small enough to inspect directly, primarily 10×10 grids and a few non-square grids. Store expected integer matrices as fixtures or derive them from independent mathematical expressions. Do not derive expected results with hyperannotatR's own rasterizer.
 
 - Shapes: axis-aligned rectangles, the three-corner rectangle-like triangle, sloped polygons, holes, multipolygons, points at integer/fractional/boundary positions, thin lines if supported, empty and repaired geometries.
 - Grid cases: non-square images, out-of-bounds shapes, half-pixel edges, lower/upper ties, very small regions, adjacent regions sharing a border, one versus multiple unrelated ROIs.
@@ -82,7 +82,7 @@ For connectivity, a diagonal two-pixel pattern must produce the documented diffe
 | QuPath | Permitted fixtures from the supported consumer version | Geometry, class/color semantics, object type, successful independent import; version recorded |
 | RDS project/session/mask | Legacy valid samples, stripped handles, current schema, intentionally invalid structures | Validation, migration, embedded legends, source reopening, overwrite semantics, checkpoint recovery |
 
-Record expected values separately from fixture generators. Generating a file with annotatR and reading it back with annotatR is useful integration coverage but insufficient interoperability evidence. Where an external application is required, retain a small reproducible import/export recipe and record its exact version.
+Record expected values separately from fixture generators. Generating a file with hyperannotatR and reading it back with hyperannotatR is useful integration coverage but insufficient interoperability evidence. Where an external application is required, retain a small reproducible import/export recipe and record its exact version.
 
 ENVI's header-offset requirement is described in the [vendor format documentation](https://www.nv5geospatialsoftware.com/docs/enviheaderfiles.html). Verify other format/API details against the relevant primary specifications during implementation rather than relying on memory or a matching filename extension.
 

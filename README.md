@@ -1,40 +1,45 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# annotatR <img src="man/figures/logo.png" align="right" height="139" alt="annotatR logo" />
+# hyperannotatR <img src="man/figures/logo.png" align="right" height="139" alt="hyperannotatR logo" />
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/CTTIR/annotatR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CTTIR/annotatR/actions/workflows/R-CMD-check.yaml)
-[![pkgdown](https://github.com/CTTIR/annotatR/actions/workflows/pkgdown.yaml/badge.svg)](https://cttir.github.io/annotatR/)
+[![R-CMD-check](https://github.com/CTTIR/hyperannotatR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CTTIR/hyperannotatR/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/CTTIR/hyperannotatR/actions/workflows/pkgdown.yaml/badge.svg)](https://cttir.github.io/hyperannotatR/)
 [![Codecov test
-coverage](https://codecov.io/gh/CTTIR/annotatR/graph/badge.svg)](https://app.codecov.io/gh/CTTIR/annotatR)
+coverage](https://codecov.io/gh/CTTIR/hyperannotatR/graph/badge.svg)](https://app.codecov.io/gh/CTTIR/hyperannotatR)
 [![License:
 MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-**annotatR** provides multi-layer region-of-interest (ROI) annotation
-for whole-slide microscopy images, hyperspectral data cubes, and
-conventional rasters. Annotations are validated simple-feature
-geometries stored in image pixel coordinates with explicit pyramid-level
-transforms, and rasterise to binary, labelled, or multi-class integer
-**masks** for downstream segmentation and classification. A batch
-annotation application supports resumable sessions across image queues,
-live mask preview, and export to GeoJSON, QuPath, and TIFF.
+**hyperannotatR** provides multi-layer region-of-interest annotation for
+hyperspectral imaging (HSI), including spectral cubes, band views, spectral
+extraction, and associated display rasters. ROI geometries, masks, resumable
+sessions and exports support HSI annotation and classification.
+
+Cell and nucleus annotation, segmentation, correction, training and review for
+microscopy belong to **segmantR**. Its independent drawing canvas and mask
+workflow do not require hyperannotatR. Generic raster and geometry APIs remain
+available for HSI previews and interchange compatibility.
+
+The R package was renamed from `annotatR` to `hyperannotatR`; load it with
+`library(hyperannotatR)`. The `at_*` function names and saved object classes are
+retained. The hosted source repository is `CTTIR/hyperannotatR`.
 
 ## Installation
 
 ``` r
 # install.packages("pak")
-pak::pak("CTTIR/annotatR")
+pak::pak("CTTIR/hyperannotatR")
 ```
 
 ## Quick start
 
 ``` r
-library(annotatR)
+library(hyperannotatR)
 
 # Read a bundled example image and build a project with one annotation layer.
 img <- at_example_image("tissue")
@@ -103,7 +108,7 @@ and keyboard-first throughput. `at_app()` returns the same app as a
 
 ## Working with qupflowR
 
-annotatR exchanges annotations with the qupflowR package through a
+hyperannotatR exchanges annotations with the qupflowR package through a
 versioned, hash-inventoried contract. `at_interop_capabilities()`
 reports which profiles this installation supports; the file (I0) and R
 API (I1) profiles are supported, while direct app control (I2) and
@@ -127,14 +132,14 @@ send typed commands to a running app. See `vignette("partner-interop")`.
 
 ## Related work
 
-Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious, annotatR
+Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious, hyperannotatR
 is R-native and script-first, handles hyperspectral cubes alongside
 microscopy, and treats the batch **mask** export as a first-class,
 reproducible artifact.
 
 ## Acknowledgements
 
-annotatR builds on [Shiny](https://shiny.posit.co/), the
+hyperannotatR builds on [Shiny](https://shiny.posit.co/), the
 [`sf`](https://r-spatial.github.io/sf/) and
 [`stars`](https://r-spatial.github.io/stars/) packages.
 

@@ -39,7 +39,7 @@ dependencies are installed.}
 The registered \code{annot_backend}, invisibly.
 }
 \description{
-Backends are how annotatR reads image formats. Each supplies functions to
+Backends are how hyperannotatR reads image formats. Each supplies functions to
 read an image's metadata, fetch tiles, detect whether it can read a file, and
 report whether its optional dependencies are installed.
 }

@@ -75,7 +75,7 @@
 
 #' Control protocol capabilities
 #'
-#' Describe the `annotatr-control-v1` protocol this annotatR version speaks,
+#' Describe the `annotatr-control-v1` protocol this hyperannotatR version speaks,
 #' without starting anything: endpoints, typed operations, limits, security
 #' rules and the digests of the shipped JSON Schemas. A client compares this
 #' (or the `/v1/handshake` response) with its own expectations before sending
@@ -92,7 +92,7 @@
 #' cc$operations
 at_control_capabilities <- function() {
   caps <- at_interop_capabilities(target = "control")
-  schema_dir <- system.file("schema", .contract$control, package = "annotatR")
+  schema_dir <- system.file("schema", .contract$control, package = "hyperannotatR")
   files <- sort(list.files(schema_dir, pattern = "\\.schema\\.json$"))
   schemas <- stats::setNames(
     lapply(files, function(f) .sha256_file(file.path(schema_dir, f))), files

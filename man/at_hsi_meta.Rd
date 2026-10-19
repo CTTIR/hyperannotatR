@@ -24,7 +24,7 @@ A named list with the elements \code{vendor}, \code{instrument},
 \code{profile}, \code{window_read} and \code{pan_sharpened}.
 }
 \description{
-Return the backend-agnostic metadata record annotatR keeps for an image:
+Return the backend-agnostic metadata record hyperannotatR keeps for an image:
 acquisition identity, storage layout, value semantics, geometry convention,
 plane selection, and calibration/transform digests. Fields a backend cannot
 establish are \code{NA} (never guessed), and \code{wavelength_status} in \code{\link[=at_bands]{at_bands()}}
@@ -37,7 +37,6 @@ at_hsi_meta(at_example_image("cube"))[c("image_kind", "value_unit", "interleave"
 \code{\link[=at_bands]{at_bands()}}, \code{\link[=at_read_stats]{at_read_stats()}}
 
 Other images:
-\code{\link{annotatR-classes}},
 \code{\link[=at_bands]{at_bands()}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_example_image]{at_example_image()}},
@@ -49,7 +48,8 @@ Other images:
 \code{\link[=at_pixel_size]{at_pixel_size()}},
 \code{\link[=at_read_image]{at_read_image()}},
 \code{\link[=at_tile]{at_tile()}},
-\code{\link[=at_wavelengths]{at_wavelengths()}}
+\code{\link[=at_wavelengths]{at_wavelengths()}},
+\code{\link{hyperannotatR-classes}}
 
 Other hsi:
 \code{\link[=at_band_operations]{at_band_operations()}},

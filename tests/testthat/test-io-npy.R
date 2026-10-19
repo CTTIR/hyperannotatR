@@ -81,7 +81,7 @@ test_that("at_read_mask polygonises a .npy via the wired reader", {
   expect_true("wound" %in% vapply(lyr$rois, `[[`, character(1), "label"))
 })
 
-test_that("transpose reconciles native-order (x, y) files with annotatR [y, x]", {
+test_that("transpose reconciles native-order (x, y) files with hyperannotatR [y, x]", {
   lyr <- at_layer("a", labels = "a")
   lyr <- at_layer_add(lyr, at_roi_rect(0, 0, 3, 4, label = "a"))
   m <- at_mask(lyr, type = "multiclass", values = c(a = 1L), dims = c(6, 4))

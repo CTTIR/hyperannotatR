@@ -52,7 +52,7 @@ test_that("export writes the neutral handoff layout with a verifiable inventory"
   expect_match(q$features[[1]]$id, "^[0-9a-f]{8}-[0-9a-f]{4}-8[0-9a-f]{3}-")
 })
 
-test_that("import validates the contract and returns namespaced annotatR objects", {
+test_that("import validates the contract and returns namespaced hyperannotatR objects", {
   f <- handoff_fixture()
   rep <- at_import_qupflowr(f$dest, expected_revision = at_annotation_revision(f$proj))
   expect_s3_class(rep, "at_import_report")

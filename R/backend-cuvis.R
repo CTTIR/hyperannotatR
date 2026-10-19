@@ -1,17 +1,17 @@
 # Cubert hyperspectral backend via the optional `cuvis.r` binding to the
 # proprietary CUVIS SDK. Reads `.cu3s` session files (and `.cu3` where the
 # installed SDK accepts them) and records SDK, device, processing-mode and
-# calibration metadata. No proprietary library is copied into annotatR; the
+# calibration metadata. No proprietary library is copied into hyperannotatR; the
 # SDK is found at use time only.
 #
 # `cuvis.r` is not on CRAN or any public repository, so it is NOT declared in
 # Suggests (a dependency resolver such as pak cannot install it). It is called
-# dynamically behind an availability guard, so annotatR builds, loads and
+# dynamically behind an availability guard, so hyperannotatR builds, loads and
 # checks cleanly without it. Tested against cuvis.r 0.1.0 with CUVIS SDK 3.5.3.
 
 .cuvis_tested_versions <- c(cuvis.r = "0.1.0", sdk = "3.5.3")
 
-# Map CUVIS processing modes to annotatR value semantics.
+# Map CUVIS processing modes to hyperannotatR value semantics.
 .cuvis_value_units <- c(
   Raw = "raw", DarkSubtract = "raw", Reflectance = "reflectance",
   SpectralRadiance = "radiance", Preview = "unknown"
@@ -123,7 +123,7 @@
 #' Export a Cubert measurement to a portable ENVI cube
 #'
 #' The portable fallback for Cubert data: the CUVIS SDK itself writes an ENVI
-#' export, which annotatR (and tools without the SDK) can then read through the
+#' export, which hyperannotatR (and tools without the SDK) can then read through the
 #' `envi` backend. Requires `cuvis.r` and a usable CUVIS SDK.
 #'
 #' @param path Path to a `.cu3s` session file.

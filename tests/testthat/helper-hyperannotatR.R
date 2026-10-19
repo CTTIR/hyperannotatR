@@ -1,4 +1,4 @@
-# Shared test fixtures for annotatR.
+# Shared test fixtures for hyperannotatR.
 #
 # Fixtures are deterministic: the identifier counter is reset where identifier
 # stability matters, and nothing depends on wall-clock time or locale. Internal
@@ -119,7 +119,7 @@ demo_project <- function() {
 
 # A session over `n` temporary image files.
 demo_session <- function(n = 4L, labels = c("tumour", "stroma")) {
-  dir <- tempfile("annotatR-session-")
+  dir <- tempfile("hyperannotatR-session-")
   dir.create(dir)
   paths <- file.path(dir, paste0("img", seq_len(n), ".png"))
   for (p in paths) writeLines("placeholder", p)

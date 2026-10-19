@@ -6,9 +6,9 @@ skip_if_not_installed("bslib")
 skip_if_not_installed("shinyjs")
 
 test_that("the full app builds a shiny.appobj", {
-  app_dir <- system.file("shiny", "annotatR", package = "annotatR")
+  app_dir <- system.file("shiny", "hyperannotatR", package = "hyperannotatR")
   skip_if(!file.exists(file.path(app_dir, "app.R")), "app not installed")
-  withr::local_options(annotatR.session = at_example_session(2))
+  withr::local_options(hyperannotatR.session = at_example_session(2))
   appobj <- withr::with_dir(app_dir, {
     source("app.R", local = new.env(parent = globalenv()))$value
   })

@@ -7,7 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="annotatR logo"}
+```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="hyperannotatR logo"}
 knitr::include_graphics("../man/figures/logo.png")
 ```
 
@@ -15,15 +15,15 @@ knitr::include_graphics("../man/figures/logo.png")
 has_raster <- requireNamespace("tiff", quietly = TRUE) &&
   (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = has_raster)
-library(annotatR)
+library(hyperannotatR)
 ```
 
-annotatR and the qupflowR package (a QuPath bridge, analysis and workflow
+hyperannotatR and the qupflowR package (a QuPath bridge, analysis and workflow
 package) exchange annotations, masks, hyperspectral metadata and deep-learning
 datasets through a small, versioned contract. qupflowR never reaches into
-annotatR internals, Shiny state, `inst/` files or the browser DOM; it uses the
+hyperannotatR internals, Shiny state, `inst/` files or the browser DOM; it uses the
 public functions below, the files they write, or the optional local control
-service. This vignette describes that contract from the annotatR side.
+service. This vignette describes that contract from the hyperannotatR side.
 
 ## What this installation supports
 
@@ -60,7 +60,7 @@ receipt$handoff_digest
 ```
 
 - `annotations_qupath.geojson` uses the QuPath 0.4+ dialect with a stable UUID
-  per ROI and annotatR's ROI id, layer, source and level in
+  per ROI and hyperannotatR's ROI id, layer, source and level in
   `properties.metadata`.
 - `masks/<layer>_labelled.tif` holds one integer value per ROI; its
   `.legend.json` joins values to ROI ids, labels and colours.
@@ -88,7 +88,7 @@ man$annotations$annotation_revision
 The coordinate convention is explicit: pixel units, origin at the top-left
 corner, `y` increasing downward, planes indexed from zero, and the pixel
 coverage rule for masks. QuPath object hierarchy and native ROI shapes, which
-annotatR does not model, are reported as `"unknown"` or `"approximated"`
+hyperannotatR does not model, are reported as `"unknown"` or `"approximated"`
 (circles and ellipses are polygons) instead of being invented.
 
 ## Importing, staging and committing
@@ -222,14 +222,14 @@ or older than the retained buffer yields `resync_required = TRUE`.
 The JSON Schemas for all documents ship with the package:
 
 ```{r schemas, eval = TRUE}
-basename(list.files(system.file("schema", package = "annotatR"), recursive = TRUE))
+basename(list.files(system.file("schema", package = "hyperannotatR"), recursive = TRUE))
 ```
 
 ## Versions and migration
 
 Schema versions are independent of the package version. Readers reject an
 unknown major version and keep unknown optional data only under `extensions`.
-annotatR 0.2.0 introduces `annotatr-handoff-v1`, `annotatr-control-v1`,
+hyperannotatR 0.2.0 introduces `annotatr-handoff-v1`, `annotatr-control-v1`,
 `annotatr-training-v1` and `annotatr-hsi-v1` (all `1.0`). Existing 0.1 files
 remain readable: legacy QuPath GeoJSON (`object_type`, `colorRGB`) is imported,
 and `at_write_qupath(dialect = "legacy")` still writes it.

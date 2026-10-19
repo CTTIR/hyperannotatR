@@ -19,7 +19,7 @@ at_example_path <- function(which = c("tissue", "multiplex", "cube"),
     multiplex = "example_multiplex.tif",
     cube      = "example_cube.hdr"
   )
-  system.file("extdata", file, package = "annotatR", mustWork = TRUE)
+  system.file("extdata", file, package = "hyperannotatR", mustWork = TRUE)
 }
 
 #' Read a bundled example image
@@ -81,7 +81,7 @@ at_example_project <- function(call = rlang::caller_env()) {
 at_example_session <- function(n = 5L, call = rlang::caller_env()) {
   n <- .check_count(n, min = 1L, call = call)
   src <- at_example_path("tissue", call = call)
-  dir <- tempfile("annotatR-example-session-")
+  dir <- tempfile("hyperannotatR-example-session-")
   dir.create(dir)
   paths <- file.path(dir, sprintf("image_%02d.png", seq_len(n)))
   for (p in paths) file.copy(src, p)

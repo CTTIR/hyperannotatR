@@ -96,7 +96,7 @@ new_annot_project <- function(image,
 #' @param call The calling environment, for error reporting.
 #'
 #' @return An [annot_project] bundling the image, layers, metadata, and
-#'   provenance (creation time, `annotatR` version, R version, author, and an
+#'   provenance (creation time, `hyperannotatR` version, R version, author, and an
 #'   edit log).
 #' @family projects
 #' @seealso [at_add_layer()], [at_add_roi()], [at_rois()], `at_mask()`

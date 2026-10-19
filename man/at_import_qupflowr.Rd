@@ -36,14 +36,14 @@ An \code{at_import_report}: a list with \code{status}, \code{format},
 }
 \description{
 Read only the neutral contract, validate it, and return a namespaced
-annotatR result together with a conversion report. For a handoff directory
+hyperannotatR result together with a conversion report. For a handoff directory
 the SHA-256 inventory (missing, extra, duplicate, resized, altered or
 symlinked files), the manifest schema and major version, ROI id uniqueness
 and the id join between manifest and GeoJSON, layers, planes, mask
 dimensions, integer values and legend completeness are all checked; any
 integrity or schema failure aborts with an \code{at_validation_error}. Nothing
 is written, no analysis is started, and foreign objects are never returned as
-if they were annotatR objects: imported ROIs carry \code{source = "imported"} and
+if they were hyperannotatR objects: imported ROIs carry \code{source = "imported"} and
 partner fields under \code{attributes$qupflowr}. An RDS file is refused, because
 deserialising it is not a neutral read.
 }

@@ -1,7 +1,7 @@
 # The qupflowR handoff: a new, self-contained directory with neutral files
 # (QuPath GeoJSON, GeoJSON, integer masks with legends, optional NPY/CSV/RDS),
 # a manifest and a SHA-256 inventory, plus the local stage -> commit flow that
-# applies a partner's changes to an annotatR project only after an explicit,
+# applies a partner's changes to an hyperannotatR project only after an explicit,
 # revision-checked, idempotent commit.
 
 .handoff_formats <- c("qupath_geojson", "geojson", "mask_tiff", "mask_npy", "csv", "rds", "manifest")
@@ -147,7 +147,7 @@
 #' `annotations_qupath.geojson` (QuPath 0.4+ dialect), optionally
 #' `annotations.geojson`, one integer mask per layer under `masks/` with a
 #' `.legend.json` sidecar, optional `tables/rois.csv`, an optional
-#' annotatR-internal `objects/project.rds`, `hsi_manifest.json` for spectral
+#' hyperannotatR-internal `objects/project.rds`, `hsi_manifest.json` for spectral
 #' images, `manifest.json` ([at_interop_manifest()]) and `integrity.json`, the
 #' SHA-256 inventory of every other file. The handoff digest is the SHA-256 of
 #' the canonical `integrity.json`. Absolute paths are never used as identity.
@@ -210,7 +210,7 @@ at_export_qupflowr <- function(x, destination,
                 class = "io", code = "DESTINATION_EXISTS", call = call)
     }
     if (!dir.exists(dest) || !file.exists(file.path(dest, "integrity.json"))) {
-      .at_abort(c("{.path {destination}} is not an annotatR handoff directory.",
+      .at_abort(c("{.path {destination}} is not an hyperannotatR handoff directory.",
                   "x" = "Refusing to replace a directory or file without {.file integrity.json}."),
                 class = "io", code = "DESTINATION_NOT_HANDOFF", call = call)
     }
@@ -414,8 +414,8 @@ print.at_handoff_receipt <- function(x, ...) {
   "unknown"
 }
 
-# Group a QuPath layer's ROIs into annotatR layers using the manifest (by ROI
-# id) or the annotatR metadata written into the QuPath dialect.
+# Group a QuPath layer's ROIs into hyperannotatR layers using the manifest (by ROI
+# id) or the hyperannotatR metadata written into the QuPath dialect.
 .split_qupath_layers <- function(qlayer, manifest_layers = list(), manifest_rois = list()) {
   roi_layer <- stats::setNames(vapply(manifest_rois, function(r) r$layer, character(1)),
                                vapply(manifest_rois, function(r) r$roi_id, character(1)))
@@ -474,14 +474,14 @@ print.at_handoff_receipt <- function(x, ...) {
 #' Import a qupflowR handoff or neutral interchange file
 #'
 #' Read only the neutral contract, validate it, and return a namespaced
-#' annotatR result together with a conversion report. For a handoff directory
+#' hyperannotatR result together with a conversion report. For a handoff directory
 #' the SHA-256 inventory (missing, extra, duplicate, resized, altered or
 #' symlinked files), the manifest schema and major version, ROI id uniqueness
 #' and the id join between manifest and GeoJSON, layers, planes, mask
 #' dimensions, integer values and legend completeness are all checked; any
 #' integrity or schema failure aborts with an `at_validation_error`. Nothing
 #' is written, no analysis is started, and foreign objects are never returned as
-#' if they were annotatR objects: imported ROIs carry `source = "imported"` and
+#' if they were hyperannotatR objects: imported ROIs carry `source = "imported"` and
 #' partner fields under `attributes$qupflowr`. An RDS file is refused, because
 #' deserialising it is not a neutral read.
 #'
@@ -525,7 +525,7 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
   }
   if (format == "rds") {
     .at_abort(c("RDS files are not part of the neutral contract.",
-                "i" = "Load a trusted annotatR project with {.fn at_load_project} instead."),
+                "i" = "Load a trusted hyperannotatR project with {.fn at_load_project} instead."),
               code = "FORMAT_NOT_NEUTRAL", call = call)
   }
   if (format == "unknown") {
@@ -810,10 +810,10 @@ print.at_import_report <- function(x, ...) {
   .digest_json(rec[c("layer", "label", "level", "geometry_sha256", "locked", "plane")])
 }
 
-#' Stage partner changes against an annotatR project
+#' Stage partner changes against an hyperannotatR project
 #'
 #' Compute, without applying, the changes a partner patch would make to an
-#' annotatR project: ROIs are joined by id and classified as `create`,
+#' hyperannotatR project: ROIs are joined by id and classified as `create`,
 #' `update`, `unchanged`, `delete` (only with `delete_missing = TRUE`) or
 #' `conflict`. Reviewed or locked ROIs, and ROIs in locked layers, are never
 #' changed automatically; such changes become conflicts. When
@@ -1057,7 +1057,7 @@ at_commit_qupflowr <- function(x, idempotency_key = NULL, destination = NULL, ov
   if (!is.null(target)) {
     lite <- project
     lite$image$handle <- NULL
-    tmp <- tempfile(pattern = ".annotatR-commit-", tmpdir = dirname(target), fileext = ".rds")
+    tmp <- tempfile(pattern = ".hyperannotatR-commit-", tmpdir = dirname(target), fileext = ".rds")
     at_save_project(lite, tmp, call = call)
     if (!file.rename(tmp, target)) {
       unlink(tmp)

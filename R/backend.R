@@ -29,7 +29,7 @@ new_annot_backend <- function(name, read_fn, tile_fn, detect_fn, available_fn,
 
 #' Register an image backend
 #'
-#' Backends are how annotatR reads image formats. Each supplies functions to
+#' Backends are how hyperannotatR reads image formats. Each supplies functions to
 #' read an image's metadata, fetch tiles, detect whether it can read a file, and
 #' report whether its optional dependencies are installed.
 #'
@@ -238,7 +238,7 @@ at_tile <- function(img, level = 0L, xrange = NULL, yrange = NULL, bands = NULL,
   if (req_bytes > .max_tile_bytes()) {
     .at_abort(
       c("The requested tile needs {format(req_bytes, big.mark = ',')} bytes, over the limit.",
-        "i" = "Request a smaller window or raise {.code options(annotatR.max_tile_bytes = )}."),
+        "i" = "Request a smaller window or raise {.code options(hyperannotatR.max_tile_bytes = )}."),
       class = "limit", code = "TILE_TOO_LARGE",
       details = list(requested_bytes = req_bytes, limit_bytes = .max_tile_bytes()),
       call = call

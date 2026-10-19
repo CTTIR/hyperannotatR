@@ -96,7 +96,7 @@
 
 #' Partner interoperability capabilities
 #'
-#' Report what this annotatR installation can exchange with a partner package
+#' Report what this hyperannotatR installation can exchange with a partner package
 #' such as qupflowR, and how far each capability has been qualified. Profiles
 #' follow the partner contract: I0 file interchange, I1 public R API, I2 the
 #' local control service (`annotatr-control-v1`) and I3 the embeddable app
@@ -220,7 +220,7 @@ at_interop_capabilities <- function(target = c("package", "hsi", "app", "control
 
 #' @export
 print.at_capabilities <- function(x, ...) {
-  cat(cli::format_inline("{.cls at_capabilities} annotatR {x$annotatr_version} for {x$consumer}"), "\n",
+  cat(cli::format_inline("{.cls at_capabilities} hyperannotatR {x$annotatr_version} for {x$consumer}"), "\n",
       sep = "")
   for (nm in names(x$profiles)) {
     p <- x$profiles[[nm]]

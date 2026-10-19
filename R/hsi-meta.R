@@ -30,7 +30,7 @@
 
 #' Hyperspectral and acquisition metadata of an image
 #'
-#' Return the backend-agnostic metadata record annotatR keeps for an image:
+#' Return the backend-agnostic metadata record hyperannotatR keeps for an image:
 #' acquisition identity, storage layout, value semantics, geometry convention,
 #' plane selection, and calibration/transform digests. Fields a backend cannot
 #' establish are `NA` (never guessed), and `wavelength_status` in [at_bands()]
@@ -163,7 +163,7 @@ at_convert_values <- function(x, from = NULL, to = c("reflectance", "absorbance"
   if (!.is_string(from) || !from %in% setdiff(.value_units, "unknown")) {
     .at_abort(
       c("The value unit of {.arg x} is not declared.",
-        "i" = "Pass {.arg from}; annotatR never guesses whether values are raw or calibrated."),
+        "i" = "Pass {.arg from}; hyperannotatR never guesses whether values are raw or calibrated."),
       code = "VALUE_UNIT_UNKNOWN", call = call
     )
   }
@@ -322,7 +322,7 @@ at_band_operations <- function() {
 #'
 #' Evaluate one of [at_band_operations()] on a window of an image. The result
 #' is a display product: a `[y, x, k]` array (`k = 3` for `"rgb"`, otherwise 1)
-#' with provenance attributes, which annotatR never uses as analysis input.
+#' with provenance attributes, which hyperannotatR never uses as analysis input.
 #'
 #' @param img An [annot_image].
 #' @param operation A registered operation name.
@@ -420,7 +420,7 @@ at_band_view <- function(img, operation = "rgb", bands = NULL, params = list(),
 #'
 #' @return A list with `tiles` (integer), `file_bytes`, `decoded_bytes` and
 #'   `max_tile_bytes` (doubles), plus `window_read` (logical) and the current
-#'   `max_tile_bytes_limit` from option `annotatR.max_tile_bytes`.
+#'   `max_tile_bytes_limit` from option `hyperannotatR.max_tile_bytes`.
 #' @family hsi
 #' @export
 #' @examples
@@ -441,5 +441,5 @@ at_read_stats <- function(img, reset = FALSE, call = rlang::caller_env()) {
 }
 
 .max_tile_bytes <- function() {
-  as.numeric(getOption("annotatR.max_tile_bytes", default = 2 * 1024^3))
+  as.numeric(getOption("hyperannotatR.max_tile_bytes", default = 2 * 1024^3))
 }

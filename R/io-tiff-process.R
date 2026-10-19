@@ -1,12 +1,12 @@
 # Decode in a fresh process because native TIFF callback state is shared by
 # independently loaded codecs. No display library is loaded in the child.
 .tiff_read_isolated <- function(path, ...) {
-  timeout <- getOption("annotatR.tiff_timeout", 120)
+  timeout <- getOption("hyperannotatR.tiff_timeout", 120)
   if (!is.numeric(timeout) || length(timeout) != 1L || !is.finite(timeout) ||
         timeout < 1 || timeout != floor(timeout) ||
         timeout > .Machine$integer.max) {
     stop( # nolint: cttir_condition. Preserve base decoder conditions.
-      "annotatR.tiff_timeout must be a finite integer of at least one second",
+      "hyperannotatR.tiff_timeout must be a finite integer of at least one second",
       call. = FALSE
     )
   }

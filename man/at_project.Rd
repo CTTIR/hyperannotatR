@@ -17,7 +17,7 @@ at_project(image, layers = list(), ..., call = rlang::caller_env())
 }
 \value{
 An \link{annot_project} bundling the image, layers, metadata, and
-provenance (creation time, \code{annotatR} version, R version, author, and an
+provenance (creation time, \code{hyperannotatR} version, R version, author, and an
 edit log).
 }
 \description{

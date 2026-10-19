@@ -86,7 +86,7 @@ writeBin(as.integer(vec), con, size = 2L)
 close(con)
 hdr <- c(
   "ENVI",
-  "description = {annotatR synthetic example cube}",
+  "description = {hyperannotatR synthetic example cube}",
   sprintf("samples = %d", sz),
   sprintf("lines = %d", sz),
   sprintf("bands = %d", nb),

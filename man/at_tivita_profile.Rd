@@ -48,7 +48,7 @@ A list of class \code{at_tivita_profile}.
 }
 \description{
 A profile states everything needed to decode a bare \verb{*_SpecCube.dat} file;
-annotatR never infers these from a file name. The default arguments describe
+hyperannotatR never infers these from a file name. The default arguments describe
 the documented 640 x 480 x 100-band layout (500-995 nm), which is a profile
 like any other and can be replaced for a different device.
 }

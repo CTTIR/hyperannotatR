@@ -521,7 +521,7 @@ mod_export_server <- function(id, rv) {
     output$receipt <- shiny::renderTable(receipt())
 
     output$run <- shiny::downloadHandler(
-      filename = function() sprintf("annotatR_export_%s.zip", input$scope %||% "current"),
+      filename = function() sprintf("hyperannotatR_export_%s.zip", input$scope %||% "current"),
       content = function(file) {
         dir <- file.path(rv$session$out_dir, "export")
         if (!dir.exists(dir)) dir.create(dir, recursive = TRUE)
@@ -537,7 +537,7 @@ mod_export_server <- function(id, rv) {
         paths <- unique(c(paths, legends[file.exists(legends)]))
         if (!length(paths)) {
           note <- file.path(dir, "README.txt")
-          writeLines(c("annotatR export",
+          writeLines(c("hyperannotatR export",
                        sprintf("Scope '%s' matched no annotated images to export.",
                                input$scope %||% "current")), note)
           paths <- note
@@ -567,7 +567,7 @@ mod_export_server <- function(id, rv) {
       sprintf("%s\n%d files, digest %s", basename(rc$destination), nrow(rc$files), rc$handoff_digest)
     })
     output$handoff_zip <- shiny::downloadHandler(
-      filename = function() "annotatR_qupflowr_handoff.zip",
+      filename = function() "hyperannotatR_qupflowr_handoff.zip",
       content = function(file) {
         rc <- write_handoff()
         if (inherits(rc, "error")) {

@@ -216,7 +216,7 @@ mod_spectrum_server <- function(id, rv) {
 
 # Write a float64 BSQ ENVI cube (raw values) with its header.
 .write_envi_cube <- function(arr, path, wavelengths = NULL, band_names = NULL,
-                             description = "annotatR region export") {
+                             description = "hyperannotatR region export") {
   d <- dim(arr)
   con <- file(path, "wb")
   writeBin(as.double(aperm(arr, c(2, 1, 3))), con, size = 8L, endian = "little")
@@ -313,12 +313,12 @@ mod_region_server <- function(id, rv) {
       list(x = xr, y = yr)
     }
     output$download <- shiny::downloadHandler(
-      filename = function() "annotatR_region.zip",
+      filename = function() "hyperannotatR_region.zip",
       content = function(file) {
         shiny::req(rv$project)
         b <- bounds()
         img <- rv$project$image
-        dir <- tempfile("annotatR-region-")
+        dir <- tempfile("hyperannotatR-region-")
         dir.create(dir)
         on.exit(unlink(dir, recursive = TRUE), add = TRUE)
         paths <- .write_region(img, b$x, b$y, seq_len(img$n_bands), dir)

@@ -36,9 +36,9 @@ The output path, invisibly.
 The default \code{dialect = "qupath"} writes what QuPath 0.4 and later read
 natively (verified with QuPath 0.7.0): \code{objectType}, \code{classification} with
 an \verb{[r, g, b]} colour, \code{isLocked} for locked ROIs, a deterministic UUID per
-ROI as the feature id (QuPath replaces non-UUID ids), and annotatR's own ROI
+ROI as the feature id (QuPath replaces non-UUID ids), and hyperannotatR's own ROI
 id, layer, source and level in \code{properties.metadata}. \code{dialect = "legacy"}
-writes the annotatR 0.1 form (\code{object_type}, signed \code{colorRGB}), which QuPath
+writes the hyperannotatR 0.1 form (\code{object_type}, signed \code{colorRGB}), which QuPath
 still reads with a deprecation warning.
 }
 \details{

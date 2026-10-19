@@ -16,7 +16,7 @@ at_read_stats(img, reset = FALSE, call = rlang::caller_env())
 \value{
 A list with \code{tiles} (integer), \code{file_bytes}, \code{decoded_bytes} and
 \code{max_tile_bytes} (doubles), plus \code{window_read} (logical) and the current
-\code{max_tile_bytes_limit} from option \code{annotatR.max_tile_bytes}.
+\code{max_tile_bytes_limit} from option \code{hyperannotatR.max_tile_bytes}.
 }
 \description{
 Report how many tiles were requested from an image's backend, how many

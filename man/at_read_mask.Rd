@@ -35,7 +35,7 @@ An \link{annot_layer} with one ROI per connected region.
 }
 \description{
 Polygonise an existing mask file (e.g. Cellpose, StarDist, or QuPath output,
-or a prior annotatR export) into an editable \link{annot_layer}. A sidecar
+or a prior hyperannotatR export) into an editable \link{annot_layer}. A sidecar
 \verb{<path>.legend.json} is used to recover labels when present.
 }
 \examples{
