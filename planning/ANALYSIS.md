@@ -1,6 +1,6 @@
 # Project analysis and finding register
 
-Prepared 2026-09-10 against `f69bf201f651c845ab496f76e25638bc919d4b13`. Implementation status: **all findings remain open**. This document refines the interpretation of the [historical audit](evidence/2026-09-10/audit.md) and maps its findings into the [roadmap](ROADMAP.md).
+Prepared 2026-09-10 against `f69bf201f651c845ab496f76e25638bc919d4b13`. Implementation status (2026-10-18): the fixes for A01–A33 were ported from the `improve/roadmap` branch onto the 0.2.0 code base on `main` together with the findings of a second audit; see the [implementation record](IMPLEMENTATION.md) and the [2026-10-18 audit](evidence/2026-10-18/audit.md). This document refines the interpretation of the [historical audit](evidence/2026-09-10/audit.md) and maps its findings into the [roadmap](ROADMAP.md).
 
 ## Assessment
 
@@ -71,7 +71,7 @@ IDs A01–A25 retain the numbering in the historical audit. P1 means fix before 
 | A24 | P2 | Clicking a polygon hole emits an erase event for the polygon | T10 | reproduce-widget.log |
 | A25 | P2 | After creating widget B, widget A's proxy tool command no longer applies | T10 | reproduce-widget.log |
 
-Evidence files are in [evidence/2026-09-10](evidence/2026-09-10/README.md); the [audit record](evidence/2026-09-10/audit.md) contains source references and detailed reproduction explanations. Update this register with status, implementing revision, and test artifact when each finding is closed. Do not infer closure from elapsed time, a refactor, or a passing aggregate test count.
+Evidence files are in [evidence/2026-09-10](evidence/2026-09-10/README.md); the [audit record](evidence/2026-09-10/audit.md) contains source references and detailed reproduction explanations. The [finding closure map](IMPLEMENTATION.md#finding-closure-map) records current status, implementation revision state, and regression artifacts separately from this historical register. Do not infer closure from elapsed time, a refactor, or a passing aggregate test count.
 
 ## Additional observations requiring qualification
 

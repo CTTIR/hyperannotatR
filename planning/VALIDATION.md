@@ -6,13 +6,14 @@ This plan supports the [roadmap](ROADMAP.md) and [finding register](ANALYSIS.md)
 
 | Invariant | Required evidence | Finding/work-package coverage |
 |---|---|---|
-| Every mutation and persisted project belongs to the intended queue entry | Full-server transition tests with stable IDs and stale-event cases | A02–A04, A11–A12; T01–T03 |
+| Every mutation and persisted project belongs to the intended queue entry | Full-server transition tests with stable IDs, gesture targets and stale-event cases | A02–A04, A11–A12; T01–T03/T10–T11 |
+| Only exact validated source metadata authorizes reopening and alignment | Prefix/duplicate-key rejection, conservative legacy handling and installed restart | A33; T03/T06/T07/T09b |
 | “Saved” means the intended revision has a durable, readable checkpoint | Fresh-process resume and injected write/replacement failure tests | A01, A23; T03 |
 | IDs and output paths are unique in their declared scope | Duplicate names, restart, populated-layer import, and path-boundary tests | A07–A09, A22; T01/T09 |
 | Coordinates and declared levels refer to the same grid | Independent transform fixtures and vector/raster round trips | A06, A16, A18, A21; T05 |
 | Mask support is independent of optimization choice | Independent tiny-grid oracle and optimized/general comparisons | A05, A15; T04 |
 | Code values preserve label meaning and encoding | Categorical, instance, binary, and bitfield reference fixtures | A17, A19–A20; T06/T13 |
-| Malformed files never become fabricated complete arrays | Handwritten short/invalid payload fixtures and size/range assertions | A10, A13–A14; T07/T08 |
+| Malformed files never become fabricated complete arrays | Handwritten short/invalid payload fixtures and size/range assertions | A10, A13–A14, A26–A30, A32; T07/T08 |
 | Browser geometry and routing match server semantics | Real-browser multiwidget, holes, history, and navigation journeys | A24–A25; T10/T11 |
 | Analytical results have correct units, denominators, and provenance | Independently calculated counts/statistics and repeatable reports | O05; T12–T14 |
 | Large-data claims have measured resource bounds | Cold-process open/window/queue/export benchmarks | O01; T15–T17 |
@@ -75,11 +76,11 @@ For connectivity, a diagonal two-pixel pattern must produce the documented diffe
 
 | Format | Minimum independent fixtures | Required checks |
 |---|---|---|
-| ENVI | BSQ/BIL/BIP; supported integer/float types; both endians; offset 0/nonzero; non-square cube | Known band/x/y values, correct byte offsets, header validation, short payload rejection |
+| ENVI | BSQ/BIL/BIP; supported integer/float types; both endians; offset 0/nonzero; non-square cube | Known band/x/y values including full signed int32 boundaries, correct byte offsets, header validation, short payload rejection |
 | NPY | External C/Fortran arrays; supported signed/unsigned widths and header versions; non-square shape | Exact dtype/range handling, endian/order correctness, malformed-header and truncated-body rejection, overflow rejection |
-| TIFF/PNG mask | Independently read/written fixtures for each supported depth/backend combination | Exact integer class codes, dimensions/orientation, sidecar mapping, backend fallbacks |
+| TIFF/PNG mask | Independently read/written fixtures for each supported depth/backend combination | Exact integer class codes including16-bit PNG, dimensions/orientation, sidecar mapping, optional backend fallbacks, requested depth on constant/extrema masks |
 | GeoJSON/CSV | Explicit coordinate levels; multiple ROI levels; independently inspected coordinates | Export level equals coordinate level, metadata precedence, stable valid IDs, documented legacy ambiguity |
-| QuPath | Permitted fixtures from the supported consumer version | Geometry, class/color semantics, object type, successful independent import; version recorded |
+| QuPath | Permitted fixtures from the supported consumer version | Geometry, current/legacy class and object fields, native feature arrays/collections, explicit ID mapping, successful independent import/export; version recorded |
 | RDS project/session/mask | Legacy valid samples, stripped handles, current schema, intentionally invalid structures | Validation, migration, embedded legends, source reopening, overwrite semantics, checkpoint recovery |
 
 Record expected values separately from fixture generators. Generating a file with hyperannotatR and reading it back with hyperannotatR is useful integration coverage but insufficient interoperability evidence. Where an external application is required, retain a small reproducible import/export recipe and record its exact version.
@@ -142,7 +143,7 @@ A full matrix returned by `at_mask()` necessarily occupies memory proportional t
 
 ## Release gates and completion evidence
 
-**Stabilization gate:** all A01–A25 have failing-before/passing-after regressions and no unresolved cross-image, persistence, mask, or encoding ambiguity in supported workflows. Run core/integration/browser lanes, independent core-format fixtures, and legacy migration fixtures. Reconcile documentation with capabilities. Existing tests and package examples must continue passing; complete applicable vignette/manual checks and review packaging notes. A skipped optional backend is listed as unverified and excluded from new support claims.
+**Stabilization gate:** all A01–A33 have failing-before/passing-after regressions and no unresolved cross-image, persistence, mask, or encoding ambiguity in supported workflows. Run core/integration/browser lanes, independent core-format fixtures, and legacy migration fixtures. Reconcile documentation with capabilities. Existing tests and package examples must continue passing; complete applicable vignette/manual checks and review packaging notes. A skipped optional backend is listed as unverified and excluded from new support claims.
 
 **Analysis gate:** T12–T14 reference calculations pass; output units, mappings, missing-data policy, denominators, and provenance are explicit. Independently reproduced tables and configuration accompany the release evidence. Do not equate this gate with validation of a particular scientific study.
 

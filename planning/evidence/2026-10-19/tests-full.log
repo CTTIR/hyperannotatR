@@ -1,0 +1,23 @@
+Loading required package: shiny
+files: 81  tests: 832  expectations: 4981  failed: 0  errors: 0  skipped: 9  warnings: 0  minutes: 4.5 
+skipped:
+                      file
+  test-backend-cuvis-sdk.R
+     test-backend-tivita.R
+             test-io-npy.R
+             test-io-npy.R
+ test-reader-correctness.R
+      test-widget-canvas.R
+   test-windowed-readers.R
+   test-windowed-readers.R
+   test-windowed-readers.R
+                                                                             test
+       an installed CUVIS SDK reads a permitted local measurement with provenance
+                        reads a real TIVITA cube from the workbench (integration)
+ transpose brings a TIVITA (width, height) ground truth into [y, x] (integration)
+                      reads a real Python-written ground-truth .npy (integration)
+            A27 OME axes calibration channels and actual anisotropic levels agree
+         canvas JS: holes, routing, edits, cancelling, provisional shapes, errors
+  OME metadata open and optional native subwindows preserve levels and duplicates
+        native OME subsets preserve independent scalar types and nonfinite values
+        OME cached windows reject replaced files and reopen after explicit relink

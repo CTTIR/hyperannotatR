@@ -4,17 +4,18 @@ Prepared 2026-09-10 against `f69bf201f651c845ab496f76e25638bc919d4b13` (package 
 
 The first objective is dependable annotation and export: an action must affect the intended image, saved work must survive restart, and masks must preserve the documented pixel grid. The next objectives are trustworthy quantitative analysis and bounded memory use for large images. Keep the existing R object model and public workflows while correcting their contracts incrementally.
 
-This is a proposed execution plan. No runtime fixes have been implemented by creating it. All work packages below are **Not Started**. The planning documents and historical evidence archive are available now.
+T00–T14 (including T09b) were implemented and reviewed on branch `improve/roadmap` and, on 2026-10-18, ported onto the 0.2.0 code base on `main` (commit `77657d6`, on top of the rename to hyperannotatR in `bbfd072`) together with the fixes from a second audit ([record](evidence/2026-10-18/audit.md)). Windowed image reads (T15) are partly ported; T16–T18 remain open. Actual Windows-host persistence qualification remains part of T18. The [implementation record](IMPLEMENTATION.md) tracks validation and current status. Historical audit evidence remains preserved.
 
 Companion documents:
 
 - [Project analysis and complete finding register](ANALYSIS.md).
 - [Validation strategy, fixtures, benchmarks, and release gates](VALIDATION.md).
 - [Historical audit and runnable diagnostics](evidence/2026-09-10/README.md).
+- [Additional findings from independent fixtures](ADDITIONAL-FINDINGS.md).
 
 ## Planning assumptions
 
-Prioritize correctness and data integrity. “Analysis” includes both the quality of the project assessment and the reliability of mask, spectrum, extraction, and agreement outputs. There is no supplied deadline, capacity allocation, representative performance hardware, or named implementation owner.
+The confirmed priority is correctness and data integrity. “Analysis” includes both the quality of the project assessment and the reliability of mask, spectrum, extraction, and agreement outputs. There is no supplied deadline, capacity allocation, representative performance hardware, or named implementation owner.
 
 Effort estimates are focused engineering days, including implementation, regression tests, documentation, and review. They assume one primary maintainer familiar with R/Shiny. They are planning ranges, not calendar commitments. Maintainer, backend specialist, analysis reviewer, and release owner are responsibilities; one person may fill several, and the actual assignees remain open. Access to optional-format fixtures is an external dependency.
 
@@ -22,11 +23,13 @@ Do not expand formats or redesign the whole UI during stabilization. Preserve ex
 
 ## Milestones and estimates
 
+These original effort ranges predate the additional A26–A33 reader/writer/interchange/provenance findings. T07–T09 now include their correctness fixes; the additional A33 provenance-key gap adds bounded T09b work before browser changes; re-estimate that work after its review before treating the totals as a current forecast.
+
 | Milestone | Horizon | Outcome | Work packages | Effort | Dependencies and exit condition |
 |---|---|---|---|---:|---|
 | M0: establish evidence | Now | Findings become repeatable, reviewable regression specifications | T00 | 2–3 days | No dependency; scenarios and independent expected results recorded |
 | M1: preserve work and image identity | Now | Saving, navigation, history, cache, and queue identity agree | T01–T03 | 6–10 days | M0; no cross-image mutation or lost committed work in transition tests |
-| M2: preserve pixels and interchange | Now | Masks, coordinates, readers, and exports obey one contract | T04–T09 | 7–12 days | M0; T01 for output naming and source identity; exact integer fixtures and transform tests pass |
+| M2: preserve pixels and interchange | Now | Masks, coordinates, readers, and exports obey one contract | T04–T09b | 7–12 days (original scope) | M0; T01 for output naming and source identity; exact integer fixtures and transform tests pass |
 | M3: make the app dependable | Next | Browser behavior matches saved geometries and available capabilities | T10–T11 | 4–7 days | M1 and relevant M2 contracts; real-browser journeys pass |
 | M4: validate analytical outputs | Next | Counts, spectra, comparisons, and provenance support reproducible analysis | T12–T14 | 4–7 days | M1–M2; independent analytical fixtures and reporting contracts pass |
 | M5: support large data deliberately | Later | Supported backends read windows; queues and exports have bounded working memory | T15–T17 | 10–18 days | Source descriptors from M1, correctness oracles from M2, benchmark specification from M0 |
@@ -112,29 +115,41 @@ Make background, categorical/instance/bitfield encoding, label-code mapping, lev
 
 **Acceptance:** a label survives RDS import; empty masks retain valid metadata; bitfield class counts include overlap while categorical counts remain exclusive. Legend counts equal independently computed statistics. Legacy masks with insufficient encoding metadata are flagged or handled by an explicit documented default.
 
-### T07 — Validate binary readers before allocating or reshaping
+### T07 — Validate readers and preserve raw samples
 
-**Owner:** maintainer. **Effort:** 1–2 days. **Dependencies:** T00. **Milestone:** M2. **Findings:** A10, A13.
+**Owner:** maintainer. **Effort:** 1–2 days. **Dependencies:** T00. **Milestone:** M2. **Findings:** A10, A13, A26, A27, A28, A30.
 
-Parse ENVI header offsets, validate dimensions/types/interleaves/endian declarations, seek correctly, and verify payload lengths. Apply corresponding validation to NPY headers, versions, dimensions, and integer ranges. Reject unsupported 64-bit values that cannot be represented instead of retaining only low words. Use overflow-safe expected-size arithmetic and resource bounds before allocation.
+Parse ENVI header offsets, validate dimensions/types/interleaves/endian declarations, seek correctly, and verify payload lengths. Apply corresponding validation to NPY headers, versions, dimensions, and integer ranges. Reject unsupported 64-bit values that cannot be represented instead of retaining only low words. Use overflow-safe expected-size arithmetic and resource bounds before allocation. Validate both lower and upper output dtype bounds before coercion or file creation so signed NPY values cannot silently wrap (A28).
 
-**Acceptance:** independent BSQ/BIL/BIP and C/Fortran fixtures decode exactly; short payloads always error before recycling; valid offset payloads exclude sentinel headers; unsupported encodings fail explicitly. Extra bytes are handled according to the format contract, not a blanket size-equality rule.
+**Acceptance:** independent BSQ/BIL/BIP and C/Fortran fixtures decode exactly; short payloads always error before recycling; valid offset payloads exclude sentinel headers; unsupported encodings fail explicitly. Extra bytes are handled according to the format contract, not a blanket size-equality rule. Independently written TIFF/OME fixtures retain raw sample values, image orientation, declared pyramid dimensions, wavelengths, and physical calibration.
+
+Preserve the full signed int32 ENVI range in double image arrays, including -2147483648 (A30), instead of silently converting this valid sample to NA.
+
+The additional A26/A27 corrections move here from T15 to honor the confirmed correctness-first priority. Add their independent regressions before changing the TIFF/OME readers; T15 subsequently improves windowing while preserving these results. This expands T07 beyond its original binary-validation estimate; re-estimate after the reader review.
 
 ### T08 — Fix numeric option handling and connectivity
 
-**Owner:** maintainer. **Effort:** 0.5–1 day. **Dependencies:** T00; T04 for membership fixtures. **Milestone:** M2. **Finding:** A14.
+**Owner:** maintainer. **Effort:** 0.5–1 day. **Dependencies:** T00; T04 for membership fixtures. **Milestone:** M2. **Findings:** A14, A29.
 
-Support numeric choice arguments without weakening string validation. Pass requested connectivity to the actual polygonization implementation, verifying the supported API locally. Check `bits`, `connectivity`, and other callers for explicit default versus omitted default behavior.
+Support numeric choice arguments without weakening string validation. Pass requested connectivity to the actual polygonization implementation, verifying the supported API locally. Check `bits`, `connectivity`, and other callers for explicit default versus omitted default behavior. Preserve raw8/16-bit grayscale mask codes on input (A32); unsupported types/depths must fail before polygonisation.
 
-**Acceptance:** `bits=8L`, `bits=16L`, `connectivity=4L`, and `connectivity=8L` work as documented. Diagonal components distinguish the two connectivity modes. Invalid, missing, fractional, and out-of-range arguments produce useful errors.
+**Acceptance:** `bits=8L`, `bits=16L`, `connectivity=4L`, and `connectivity=8L` work as documented. Diagonal components distinguish the two connectivity modes. Invalid, missing, fractional, and out-of-range arguments produce useful errors. Optional TIFF/PNG writer paths preserve the requested supported depth, orientation, and exact integer codes, or report a missing lossless writer capability before producing an output (A29).
 
 ### T09 — Constrain output paths and expose complete export outcomes
 
 **Owner:** maintainer. **Effort:** 0.5–1 day. **Dependencies:** T01. **Milestone:** M2. **Finding:** A22; reinforces A08.
 
-Create one filename policy for package and app exports. Preserve user-visible labels in metadata while using safe path components. Preflight destination containment, aliases, and collisions, including existing symlinked directories where supported. Stage outputs and sidecars so receipts report complete, failed, and skipped items accurately.
+Create one filename policy for package and app exports. Preserve user-visible labels in metadata while using safe path components. Preflight destination containment, aliases, and collisions, including existing symlinked directories where supported. Stage outputs and sidecars so receipts report complete, failed, and skipped items accurately. Qualify the QuPath boundary against actual consumer output: feature arrays/collections, current and legacy class/object fields, and a documented identifier mapping (A31).
 
 **Acceptance:** names containing separators or `..` cannot escape the destination; duplicate stems remain unique; an incomplete export cannot report success; one failed item does not hide the receipt for other items.
+
+### T09b — Match source and mask provenance keys exactly
+
+**Owner:** maintainer. **Effort:** bounded correctness follow-up; estimate after review. **Dependencies:** T06, T07, T09. **Milestone:** M2. **Finding:** A33.
+
+Use exact field names when validating, recovering, comparing or reopening source and mask metadata. Unsupported near-prefix fields cannot supply an absent reader contract, path, option flag, signature, grid or schema declaration. Preserve documented legacy defaults and unknown custom metadata; do not guess or rewrite a missing authoritative declaration.
+
+**Acceptance:** a square OME mask with only `reader_contract_extra` remains unverified against a mask with a real `reader_contract`, both directly and after NPY sidecar round trip. Near-prefix keys cannot satisfy required metadata or change optional-field meaning. Valid modern/legacy/custom descriptors, exact reader options and explicit alignment assertions keep their reviewed behavior. Annotation and ROI identities remain available if a source cannot be reopened.
 
 ### T10 — Render and route all supported widget geometry correctly
 
@@ -183,6 +198,10 @@ Provide a repeatable example workflow from annotations through masks, per-ROI sp
 Inventory metadata-only and window-read capabilities by backend. Implement ENVI/Tivita windows first using known layout and reader descriptors, then qualify an appropriate TIFF/OME path with actual available dependencies and fixtures. Keep eager small-raster fallback explicit. Add reopen/close lifecycle behavior without breaking third-party registered backends; document additive capability metadata and migration.
 
 **Acceptance:** tests measure file bytes and memory from before `at_read_image()`, not after a full array already exists. Fixed windows produce identical pixels to independent full-file fixtures. At least the specifically advertised large-data backends open and read windows without allocating full cubes. Unsupported capabilities remain clearly identified.
+
+### T18a — Contain the reproduced native TIFF callback crash
+
+Execute the native-integration correction from T18 after T15 and before T16. A dependency-only subprocess reproduces a TIFF warning reaching an invalid ImageMagick exception callback and aborting R. Preserve raw reader/writer contracts and qualify a portable mitigation under the failing library order; suppressing warnings or changing the fixture does not resolve the defect. Final package qualification remains T18.
 
 ### T16 — Bound preview, queue, and export working memory
 

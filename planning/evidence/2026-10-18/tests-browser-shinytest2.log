@@ -1,0 +1,9 @@
+                                                                                        test
+ draw, navigate by keyboard, change bands, probe, overlay, stage, commit, download and theme
+                                 a saved session resumes in a fresh app with its annotations
+            a browser app attached to the control service follows commands and reports edits
+ nb failed error skipped
+ 16      0 FALSE   FALSE
+  3      0 FALSE   FALSE
+  3      0 FALSE   FALSE
+TOTAL expectations: 22 failed: 0 errors: 0 
