@@ -39,7 +39,9 @@ with one row per band and the columns:
 
 - `unit`:
 
-  Wavelength unit (character); `NA` when not spectral.
+  Declared spectral coordinate unit (character); `NA` when not spectral
+  or when the unit is unknown. Scalar metadata applies to all bands;
+  per-band units are preserved without conversion.
 
 - `fwhm`:
 
@@ -60,9 +62,11 @@ from hyperannotatR 0.1; the remaining columns were added in 0.2.0.
 ## See also
 
 Other images:
+[`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md),
 [`at_dims()`](https://cttir.github.io/hyperannotatR/reference/at_dims.md),
 [`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md),
 [`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md),
 [`at_is_pyramidal()`](https://cttir.github.io/hyperannotatR/reference/at_is_pyramidal.md),
 [`at_is_spectral()`](https://cttir.github.io/hyperannotatR/reference/at_is_spectral.md),
 [`at_meta()`](https://cttir.github.io/hyperannotatR/reference/at_meta.md),

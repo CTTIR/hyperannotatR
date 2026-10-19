@@ -15,11 +15,16 @@ at_plot(x, ...)
   An
   [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
   [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
+  [annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
   or `annot_mask`.
 
 - ...:
 
-  Passed to the specific plot function.
+  Passed to the specific plot function. For layers, passed to
+  [`at_layer_rois()`](https://cttir.github.io/hyperannotatR/reference/at_layer_rois.md):
+  supply `image = img` for any nonzero stored ROI level. Layer plot
+  geometry uses level-0 coordinates. The same image argument is
+  supported by `ggplot2::autoplot(layer, image = img)`.
 
 ## Value
 

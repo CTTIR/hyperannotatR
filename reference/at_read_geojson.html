@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,9 @@
 <span>  level <span class="op">=</span> <span class="fl">0L</span>,</span>
 <span>  flip_y <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  height <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  coordinate_level <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  legacy_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"error"</span>, <span class="st">"recorded"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -83,6 +85,22 @@
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
 <dd><p>The calling environment, for error reporting.</p></dd>
 
+
+<dt id="arg-coordinate-level">coordinate_level<a class="anchor" aria-label="anchor" href="#arg-coordinate-level"></a></dt>
+<dd><p>Optional integer overriding every recorded <code>level</code>
+without scaling coordinates. Use only when the actual coordinate level is
+known, for example <code>0L</code> for legacy hyperannotatR exports that wrote level-0
+coordinates beside a nonzero source level. <code>NULL</code> (default) uses the
+schema and <code>legacy_levels</code> policy. Coordinates are never automatically
+repaired.</p></dd>
+
+
+<dt id="arg-legacy-levels">legacy_levels<a class="anchor" aria-label="anchor" href="#arg-legacy-levels"></a></dt>
+<dd><p>How to interpret files without the coordinate schema
+marker: <code>"error"</code> (default) rejects ambiguous nonzero recorded levels;
+<code>"recorded"</code> explicitly trusts those levels. Level-0 files remain
+unambiguous.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -90,12 +108,22 @@
 property), or a single <a href="hyperannotatR-classes.html">annot_layer</a> when <code>layer_name</code> is supplied.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>A FeatureCollection, a single Feature or a bare array of features
+is accepted. Features without a geometry (<code>"geometry": null</code>) carry no
+region and are skipped with a warning; any other document is refused with
+an <code>at_validation_error</code> of code <code>INVALID_GEOJSON</code>.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other io:
+<code><a href="at_inspect_saved.html">at_inspect_saved()</a></code>,
+<code><a href="at_inspect_source.html">at_inspect_source()</a></code>,
 <code><a href="at_load_project.html">at_load_project()</a></code>,
 <code><a href="at_load_session.html">at_load_session()</a></code>,
 <code><a href="at_read_qupath.html">at_read_qupath()</a></code>,
 <code><a href="at_read_rois_csv.html">at_read_rois_csv()</a></code>,
+<code><a href="at_relink_source.html">at_relink_source()</a></code>,
 <code><a href="at_roi_from_geojson.html">at_roi_from_geojson()</a></code>,
 <code><a href="at_save_project.html">at_save_project()</a></code>,
 <code><a href="at_save_session.html">at_save_session()</a></code>,

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,8 +57,9 @@
 
 
 <dt id="arg-pixel-size">pixel_size<a class="anchor" aria-label="anchor" href="#arg-pixel-size"></a></dt>
-<dd><p>Optional numeric <code>c(x, y)</code> physical pixel size for physical
-area. When <code>NULL</code>, <code>area_physical</code> is <code>NA</code>.</p></dd>
+<dd><p>Optional positive physical pixel size <code>c(x, y)</code>, or one
+value for square pixels, in the mask's own pixel grid. When <code>NULL</code>,
+<code>area_physical</code> is <code>NA</code>.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
@@ -70,7 +71,10 @@ area. When <code>NULL</code>, <code>area_physical</code> is <code>NA</code>.</p>
     <p>A <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a> with one row per mask value: <code>value</code>, <code>label</code>,
 <code>n_px</code>, <code>area_px</code>, <code>area_physical</code>, <code>frac_total</code>, bounding box
 (<code>bbox_xmin</code>, <code>bbox_ymin</code>, <code>bbox_xmax</code>, <code>bbox_ymax</code>), and centroid
-(<code>centroid_x</code>, <code>centroid_y</code>). A 0-row tibble when the mask is empty.</p>
+(<code>centroid_x</code>, <code>centroid_y</code>). Every bitfield membership contributes to its
+class count, including composite samples; categorical counts are exclusive.
+Mapped-but-absent classes have zero counts. A 0-row tibble is returned only
+when the codebook is empty.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

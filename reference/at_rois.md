@@ -50,7 +50,11 @@ with one row per ROI and, in this exact order, the columns:
 
 - `level`:
 
-  Reference pyramid level (integer).
+  Coordinate pyramid level, always 0 (integer).
+
+- `source_level`:
+
+  Stored ROI reference level (integer provenance).
 
 - `area_px`:
 
@@ -85,8 +89,13 @@ Returns a 0-row tibble with these columns if no ROIs match.
 ## Details
 
 Coordinates in the `geometry` column, together with `area_px` and the
-centroid, are expressed at pyramid level 0; the `level` column records
-the level at which each ROI was originally defined.
+centroid, are expressed at pyramid level 0. The `level` column is 0;
+`source_level` records the stored level at which each ROI was defined.
+
+Older tables used `level` for the stored reference level despite
+returning level-0 geometry. Consumers needing that provenance must now
+use `source_level`. The stored ROI geometry, level, and identifier are
+unchanged.
 
 ## See also
 

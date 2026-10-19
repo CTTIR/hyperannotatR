@@ -63,6 +63,11 @@ at_control_start(
   Optional path of a new file to receive the token (for a client
   process). It must not exist yet.
 
+  The token needs a cryptographically secure random source
+  (`/dev/urandom`, or the openssl package where there is none, as on
+  Windows); without one the service is not started
+  (`CAPABILITY_UNAVAILABLE`).
+
 - read_only:
 
   Logical; refuse annotation mutations.
@@ -90,10 +95,28 @@ print method never shows the token.
 
 The token is never written into URLs, logs, downloads, manifests or RDS
 files. In-process calls use the returned handle; a separate client
-process reads the token from `token_file` (created with owner-only
-permissions). A sanitised lifecycle manifest
-`annotatr-control-<instance_id>.json` is written to `root` at start and
-rewritten when the service stops.
+process reads the token from `token_file`, which is created exclusively
+with owner-only permissions (on Windows, file modes are not enforced;
+keep the file in a directory only the user can read). A sanitised
+lifecycle manifest `annotatr-control-<instance_id>.json` is written to
+`root` at start and rewritten when the service stops.
+
+The service stops itself when the token expires: either when the expiry
+timer runs or, if a request arrives first (for example after the
+computer slept), on that request. Error messages sent to clients never
+contain absolute local paths. Request bodies whose declared
+`Content-Length` exceeds `max_body_bytes`, and requests that fail the
+Host, Origin or token checks, are refused before the body is read (a
+chunked body without `Content-Length` is buffered by httpuv and then
+refused).
+
+Two options bound work done for clients:
+`hyperannotatR.control_mask_max_pixels` (default `4096^2`) is the
+largest mask `mask.preview` builds (without a `level` it picks the
+finest pyramid level within the budget), and
+`hyperannotatR.control_hash_max_bytes` (default 256 MiB) is the largest
+queue entry whose content id `GET /v1/state` computes before the entry
+is visited (larger entries report `image_id: null` until then).
 
 ## See also
 

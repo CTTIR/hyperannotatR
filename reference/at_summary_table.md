@@ -31,7 +31,8 @@ at_summary_table(
 
 A [tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
 with the grouping key plus `n_rois`, `total_area_px`, `mean_area`, and
-`sd_area`. A 0-row tibble when there are no ROIs.
+`sd_area`. Image summaries also include `entry_id`, so repeated display
+names remain separate. A 0-row tibble when there are no ROIs.
 
 ## See also
 

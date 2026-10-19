@@ -17,9 +17,9 @@ at_layer_rois(layer, image = NULL, call = rlang::caller_env())
 
 - image:
 
-  Optional
   [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
-  for accurate level-0 coordinate transforms.
+  defining actual pyramid dimensions. Required when any ROI is stored at
+  a nonzero level; no scale is inferred without it.
 
 - call:
 

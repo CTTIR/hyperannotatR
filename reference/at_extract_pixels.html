@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,10 @@
 
 
 <dt id="arg-img">img<a class="anchor" aria-label="anchor" href="#arg-img"></a></dt>
-<dd><p>An <a href="hyperannotatR-classes.html">annot_image</a>; defaults to the project's image.</p></dd>
+<dd><p>An <a href="hyperannotatR-classes.html">annot_image</a>; defaults to the project's image. Supplying an
+alternate image asserts spatial registration on the same level-0 pixel
+grid. Its level-0 extent must match; differing pyramid dimensions are
+handled using the alternate image's actual level dimensions.</p></dd>
 
 
 <dt id="arg-layer">layer<a class="anchor" aria-label="anchor" href="#arg-layer"></a></dt>

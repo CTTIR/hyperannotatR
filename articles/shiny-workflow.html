@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,10 +79,10 @@
 <p>Annotating one image is a job for <code><a href="../reference/at_project.html">at_project()</a></code> and the
 ROI constructors. Annotating a <em>queue</em> of images — a plate of
 serial sections, a batch of slides, a folder of cubes — is what the
-annotation app is for. It wraps a Shiny canvas around a resumable
-<strong>session</strong>, so you can work through many images without
-losing your place, your labels, or your unsaved edits.
-<code><a href="../reference/at_app.html">at_app()</a></code> builds the app as an ordinary
+annotation app is for. It wraps a Shiny app and a self-contained HTML5
+canvas around a resumable <strong>session</strong>, so you can work
+through many images without losing your place, your labels, or your
+unsaved edits. <code><a href="../reference/at_app.html">at_app()</a></code> builds the app as an ordinary
 <code>shiny.appobj</code> from explicit arguments (for embedding or
 testing), and <code><a href="../reference/at_annotate.html">at_annotate()</a></code> launches it.</p>
 <div class="section level2">
@@ -98,7 +98,7 @@ into a temporary directory so the queue has real files to iterate.</p>
 <span><span class="va">sess</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_session&gt;</span></span></span>
 <span><span class="co">#&gt; images: 3  |  complete: 0  |  cursor: 1</span></span>
-<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpiC7h3P/hyperannotatR-example-session-3aa97ce95d61</span>  |  autosave: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpQ4L2Px/hyperannotatR-example-session-393d73070f95</span>  |  autosave: TRUE</span></span></code></pre></div>
 <p>Every image starts with status <code>"pending"</code>, the cursor
 sits on the first image, and per-image projects are materialised lazily
 — nothing is read from disk until you visit it.</p>
@@ -172,133 +172,167 @@ cube with provenance.</p>
 imported on the Data page or a control command, arrive as a
 <strong>staged</strong> patch. The Annotate page lists its creates,
 updates and conflicts; reviewed or locked ROIs are never changed
-automatically. Commit or discard it explicitly. The badge next to the
-save controls always shows the state: <em>read-only</em>,
-<em>unsaved</em>, <em>staged</em>, <em>committed</em> or <em>saved</em>.
-See <code><a href="../articles/partner-interop.html">vignette("partner-interop")</a></code> for the contract behind
+automatically. Commit or discard it explicitly. One badge next to the
+save controls always shows the state (<em>read-only</em>,
+<em>unsaved</em>, <em>staged</em>, <em>committed</em> or
+<em>saved</em>), followed by a line with the time and folder of the last
+checkpoint, or a warning when that folder is temporary. See
+<code><a href="../articles/partner-interop.html">vignette("partner-interop")</a></code> for the contract behind
 this.</p>
 </div>
 <div class="section level2">
 <h2 id="keyboard-shortcuts">Keyboard shortcuts<a class="anchor" aria-label="anchor" href="#keyboard-shortcuts"></a>
 </h2>
-<p>The canvas is built for speed, so almost everything has a key. Draw
-with the tool keys, assign a label with a digit, then commit.</p>
+<p>The canvas is built for speed, so almost everything has a key. Pick a
+layer and a label (radio buttons, or a digit for the label), draw, then
+commit and advance; <strong>Undo</strong>, <strong>Redo</strong> and
+<strong>Copy previous</strong> are also buttons next to the tools.
+Shortcuts are inactive while a text field, list, button or link has
+focus (label and layer radios keep them), while a dialog is open, and,
+except for <code>?</code>, away from the Annotate page. The table below
+is the one the app shows when you press <code>?</code>:</p>
 <table class="table">
+<colgroup>
+<col width="25%">
+<col width="74%">
+</colgroup>
 <thead><tr class="header">
-<th>Key</th>
-<th>Action</th>
+<th align="left">Key</th>
+<th align="left">Action</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>
-<code>n</code> / <code>p</code>
-</td>
-<td>Next / previous image</td>
+<td align="left">Arrows / Shift+arrows</td>
+<td align="left">canvas cursor: 1 / 10 image pixels</td>
 </tr>
 <tr class="even">
-<td><code>N</code></td>
-<td>Jump to next pending image</td>
+<td align="left">Enter / Space</td>
+<td align="left">point/rectangle anchors; polygon: Space vertices, Enter
+finish</td>
 </tr>
 <tr class="odd">
-<td>
-<code>1</code>–<code>9</code>
-</td>
-<td>Assign label from the vocabulary</td>
+<td align="left">Escape</td>
+<td align="left">cancel unfinished drawing/edit</td>
 </tr>
 <tr class="even">
-<td><code>q</code></td>
-<td>Rectangle tool</td>
+<td align="left">n / p</td>
+<td align="left">next / previous image</td>
 </tr>
 <tr class="odd">
-<td><code>w</code></td>
-<td>Polygon tool</td>
+<td align="left">N</td>
+<td align="left">next pending image</td>
 </tr>
 <tr class="even">
-<td><code>e</code></td>
-<td>Ellipse / circle tool</td>
+<td align="left">1-9</td>
+<td align="left">select label</td>
 </tr>
 <tr class="odd">
-<td><code>r</code></td>
-<td>Freehand tool</td>
+<td align="left">q w e r t y</td>
+<td align="left">tool: pan/rect/polygon/freehand/circle/point</td>
 </tr>
 <tr class="even">
-<td><code>t</code></td>
-<td>Point tool</td>
+<td align="left">d</td>
+<td align="left">delete last ROI</td>
 </tr>
 <tr class="odd">
-<td><code>y</code></td>
-<td>Pan / move tool</td>
+<td align="left">Ctrl+Z / Ctrl+Shift+Z</td>
+<td align="left">undo / redo</td>
 </tr>
 <tr class="even">
-<td><code>d</code></td>
-<td>Delete selected ROI</td>
+<td align="left">Shift+Enter</td>
+<td align="left">save, mark complete &amp; advance</td>
 </tr>
 <tr class="odd">
-<td>
-<code>Ctrl</code>+<code>Z</code> /
-<code>Ctrl</code>+<code>Shift</code>+<code>Z</code>
-</td>
-<td>Undo / redo</td>
+<td align="left">Shift+V</td>
+<td align="left">paste previous image’s ROIs</td>
 </tr>
 <tr class="even">
-<td><code>Space</code></td>
-<td>Toggle mask overlay</td>
+<td align="left">f</td>
+<td align="left">flag image</td>
 </tr>
 <tr class="odd">
-<td><code>Enter</code></td>
-<td>Commit the current ROI</td>
+<td align="left">s</td>
+<td align="left">save session</td>
 </tr>
 <tr class="even">
-<td>
-<code>Shift</code>+<code>Enter</code>
-</td>
-<td>Commit and advance to next image</td>
+<td align="left">Ctrl+E</td>
+<td align="left">open export</td>
 </tr>
 <tr class="odd">
-<td>
-<code>Shift</code>+<code>V</code>
-</td>
-<td>Copy annotations forward from previous image</td>
-</tr>
-<tr class="even">
-<td><code>f</code></td>
-<td>Flag image for review</td>
-</tr>
-<tr class="odd">
-<td><code>s</code></td>
-<td>Save session</td>
-</tr>
-<tr class="even">
-<td>
-<code>Ctrl</code>+<code>E</code>
-</td>
-<td>Export</td>
-</tr>
-<tr class="odd">
-<td><code>?</code></td>
-<td>Show help</td>
+<td align="left">?</td>
+<td align="left">shortcut help</td>
 </tr>
 </tbody>
 </table>
+<p>Drawing also works without a mouse. Tab to the canvas: the arrow keys
+move a cursor by 1 level-0 image pixel (10 with Shift), Enter or Space
+places a point and starts or finishes a rectangle, Space places polygon
+vertices and Enter finishes the polygon after at least three, and Escape
+cancels an unfinished drawing or edit. A new shape is drawn dashed until
+the server accepts it. Drawing needs an active label and an unlocked
+layer; otherwise the app warns and no shape is added.</p>
+<p>The canvas shows a downsampled overview of the image (at most 2048
+pixels on its longest side) with pan and zoom; it does not stream
+pyramid tiles. Drawing coordinates are always level-0 image pixels.
+Encoding the canvas image needs <code>magick</code>: TIFF reading can
+use <code>tiff</code>, but PNG images, including the tissue example,
+need <code>magick</code>. A missing capability or an image that fails to
+decode is reported before drawing is enabled, and navigation keeps
+working when the current image fails.</p>
+<p>Label colours, layer visibility, opacity, stroke width and z-order
+control the display. Hidden layers are neither drawn nor hit-tested on
+the canvas, but they still take part in masks and exports: visibility is
+not an analytical filter. Locked layers and protected imported ROIs
+cannot be edited or removed through the canvas, the keyboard, the ROI
+table or undo/redo, and labels cannot be added to a locked layer. These
+protections apply in the app; the R functions can still edit
+everything.</p>
 </div>
 <div class="section level2">
 <h2 id="copy-forward-for-serial-sections">Copy-forward for serial sections<a class="anchor" aria-label="anchor" href="#copy-forward-for-serial-sections"></a>
 </h2>
 <p>Adjacent serial sections often share most of their anatomy. Rather
-than redraw it, press <code>Shift</code>+<code>V</code> to copy every
-ROI from the previous image onto the current one, then nudge the
-vertices to fit. Combined with <code>Shift</code>+<code>Enter</code>
-(commit and advance), a run of near-identical sections can be annotated
-in a few keystrokes each.</p>
+than redraw it, press <code>Shift</code>+<code>V</code> to copy the
+previous image’s ROIs into the unlocked layers of the current one, then
+use the edit tool to move whole regions into place. Combined with
+<code>Shift</code>+<code>Enter</code> (commit and advance), a run of
+near-identical sections can be annotated in a few keystrokes each.</p>
 </div>
 <div class="section level2">
 <h2 id="autosave-and-recovery">Autosave and recovery<a class="anchor" aria-label="anchor" href="#autosave-and-recovery"></a>
 </h2>
-<p>By default a session autosaves to <code>_session.rds</code> in its
-<code>out_dir</code> on every commit, so a crashed browser or a closed
-laptop costs you nothing. Save on demand with
-<code><a href="../reference/at_save_session.html">at_save_session()</a></code> (bound to <code>s</code>), and pick up
-exactly where you left off with <code><a href="../reference/at_resume.html">at_resume()</a></code>.</p>
+<p>With <code>autosave = TRUE</code> (the default), the app writes the
+session to <code>_session.rds</code> in its <code>out_dir</code> after
+every annotation change. The badge shows <em>saved</em> only after the
+checkpoint has been written. A failed save leaves the current edits
+marked unsaved and keeps the previous valid checkpoint; press
+<code>s</code> to retry. With <code>autosave = FALSE</code>, navigation
+keeps edits in memory and the indicator stays unsaved until a save
+succeeds. Resume the last successful checkpoint with
+<code><a href="../reference/at_resume.html">at_resume()</a></code>.</p>
+<p>Each new session gets its own temporary output directory, which R
+deletes when it exits, and the app warns about it; for real work pass a
+persistent <code>out_dir</code> to <code><a href="../reference/at_session.html">at_session()</a></code> or
+<code><a href="../reference/at_annotate.html">at_annotate()</a></code>. In scripts, <code><a href="../reference/at_save_session.html">at_save_session()</a></code>
+refuses to replace an existing checkpoint unless you pass
+<code>overwrite = TRUE</code>, also when you omit <code>path</code>; app
+autosave asks for replacement explicitly. Before the app first replaces
+an existing <code>_session.rds</code> that holds another queue, or ROIs
+the new checkpoint lacks, it keeps a timestamped
+<code>_session-*.previous.rds</code> copy.</p>
+<p>All browser tabs of one app object share its in-memory queue, so
+reloading the page or opening a second tab continues from the latest
+edits; two tabs editing the same image keep the last edit. Loading
+another folder on the Data page writes the new queue into its own
+subfolder and keeps the previous queue, including its unsaved
+annotations and history, so <strong>Restore previous queue</strong> can
+bring it back. That recovery copy lives only in the running app: restore
+and save it before closing. An app attached to a control service refuses
+folder loads; the controller loads sessions instead.</p>
+<p>The Data page reads folder and handoff paths on the machine running
+R: the app is meant for local use. For any shared deployment, set
+<code>options(hyperannotatR.app_root = "/allowed/folder")</code> so the
+app refuses paths outside that folder.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_set_status.html">at_set_status</a></span><span class="op">(</span><span class="va">sess</span>, <span class="fl">1</span>, <span class="st">"complete"</span><span class="op">)</span></span>
 <span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_next.html">at_next</a></span><span class="op">(</span><span class="va">sess</span><span class="op">)</span></span>
@@ -308,9 +342,42 @@ exactly where you left off with <code><a href="../reference/at_resume.html">at_r
 <span><span class="va">recovered</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_session&gt;</span></span></span>
 <span><span class="co">#&gt; images: 3  |  complete: 1  |  cursor: 2</span></span>
-<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpiC7h3P/hyperannotatR-example-session-3aa97ce95d61</span>  |  autosave: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpQ4L2Px/hyperannotatR-example-session-393d73070f95</span>  |  autosave: TRUE</span></span></code></pre></div>
 <p>The cursor, statuses, materialised projects, and templates all come
 back intact.</p>
+<p>File-backed images are saved as a versioned source descriptor (the
+canonical source path, backend and reader options), not as pixels, and
+are reopened when needed; keep the original source files available.
+In-memory images keep their only pixel copy. A session whose sources are
+unavailable still loads, with its annotations intact.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/at_inspect_saved.html">at_inspect_saved</a></span><span class="op">(</span><span class="st">"annotations/_session.rds"</span><span class="op">)</span></span>
+<span><span class="va">project</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_current.html">at_current</a></span><span class="op">(</span><span class="va">recovered</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/at_inspect_source.html">at_inspect_source</a></span><span class="op">(</span><span class="va">project</span><span class="op">)</span></span>
+<span><span class="va">project</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_relink_source.html">at_relink_source</a></span><span class="op">(</span><span class="va">project</span>, <span class="st">"/new/location/original.tif"</span><span class="op">)</span></span>
+<span><span class="va">recovered</span><span class="op">$</span><span class="va">projects</span><span class="op">[[</span><span class="va">recovered</span><span class="op">$</span><span class="va">cursor</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">project</span></span>
+<span><span class="fu"><a href="../reference/at_save_session.html">at_save_session</a></span><span class="op">(</span><span class="va">recovered</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Relinking explicitly accepts a replacement source after checking its
+size, pyramid levels, bands and wavelengths. For readers with
+non-default options, pass <code>options = list(...)</code> when an old
+file does not record them. The saved source signature compares file size
+and modification time (for ENVI cubes, of both the header and the data
+file): it detects many replacements but cannot prove identical content.
+Changed source metadata needs explicit relinking.</p>
+<p>Queue entries saved without identifiers are migrated by their
+recorded row position; existing valid identifiers and geometry are kept.
+Older lightweight images reopen through the known default readers, and
+inspection reports that their reader options were inferred. Ambiguous
+identities and unsupported schemas are refused;
+<code><a href="../reference/at_inspect_saved.html">at_inspect_saved()</a></code> reports such issues without modifying
+the file.</p>
+<p>App checkpoints write complete, uniquely named project files before
+replacing the session file, and keep the project files that older
+checkpoints refer to. On Unix the replacement is a checked rename in the
+same directory; on Windows the previous file is backed up and restored
+if an ordinary write fails. Neither guarantees durability across a power
+loss. Do not delete retained project files while a checkpoint still
+refers to them.</p>
 </div>
 <div class="section level2">
 <h2 id="the-session-api-without-the-app">The session API without the app<a class="anchor" aria-label="anchor" href="#the-session-api-without-the-app"></a>
@@ -321,36 +388,46 @@ the queue with <code><a href="../reference/at_session_status.html">at_session_st
 <code><a href="../reference/at_next.html">at_next()</a></code> / <code><a href="../reference/at_prev.html">at_prev()</a></code> /
 <code><a href="../reference/at_goto.html">at_goto()</a></code>, and read a richer progress report — one column
 per label — with <code><a href="../reference/at_manifest.html">at_manifest()</a></code>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/at_session_status.html">at_session_status</a></span><span class="op">(</span><span class="va">sess</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 7</span></span></span>
-<span><span class="co">#&gt;     idx path                name  status project_path n_rois modified</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 /tmp/RtmpiC7h3P/hy… imag… compl… <span style="color: #BB0000;">NA</span>                0 <span style="color: #BB0000;">NA</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 /tmp/RtmpiC7h3P/hy… imag… pendi… <span style="color: #BB0000;">NA</span>                0 <span style="color: #BB0000;">NA</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 /tmp/RtmpiC7h3P/hy… imag… pendi… <span style="color: #BB0000;">NA</span>                0 <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 9</span></span></span>
+<span><span class="co">#&gt;     idx entry_id              export_stem path  name  status project_path n_rois</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 entry_at_393d46993b2… entry_at_3… /tmp… imag… compl… <span style="color: #BB0000;">NA</span>                0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 entry_at_393d46993b2… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 entry_at_393d46993b2… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: modified &lt;dttm&gt;</span></span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/at_manifest.html">at_manifest</a></span><span class="op">(</span><span class="va">sess</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 9</span></span></span>
-<span><span class="co">#&gt;     idx name     path              status n_layers n_rois tumour necrosis stroma</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 image_01 /tmp/RtmpiC7h3P/… compl…        0      0      0        0      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 image_02 /tmp/RtmpiC7h3P/… pendi…        0      0      0        0      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 image_03 /tmp/RtmpiC7h3P/… pendi…        0      0      0        0      0</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 11</span></span></span>
+<span><span class="co">#&gt;     idx entry_id  export_stem name  path  status n_layers n_rois tumour necrosis</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 entry_at… entry_at_3… imag… /tmp… compl…        0      0      0        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 entry_at… entry_at_3… imag… /tmp… pendi…        0      0      0        0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 entry_at… entry_at_3… imag… /tmp… pendi…        0      0      0        0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: stroma &lt;int&gt;</span></span></span></code></pre></div>
 <p>Use these to seed a session programmatically, pre-fill statuses, or
 audit progress in a report — no Shiny required.</p>
 </div>
 <div class="section level2">
 <h2 id="export-scoping">Export scoping<a class="anchor" aria-label="anchor" href="#export-scoping"></a>
 </h2>
-<p>Exports (<code>Ctrl</code>+<code>E</code>) are scoped deliberately.
-You choose the <strong>layers</strong> to include, the
-<strong>format</strong> (GeoJSON, QuPath, or a rasterised TIFF mask),
-and the <strong>breadth</strong> — the current image only, every
-completed image, or the whole queue. Flagged and skipped images are
-excluded from batch exports unless you opt them back in, so a “export
-all complete” pass yields exactly the reviewed annotations and nothing
-half-finished.</p>
+<p>The export panel (<code>Ctrl</code>+<code>E</code>) writes the
+selected <strong>formats</strong> (an integer TIFF mask with its legend
+sidecar, GeoJSON, QuPath GeoJSON, and an ROI table as CSV) for a
+<strong>scope</strong>: the current image, every image marked complete,
+every flagged image, or the whole queue. The current image is exported
+from the live project, other entries from the session’s stored projects,
+and every layer is included; the app has no layer selector. Scope
+<code>all</code> includes flagged and skipped images, so choose
+<code>complete</code> when only reviewed annotations should leave the
+session. The zip download holds every complete bundle plus the receipt,
+and a copy is written to the session’s export folder. The receipt lists
+complete files, skips and errors; check it before assuming that every
+requested image and format succeeded. To export a subset of layers, call
+the writers from R instead: <code><a href="../reference/at_write_geojson.html">at_write_geojson()</a></code>,
+<code><a href="../reference/at_write_qupath.html">at_write_qupath()</a></code> and <code><a href="../reference/at_mask.html">at_mask()</a></code> take a
+<code>layer</code> argument.</p>
 <p>Those export formats — and how hyperannotatR round-trips with QuPath,
 GeoJSON, and mask TIFFs — are the subject of the next vignette,
 “Interoperability”.</p>

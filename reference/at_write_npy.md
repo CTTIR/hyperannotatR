@@ -1,11 +1,15 @@
 # Write a mask to a NumPy `.npy` file
 
 Write an `annot_mask` as a lossless integer NumPy array, for interchange
-with Python tools. A `<path>.legend.json` sidecar (value -\> label) is
-written alongside so the array stays self-describing. Unlike
+with Python tools. A `<path>.legend.json` sidecar (value -\> label, plus
+the mask metadata and storage orientation) is written alongside so the
+array stays self-describing. Unlike
 [`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md),
 values are stored raw (no bit-depth normalisation), so bitfield artefact
-masks survive intact.
+masks survive intact. The array and legend are staged as one output
+bundle; an existing sidecar also requires `overwrite = TRUE`. Values
+outside the chosen `dtype` are refused before anything is written.
+Concurrent writers must be serialised.
 
 ## Usage
 

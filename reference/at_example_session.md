@@ -47,10 +47,11 @@ Other sessions:
 ``` r
 sess <- at_example_session(3)
 at_session_status(sess)
-#> # A tibble: 3 × 7
-#>     idx path                name  status project_path n_rois modified
-#>   <int> <chr>               <chr> <chr>  <chr>         <int> <dttm>  
-#> 1     1 /tmp/RtmpW8To19/hy… imag… pendi… NA                0 NA      
-#> 2     2 /tmp/RtmpW8To19/hy… imag… pendi… NA                0 NA      
-#> 3     3 /tmp/RtmpW8To19/hy… imag… pendi… NA                0 NA      
+#> # A tibble: 3 × 9
+#>     idx entry_id              export_stem path  name  status project_path n_rois
+#>   <int> <chr>                 <chr>       <chr> <chr> <chr>  <chr>         <int>
+#> 1     1 entry_at_29545e8c4d1… entry_at_2… /tmp… imag… pendi… NA                0
+#> 2     2 entry_at_29545e8c4d1… entry_at_2… /tmp… imag… pendi… NA                0
+#> 3     3 entry_at_29545e8c4d1… entry_at_2… /tmp… imag… pendi… NA                0
+#> # ℹ 1 more variable: modified <dttm>
 ```

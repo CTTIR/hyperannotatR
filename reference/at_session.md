@@ -9,7 +9,7 @@ at_session(
   paths,
   labels = character(),
   layers = NULL,
-  out_dir = tempdir(),
+  out_dir = .session_out_dir(),
   autosave = TRUE,
   ...,
   call = rlang::caller_env()
@@ -24,7 +24,8 @@ at_session(
 
 - labels:
 
-  Character vector of the global label vocabulary.
+  Character vector of the global label vocabulary. Duplicates are
+  dropped.
 
 - layers:
 
@@ -35,8 +36,12 @@ at_session(
 
 - out_dir:
 
-  Directory for autosave and exports. Defaults to a session temporary
-  directory.
+  Directory for autosave and exports. Defaults to a new, unique
+  directory under [`tempdir()`](https://rdrr.io/r/base/tempfile.html),
+  which R deletes when the process ends: pass a persistent directory to
+  keep autosaved work. Separate sessions never share a default
+  directory. A relative path is resolved against the working directory
+  when the session is created.
 
 - autosave:
 

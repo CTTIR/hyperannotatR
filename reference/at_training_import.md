@@ -63,7 +63,7 @@ at_training_import(
 
 - min_confidence:
 
-  Optional threshold applied to `confidence`.
+  Optional threshold applied to `confidence` (which is then required).
 
 - layer:
 

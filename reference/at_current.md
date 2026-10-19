@@ -2,7 +2,10 @@
 
 Return the project for the image at the cursor, materialising it from
 the image (and applying the session's layer template) if it has not been
-visited.
+visited. A stored project whose pixel handle was not saved is reopened
+from its recorded source (see
+[`at_inspect_source()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_source.md)
+when that is impossible).
 
 ## Usage
 

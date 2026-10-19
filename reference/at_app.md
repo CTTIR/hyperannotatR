@@ -73,6 +73,24 @@ at_app(
 
 A `shiny.appobj`.
 
+## Details
+
+All Shiny sessions of one app object share its in-memory queue:
+reloading the page or opening a second tab continues from the latest
+edits instead of the session the app was built with. Edits are stored
+per queue entry; two tabs editing the same image keep the last edit.
+
+Annotations autosave to the session's `out_dir` (unless the session was
+created with `autosave = FALSE`); the app warns when that folder is
+inside R's temporary directory, which is deleted when R exits. Before it
+first replaces an existing `_session.rds` that holds another queue or
+more ROIs, the app keeps a timestamped `_session-*.previous.rds` copy.
+
+The Data page reads folder and handoff paths on the machine running R.
+The app is meant for local use; for a shared deployment set
+`options(hyperannotatR.app_root = "/allowed/folder")` to refuse paths
+outside one folder.
+
 ## See also
 
 [`at_annotate()`](https://cttir.github.io/hyperannotatR/reference/at_annotate.md),

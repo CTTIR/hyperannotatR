@@ -23,7 +23,7 @@ the canonical integrity.json. Absolute paths are never used as identity."><meta 
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,9 @@ the canonical <code>integrity.json</code>. Absolute paths are never used as iden
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>An <a href="hyperannotatR-classes.html">annot_project</a> or <a href="hyperannotatR-classes.html">annot_session</a> (materialised entries are
-exported under <code>entries/entry-NNNN/</code>).</p></dd>
+exported under <code>entries/&lt;entry_id&gt;/</code>, where <code>entry_id</code> is the session's
+stable entry id, or <code>entry-NNNN</code> by queue position for sessions without
+stable ids).</p></dd>
 
 
 <dt id="arg-destination">destination<a class="anchor" aria-label="anchor" href="#arg-destination"></a></dt>
@@ -135,7 +137,10 @@ per ROI, joinable by <code>roi_id</code> through the legend), <code>"multiclass"
     <p>Files are written into a hidden sibling staging directory and moved into
 place only when complete, so a failed export never leaves a directory that
 looks valid. An existing destination is replaced only with
-<code>overwrite = TRUE</code>, and only when it is itself a handoff directory.</p>
+<code>overwrite = TRUE</code>, and only when it is itself a handoff directory; if the
+new directory cannot be moved into place the previous one is restored. The
+optional <code>objects/project.rds</code> holds no pixels, read identity or local path
+(the image source is reduced to its file name).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -153,11 +158,8 @@ looks valid. An existing destination is replaced only with
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"handoff-example"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rc</span> <span class="op">&lt;-</span> <span class="fu">at_export_qupflowr</span><span class="op">(</span><span class="fu"><a href="at_example_project.html">at_example_project</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">dest</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Registered S3 method overwritten by 'stars':</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   method                  from</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   st_interpolate_aw.stars sf  </span>
 <span class="r-in"><span><span class="va">rc</span><span class="op">$</span><span class="va">handoff_digest</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "f4fe99fc7a20bacca4c827263df7924494ebe741f668a7c3ba579e0f49d5cee3"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "4ef808f02c5ab8ff5b976f181fca94abceb9a833f2b3115b2cbd6dbac473eada"</span>
 <span class="r-in"><span><span class="va">rc</span><span class="op">$</span><span class="va">files</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path"</span>, <span class="st">"format"</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   path                                   format        </span>

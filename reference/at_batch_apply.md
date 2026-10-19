@@ -24,7 +24,7 @@ at_batch_apply(
 
 - fn:
 
-  A function `fn(project, image, idx)` returning an
+  A function `fn(project, image, idx, ...)` returning an
   [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - ...:
@@ -47,7 +47,13 @@ at_batch_apply(
 
 The
 [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
-with modified projects.
+with modified projects. An image whose project cannot be materialised,
+or for which `fn` errors or does not return an
+[annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
+keeps its previous project; the failures are reported in one warning and
+attached as the `"batch_errors"` attribute, a
+[tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `idx`, `image` and `message`.
 
 ## See also
 

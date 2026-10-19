@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
 
     
     
-<p><img src="../reference/figures/hyperannotatR-hex.png" class="r-plt" alt="hyperannotatR hex sticker" width="220px" style="display: block; margin: auto;"></p>
+<p><img src="../reference/figures/logo.png" class="r-plt" alt="hyperannotatR logo" width="220px" style="display: block; margin: auto;"></p>
 <p>hyperannotatR helps you draw, organise and export regions of interest
 (ROIs) across ordinary images, whole-slide microscopy and hyperspectral
 data cubes. Every annotation is stored as a validated simple-feature
@@ -105,9 +105,10 @@ four-channel <code>"multiplex"</code> pyramid, and a 40-band spectral
 <span><span class="co">#&gt; backend: <span style="color: #0000BB;">"raster"</span>  |  dtype: <span style="color: #0000BB;">"uint8"</span></span></span>
 <span><span class="co">#&gt; size: 512 x 512 px  |  levels: 1  |  bands: 3</span></span>
 <span><span class="co">#&gt; pixel size: 1 x 1 px</span></span></code></pre></div>
-<p>An <code>annot_image</code> is a thin, lazy handle over a pluggable
-backend rather than the pixels themselves. A handful of accessors tell
-you what you are working with:</p>
+<p>An <code>annot_image</code> is a handle over a pluggable backend: it
+carries the image’s metadata and serves pixels through
+<code><a href="../reference/at_tile.html">at_tile()</a></code>. A handful of accessors tell you what you are
+working with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/at_dims.html">at_dims</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 512 512</span></span>
@@ -189,11 +190,11 @@ focus on the attributes.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> roi_000000002 regions immune POLYGON       0  <span style="text-decoration: underline;">11</span>292.         65</span></span></code></pre></div>
 <p>Notice that the circle has been stored as a many-vertex polygon:
 hyperannotatR keeps every ROI as a genuine simple feature, so areas,
-overlaps and set operations are all exact. <code><a href="../reference/at_rois.html">at_rois()</a></code> also
-accepts <code>layer</code> and <code>label</code> arguments when you
-want to pull out a subset, and <code><a href="../reference/at_summary.html">at_summary()</a></code> rolls the same
-table up into per-label counts and areas — a quick sanity check before
-you commit to a mask.</p>
+overlaps and set operations are computed on the stored geometry.
+<code><a href="../reference/at_rois.html">at_rois()</a></code> also accepts <code>layer</code> and
+<code>label</code> arguments when you want to pull out a subset, and
+<code><a href="../reference/at_summary.html">at_summary()</a></code> rolls the same table up into per-label counts
+and areas — a quick sanity check before you commit to a mask.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/at_summary.html">at_summary</a></span><span class="op">(</span><span class="va">project</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_summary&gt;</span> <span style="color: #00BB00;">quick tour</span></span></span>
@@ -222,9 +223,6 @@ and a <code>"multiclass"</code> mask with one value per label class. We
 build a labelled mask.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_mask.html">at_mask</a></span><span class="op">(</span><span class="va">project</span>, type <span class="op">=</span> <span class="st">"labelled"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Registered S3 method overwritten by 'stars':</span></span>
-<span><span class="co">#&gt;   method                  from</span></span>
-<span><span class="co">#&gt;   st_interpolate_aw.stars sf</span></span>
 <span><span class="va">m</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_mask&gt;</span> labelled  |  512 x 512 px  |  level 0</span></span>
 <span><span class="co">#&gt; values: 2</span></span>
@@ -238,11 +236,13 @@ default, <code>touches = FALSE</code>), using a half-open tie rule so
 that shared edges are never double-counted; set
 <code>touches = TRUE</code> if you would rather include any pixel the
 polygon so much as grazes. Where ROIs overlap, the <code>overlap</code>
-argument decides who wins — by default the region drawn last, but
+argument decides who wins: by default the region drawn last, but
 <code>"first"</code>, <code>"max"</code>, <code>"min"</code> and
-<code>"error"</code> are all available. The mask carries a
-self-describing legend, and because it is a plain integer matrix
-underneath you can tabulate it directly.</p>
+<code>"error"</code> are available, and <code>"bitor"</code> combines
+power-of-two class codes bitwise so that overlapping classes stay
+recoverable in a multiclass mask. The mask carries a self-describing
+legend, and because it is a plain integer matrix underneath you can
+tabulate it directly.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/at_mask_legend.html">at_mask_legend</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 6</span></span></span>

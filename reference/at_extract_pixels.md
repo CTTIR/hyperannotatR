@@ -27,7 +27,10 @@ at_extract_pixels(
 
   An
   [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md);
-  defaults to the project's image.
+  defaults to the project's image. Supplying an alternate image asserts
+  spatial registration on the same level-0 pixel grid. Its level-0
+  extent must match; differing pyramid dimensions are handled using the
+  alternate image's actual level dimensions.
 
 - layer:
 

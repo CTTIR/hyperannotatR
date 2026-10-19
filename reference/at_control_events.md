@@ -27,7 +27,8 @@ at_control_events(
 
 - limit:
 
-  Maximum number of events to return.
+  Maximum number of events to return (a positive integer; the service
+  caps a page at 500).
 
 - call:
 

@@ -9,7 +9,13 @@ when absent and `content_sha256` is always computed from the canonical
 payload. A stale revision raises an `at_conflict_error`
 (`REVISION_CONFLICT`); re-sending the same command with the same
 idempotency key returns the original result (`replayed = TRUE` in the
-response) instead of applying it twice.
+response) instead of applying it twice. The service keeps the most
+recent 1000 request records; a replay of an older key raises
+`IDEMPOTENCY_EXPIRED` instead of executing again, and a large stored
+response (for example a mask preview PNG) is replayed in compact form
+with `response_truncated = TRUE`. `close` is the only operation that
+does not check `expected_revision`. Errors carry the same condition
+class as the corresponding local call.
 
 ## Usage
 
@@ -62,7 +68,7 @@ at_control_command(h, list(operation = "context.goto", payload = list(queue_inde
 #> [1] 2
 #> 
 #> $entry_id
-#> [1] "entry-0002"
+#> [1] "entry_at_29545e8c4d1d_000000004"
 #> 
 #> $image_id
 #> [1] "sha256:3fa00078c93c3a7d"
@@ -75,19 +81,19 @@ at_control_command(h, list(operation = "context.goto", payload = list(queue_inde
 #> [1] "annotatr-control-v1"
 #> 
 #> attr(,"response")$protocol_version
-#> [1] "1.0"
+#> [1] "1.1"
 #> 
 #> attr(,"response")$request_id
-#> [1] "request-c836ca4b-3bd8-469f-966c-ae46f5a17c3b"
+#> [1] "request-a356d9ff-0f28-4fbe-a68c-75e558c7c36c"
 #> 
 #> attr(,"response")$instance_id
-#> [1] "instance-7cb44c46-3926-4a30-9e38-fc94e70a1bd8"
+#> [1] "instance-cd5fa5ce-f036-4cb9-ac6b-67ad4ecc09dd"
 #> 
 #> attr(,"response")$state_revision
 #> [1] "1"
 #> 
 #> attr(,"response")$event_cursor
-#> [1] "instance-7cb44c46-3926-4a30-9e38-fc94e70a1bd8:2"
+#> [1] "instance-cd5fa5ce-f036-4cb9-ac6b-67ad4ecc09dd:2"
 #> 
 #> attr(,"response")$warnings
 #> list()

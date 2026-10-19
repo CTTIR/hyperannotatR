@@ -53,7 +53,19 @@ at_write_masks(
 
 An invisible export-receipt
 [tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
-with columns `path`, `type`, `n_px`, and `bytes`.
+with columns `path`, `type`, `n_px`, `bytes`, `name`, `status`,
+`message`, `sidecar_path`, and `sidecar_bytes`. Counts and bytes use
+double precision. Display names are retained in `name`; filenames use
+safe components with unique suffixes. Each item is `"ok"`, `"error"`, or
+`"skipped"`; one failure does not abort later items. A TIFF and its
+legend form one staged output bundle.
+
+## Details
+
+Output plans reject symlinked descendants and aliases before writing.
+Callers must serialize concurrent writes and keep destination paths
+stable; preflight plus staged renames is not a race-free filesystem
+transaction.
 
 ## See also
 

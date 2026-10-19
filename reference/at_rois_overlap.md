@@ -5,7 +5,7 @@ Pairwise ROI overlaps within a layer
 ## Usage
 
 ``` r
-at_rois_overlap(layer, call = rlang::caller_env())
+at_rois_overlap(layer, call = rlang::caller_env(), image = NULL)
 ```
 
 ## Arguments
@@ -19,12 +19,18 @@ at_rois_overlap(layer, call = rlang::caller_env())
 
   The calling environment, for error reporting.
 
+- image:
+
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  defining actual pyramid dimensions; required for any nonzero ROI level
+  because measurements are reported at level 0.
+
 ## Value
 
 A [tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
 with columns `id_a`, `id_b` (character), `overlap_px` (double, level-0
 pixels), and `jaccard` (double). A 0-row tibble with these columns when
-no ROIs overlap.
+no ROIs overlap with positive area.
 
 ## See also
 

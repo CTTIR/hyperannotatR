@@ -20,3 +20,5 @@
 - [Interoperability](https://cttir.github.io/hyperannotatR/articles/interop.md):
 - [Working with qupflowR: handoffs, control and training
   data](https://cttir.github.io/hyperannotatR/articles/partner-interop.md):
+- [Reproducible analytical
+  summaries](https://cttir.github.io/hyperannotatR/articles/reproducible-analysis.md):

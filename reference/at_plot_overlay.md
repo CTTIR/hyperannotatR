@@ -32,7 +32,8 @@ at_plot_overlay(project, img = NULL, layer = NULL, call = rlang::caller_env())
 ## Value
 
 A [ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)
-object with the image and ROI outlines.
+object with the image and ROI outlines (points as markers), both in
+level-0 image coordinates.
 
 ## See also
 

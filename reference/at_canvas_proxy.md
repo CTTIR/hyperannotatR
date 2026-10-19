@@ -1,7 +1,9 @@
 # A proxy for an existing annotation canvas
 
 Mirrors the `leafletProxy()` pattern: update a live canvas without
-re-rendering the whole widget.
+re-rendering the whole widget. Inside a Shiny module, pass the module's
+(un-namespaced) output id; it is namespaced with the module session, as
+`leaflet::leafletProxy()` does.
 
 ## Usage
 

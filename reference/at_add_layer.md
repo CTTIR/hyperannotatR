@@ -29,7 +29,9 @@ at_add_layer(project, layer, call = rlang::caller_env())
 
 A new
 [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
-with the layer added. The input is unchanged.
+with the layer added. ROIs in `layer` whose identifiers are missing,
+already used in the project, or repeated within the layer are re-minted;
+the first occurrence of each valid id is kept. The input is unchanged.
 
 ## See also
 

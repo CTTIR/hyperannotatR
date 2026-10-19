@@ -6,8 +6,12 @@ documentation.
 
 - `annot_image`:
 
-  A backend-agnostic image handle holding metadata and a lazy tile
-  accessor. Created by
+  A backend-agnostic image handle holding metadata and the backend's
+  pixel handle, read through
+  [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md).
+  Windowed backends (ENVI, TIVITA) read only the requested window; the
+  raster and TIFF backends decode the whole image when it is read.
+  Created by
   [`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md)
   or
   [`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md).
@@ -37,8 +41,8 @@ documentation.
 
 - `annot_mask`:
 
-  A rasterised mask: a labelled or binary integer matrix with a legend.
-  Created by
+  A rasterised mask: an integer matrix (binary, labelled, multiclass, or
+  bitfield-encoded) with a legend. Created by
   [`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md).
 
 - `annot_style`:
@@ -58,9 +62,11 @@ documentation.
 
 Other images:
 [`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md),
+[`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md),
 [`at_dims()`](https://cttir.github.io/hyperannotatR/reference/at_dims.md),
 [`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md),
 [`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md),
 [`at_is_pyramidal()`](https://cttir.github.io/hyperannotatR/reference/at_is_pyramidal.md),
 [`at_is_spectral()`](https://cttir.github.io/hyperannotatR/reference/at_is_spectral.md),
 [`at_meta()`](https://cttir.github.io/hyperannotatR/reference/at_meta.md),

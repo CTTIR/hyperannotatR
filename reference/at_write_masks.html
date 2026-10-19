@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,7 +92,17 @@ masks are split into files.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An invisible export-receipt <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a> with columns <code>path</code>,
-<code>type</code>, <code>n_px</code>, and <code>bytes</code>.</p>
+<code>type</code>, <code>n_px</code>, <code>bytes</code>, <code>name</code>, <code>status</code>, <code>message</code>, <code>sidecar_path</code>, and
+<code>sidecar_bytes</code>. Counts and bytes use double precision. Display names are
+retained in <code>name</code>; filenames use safe components with unique suffixes.
+Each item is <code>"ok"</code>, <code>"error"</code>, or <code>"skipped"</code>; one failure does not abort
+later items. A TIFF and its legend form one staged output bundle.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Output plans reject symlinked descendants and aliases before writing.
+Callers must serialize concurrent writes and keep destination paths stable;
+preflight plus staged renames is not a race-free filesystem transaction.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -23,7 +23,7 @@ handled by policy. Image bytes are excluded unless include_images = TRUE.'><meta
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,8 +106,9 @@ handled by policy. Image bytes are excluded unless <code>include_images = TRUE</
 
 <dt id="arg-split">split<a class="anchor" aria-label="anchor" href="#arg-split"></a></dt>
 <dd><p>Optional explicit assignment: a named list
-(<code>train</code>, <code>validation</code>, <code>test</code>) of group ids. <code>NULL</code> assigns groups by
-<code>fractions</code> and <code>seed</code>.</p></dd>
+(<code>train</code>, <code>validation</code>, <code>test</code>) of group ids. With <code>group_by = "image_id"</code> entry ids (<code>"entry-0001"</code>) or entry names are accepted too
+and mapped to their image's group. <code>NULL</code> assigns groups by <code>fractions</code>
+and <code>seed</code>.</p></dd>
 
 
 <dt id="arg-tile-size">tile_size<a class="anchor" aria-label="anchor" href="#arg-tile-size"></a></dt>
@@ -127,7 +128,9 @@ handled by policy. Image bytes are excluded unless <code>include_images = TRUE</
 
 
 <dt id="arg-bands">bands<a class="anchor" aria-label="anchor" href="#arg-bands"></a></dt>
-<dd><p>Band indices recorded (and written with <code>include_images</code>).</p></dd>
+<dd><p>Band indices recorded (and written with <code>include_images</code>);
+every entry must have them. With <code>include_images = TRUE</code> all entries must
+share the same band table (<code>BAND_MISMATCH</code> otherwise).</p></dd>
 
 
 <dt id="arg-include-images">include_images<a class="anchor" aria-label="anchor" href="#arg-include-images"></a></dt>
@@ -144,12 +147,15 @@ handled by policy. Image bytes are excluded unless <code>include_images = TRUE</
 
 
 <dt id="arg-groups">groups<a class="anchor" aria-label="anchor" href="#arg-groups"></a></dt>
-<dd><p>Optional data frame with <code>entry_id</code> (or <code>name</code>) plus
-<code>subject_id</code> and/or <code>sample_id</code> columns (character).</p></dd>
+<dd><p>Optional data frame with <code>entry_id</code> (the session's entry id,
+or the queue-position id <code>"entry-NNNN"</code>; else <code>name</code>) plus <code>subject_id</code>
+and/or <code>sample_id</code> columns (character).</p></dd>
 
 
 <dt id="arg-fractions">fractions<a class="anchor" aria-label="anchor" href="#arg-fractions"></a></dt>
-<dd><p>Named split fractions.</p></dd>
+<dd><p>Named split fractions. Split names (here and in <code>split</code>)
+are used as directory names and must consist of letters, digits, <code>.</code>,
+<code>_</code> or <code>-</code>.</p></dd>
 
 
 <dt id="arg-label-map">label_map<a class="anchor" aria-label="anchor" href="#arg-label-map"></a></dt>
@@ -201,12 +207,24 @@ manifest.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_example_session.html">at_example_session</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span> <span class="va">sess</span><span class="op">$</span><span class="va">projects</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_example_project.html">at_example_project</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu">at_training_export</span><span class="op">(</span><span class="va">sess</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"train-example"</span><span class="op">)</span>, tile_size <span class="op">=</span> <span class="fl">128</span>,</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_example_session.html">at_example_session</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span> <span class="va">sess</span><span class="op">$</span><span class="va">projects</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_example_project.html">at_example_project</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu">at_training_export</span><span class="op">(</span><span class="va">sess</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"train-example"</span><span class="op">)</span>, tile_size <span class="op">=</span> <span class="fl">256</span>,</span></span>
 <span class="r-in"><span>                         overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ds</span><span class="op">$</span><span class="va">manifest</span><span class="op">$</span><span class="va">counts</span><span class="op">$</span><span class="va">tiles</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 48</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
+<span class="r-in"><span><span class="co"># Both example entries show the same picture, so they form one image</span></span></span>
+<span class="r-in"><span><span class="co"># group and land in one split: tiles of one image never leak across splits.</span></span></span>
+<span class="r-in"><span><span class="va">ds</span><span class="op">$</span><span class="va">manifest</span><span class="op">$</span><span class="va">counts</span><span class="op">$</span><span class="va">images_by_split</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $train</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $validation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $test</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

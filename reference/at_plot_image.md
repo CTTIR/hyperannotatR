@@ -24,7 +24,9 @@ at_plot_image(
 
 - level:
 
-  Pyramid level to display; chosen automatically when `NULL`.
+  Pyramid level to sample; chosen automatically when `NULL`. Plot axes
+  always use level-0 image coordinates, scaled independently by actual
+  width and height ratios.
 
 - bands:
 
@@ -33,11 +35,18 @@ at_plot_image(
 - rgb:
 
   Optional length-3 vector of band indices, or wavelengths in nm for a
-  spectral cube, for a false-colour composite.
+  spectral cube, for a false-colour composite. Each channel of an `rgb`
+  composite is contrast-stretched on its own; the default natural-colour
+  display of an image with three or more bands shows an 8-bit image with
+  its stored values and stretches deeper data in its first three bands
+  jointly, preserving their colour balance.
 
 - max_dim:
 
-  Maximum display dimension (auto-downsampled). Default `1024`.
+  Maximum display dimension (auto-downsampled). Default `1024`. Each
+  displayed cell covers its full source block; final partial blocks end
+  at the image boundary. When `level` is `NULL`, the finest pyramid
+  level that fits within `max_dim` is sampled.
 
 - call:
 
@@ -46,7 +55,7 @@ at_plot_image(
 ## Value
 
 A [ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)
-object.
+object. Non-finite samples are drawn transparent.
 
 ## See also
 

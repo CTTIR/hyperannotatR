@@ -33,7 +33,12 @@ at_write_geojson(
 
 - level:
 
-  Integer pyramid level for the coordinates. Default `0`.
+  Integer pyramid level for the coordinates and the exported `level`
+  property. Default `0`. `source_level` separately records the stored
+  ROI level, and `coordinate_schema` marks the file as recording the
+  level of its coordinates, so
+  [`at_read_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_read_geojson.md)
+  restores ROIs at that level.
 
 - flip_y:
 
@@ -59,11 +64,14 @@ The output path, invisibly.
 [`at_write_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_write_qupath.md)
 
 Other io:
+[`at_inspect_saved()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_saved.md),
+[`at_inspect_source()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_source.md),
 [`at_load_project()`](https://cttir.github.io/hyperannotatR/reference/at_load_project.md),
 [`at_load_session()`](https://cttir.github.io/hyperannotatR/reference/at_load_session.md),
 [`at_read_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_read_geojson.md),
 [`at_read_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_read_qupath.md),
 [`at_read_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.md),
+[`at_relink_source()`](https://cttir.github.io/hyperannotatR/reference/at_relink_source.md),
 [`at_roi_from_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_roi_from_geojson.md),
 [`at_save_project()`](https://cttir.github.io/hyperannotatR/reference/at_save_project.md),
 [`at_save_session()`](https://cttir.github.io/hyperannotatR/reference/at_save_session.md),
@@ -73,6 +81,6 @@ Other io:
 ## Examples
 
 ``` r
-p <- withr::local_tempfile(fileext = ".geojson")
+p <- tempfile(fileext = ".geojson")
 at_write_geojson(at_example_project(), p)
 ```

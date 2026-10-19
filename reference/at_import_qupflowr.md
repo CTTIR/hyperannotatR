@@ -6,12 +6,23 @@ directory the SHA-256 inventory (missing, extra, duplicate, resized,
 altered or symlinked files), the manifest schema and major version, ROI
 id uniqueness and the id join between manifest and GeoJSON, layers,
 planes, mask dimensions, integer values and legend completeness are all
-checked; any integrity or schema failure aborts with an
-`at_validation_error`. Nothing is written, no analysis is started, and
-foreign objects are never returned as if they were hyperannotatR
-objects: imported ROIs carry `source = "imported"` and partner fields
-under `attributes$qupflowr`. An RDS file is refused, because
-deserialising it is not a neutral read.
+checked. Every file the manifest references must be a clean relative
+path listed in the verified inventory; unlisted operating-system
+metadata files (`.DS_Store`, `._*`, `Thumbs.db`, `desktop.ini`) are
+ignored with a warning. Any failure aborts with a classified `at_error`:
+`at_validation_error` for integrity, schema and join failures,
+`at_protocol_error` for an unsupported major version, `at_limit_error`
+for oversized inventories and `at_io_error` for missing files. Nothing
+is written, no analysis is started, and foreign objects are never
+returned as if they were hyperannotatR objects: imported ROIs carry
+`source = "imported"` and partner fields under `attributes$qupflowr`.
+Features of a single GeoJSON file that carry no id get a minted one and
+are flagged (`attributes$qupflowr$id_minted`), so
+[`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
+creates them instead of joining them to an existing ROI; two features
+with the same id are refused (`DUPLICATE_ID`). Handoff coordinates are
+read at the export level recorded in the manifest. An RDS file is
+refused, because deserialising it is not a neutral read.
 
 ## Usage
 
@@ -55,9 +66,10 @@ An `at_import_report`: a list with `status`, `format`, `source_name`,
 [annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md);
 `masks`: named list of `annot_mask`; `images`: image records),
 `conversion` (tibble with one row per ROI: `roi_id`, `layer`, `label`,
-`source_object_id`, `object_type`, `geometry_fidelity`,
-`geometry_match`, `notes`) and `annotation_revision` of the imported
-layers.
+`source_object_id`, `object_type`, `geometry_fidelity`, `geometry_match`
+(`"exact"` bytes, `"equivalent"` within 1e-9 after level normalisation,
+`"changed"`, or `NA` without a manifest record), `notes`) and
+`annotation_revision` of the imported layers.
 
 ## See also
 
@@ -83,7 +95,7 @@ rep$checks
 #>   check               status detail                                            
 #>   <chr>               <chr>  <chr>                                             
 #> 1 integrity           ok     5 files verified                                  
-#> 2 manifest_schema     ok     1.0                                               
-#> 3 annotations:project ok     3 ROIs joined by id                               
+#> 2 manifest_schema     ok     1.1                                               
+#> 3 annotations:project ok     3 ROIs joined by id at level 0                    
 #> 4 masks               ok     1 masks: dimensions, integers and legends verified
 ```

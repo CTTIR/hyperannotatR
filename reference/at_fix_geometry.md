@@ -2,9 +2,10 @@
 
 Apply
 [`sf::st_make_valid()`](https://r-spatial.github.io/sf/reference/valid.html)
-to invalid ROIs (which also drops duplicate consecutive vertices) and
-clamp out-of-bounds vertices into the image bounds, reporting what
-changed.
+to invalid ROIs, drop duplicate consecutive vertices, re-orient holes
+that wind like their exterior ring, and clip out-of-bounds geometry to
+the image bounds (an intersection, so a polygon stays a polygon),
+reporting what changed.
 
 ## Usage
 
@@ -34,7 +35,8 @@ The
 with repaired geometry. Repairs are reported via
 [`cli::cli_inform()`](https://cli.r-lib.org/reference/cli_abort.html)
 when `verbose` is `TRUE`. Issues that cannot be repaired (zero area,
-degenerate, `NA` coordinates) are left in place and reported.
+degenerate, empty, `NA` coordinates, or a clip that would leave nothing
+inside the image) are left in place and reported.
 
 ## See also
 

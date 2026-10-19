@@ -23,8 +23,8 @@ at_session_status(session, call = rlang::caller_env())
 
 The manifest
 [tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
-with columns `idx`, `path`, `name`, `status`, `project_path`, `n_rois`,
-and `modified`.
+with columns `idx`, `entry_id`, `export_stem`, `path`, `name`, `status`,
+`project_path`, `n_rois`, and `modified`.
 
 ## See also
 

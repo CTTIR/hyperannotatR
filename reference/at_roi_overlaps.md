@@ -5,7 +5,7 @@ Test whether two ROIs intersect
 ## Usage
 
 ``` r
-at_roi_overlaps(roi1, roi2, call = rlang::caller_env())
+at_roi_overlaps(roi1, roi2, call = rlang::caller_env(), image = NULL)
 ```
 
 ## Arguments
@@ -19,9 +19,16 @@ at_roi_overlaps(roi1, roi2, call = rlang::caller_env())
 
   The calling environment, for error reporting.
 
+- image:
+
+  Optional
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md);
+  required for mixed coordinate levels.
+
 ## Value
 
-A logical scalar.
+A logical scalar: `TRUE` when the ROIs share any point, including ROIs
+that only touch along an edge or at a corner.
 
 ## See also
 

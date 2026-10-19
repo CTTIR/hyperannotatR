@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,8 +67,10 @@
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A new <a href="hyperannotatR-classes.html">annot_layer</a> with the ROI appended. The label vocabulary and
-colour mapping are extended if the ROI introduces a new label. A colliding
-ROI identifier is re-minted to preserve uniqueness. The input is unchanged.</p>
+colour mapping are extended if the ROI introduces a new label (following
+the colour specification given to <code><a href="at_layer.html">at_layer()</a></code>). A missing, empty or
+colliding ROI identifier is re-minted to one unused in the layer. The
+input is unchanged.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

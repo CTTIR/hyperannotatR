@@ -21,6 +21,9 @@ at_plot_spectrum(
   [`at_extract_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_extract_spectrum.md)
   or
   [`at_extract()`](https://cttir.github.io/hyperannotatR/reference/at_extract.md).
+  Its declared `unit` is used on the axis; absent units remain unknown.
+  Mixed units reject: explicitly convert coordinates before combining
+  them.
 
 - colour_by:
 
@@ -28,7 +31,8 @@ at_plot_spectrum(
 
 - ribbon:
 
-  Logical; draw a min-max ribbon per colour group.
+  Logical; draw a min-max ribbon per colour group (and statistic)
+  wherever the group holds more than one ROI. Default `TRUE`.
 
 - call:
 
@@ -37,7 +41,7 @@ at_plot_spectrum(
 ## Value
 
 A [ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)
-object.
+object with one line per ROI and statistic.
 
 ## See also
 

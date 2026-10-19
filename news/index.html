@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,11 +39,65 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="hyperannotatr-development-version">hyperannotatR (development version)<a class="anchor" aria-label="anchor" href="#hyperannotatr-development-version"></a></h2>
-<ul><li><p>Renamed the R package to hyperannotatR and focused its scope on HSI. Existing at_* APIs, object classes and saved version fields are retained. Microscopy cell annotation and correction are owned by segmantR.</p></li>
-<li><p>Stopping a local control listener now cancels its pending expiry callback. This releases the stopped service and prevents subsequent Shiny module tests from waiting for the old expiry time. Active-service expiry is preserved.</p></li>
+<h2 class="pkg-version" data-toc-text="0.3.0" id="hyperannotatr-030">hyperannotatR 0.3.0<a class="anchor" aria-label="anchor" href="#hyperannotatr-030"></a></h2>
+<ul><li>Renamed the R package to hyperannotatR and focused its scope on HSI. Existing at_* APIs, object classes and saved version fields are retained. Microscopy cell annotation and correction are owned by segmantR.</li>
+<li>Options are renamed from <code>annotatR.*</code> to <code>hyperannotatR.*</code>: the 0.2.0 options <code>author</code>, <code>cache_size</code>, <code>max_tile_bytes</code> and <code>tiff_timeout</code>, and the new ones listed below. The old names are no longer read.</li>
+</ul><p>This release also ports the roadmap fixes (work packages T00–T14, findings A01–A33, previously on the unmerged <code>improve/roadmap</code> branch) onto the 0.2.0 code base and adds the fixes from a full audit of 0.2.0 that included real-browser checks of the app. Several results change; see <em>Behaviour changes</em>. The finding register and evidence are in <code>planning/</code> (not part of the package).</p>
+<div class="section level3">
+<h3 id="behaviour-changes-0-3-0">Behaviour changes<a class="anchor" aria-label="anchor" href="#behaviour-changes-0-3-0"></a></h3>
+<ul><li>PNG and JPEG images read through magick returned scrambled pixels: magick’s <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer()</a></code> already transposes its bitmap and hyperannotatR transposed it again. Every value taken from such an image (canvas display, plots, extraction, spectra, masks of derived data, training tiles) was wrong. Pixels now match an independent decoder exactly; grey+alpha PNGs keep their alpha.</li>
+<li>
+<code><a href="../reference/at_rois.html">at_rois()</a></code> reports coordinates at level 0: its <code>level</code> column is always 0 and the stored level moved to a new <code>source_level</code> column. Implicit level changes (<code><a href="../reference/at_rois.html">at_rois()</a></code>, <code>at_roi_area(level =)</code>, masks, extraction, distances and exports) use the image’s real pyramid and fail with <code>PYRAMID_REQUIRED</code> without one; <code><a href="../reference/at_roi_rescale.html">at_roi_rescale()</a></code> remains the explicit power-of-two conversion, and its <code>from_level</code> must equal the ROI’s level. Set operations and predicates on ROIs at different levels take <code>image =</code> or fail with <code>MIXED_LEVELS</code>.</li>
+<li>GeoJSON, CSV and QuPath writers record the level of the coordinates they write (<code>level</code>, plus <code>source_level</code> and <code>coordinate_schema = "annotatR-pixel-level-v1"</code>), so round trips at any level are exact (A06). Files without the schema marker and with a nonzero <code>level</code> are ambiguous and now error unless <code>coordinate_level =</code> or <code>legacy_levels = "recorded"</code> is given.</li>
+<li>A point covers the pixel holding it under the documented half-open rule: <code>(5, 5)</code> now selects pixel <code>[6, 6]</code>, and points at <code>x = 0</code> or <code>y = 0</code> no longer vanish. Masks, extraction and the rectangle fast path agree; the fast path no longer fills right triangles as rectangles (A05, A15).</li>
+<li>TIFF reads return stored sample values (A26): the multiplex example now holds 0–58981 instead of 0–0.9. Unsupported 32-bit integer and 64-bit float TIFFs and planar-separate TIFFs, which decoded as mostly zeros, are refused (<code>TIFF_UNSUPPORTED</code>, A35), as are TIFFs whose pages are equal-sized (ambiguous bands or pyramid; <code>TIFF_AMBIGUOUS</code>). PNG and JPEG require magick.</li>
+<li>Masks carry validated metadata (encoding, background, grid, source) and complete legends. A background code that collides with a foreground code is refused (A17); RDS legends survive import (A19); bitfield statistics count overlapping memberships (A20); <code>overlap = "bitor"</code> assigns power-of-two class codes, needs <code>background = 0</code> (at most 31 classes) and is refused for labelled masks (<code>INVALID_OVERLAP</code>). Agreement validates grids, sources and codebooks: conflicting codebooks are refused unless <code>code_alignment = "by-label"</code> (or <code>"by-id"</code> for instance maps) remaps them, and annotated masks whose source cannot be verified need <code>alignment = "assert"</code>.</li>
+<li>Extraction gains <code>nonfinite =</code>: by default (<code>"propagate"</code>) any non-finite sample makes the affected ROI/band statistics <code>NA</code>, <code>"omit"</code> uses finite samples only and reports valid and invalid counts, and <code>"error"</code> refuses them. Unknown layer names are an error instead of an empty result.</li>
+<li>
+<code>at_roi_area(units = "physical")</code> refuses a scalar ROI <code>pixel_size</code> attribute: give <code>c(x, y)</code> or pass <code>image =</code> to use its calibration. <code>at_mask_stats(pixel_size =)</code> accepts one value for square pixels.</li>
+<li>An explicitly supplied choice vector (e.g. <code>units = c("px", "physical")</code>) is an error instead of silently using its first element.</li>
+<li>Sessions get their own default <code>out_dir</code> (a unique temporary folder) and saves are atomic. The default session path honours <code>overwrite = FALSE</code> (A23). Saved projects store a source descriptor instead of pixels and reopen their images on load (A01).</li>
+<li>Export files are named by stable queue-entry stems, so images sharing a file name no longer overwrite each other (A08); receipts carry <code>entry_id</code>.</li>
+<li>The default display of an 8-bit image (canvas and plots) shows its stored values; contrast stretching remains for deeper and multichannel data and for explicitly chosen views.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="identity-persistence-and-coordinates-0-3-0">Identity, persistence and coordinates<a class="anchor" aria-label="anchor" href="#identity-persistence-and-coordinates-0-3-0"></a></h3>
+<ul><li>Queue entries have stable identities (<code>entry_id</code>, <code>export_stem</code>); ROI ids are re-minted until unique across a project and after a restart (A07); tile caches are keyed by read identity, so equal relative paths, replaced files or re-reads with other options never share pixels (A09).</li>
+<li>New <code><a href="../reference/at_inspect_saved.html">at_inspect_saved()</a></code>, <code><a href="../reference/at_inspect_source.html">at_inspect_source()</a></code> and <code><a href="../reference/at_relink_source.html">at_relink_source()</a></code> inspect checkpoints and relink moved sources; legacy 0.1 files migrate.</li>
+<li>Per-ROI mask exports use the project’s real pyramid (A21); plots align ROIs with downsampled images and choose the finest pyramid level that fits (A18); empty or lower-dimensional set-operation results stay valid areal geometries.</li>
+<li>Errors from persistence and exports are classified conditions with codes (for example <code>WRITE_FAILED</code>, <code>PATH_OUTSIDE_ROOT</code>, <code>IDENTITY_MISMATCH</code>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="readers-and-interchange-0-3-0">Readers and interchange<a class="anchor" aria-label="anchor" href="#readers-and-interchange-0-3-0"></a></h3>
+<ul><li>ENVI keeps the full signed and unsigned 32-bit range (A30), bounds header reads (fixed 1 MiB) and payload reads (<code>options(hyperannotatR.max_read_bytes)</code>, default 1 GiB), and requires <code>data type</code>. NPY reading is strict and NPY writing refuses values outside the chosen type (A13, A28).</li>
+<li>New <code><a href="../reference/at_image_capabilities.html">at_image_capabilities()</a></code> and <code><a href="../reference/at_close_image.html">at_close_image()</a></code>; OME-TIFF keeps its axes, calibration and series (A27; needs RBioFormats, not verified on all hosts).</li>
+<li>QuPath native feature arrays, current class colours and pre-0.4 measurement arrays are read (A31). Contradictory duplicate fields, conflicting colours or object types and repeated ROI ids are refused, while identical duplicates (as QuPath 0.7.0 writes them) are accepted. Source and mask metadata keys are matched exactly and duplicated provenance keys are refused (A33). GeoJSON accepts bare arrays and single features; CSV keeps text columns and 17-digit coordinates.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="partner-interop-and-control-service-0-3-0">Partner interop and control service<a class="anchor" aria-label="anchor" href="#partner-interop-and-control-service-0-3-0"></a></h3>
+<ul><li>Contract families are version 1.1 (readers accept any 1.x). Handoff paths are checked against the verified inventory, entries use stable ids, minted ids are staged as new ROIs, locked target layers produce conflicts, and dates and other attribute types serialise safely. Tokens require <code>/dev/urandom</code> or the openssl package.</li>
+<li>The control service shuts down on expiry, ignores HTTP proxies, applies a commit only after a successful save, refuses <code>session.load</code> over unsaved work unless <code>discard_unsaved</code>, bounds request bodies, records and mask previews, and never returns absolute paths to clients.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="app-and-canvas-0-3-0">App and canvas<a class="anchor" aria-label="anchor" href="#app-and-canvas-0-3-0"></a></h3>
+<ul><li>Every browser action carries the entry and revision it was made on; stale actions are rejected, so edits can no longer land on another image (A02–A04, A11, A12). Shift+Enter saves synchronously under the right entry.</li>
+<li>A reload or a second tab continues the in-memory session; before replacing a session file that holds other work the app keeps a <code>.previous.rds</code> copy.</li>
+<li>Label colours are drawn; drawings stay dashed until accepted; polygons finish on the first vertex or a double-click (including slow system double-click settings) and Escape cancels; pointer, touch and high-density displays are supported; holes and multipolygons render and hit-test correctly (A24); each canvas instance routes its own messages (A25). Clicking a canvas that is partly scrolled out of view no longer scrolls the page under the pointer.</li>
+<li>Mask overlays reach the app canvas (module proxies were mis-addressed), mask previews show the whole image in image coordinates, and error notices are plain text.</li>
+<li>One save badge with a checkpoint line that warns about temporary folders; keyboard shortcuts work after clicking a toolbar button and are inactive in dialogs and off the Annotate page. <code>options(hyperannotatR.app_root)</code> restricts the folders the Data page may open.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="packaging-and-documentation-0-3-0">Packaging and documentation<a class="anchor" aria-label="anchor" href="#packaging-and-documentation-0-3-0"></a></h3>
+<ul><li>
+<code>digest</code> moved to Imports; <code>bslib (&gt;= 0.6.0)</code>; <code>png</code> and <code>openssl</code> added to Suggests; <code>scales</code> dropped. The app logo ships again (it was build-ignored).</li>
+<li>New vignette <em>Reproducible analysis</em>; vignettes and README describe the shipped behaviour (memory and window-read claims, keyboard table, coordinate levels).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="earlier-development-changes-0-3-0">Earlier development changes<a class="anchor" aria-label="anchor" href="#earlier-development-changes-0-3-0"></a></h3>
+<ul><li><p>Stopping a local control listener now cancels its pending expiry callback. This releases the stopped service and prevents subsequent Shiny module tests from waiting for the old expiry time. Active-service expiry is preserved.</p></li>
 <li><p>TIFF image reads, TIFF mask imports and the TIFF raster fallback now decode in a clean R subprocess to avoid native callback failures after ImageMagick has been used. Pixel values, attributes and caller-specific conversions are preserved. Decoding requires an executable <code>Rscript</code> and writable temporary storage. Set <code>options(hyperannotatR.tiff_timeout = 120L)</code> to control the timeout in whole seconds (default 120). Failed or timed-out decoding returns an error. This remains eager decoding; isolation does not provide bounded image memory or native window reads.</p></li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="hyperannotatr-020">hyperannotatR 0.2.0<a class="anchor" aria-label="anchor" href="#hyperannotatr-020"></a></h2>
 <p>A partner contract for the qupflowR package, a testable app builder with an optional local control service, hyperspectral metadata and windowed readers, and deep-learning training datasets. The existing API, S3 classes and files remain compatible; behaviour changes are listed under <em>Changes</em>.</p>

@@ -16,12 +16,12 @@ that contract from the hyperannotatR side.
 
 caps <- at_interop_capabilities()
 caps
-#> <at_capabilities> hyperannotatR 0.2.0 for qupflowR
+#> <at_capabilities> hyperannotatR 0.3.0 for qupflowR
 #>   I0 supported   file interchange (handoff directory)
 #>   I1 supported   public R API
 #>   I2 planned     loopback control service - implemented and tested locally; no qualified qupflowR client run recorded
 #>   I3 planned     embeddable shiny.appobj - at_app() is implemented and tested locally; no qualified qupflowR embedding recorded
-#>   digest d279f3d2d735190e25c37b8a9d6e5d4ca76ee00854c3fa8984c8f86fa85af500
+#>   digest d635a2101a97788c784d52220c1c4e3ff211965d1cb7d93c85d0953b274f9410
 caps$profiles$I2[c("status", "implemented", "available", "reason")]
 #> $status
 #> [1] "planned"
@@ -61,25 +61,22 @@ proj <- at_example_project()
 dest <- file.path(tempdir(), "qupflowr-handoff")
 receipt <- at_export_qupflowr(proj, dest, formats = c("qupath_geojson", "mask_tiff", "manifest"),
                               overwrite = TRUE)
-#> Registered S3 method overwritten by 'stars':
-#>   method                  from
-#>   st_interpolate_aw.stars sf
 receipt$files[, c("path", "size_bytes", "format")]
 #> # A tibble: 5 × 3
 #>   path                                   size_bytes format        
 #>   <chr>                                       <dbl> <chr>         
-#> 1 annotations_qupath.geojson                   2228 qupath_geojson
+#> 1 annotations_qupath.geojson                   2870 qupath_geojson
 #> 2 image.json                                   1824 image_json    
-#> 3 manifest.json                                8294 manifest      
+#> 3 manifest.json                                8409 manifest      
 #> 4 masks/regions_labelled.tif                   2936 mask_tiff     
-#> 5 masks/regions_labelled.tif.legend.json        675 legend_json
+#> 5 masks/regions_labelled.tif.legend.json       1811 legend_json
 receipt$handoff_digest
-#> [1] "b4dd67578ff8492227edd3bc81b0e5bf65071436ae24bdceaf08e34c64291222"
+#> [1] "0b2facbf89c70bf9c56454188e1de006d3e5daaa052cf9d73ea79cc1eac85b8c"
 ```
 
 - `annotations_qupath.geojson` uses the QuPath 0.4+ dialect with a
   stable UUID per ROI and hyperannotatR’s ROI id, layer, source and
-  level in `properties.metadata`.
+  coordinate level in `properties.metadata`.
 - `masks/<layer>_labelled.tif` holds one integer value per ROI; its
   `.legend.json` joins values to ROI ids, labels and colours.
 - `image.json` and `manifest.json` identify images by content hash and
@@ -93,6 +90,13 @@ Files are written to a hidden staging directory and moved into place
 only when complete. An existing destination is replaced only with
 `overwrite = TRUE`, and only if it is itself a handoff directory.
 
+A session export writes each queue entry under `entries/<entry_id>/`.
+Entry ids come from the session manifest’s stable `entry_id` (falling
+back to `entry-0001`, … for older sessions), and the manifest’s ROI,
+layer and file records carry the `entry_id` they belong to, so two
+entries showing the same image stay separate. Project masks have the ids
+`project:<layer>`.
+
 ### The manifest
 
 ``` r
@@ -103,7 +107,7 @@ man[c("schema", "schema_version", "consumer", "object_kind")]
 #> [1] "annotatr-handoff-v1"
 #> 
 #> $schema_version
-#> [1] "1.0"
+#> [1] "1.1"
 #> 
 #> $consumer
 #> [1] "qupflowR"
@@ -155,7 +159,16 @@ reads only the neutral contract. It verifies the inventory (missing,
 extra, duplicate, resized, altered and symlinked files), the manifest
 schema and its major version, the id join between manifest and GeoJSON,
 labels, mask dimensions, integer values and legend completeness. Any
-failure is a classified error; nothing is written and no analysis runs.
+failure is a classified error with a machine-readable `code` (for
+example `DUPLICATE_ID`, `LEGEND_INCOMPLETE`, `MASK_INVALID`,
+`FORMAT_UNRECOGNISED` or `INVALID_JSON`, which also covers duplicate
+JSON keys); nothing is written and no analysis runs. Operating-system
+metadata files that are not in the inventory (`.DS_Store`, `._*`,
+`Thumbs.db`, `desktop.ini`) are ignored with a warning. The conversion
+table’s `geometry_match` reports `"exact"` when the geometry is
+byte-identical to its manifest record, `"equivalent"` when an export at
+another pyramid level agrees with it within a relative `1e-9` after
+rescaling, and `"changed"` otherwise.
 
 ``` r
 
@@ -165,15 +178,17 @@ report$checks
 #>   check               status detail                                             
 #>   <chr>               <chr>  <chr>                                              
 #> 1 integrity           ok     5 files verified                                   
-#> 2 manifest_schema     ok     1.0                                                
-#> 3 annotations:project ok     3 ROIs joined by id                                
+#> 2 manifest_schema     ok     1.1                                                
+#> 3 annotations:project ok     3 ROIs joined by id at level 0                     
 #> 4 masks               ok     1 masks: dimensions, integers and legends verified 
 #> 5 expected_revision   ok     sha256:6b91babfc88f9fa8593075b60d31a11fb82d3fdb8c3…
 ```
 
 Changes are applied in two explicit steps. Staging joins ROIs by id and
-classifies each change; reviewed or locked ROIs and locked layers are
-never changed automatically but reported as conflicts:
+classifies each change. Reviewed or locked ROIs and locked layers,
+including a locked target layer of a new or moved ROI, are never changed
+automatically but reported as conflicts. ROIs whose ids were minted on
+import, because the file carried none, are always staged as new ROIs:
 
 ``` r
 
@@ -269,8 +284,11 @@ sess <- at_example_session(3)
 for (i in seq_len(3)) sess$projects[[i]] <- at_example_project()
 ds <- at_training_export(sess, file.path(tempdir(), "training-dataset"), tile_size = 128,
                          mask_type = "labelled", seed = 11, overwrite = TRUE)
+#> Registered S3 method overwritten by 'stars':
+#>   method                  from
+#>   st_interpolate_aw.stars sf
 ds$manifest$split_policy$algorithm
-#> [1] "groups ranked by sha256('<seed>:<group_id>'), cut by cumulative fractions"
+#> [1] "groups ranked by sha256('<seed>:<group_id>'), cut by cumulative fractions rounded half up"
 ds$manifest$counts[c("tiles", "tiles_by_split", "excluded")]
 #> $tiles
 #> [1] 48
@@ -293,23 +311,33 @@ ds$manifest$counts[c("tiles", "tiles_by_split", "excluded")]
 #> $excluded$empty
 #> [1] 0
 ds$checks
-#> # A tibble: 6 × 3
+#> # A tibble: 7 × 3
 #>   check              status detail                                              
 #>   <chr>              <chr>  <chr>                                               
 #> 1 integrity          ok     inventory verified                                  
 #> 2 split_leakage      ok     1 groups, 3 images, no shared source across splits  
-#> 3 mask_dimensions    ok     0 of 48 tiles with wrong or unreadable dimensions   
+#> 3 mask_dimensions    ok     0 of 48 tiles with wrong or unreadable dimensions; …
 #> 4 label_range        ok     0 of 48 tiles with codes outside the legend         
 #> 5 overlap            ok     0 ambiguous (overlapping) pixels in included tiles  
 #> 6 mask_roi_roundtrip ok     0 of 20 sampled tiles differ after mask -> ROI -> m…
+#> 7 manifest_schema    ok     1.1
 ```
 
-Splits are assigned per group — per image by default, or per `sample_id`
-or `subject_id` supplied in `groups` — so tiles of one source never
-occur in two splits. The manifest records tile size, overlap, level,
-pixel origin, coverage rule, class legend (background `0`), band list
-with wavelengths and FWHM, value unit, calibration and transform
-digests, annotation revisions and review status counts.
+Splits are assigned per group, so tiles of one group never occur in two
+splits. The default group is the image, identified by its content hash
+(including any non-default series, plane or measurement). The three
+example entries are copies of one picture, so they form a single image
+group and all land in one split: tiles of one image never leak across
+splits. Distinct images spread over the splits. Group by `sample_id` or
+`subject_id`, supplied in `groups`, when several images come from one
+sample or one patient; entries that show the same pixels must still
+share a split, and
+[`at_training_check()`](https://cttir.github.io/hyperannotatR/reference/at_training_check.md)
+reports an image found in two splits as leakage. The manifest records
+tile size, overlap, level, pixel origin, coverage rule, class legend
+(background `0`), band list with wavelengths and FWHM, value unit,
+calibration and transform digests, annotation revisions and review
+status counts.
 [`at_training_check()`](https://cttir.github.io/hyperannotatR/reference/at_training_check.md)
 re-verifies the inventory, split leakage, mask dimensions, label range
 and a mask-to-ROI round trip.
@@ -350,7 +378,10 @@ A partner process can drive a running app through the loopback service.
 It is off unless started, binds only to `127.0.0.1`, authenticates with
 a random bearer token that expires, rejects browser-origin requests and
 oversized bodies, resolves file references only below its root, and
-offers no endpoint that evaluates R, shell or Python code.
+offers no endpoint that evaluates R, shell or Python code. Tokens come
+from the operating system’s random source (`/dev/urandom`) or, where
+that does not exist (Windows), from the optional `openssl` package;
+without either, the service refuses to start.
 
 ``` r
 
@@ -360,7 +391,7 @@ state$state_revision
 #> [1] "0"
 at_control_command(handle, list(operation = "context.goto", payload = list(queue_index = 2),
                                 expected_revision = state$state_revision))$entry_id
-#> [1] "entry-0002"
+#> [1] "entry_at_357966aa23ab_000000005"
 vapply(at_control_events(handle)$events, `[[`, character(1), "type")
 #> [1] "service.started" "image.changed"
 at_control_stop(handle)
@@ -384,6 +415,31 @@ and re-sending with the same key never applies a command twice. Events
 are read with a cursor; a cursor from another instance or older than the
 retained buffer yields `resync_required = TRUE`.
 
+A few further rules matter to clients:
+
+- `session.load` refuses with `UNSAVED_CHANGES` (409) while the current
+  session has unsaved or staged edits, unless the payload sets
+  `discard_unsaved: true`. A loaded session gets its own output
+  directory under `<root>/sessions/`, reported as the relative
+  `session_dir`.
+- Re-sending an idempotency key whose record has already been evicted
+  returns `IDEMPOTENCY_EXPIRED` (409) instead of running the command
+  again.
+- `mask.preview` refuses masks larger than
+  `options(hyperannotatR.control_mask_max_pixels)` (default 4096^2
+  pixels) with `MASK_TOO_LARGE` (413).
+- `GET /v1/state` reports `image_id: null` for unvisited queue entries
+  larger than `options(hyperannotatR.control_hash_max_bytes)` (default
+  256 MiB) rather than hashing them while the app waits.
+- `close` is not revision-checked. Once the token has expired, the
+  listener shuts down.
+- Error bodies carry the condition `class` alongside the `code`. Paths
+  in errors are reported relative to the root, never as absolute paths.
+- The remote client ignores `http_proxy`/`https_proxy` and never follows
+  redirects, so the token only ever goes to the loopback address.
+- On Windows the operating system does not enforce the token file’s
+  owner-only permission; keep it in a directory only you can read.
+
 The JSON Schemas for all documents ship with the package:
 
 ``` r
@@ -399,10 +455,12 @@ basename(list.files(system.file("schema", package = "hyperannotatR"), recursive 
 
 ## Versions and migration
 
-Schema versions are independent of the package version. Readers reject
-an unknown major version and keep unknown optional data only under
-`extensions`. hyperannotatR 0.2.0 introduces `annotatr-handoff-v1`,
-`annotatr-control-v1`, `annotatr-training-v1` and `annotatr-hsi-v1` (all
-`1.0`). Existing 0.1 files remain readable: legacy QuPath GeoJSON
+Schema versions are independent of the package version. Readers accept
+any `1.x` version, reject an unknown major version and keep unknown
+optional data only under `extensions`. hyperannotatR 0.2.0 introduced
+`annotatr-handoff-v1`, `annotatr-control-v1`, `annotatr-training-v1` and
+`annotatr-hsi-v1`; they are now at version `1.1`. The `integrity.json`
+format stays at `1.0`, because its digest rule is shared with qupflowR.
+Existing 0.1 files remain readable: legacy QuPath GeoJSON
 (`object_type`, `colorRGB`) is imported, and
 `at_write_qupath(dialect = "legacy")` still writes it.

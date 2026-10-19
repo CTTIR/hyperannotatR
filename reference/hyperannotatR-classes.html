@@ -3,8 +3,11 @@
 collects them so they can be cross-referenced from the documentation.
 
 annot_image
-A backend-agnostic image handle holding metadata and a
-lazy tile accessor. Created by at_read_image() or at_example_image().
+A backend-agnostic image handle holding metadata and
+the backend's pixel handle, read through at_tile(). Windowed backends
+(ENVI, TIVITA) read only the requested window; the raster and TIFF
+backends decode the whole image when it is read. Created by
+at_read_image() or at_example_image().
 
 annot_roi
 A single region of interest: an sf geometry in image
@@ -24,8 +27,9 @@ A resumable batch-annotation session over a queue of
 images. Created by at_session().
 
 annot_mask
-A rasterised mask: a labelled or binary integer matrix
-with a legend. Created by at_mask().
+A rasterised mask: an integer matrix (binary,
+labelled, multiclass, or bitfield-encoded) with a legend. Created by
+at_mask().
 
 annot_style
 A layer style specification. Created by at_style().
@@ -40,8 +44,11 @@ at_summary().
 collects them so they can be cross-referenced from the documentation.
 
 annot_image
-A backend-agnostic image handle holding metadata and a
-lazy tile accessor. Created by at_read_image() or at_example_image().
+A backend-agnostic image handle holding metadata and
+the backend's pixel handle, read through at_tile(). Windowed backends
+(ENVI, TIVITA) read only the requested window; the raster and TIFF
+backends decode the whole image when it is read. Created by
+at_read_image() or at_example_image().
 
 annot_roi
 A single region of interest: an sf geometry in image
@@ -61,8 +68,9 @@ A resumable batch-annotation session over a queue of
 images. Created by at_session().
 
 annot_mask
-A rasterised mask: a labelled or binary integer matrix
-with a legend. Created by at_mask().
+A rasterised mask: an integer matrix (binary,
+labelled, multiclass, or bitfield-encoded) with a legend. Created by
+at_mask().
 
 annot_style
 A layer style specification. Created by at_style().
@@ -81,7 +89,7 @@ at_summary().
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -117,8 +125,11 @@ at_summary().
     <p>hyperannotatR represents annotations with a small set of S3 classes. This page
 collects them so they can be cross-referenced from the documentation.</p>
 <dl><dt><code>annot_image</code></dt>
-<dd><p>A backend-agnostic image handle holding metadata and a
-lazy tile accessor. Created by <code><a href="at_read_image.html">at_read_image()</a></code> or <code><a href="at_example_image.html">at_example_image()</a></code>.</p></dd>
+<dd><p>A backend-agnostic image handle holding metadata and
+the backend's pixel handle, read through <code><a href="at_tile.html">at_tile()</a></code>. Windowed backends
+(ENVI, TIVITA) read only the requested window; the raster and TIFF
+backends decode the whole image when it is read. Created by
+<code><a href="at_read_image.html">at_read_image()</a></code> or <code><a href="at_example_image.html">at_example_image()</a></code>.</p></dd>
 
 <dt><code>annot_roi</code></dt>
 <dd><p>A single region of interest: an <code>sf</code> geometry in image
@@ -138,8 +149,9 @@ Created by <code><a href="at_project.html">at_project()</a></code>.</p></dd>
 images. Created by <code><a href="at_session.html">at_session()</a></code>.</p></dd>
 
 <dt><code>annot_mask</code></dt>
-<dd><p>A rasterised mask: a labelled or binary integer matrix
-with a legend. Created by <code><a href="at_mask.html">at_mask()</a></code>.</p></dd>
+<dd><p>A rasterised mask: an integer matrix (binary,
+labelled, multiclass, or bitfield-encoded) with a legend. Created by
+<code><a href="at_mask.html">at_mask()</a></code>.</p></dd>
 
 <dt><code>annot_style</code></dt>
 <dd><p>A layer style specification. Created by <code><a href="at_style.html">at_style()</a></code>.</p></dd>
@@ -157,9 +169,11 @@ with a legend. Created by <code><a href="at_mask.html">at_mask()</a></code>.</p>
     <div class="dont-index"><p><code><a href="at_project.html">at_project()</a></code>, <code><a href="at_layer.html">at_layer()</a></code></p>
 <p>Other images:
 <code><a href="at_bands.html">at_bands()</a></code>,
+<code><a href="at_close_image.html">at_close_image()</a></code>,
 <code><a href="at_dims.html">at_dims()</a></code>,
 <code><a href="at_example_image.html">at_example_image()</a></code>,
 <code><a href="at_hsi_meta.html">at_hsi_meta()</a></code>,
+<code><a href="at_image_capabilities.html">at_image_capabilities()</a></code>,
 <code><a href="at_is_pyramidal.html">at_is_pyramidal()</a></code>,
 <code><a href="at_is_spectral.html">at_is_spectral()</a></code>,
 <code><a href="at_meta.html">at_meta()</a></code>,

@@ -9,6 +9,7 @@ Read images and register formats.
 - [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md)
   : Read a tile from an image
 - [`at_dims()`](https://cttir.github.io/hyperannotatR/reference/at_dims.md)
+  [`dim(`*`<annot_image>`*`)`](https://cttir.github.io/hyperannotatR/reference/at_dims.md)
   : Image dimensions at a pyramid level
 - [`at_n_levels()`](https://cttir.github.io/hyperannotatR/reference/at_n_levels.md)
   : Number of pyramid levels
@@ -38,6 +39,10 @@ Read images and register formats.
   : Declare a TIVITA SpecCube layout profile
 - [`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md)
   : Export a Cubert measurement to a portable ENVI cube
+- [`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md)
+  : Inspect the effective reading capabilities of an image
+- [`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md)
+  : Release an image handle
 
 ## Hyperspectral metadata
 
@@ -265,7 +270,8 @@ ggplot2 plots.
 
 ## Import and export
 
-Interchange with GeoJSON, QuPath, CSV, and RDS.
+Interchange with GeoJSON, QuPath, CSV, and RDS; inspect and relink saved
+sources.
 
 - [`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md)
   : Write a project's ROIs to GeoJSON
@@ -285,6 +291,13 @@ Interchange with GeoJSON, QuPath, CSV, and RDS.
   : Save a session
 - [`at_load_session()`](https://cttir.github.io/hyperannotatR/reference/at_load_session.md)
   : Load a session
+- [`at_inspect_saved()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_saved.md)
+  : Inspect a saved checkpoint without modifying it
+- [`at_inspect_source()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_source.md)
+  : Inspect an image source without changing annotations or reading
+  pixels
+- [`at_relink_source()`](https://cttir.github.io/hyperannotatR/reference/at_relink_source.md)
+  : Explicitly relink or revalidate an image source
 - [`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)
   : Write a project's ROIs to CSV
 - [`at_read_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.md)
@@ -306,7 +319,7 @@ staging and commits.
 - [`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md)
   : Import a qupflowR handoff or neutral interchange file
 - [`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
-  : Stage partner changes against an hyperannotatR project
+  : Stage partner changes against a hyperannotatR project
 - [`at_commit_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.md)
   : Commit a staged partner patch
 

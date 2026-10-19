@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,8 @@
 
 
 <dt id="arg-fn">fn<a class="anchor" aria-label="anchor" href="#arg-fn"></a></dt>
-<dd><p>A function <code>fn(project, image, idx)</code> returning an <a href="hyperannotatR-classes.html">annot_project</a>.</p></dd>
+<dd><p>A function <code>fn(project, image, idx, ...)</code> returning an
+<a href="hyperannotatR-classes.html">annot_project</a>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -85,7 +86,11 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The <a href="hyperannotatR-classes.html">annot_session</a> with modified projects.</p>
+    <p>The <a href="hyperannotatR-classes.html">annot_session</a> with modified projects. An image whose project
+cannot be materialised, or for which <code>fn</code> errors or does not return an
+<a href="hyperannotatR-classes.html">annot_project</a>, keeps its previous project; the failures are reported in
+one warning and attached as the <code>"batch_errors"</code> attribute, a
+<a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a> with columns <code>idx</code>, <code>image</code> and <code>message</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

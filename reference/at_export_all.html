@@ -9,7 +9,7 @@ per-image failures so one bad image never aborts the run."><meta property="og:im
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -104,9 +104,28 @@ per-image failures so one bad image never aborts the run.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An invisible export-receipt <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a> with columns <code>image</code>,
-<code>format</code>, <code>path</code>, <code>bytes</code>, <code>n_rois</code>, <code>status</code>, and <code>message</code>. Also written
-to <code>_export_manifest.csv</code> alongside the exports.</p>
+    <p>An invisible export-receipt <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a> with columns <code>entry_id</code>,
+<code>image</code>, <code>format</code>, <code>path</code>, <code>bytes</code>, <code>n_rois</code>, <code>status</code>, and <code>message</code>. Also
+written to <code>_export_manifest.csv</code> alongside the exports. Additive columns
+<code>sidecar_path</code> and <code>sidecar_bytes</code> describe mask legends. Byte counts are
+doubles. Status is <code>"ok"</code> for a complete published bundle, <code>"error"</code> for a
+failed item, or <code>"skipped"</code> when an existing bundle is protected. Every
+image-format request has a row, even if loading the image fails. Receipt
+publication or annotation-summary failures warn and are also retained in
+<code>receipt_error</code> / <code>summary_error</code> attributes; the item receipt is returned.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Derived filenames use safe portable components; display names stay
+in the receipt and annotation metadata. Case-folded collisions are given
+deterministic suffixes, including cross-format and sidecar collisions.
+The complete plan (including manifests) rejects descendant symlinks before
+writing outputs. Existing mask/legend bundles are skipped as a whole unless
+<code>overwrite=TRUE</code>. Files are staged and publication failures roll back prior
+files. Callers must serialize concurrent exports and avoid changing the
+destination filesystem during a run: preflight and multiple renames are
+not a race-free filesystem transaction. Receipt files are replaced each
+run, independently of the item overwrite policy.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

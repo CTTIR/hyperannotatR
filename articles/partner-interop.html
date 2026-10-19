@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,12 +90,12 @@ side.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">caps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_interop_capabilities.html">at_interop_capabilities</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">caps</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;at_capabilities&gt;</span> hyperannotatR 0.2.0 for qupflowR</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;at_capabilities&gt;</span> hyperannotatR 0.3.0 for qupflowR</span></span>
 <span><span class="co">#&gt;   I0 supported   file interchange (handoff directory)</span></span>
 <span><span class="co">#&gt;   I1 supported   public R API</span></span>
 <span><span class="co">#&gt;   I2 planned     loopback control service - implemented and tested locally; no qualified qupflowR client run recorded</span></span>
 <span><span class="co">#&gt;   I3 planned     embeddable shiny.appobj - at_app() is implemented and tested locally; no qualified qupflowR embedding recorded</span></span>
-<span><span class="co">#&gt;   digest d279f3d2d735190e25c37b8a9d6e5d4ca76ee00854c3fa8984c8f86fa85af500</span></span>
+<span><span class="co">#&gt;   digest d635a2101a97788c784d52220c1c4e3ff211965d1cb7d93c85d0953b274f9410</span></span>
 <span><span class="va">caps</span><span class="op">$</span><span class="va">profiles</span><span class="op">$</span><span class="va">I2</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"status"</span>, <span class="st">"implemented"</span>, <span class="st">"available"</span>, <span class="st">"reason"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; $status</span></span>
 <span><span class="co">#&gt; [1] "planned"</span></span>
@@ -165,25 +165,22 @@ directory of neutral files:</p>
 <span><span class="va">dest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"qupflowr-handoff"</span><span class="op">)</span></span>
 <span><span class="va">receipt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_export_qupflowr.html">at_export_qupflowr</a></span><span class="op">(</span><span class="va">proj</span>, <span class="va">dest</span>, formats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"qupath_geojson"</span>, <span class="st">"mask_tiff"</span>, <span class="st">"manifest"</span><span class="op">)</span>,</span>
 <span>                              overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Registered S3 method overwritten by 'stars':</span></span>
-<span><span class="co">#&gt;   method                  from</span></span>
-<span><span class="co">#&gt;   st_interpolate_aw.stars sf</span></span>
 <span><span class="va">receipt</span><span class="op">$</span><span class="va">files</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path"</span>, <span class="st">"size_bytes"</span>, <span class="st">"format"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">#&gt;   path                                   size_bytes format        </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> annotations_qupath.geojson                   <span style="text-decoration: underline;">2</span>228 qupath_geojson</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> annotations_qupath.geojson                   <span style="text-decoration: underline;">2</span>870 qupath_geojson</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> image.json                                   <span style="text-decoration: underline;">1</span>824 image_json    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> manifest.json                                <span style="text-decoration: underline;">8</span>294 manifest      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> manifest.json                                <span style="text-decoration: underline;">8</span>409 manifest      </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> masks/regions_labelled.tif                   <span style="text-decoration: underline;">2</span>936 mask_tiff     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> masks/regions_labelled.tif.legend.json        675 legend_json</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> masks/regions_labelled.tif.legend.json       <span style="text-decoration: underline;">1</span>811 legend_json</span></span>
 <span><span class="va">receipt</span><span class="op">$</span><span class="va">handoff_digest</span></span>
-<span><span class="co">#&gt; [1] "b4dd67578ff8492227edd3bc81b0e5bf65071436ae24bdceaf08e34c64291222"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "0b2facbf89c70bf9c56454188e1de006d3e5daaa052cf9d73ea79cc1eac85b8c"</span></span></code></pre></div>
 <ul>
 <li>
 <code>annotations_qupath.geojson</code> uses the QuPath 0.4+ dialect
 with a stable UUID per ROI and hyperannotatR’s ROI id, layer, source and
-level in <code>properties.metadata</code>.</li>
+coordinate level in <code>properties.metadata</code>.</li>
 <li>
 <code>masks/&lt;layer&gt;_labelled.tif</code> holds one integer
 value per ROI; its <code>.legend.json</code> joins values to ROI ids,
@@ -203,6 +200,13 @@ newline) — the same rule qupflowR uses for its bundle digest.</li>
 only when complete. An existing destination is replaced only with
 <code>overwrite = TRUE</code>, and only if it is itself a handoff
 directory.</p>
+<p>A session export writes each queue entry under
+<code>entries/&lt;entry_id&gt;/</code>. Entry ids come from the session
+manifest’s stable <code>entry_id</code> (falling back to
+<code>entry-0001</code>, … for older sessions), and the manifest’s ROI,
+layer and file records carry the <code>entry_id</code> they belong to,
+so two entries showing the same image stay separate. Project masks have
+the ids <code>project:&lt;layer&gt;</code>.</p>
 <div class="section level3">
 <h3 id="the-manifest">The manifest<a class="anchor" aria-label="anchor" href="#the-manifest"></a>
 </h3>
@@ -213,7 +217,7 @@ directory.</p>
 <span><span class="co">#&gt; [1] "annotatr-handoff-v1"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $schema_version</span></span>
-<span><span class="co">#&gt; [1] "1.0"</span></span>
+<span><span class="co">#&gt; [1] "1.1"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $consumer</span></span>
 <span><span class="co">#&gt; [1] "qupflowR"</span></span>
@@ -264,8 +268,19 @@ ellipses are polygons) instead of being invented.</p>
 verifies the inventory (missing, extra, duplicate, resized, altered and
 symlinked files), the manifest schema and its major version, the id join
 between manifest and GeoJSON, labels, mask dimensions, integer values
-and legend completeness. Any failure is a classified error; nothing is
-written and no analysis runs.</p>
+and legend completeness. Any failure is a classified error with a
+machine-readable <code>code</code> (for example
+<code>DUPLICATE_ID</code>, <code>LEGEND_INCOMPLETE</code>,
+<code>MASK_INVALID</code>, <code>FORMAT_UNRECOGNISED</code> or
+<code>INVALID_JSON</code>, which also covers duplicate JSON keys);
+nothing is written and no analysis runs. Operating-system metadata files
+that are not in the inventory (<code>.DS_Store</code>, <code>._*</code>,
+<code>Thumbs.db</code>, <code>desktop.ini</code>) are ignored with a
+warning. The conversion table’s <code>geometry_match</code> reports
+<code>"exact"</code> when the geometry is byte-identical to its manifest
+record, <code>"equivalent"</code> when an export at another pyramid
+level agrees with it within a relative <code>1e-9</code> after
+rescaling, and <code>"changed"</code> otherwise.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_import_qupflowr.html">at_import_qupflowr</a></span><span class="op">(</span><span class="va">dest</span>, expected_revision <span class="op">=</span> <span class="fu"><a href="../reference/at_annotation_revision.html">at_annotation_revision</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">report</span><span class="op">$</span><span class="va">checks</span></span>
@@ -273,13 +288,16 @@ written and no analysis runs.</p>
 <span><span class="co">#&gt;   check               status detail                                             </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                              </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> integrity           ok     5 files verified                                   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> manifest_schema     ok     1.0                                                </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> annotations:project ok     3 ROIs joined by id                                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> manifest_schema     ok     1.1                                                </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> annotations:project ok     3 ROIs joined by id at level 0                     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> masks               ok     1 masks: dimensions, integers and legends verified </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> expected_revision   ok     sha256:6b91babfc88f9fa8593075b60d31a11fb82d3fdb8c3…</span></span></code></pre></div>
 <p>Changes are applied in two explicit steps. Staging joins ROIs by id
-and classifies each change; reviewed or locked ROIs and locked layers
-are never changed automatically but reported as conflicts:</p>
+and classifies each change. Reviewed or locked ROIs and locked layers,
+including a locked target layer of a new or moved ROI, are never changed
+automatically but reported as conflicts. ROIs whose ids were minted on
+import, because the file carried none, are always staged as new
+ROIs:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">partner</span> <span class="op">&lt;-</span> <span class="va">report</span><span class="op">$</span><span class="va">objects</span><span class="op">$</span><span class="va">layers</span><span class="op">$</span><span class="va">regions</span></span>
 <span><span class="va">partner</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_layer_add.html">at_layer_add</a></span><span class="op">(</span><span class="va">partner</span>, <span class="fu"><a href="../reference/at_roi_rect.html">at_roi_rect</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">60</span>, <span class="fl">60</span>, label <span class="op">=</span> <span class="st">"stroma"</span>, id <span class="op">=</span> <span class="st">"from-partner"</span><span class="op">)</span><span class="op">)</span></span>
@@ -362,8 +380,11 @@ and band list and are never used as analysis input.</p>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span><span class="op">)</span> <span class="va">sess</span><span class="op">$</span><span class="va">projects</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_example_project.html">at_example_project</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_training_export.html">at_training_export</a></span><span class="op">(</span><span class="va">sess</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"training-dataset"</span><span class="op">)</span>, tile_size <span class="op">=</span> <span class="fl">128</span>,</span>
 <span>                         mask_type <span class="op">=</span> <span class="st">"labelled"</span>, seed <span class="op">=</span> <span class="fl">11</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Registered S3 method overwritten by 'stars':</span></span>
+<span><span class="co">#&gt;   method                  from</span></span>
+<span><span class="co">#&gt;   st_interpolate_aw.stars sf</span></span>
 <span><span class="va">ds</span><span class="op">$</span><span class="va">manifest</span><span class="op">$</span><span class="va">split_policy</span><span class="op">$</span><span class="va">algorithm</span></span>
-<span><span class="co">#&gt; [1] "groups ranked by sha256('&lt;seed&gt;:&lt;group_id&gt;'), cut by cumulative fractions"</span></span>
+<span><span class="co">#&gt; [1] "groups ranked by sha256('&lt;seed&gt;:&lt;group_id&gt;'), cut by cumulative fractions rounded half up"</span></span>
 <span><span class="va">ds</span><span class="op">$</span><span class="va">manifest</span><span class="op">$</span><span class="va">counts</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tiles"</span>, <span class="st">"tiles_by_split"</span>, <span class="st">"excluded"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; $tiles</span></span>
 <span><span class="co">#&gt; [1] 48</span></span>
@@ -386,20 +407,28 @@ and band list and are never used as analysis input.</p>
 <span><span class="co">#&gt; $excluded$empty</span></span>
 <span><span class="co">#&gt; [1] 0</span></span>
 <span><span class="va">ds</span><span class="op">$</span><span class="va">checks</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 3</span></span></span>
 <span><span class="co">#&gt;   check              status detail                                              </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                               </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> integrity          ok     inventory verified                                  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> split_leakage      ok     1 groups, 3 images, no shared source across splits  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> mask_dimensions    ok     0 of 48 tiles with wrong or unreadable dimensions   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> mask_dimensions    ok     0 of 48 tiles with wrong or unreadable dimensions; …</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> label_range        ok     0 of 48 tiles with codes outside the legend         </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> overlap            ok     0 ambiguous (overlapping) pixels in included tiles  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> mask_roi_roundtrip ok     0 of 20 sampled tiles differ after mask -&gt; ROI -&gt; m…</span></span></code></pre></div>
-<p>Splits are assigned per group — per image by default, or per
-<code>sample_id</code> or <code>subject_id</code> supplied in
-<code>groups</code> — so tiles of one source never occur in two splits.
-The manifest records tile size, overlap, level, pixel origin, coverage
-rule, class legend (background <code>0</code>), band list with
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> mask_roi_roundtrip ok     0 of 20 sampled tiles differ after mask -&gt; ROI -&gt; m…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> manifest_schema    ok     1.1</span></span></code></pre></div>
+<p>Splits are assigned per group, so tiles of one group never occur in
+two splits. The default group is the image, identified by its content
+hash (including any non-default series, plane or measurement). The three
+example entries are copies of one picture, so they form a single image
+group and all land in one split: tiles of one image never leak across
+splits. Distinct images spread over the splits. Group by
+<code>sample_id</code> or <code>subject_id</code>, supplied in
+<code>groups</code>, when several images come from one sample or one
+patient; entries that show the same pixels must still share a split, and
+<code><a href="../reference/at_training_check.html">at_training_check()</a></code> reports an image found in two splits as
+leakage. The manifest records tile size, overlap, level, pixel origin,
+coverage rule, class legend (background <code>0</code>), band list with
 wavelengths and FWHM, value unit, calibration and transform digests,
 annotation revisions and review status counts.
 <code><a href="../reference/at_training_check.html">at_training_check()</a></code> re-verifies the inventory, split
@@ -438,7 +467,10 @@ service. It is off unless started, binds only to <code>127.0.0.1</code>,
 authenticates with a random bearer token that expires, rejects
 browser-origin requests and oversized bodies, resolves file references
 only below its root, and offers no endpoint that evaluates R, shell or
-Python code.</p>
+Python code. Tokens come from the operating system’s random source
+(<code>/dev/urandom</code>) or, where that does not exist (Windows),
+from the optional <code>openssl</code> package; without either, the
+service refuses to start.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">handle</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_control_start.html">at_control_start</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_example_session.html">at_example_session</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, serve <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">state</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_control_state.html">at_control_state</a></span><span class="op">(</span><span class="va">handle</span><span class="op">)</span></span>
@@ -446,7 +478,7 @@ Python code.</p>
 <span><span class="co">#&gt; [1] "0"</span></span>
 <span><span class="fu"><a href="../reference/at_control_command.html">at_control_command</a></span><span class="op">(</span><span class="va">handle</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>operation <span class="op">=</span> <span class="st">"context.goto"</span>, payload <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>queue_index <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
 <span>                                expected_revision <span class="op">=</span> <span class="va">state</span><span class="op">$</span><span class="va">state_revision</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">entry_id</span></span>
-<span><span class="co">#&gt; [1] "entry-0002"</span></span>
+<span><span class="co">#&gt; [1] "entry_at_357966aa23ab_000000005"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_control_events.html">at_control_events</a></span><span class="op">(</span><span class="va">handle</span><span class="op">)</span><span class="op">$</span><span class="va">events</span>, <span class="va">`[[`</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="st">"type"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "service.started" "image.changed"</span></span>
 <span><span class="fu"><a href="../reference/at_control_stop.html">at_control_stop</a></span><span class="op">(</span><span class="va">handle</span><span class="op">)</span></span></code></pre></div>
@@ -464,6 +496,38 @@ stale revision is a conflict; a lost response is resolved with
 key never applies a command twice. Events are read with a cursor; a
 cursor from another instance or older than the retained buffer yields
 <code>resync_required = TRUE</code>.</p>
+<p>A few further rules matter to clients:</p>
+<ul>
+<li>
+<code>session.load</code> refuses with <code>UNSAVED_CHANGES</code>
+(409) while the current session has unsaved or staged edits, unless the
+payload sets <code>discard_unsaved: true</code>. A loaded session gets
+its own output directory under <code>&lt;root&gt;/sessions/</code>,
+reported as the relative <code>session_dir</code>.</li>
+<li>Re-sending an idempotency key whose record has already been evicted
+returns <code>IDEMPOTENCY_EXPIRED</code> (409) instead of running the
+command again.</li>
+<li>
+<code>mask.preview</code> refuses masks larger than
+<code>options(hyperannotatR.control_mask_max_pixels)</code> (default
+4096^2 pixels) with <code>MASK_TOO_LARGE</code> (413).</li>
+<li>
+<code>GET /v1/state</code> reports <code>image_id: null</code> for
+unvisited queue entries larger than
+<code>options(hyperannotatR.control_hash_max_bytes)</code> (default 256
+MiB) rather than hashing them while the app waits.</li>
+<li>
+<code>close</code> is not revision-checked. Once the token has
+expired, the listener shuts down.</li>
+<li>Error bodies carry the condition <code>class</code> alongside the
+<code>code</code>. Paths in errors are reported relative to the root,
+never as absolute paths.</li>
+<li>The remote client ignores
+<code>http_proxy</code>/<code>https_proxy</code> and never follows
+redirects, so the token only ever goes to the loopback address.</li>
+<li>On Windows the operating system does not enforce the token file’s
+owner-only permission; keep it in a directory only you can read.</li>
+</ul>
 <p>The JSON Schemas for all documents ship with the package:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"schema"</span>, package <span class="op">=</span> <span class="st">"hyperannotatR"</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
@@ -478,14 +542,16 @@ cursor from another instance or older than the retained buffer yields
 <h2 id="versions-and-migration">Versions and migration<a class="anchor" aria-label="anchor" href="#versions-and-migration"></a>
 </h2>
 <p>Schema versions are independent of the package version. Readers
-reject an unknown major version and keep unknown optional data only
-under <code>extensions</code>. hyperannotatR 0.2.0 introduces
-<code>annotatr-handoff-v1</code>, <code>annotatr-control-v1</code>,
-<code>annotatr-training-v1</code> and <code>annotatr-hsi-v1</code> (all
-<code>1.0</code>). Existing 0.1 files remain readable: legacy QuPath
-GeoJSON (<code>object_type</code>, <code>colorRGB</code>) is imported,
-and <code>at_write_qupath(dialect = "legacy")</code> still writes
-it.</p>
+accept any <code>1.x</code> version, reject an unknown major version and
+keep unknown optional data only under <code>extensions</code>.
+hyperannotatR 0.2.0 introduced <code>annotatr-handoff-v1</code>,
+<code>annotatr-control-v1</code>, <code>annotatr-training-v1</code> and
+<code>annotatr-hsi-v1</code>; they are now at version <code>1.1</code>.
+The <code>integrity.json</code> format stays at <code>1.0</code>,
+because its digest rule is shared with qupflowR. Existing 0.1 files
+remain readable: legacy QuPath GeoJSON (<code>object_type</code>,
+<code>colorRGB</code>) is imported, and
+<code>at_write_qupath(dialect = "legacy")</code> still writes it.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

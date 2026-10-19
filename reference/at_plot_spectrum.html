@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,9 @@
 
 
 <dl><dt id="arg-spectra">spectra<a class="anchor" aria-label="anchor" href="#arg-spectra"></a></dt>
-<dd><p>The long tibble from <code><a href="at_extract_spectrum.html">at_extract_spectrum()</a></code> or <code><a href="at_extract.html">at_extract()</a></code>.</p></dd>
+<dd><p>The long tibble from <code><a href="at_extract_spectrum.html">at_extract_spectrum()</a></code> or <code><a href="at_extract.html">at_extract()</a></code>.
+Its declared <code>unit</code> is used on the axis; absent units remain unknown.
+Mixed units reject: explicitly convert coordinates before combining them.</p></dd>
 
 
 <dt id="arg-colour-by">colour_by<a class="anchor" aria-label="anchor" href="#arg-colour-by"></a></dt>
@@ -66,7 +68,8 @@
 
 
 <dt id="arg-ribbon">ribbon<a class="anchor" aria-label="anchor" href="#arg-ribbon"></a></dt>
-<dd><p>Logical; draw a min-max ribbon per colour group.</p></dd>
+<dd><p>Logical; draw a min-max ribbon per colour group (and
+statistic) wherever the group holds more than one ROI. Default <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
@@ -75,7 +78,7 @@
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot2::ggplot</a> object.</p>
+    <p>A <a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot2::ggplot</a> object with one line per ROI and statistic.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -1,12 +1,17 @@
-# Stage partner changes against an hyperannotatR project
+# Stage partner changes against a hyperannotatR project
 
 Compute, without applying, the changes a partner patch would make to an
 hyperannotatR project: ROIs are joined by id and classified as `create`,
 `update`, `unchanged`, `delete` (only with `delete_missing = TRUE`) or
 `conflict`. Reviewed or locked ROIs, and ROIs in locked layers, are
-never changed automatically; such changes become conflicts. When
-`expected_revision` is given and the project has moved on, staging
-aborts with an `at_conflict_error` (`REVISION_CONFLICT`).
+never changed automatically, and nothing is created in or moved into a
+locked layer; such changes become conflicts. Incoming ROIs whose id was
+minted on import (features without an id) are always created, with an id
+unique in the project. Incoming ROIs at another pyramid level are
+compared, and updates stored, at the level of the existing ROI. A patch
+that repeats an ROI id aborts (`DUPLICATE_ID`). When `expected_revision`
+is given and the project has moved on, staging aborts with an
+`at_conflict_error` (`REVISION_CONFLICT`).
 
 ## Usage
 

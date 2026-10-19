@@ -41,7 +41,8 @@ at_plot_project(
 ## Value
 
 A [ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)
-object. Empty projects give a valid empty plot.
+object in level-0 image coordinates with the y axis pointing down, as in
+the image. Empty projects give a valid empty plot.
 
 ## See also
 

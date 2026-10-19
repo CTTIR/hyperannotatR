@@ -1,6 +1,13 @@
 # Set the displayed band or RGB triple
 
-Set the displayed band or RGB triple
+Retained for API compatibility; it has no visible effect on the built-in
+canvas. The canvas shows one embedded image rendered in R, and cannot
+recompute bands in the browser. To change the displayed bands, re-render
+the widget with a `view` (see
+[`at_canvas()`](https://cttir.github.io/hyperannotatR/reference/at_canvas.md)
+and
+[`at_band_view()`](https://cttir.github.io/hyperannotatR/reference/at_band_view.md)),
+as the annotation app does.
 
 ## Usage
 

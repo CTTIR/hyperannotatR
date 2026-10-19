@@ -43,7 +43,9 @@ at_annotate(
 
 - out_dir:
 
-  Directory for autosave and exports.
+  Directory for autosave and exports. When `NULL`, a new folder inside
+  R's temporary directory is used, which R deletes when it exits; a
+  message says so at launch.
 
 - launch.browser:
 

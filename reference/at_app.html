@@ -13,7 +13,7 @@ tests; at_annotate() is a launcher around it."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,6 +114,22 @@ only).</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>shiny.appobj</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>All Shiny sessions of one app object share its in-memory queue: reloading
+the page or opening a second tab continues from the latest edits instead of
+the session the app was built with. Edits are stored per queue entry; two
+tabs editing the same image keep the last edit.</p>
+<p>Annotations autosave to the session's <code>out_dir</code> (unless the session was
+created with <code>autosave = FALSE</code>); the app warns when that folder is inside
+R's temporary directory, which is deleted when R exits. Before it first
+replaces an existing <code>_session.rds</code> that holds another queue or more ROIs,
+the app keeps a timestamped <code>_session-*.previous.rds</code> copy.</p>
+<p>The Data page reads folder and handoff paths on the machine running R. The
+app is meant for local use; for a shared deployment set
+<code>options(hyperannotatR.app_root = "/allowed/folder")</code> to refuse paths outside one
+folder.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

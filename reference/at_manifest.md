@@ -22,9 +22,11 @@ at_manifest(session, call = rlang::caller_env())
 ## Value
 
 A [tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
-with `idx`, `name`, `path`, `status`, `n_layers`, `n_rois`, and one
-integer column per label in the session vocabulary giving its ROI count
-per image.
+with `idx`, `entry_id`, `export_stem`, `name`, `path`, `status`,
+`n_layers`, `n_rois`, and one integer column per label in the session
+vocabulary giving its ROI count per image. `n_rois` counts the ROIs of
+materialised projects (otherwise the manifest's stored count). A label
+that clashes with one of the fixed column names gets a `label_` prefix.
 
 ## See also
 

@@ -10,7 +10,12 @@ with the
 ## Usage
 
 ``` r
-at_roi_rescale(roi, from_level, to_level, call = rlang::caller_env())
+at_roi_rescale(
+  roi,
+  from_level = roi$level,
+  to_level,
+  call = rlang::caller_env()
+)
 ```
 
 ## Arguments
@@ -20,9 +25,15 @@ at_roi_rescale(roi, from_level, to_level, call = rlang::caller_env())
   An
   [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
-- from_level, to_level:
+- from_level:
 
-  Integer source and target pyramid levels.
+  Integer source pyramid level. Defaults to the ROI's own `level`; any
+  other value is an error, because the coordinates are stored at that
+  level.
+
+- to_level:
+
+  Integer target pyramid level.
 
 - call:
 
@@ -33,7 +44,8 @@ at_roi_rescale(roi, from_level, to_level, call = rlang::caller_env())
 An
 [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 with coordinates at `to_level` and its `level` field set to `to_level`.
-The transform is exactly invertible.
+Power-of-two scaling is exact in floating point, so the transform is
+exactly invertible.
 
 ## See also
 

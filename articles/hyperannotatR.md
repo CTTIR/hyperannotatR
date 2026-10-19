@@ -1,6 +1,6 @@
 # Get started with hyperannotatR
 
-![hyperannotatR hex sticker](../reference/figures/hyperannotatR-hex.png)
+![hyperannotatR logo](../reference/figures/logo.png)
 
 hyperannotatR helps you draw, organise and export regions of interest
 (ROIs) across ordinary images, whole-slide microscopy and hyperspectral
@@ -35,9 +35,10 @@ img
 #> pixel size: 1 x 1 px
 ```
 
-An `annot_image` is a thin, lazy handle over a pluggable backend rather
-than the pixels themselves. A handful of accessors tell you what you are
-working with:
+An `annot_image` is a handle over a pluggable backend: it carries the
+image’s metadata and serves pixels through
+[`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md).
+A handful of accessors tell you what you are working with:
 
 ``` r
 
@@ -132,7 +133,7 @@ sf::st_drop_geometry(roi_tbl)[, c("roi_id", "layer", "label", "geom_type",
 
 Notice that the circle has been stored as a many-vertex polygon:
 hyperannotatR keeps every ROI as a genuine simple feature, so areas,
-overlaps and set operations are all exact.
+overlaps and set operations are computed on the stored geometry.
 [`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md)
 also accepts `layer` and `label` arguments when you want to pull out a
 subset, and
@@ -175,9 +176,6 @@ per label class. We build a labelled mask.
 ``` r
 
 m <- at_mask(project, type = "labelled")
-#> Registered S3 method overwritten by 'stars':
-#>   method                  from
-#>   st_interpolate_aw.stars sf
 m
 #> <annot_mask> labelled  |  512 x 512 px  |  level 0
 #> values: 2
@@ -192,10 +190,12 @@ A pixel is filled when its centre lies inside the polygon (the default,
 `touches = FALSE`), using a half-open tie rule so that shared edges are
 never double-counted; set `touches = TRUE` if you would rather include
 any pixel the polygon so much as grazes. Where ROIs overlap, the
-`overlap` argument decides who wins — by default the region drawn last,
-but `"first"`, `"max"`, `"min"` and `"error"` are all available. The
-mask carries a self-describing legend, and because it is a plain integer
-matrix underneath you can tabulate it directly.
+`overlap` argument decides who wins: by default the region drawn last,
+but `"first"`, `"max"`, `"min"` and `"error"` are available, and
+`"bitor"` combines power-of-two class codes bitwise so that overlapping
+classes stay recoverable in a multiclass mask. The mask carries a
+self-describing legend, and because it is a plain integer matrix
+underneath you can tabulate it directly.
 
 ``` r
 

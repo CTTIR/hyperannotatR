@@ -62,8 +62,29 @@ at_export_all(
 
 An invisible export-receipt
 [tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
-with columns `image`, `format`, `path`, `bytes`, `n_rois`, `status`, and
-`message`. Also written to `_export_manifest.csv` alongside the exports.
+with columns `entry_id`, `image`, `format`, `path`, `bytes`, `n_rois`,
+`status`, and `message`. Also written to `_export_manifest.csv`
+alongside the exports. Additive columns `sidecar_path` and
+`sidecar_bytes` describe mask legends. Byte counts are doubles. Status
+is `"ok"` for a complete published bundle, `"error"` for a failed item,
+or `"skipped"` when an existing bundle is protected. Every image-format
+request has a row, even if loading the image fails. Receipt publication
+or annotation-summary failures warn and are also retained in
+`receipt_error` / `summary_error` attributes; the item receipt is
+returned.
+
+## Details
+
+Derived filenames use safe portable components; display names stay in
+the receipt and annotation metadata. Case-folded collisions are given
+deterministic suffixes, including cross-format and sidecar collisions.
+The complete plan (including manifests) rejects descendant symlinks
+before writing outputs. Existing mask/legend bundles are skipped as a
+whole unless `overwrite=TRUE`. Files are staged and publication failures
+roll back prior files. Callers must serialize concurrent exports and
+avoid changing the destination filesystem during a run: preflight and
+multiple renames are not a race-free filesystem transaction. Receipt
+files are replaced each run, independently of the item overwrite policy.
 
 ## See also
 

@@ -40,7 +40,9 @@ at_tile_source(
   Optional band view: a list with `operation` (see
   [`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md)),
   `bands` and `params`. `NULL` shows natural-colour RGB (nearest bands
-  to 640/550/460 nm for spectral cubes). Display only.
+  to 640/550/460 nm for spectral cubes). Display only. A view that does
+  not apply to `img` (for example bands it does not have) falls back to
+  the default view and is reported in `viewError`.
 
 - call:
 
@@ -48,9 +50,14 @@ at_tile_source(
 
 ## Value
 
-A list describing the image for the widget: `width`, `height`,
-`tileSize`, `minLevel`, `maxLevel`, `nBands`, and (when `embed`)
-`dataUri`.
+A list describing the image for the widget: `width`, `height` (level-0
+pixels), `nBands`, and the pyramid description `tileSize`, `minLevel`
+and `maxLevel` (informational: the built-in canvas displays a single
+embedded image rather than streaming tiles). When `embed` is `TRUE` it
+also has `dataUri` (a PNG data URI); when no image could be encoded,
+`dataUri` is absent and `displayError` says why, and the canvas shows
+that message instead of an image. `viewError` says why `view` was not
+applied, when it was not.
 
 ## See also
 

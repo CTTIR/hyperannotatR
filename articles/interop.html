@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,11 +109,12 @@ rectangles on a small tissue raster.</p>
 <code>Feature</code> whose <code>geometry</code> is the pixel-coordinate
 polygon and whose <code>properties</code> carry the full hyperannotatR
 schema: <code>roi_id</code>, <code>layer</code>, <code>label</code>,
-<code>level</code>, <code>author</code>, <code>created</code>,
-<code>modified</code>, <code>source</code>, the writing
-<code>annotatR_version</code>, and any free-form
-<code>attributes</code>. Keeping the schema explicit is what lets a file
-survive a return trip.</p>
+<code>level</code> (the level of the written coordinates),
+<code>source_level</code>, <code>coordinate_schema</code>,
+<code>author</code>, <code>created</code>, <code>modified</code>,
+<code>source</code>, the writing <code>annotatR_version</code>, and any
+free-form <code>attributes</code>. Keeping the schema explicit is what
+lets a file survive a return trip.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".geojson"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/at_write_geojson.html">at_write_geojson</a></span><span class="op">(</span><span class="va">proj</span>, <span class="va">gj</span><span class="op">)</span></span>
@@ -152,6 +153,54 @@ original image and check that the labels came through intact.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_rois.html">at_rois</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span><span class="op">$</span><span class="va">label</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_rois.html">at_rois</a></span><span class="op">(</span><span class="va">imported</span><span class="op">)</span><span class="op">$</span><span class="va">label</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <div class="section level3">
+<h3 id="coordinate-levels-and-legacy-imports">Coordinate levels and legacy imports<a class="anchor" aria-label="anchor" href="#coordinate-levels-and-legacy-imports"></a>
+</h3>
+<p>An ROI can be stored at any level of a pyramidal image, and the
+writers’ <code>level</code> argument transforms the coordinates to
+another level on the way out. GeoJSON and QuPath exports write
+<code>level</code> matching their coordinates, with the stored ROI level
+in <code>source_level</code> as provenance. The
+<code>coordinate_schema = "annotatR-pixel-level-v1"</code> marker
+identifies this contract. CSV exports always use level-0 coordinates and
+<code>level = 0</code>. Image dimensions determine separate x and y
+scale factors; no power-of-two pyramid is inferred. Vector geometry
+round trips use floating-point precision (relative tolerance
+<code>1e-12</code>), so a region drawn on an overview level comes back
+with the same level-0 area whichever format carried it:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">mx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"multiplex"</span><span class="op">)</span></span>
+<span><span class="va">lp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_project.html">at_project</a></span><span class="op">(</span><span class="va">mx</span>, <span class="fu"><a href="../reference/at_layer_add.html">at_layer_add</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_layer.html">at_layer</a></span><span class="op">(</span><span class="st">"regions"</span><span class="op">)</span>,</span>
+<span>                                  <span class="fu"><a href="../reference/at_roi_rect.html">at_roi_rect</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">40</span>, <span class="fl">40</span>, label <span class="op">=</span> <span class="st">"a"</span>, level <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">gj1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".geojson"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/at_write_geojson.html">at_write_geojson</a></span><span class="op">(</span><span class="va">lp</span>, <span class="va">gj1</span><span class="op">)</span></span>
+<span><span class="va">csv1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".csv"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/at_write_rois_csv.html">at_write_rois_csv</a></span><span class="op">(</span><span class="va">lp</span>, <span class="va">csv1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>stored  <span class="op">=</span> <span class="fu"><a href="../reference/at_rois.html">at_rois</a></span><span class="op">(</span><span class="va">lp</span><span class="op">)</span><span class="op">$</span><span class="va">area_px</span>,</span>
+<span>  geojson <span class="op">=</span> <span class="fu"><a href="../reference/at_rois.html">at_rois</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_project.html">at_project</a></span><span class="op">(</span><span class="va">mx</span>, <span class="fu"><a href="../reference/at_read_geojson.html">at_read_geojson</a></span><span class="op">(</span><span class="va">gj1</span><span class="op">)</span><span class="op">[[</span><span class="st">"regions"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">area_px</span>,</span>
+<span>  csv     <span class="op">=</span> <span class="fu"><a href="../reference/at_rois.html">at_rois</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_project.html">at_project</a></span><span class="op">(</span><span class="va">mx</span>, <span class="fu"><a href="../reference/at_read_rois_csv.html">at_read_rois_csv</a></span><span class="op">(</span><span class="va">csv1</span>, layer_name <span class="op">=</span> <span class="st">"regions"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">area_px</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  stored geojson     csv </span></span>
+<span><span class="co">#&gt;    3600    3600    3600</span></span></code></pre></div>
+<p>Some older exports, including GeoJSON, CSV and QuPath files written
+by hyperannotatR 0.2.0 and earlier, paired level-0 geometry with a
+nonzero stored ROI level. Those files cannot be distinguished reliably
+from valid nonzero-coordinate files, so readers reject an unmarked
+nonzero recorded level by default with an <code>AMBIGUOUS_LEVEL</code>
+error. When the actual coordinate level is known, pass it as
+<code>coordinate_level</code> (for example <code>0L</code> for such
+hyperannotatR exports) to <code><a href="../reference/at_read_geojson.html">at_read_geojson()</a></code>,
+<code><a href="../reference/at_read_rois_csv.html">at_read_rois_csv()</a></code> or <code><a href="../reference/at_read_qupath.html">at_read_qupath()</a></code>; this
+overrides the level declaration without scaling coordinates. To trust
+the recorded levels of legitimate foreign or legacy files, pass
+<code>legacy_levels = "recorded"</code>. Use either only when the
+coordinate convention is known; never guess a repair. Files without
+level metadata default to level 0, or to the reader’s fallback
+<code>level</code>.</p>
+<p>Mask imports, including NPY, recover the level from the RDS object or
+the legend sidecar by default; an explicit <code>level</code> overrides
+it. Keep the sidecar next to the raster, and for external masks without
+metadata supply the level when it is not 0.</p>
+</div>
+<div class="section level3">
 <h3 id="the-flip_y-option">The <code>flip_y</code> option<a class="anchor" aria-label="anchor" href="#the-flip_y-option"></a>
 </h3>
 <p>hyperannotatR’s convention is image orientation: the origin is
@@ -160,7 +209,7 @@ expect <em>y</em> to increase upward. Set <code>flip_y = TRUE</code> to
 write coordinates in that upward convention; the y-axis is mirrored
 about the image height. If you write flipped, you must read flipped,
 supplying the same <code>height</code> so the inversion is undone:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">h</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_dims.html">at_dims</a></span><span class="op">(</span><span class="va">proj</span><span class="op">$</span><span class="va">image</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span>
 <span><span class="va">gj_flip</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".geojson"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/at_write_geojson.html">at_write_geojson</a></span><span class="op">(</span><span class="va">proj</span>, <span class="va">gj_flip</span>, flip_y <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -187,16 +236,33 @@ natively, checked against a real QuPath 0.7.0 installation:
 <code>"Tumor: Positive"</code>) and an <code>[r, g, b]</code>
 <code>color</code>, and <code>isLocked</code> for locked ROIs. QuPath
 silently replaces feature ids that are not UUIDs, so each ROI gets a
-deterministic UUID and hyperannotatR’s own id, layer, source and level
-travel in <code>properties.metadata</code>.
-<code><a href="../reference/at_read_qupath.html">at_read_qupath()</a></code> restores labels, colours and those ids,
-and keeps everything else QuPath carries under
+deterministic UUID (existing UUIDs are kept). The feature properties
+carry <code>level</code>, <code>source_level</code> and
+<code>coordinate_schema</code>, but QuPath keeps only
+<code>properties.metadata</code> through its own import and export, so
+hyperannotatR repeats what it needs there as strings:
+<code>annotatr_roi_id</code>, <code>annotatr_layer</code>,
+<code>annotatr_source</code>, <code>annotatr_level</code> (the stored
+ROI level, as in hyperannotatR 0.2.0),
+<code>annotatr_coordinate_schema</code> and
+<code>annotatr_coordinate_level</code>. QuPath 0.7.0 keeps these
+entries, so the original id and the coordinate level come back; if
+another tool drops the metadata, a non-UUID id cannot be recovered from
+the UUID.</p>
+<p><code><a href="../reference/at_read_qupath.html">at_read_qupath()</a></code> accepts a native feature array
+(QuPath’s default export), a FeatureCollection or a single Feature, in
+the current dialect or the legacy
+<code>object_type</code>/<code>colorRGB</code> form. It restores labels,
+colours and ids, and keeps everything else QuPath carries under
 <code>attributes$qupath</code>: object type, measurements with explicit
 <code>NaN</code>/infinity states, image planes, cell nuclei, and a flag
 on ellipses that QuPath exported as polygons. Features without a
 classification are imported as <code>"unclassified"</code> rather than
-dropped.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+dropped. Input is validated strictly: malformed structure, contradictory
+repeated fields (identical repeats, which QuPath 0.7.0 emits, are
+accepted), conflicting colours or object types, and repeated ROI ids are
+refused with an <code>INVALID_GEOJSON</code> error.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">qp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".geojson"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/at_write_qupath.html">at_write_qupath</a></span><span class="op">(</span><span class="va">proj</span>, <span class="va">qp</span><span class="op">)</span></span>
 <span><span class="va">feature</span> <span class="op">&lt;-</span> <span class="fu">jsonlite</span><span class="fu">::</span><span class="fu"><a href="https://jeroen.r-universe.dev/jsonlite/reference/read_json.html" class="external-link">read_json</a></span><span class="op">(</span><span class="va">qp</span><span class="op">)</span><span class="op">$</span><span class="va">features</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
@@ -206,11 +272,13 @@ dropped.</p>
 <span><span class="co">#&gt;  $ classification:List of 2</span></span>
 <span><span class="co">#&gt;   ..$ name : chr "tumour"</span></span>
 <span><span class="co">#&gt;   ..$ color:List of 3</span></span>
-<span><span class="co">#&gt;  $ metadata      :List of 4</span></span>
-<span><span class="co">#&gt;   ..$ annotatr_roi_id: chr "roi_000000001"</span></span>
-<span><span class="co">#&gt;   ..$ annotatr_layer : chr "regions"</span></span>
-<span><span class="co">#&gt;   ..$ annotatr_source: chr "manual"</span></span>
-<span><span class="co">#&gt;   ..$ annotatr_level : chr "0"</span></span></code></pre></div>
+<span><span class="co">#&gt;  $ metadata      :List of 6</span></span>
+<span><span class="co">#&gt;   ..$ annotatr_roi_id           : chr "roi_000000001"</span></span>
+<span><span class="co">#&gt;   ..$ annotatr_layer            : chr "regions"</span></span>
+<span><span class="co">#&gt;   ..$ annotatr_source           : chr "manual"</span></span>
+<span><span class="co">#&gt;   ..$ annotatr_level            : chr "0"</span></span>
+<span><span class="co">#&gt;   ..$ annotatr_coordinate_schema: chr "annotatR-pixel-level-v1"</span></span>
+<span><span class="co">#&gt;   ..$ annotatr_coordinate_level : chr "0"</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="the-colour-gotcha">The colour gotcha<a class="anchor" aria-label="anchor" href="#the-colour-gotcha"></a>
 </h3>
@@ -225,7 +293,7 @@ in both directions. QuPath keeps a single colour per classification
 name, so identical labels with different layer colours collapse to the
 first colour it sees. Reading the file back recovers the hex colours
 onto the layer style:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lyr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_read_qupath.html">at_read_qupath</a></span><span class="op">(</span><span class="va">qp</span><span class="op">)</span></span>
 <span><span class="va">lyr</span><span class="op">$</span><span class="va">style</span><span class="op">$</span><span class="va">colour</span></span>
 <span><span class="co">#&gt;    tumour  necrosis    stroma </span></span>
@@ -244,28 +312,25 @@ records the mask type, level, dimensions, and one entry per class
 sidecar is what turns an anonymous grid of integers into something a
 downstream model can interpret without guessing which value meant which
 class, and it travels with the raster so the mapping is never lost.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_mask.html">at_mask</a></span><span class="op">(</span><span class="va">proj</span>, type <span class="op">=</span> <span class="st">"labelled"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Registered S3 method overwritten by 'stars':</span></span>
-<span><span class="co">#&gt;   method                  from</span></span>
-<span><span class="co">#&gt;   st_interpolate_aw.stars sf</span></span>
 <span><span class="va">mp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".tiff"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/at_write_mask.html">at_write_mask</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">mp</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">mp</span>, <span class="st">".legend.json"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">14</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; {</span></span>
-<span><span class="co">#&gt;   "annotatR_version": "0.2.0",</span></span>
-<span><span class="co">#&gt;   "created": "2026-10-19T05:51:42+0000",</span></span>
-<span><span class="co">#&gt;   "mask_type": "labelled",</span></span>
-<span><span class="co">#&gt;   "level": 0,</span></span>
-<span><span class="co">#&gt;   "dims": [512, 512],</span></span>
-<span><span class="co">#&gt;   "source_project": "example",</span></span>
-<span><span class="co">#&gt;   "legend": [</span></span>
-<span><span class="co">#&gt;     {</span></span>
-<span><span class="co">#&gt;       "value": 1,</span></span>
-<span><span class="co">#&gt;       "label": "tumour",</span></span>
-<span><span class="co">#&gt;       "layer": "regions",</span></span>
-<span><span class="co">#&gt;       "roi_id": "roi_000000001",</span></span>
-<span><span class="co">#&gt;       "n_px": 19600,</span></span></code></pre></div>
+<span><span class="co">#&gt;   "mask_metadata": {</span></span>
+<span><span class="co">#&gt;     "schema_version": 1,</span></span>
+<span><span class="co">#&gt;     "status": "declared",</span></span>
+<span><span class="co">#&gt;     "encoding": "instance",</span></span>
+<span><span class="co">#&gt;     "background": 0,</span></span>
+<span><span class="co">#&gt;     "overlap": "last",</span></span>
+<span><span class="co">#&gt;     "grid": {</span></span>
+<span><span class="co">#&gt;       "dims": [512, 512],</span></span>
+<span><span class="co">#&gt;       "level": 0,</span></span>
+<span><span class="co">#&gt;       "origin": [0, 0],</span></span>
+<span><span class="co">#&gt;       "stride": [1, 1]</span></span>
+<span><span class="co">#&gt;     },</span></span>
+<span><span class="co">#&gt;     "source": {</span></span></code></pre></div>
 <p>Here we used a <code>"labelled"</code> mask, where each ROI gets its
 own integer; a <code>"binary"</code> mask collapses everything to
 foreground and background, and a <code>"multiclass"</code> mask shares
@@ -273,17 +338,17 @@ one integer per label. Whichever you choose, the legend describes
 exactly what the pixels mean. On the Python side, read the TIFF as an
 integer array and load the legend to map values back to labels. This
 chunk is illustrative and is not run when the vignette is built.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="im">import</span> json</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="im">import</span> tifffile</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>mask <span class="op">=</span> tifffile.imread(<span class="st">"mask.tiff"</span>)</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"mask.tiff.legend.json"</span>) <span class="im">as</span> f:</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    legend <span class="op">=</span> json.load(f)</span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>labels <span class="op">=</span> {e[<span class="st">"value"</span>]: e[<span class="st">"label"</span>] <span class="cf">for</span> e <span class="kw">in</span> legend[<span class="st">"legend"</span>]}</span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="cf">for</span> value, label <span class="kw">in</span> labels.items():</span>
-<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>    <span class="bu">print</span>(label, <span class="bu">int</span>(np.<span class="bu">sum</span>(mask <span class="op">==</span> value)), <span class="st">"px"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="im">import</span> json</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="im">import</span> tifffile</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>mask <span class="op">=</span> tifffile.imread(<span class="st">"mask.tiff"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"mask.tiff.legend.json"</span>) <span class="im">as</span> f:</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>    legend <span class="op">=</span> json.load(f)</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>labels <span class="op">=</span> {e[<span class="st">"value"</span>]: e[<span class="st">"label"</span>] <span class="cf">for</span> e <span class="kw">in</span> legend[<span class="st">"legend"</span>]}</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="cf">for</span> value, label <span class="kw">in</span> labels.items():</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>    <span class="bu">print</span>(label, <span class="bu">int</span>(np.<span class="bu">sum</span>(mask <span class="op">==</span> value)), <span class="st">"px"</span>)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="csv-and-wkt">CSV and WKT<a class="anchor" aria-label="anchor" href="#csv-and-wkt"></a>
@@ -294,7 +359,7 @@ geometry in a Well-Known Text <code>geometry</code> column, plus the
 metadata fields. <code><a href="../reference/at_read_rois_csv.html">at_read_rois_csv()</a></code> parses any CSV with at
 least <code>label</code> and <code>geometry</code> columns back into a
 layer.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">csv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".csv"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/at_write_rois_csv.html">at_write_rois_csv</a></span><span class="op">(</span><span class="va">proj</span>, <span class="va">csv</span><span class="op">)</span></span>
 <span><span class="va">lyr_csv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_read_rois_csv.html">at_read_rois_csv</a></span><span class="op">(</span><span class="va">csv</span>, layer_name <span class="op">=</span> <span class="st">"regions"</span><span class="op">)</span></span>
@@ -308,6 +373,35 @@ layer.</p>
 <p>Because WKT is understood by PostGIS, <code>sf</code>, Shapely, and
 most spatial databases, the CSV is often the shortest path into a wider
 geospatial stack.</p>
+</div>
+<div class="section level2">
+<h2 id="export-destinations-and-receipts">Export destinations and receipts<a class="anchor" aria-label="anchor" href="#export-destinations-and-receipts"></a>
+</h2>
+<p>Batch and split-mask exports (<code><a href="../reference/at_export_all.html">at_export_all()</a></code>,
+<code><a href="../reference/at_write_masks.html">at_write_masks()</a></code> and the app’s export) turn project, layer,
+ROI and class names into safe, portable filename components and append
+deterministic suffixes to collisions, including names that differ only
+in case. Display labels stay in receipts and in the annotation and
+legend metadata. Exports preflight the complete bundle, including
+sidecars and receipt files, and reject symlinked paths inside the
+destination before writing. An explicitly chosen single-file output
+path, as in <code><a href="../reference/at_write_geojson.html">at_write_geojson()</a></code>, can point to any
+directory.</p>
+<p>A mask and its legend are staged before either is published. Existing
+bundles are skipped unless replacement was requested, and a failed item
+does not stop later items. The receipt has a row for every requested
+image and format, with status <code>ok</code>, <code>error</code> or
+<code>skipped</code>, a message, the paths, and byte counts for the
+output and its sidecar; <code>ok</code> means the whole bundle was
+published. A failed publication restores the files it replaced. Session
+exports rewrite <code>_export_manifest.csv</code> and
+<code>_annotation_summary.csv</code> on every run; a failure to write
+them warns and is kept in the receipt’s attributes without discarding
+the item results.</p>
+<p>Serialise exports and keep the destination stable while they run:
+preflight and several renames are not a race-free transaction against
+concurrent writers, crashes between renames, or symlinks changed during
+the run.</p>
 <p>For the complete list of import and export helpers, see the reference
 index on the package website.</p>
 </div>

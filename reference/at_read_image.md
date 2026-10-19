@@ -22,7 +22,10 @@ at_read_image(path, backend = NULL, ..., call = rlang::caller_env())
 
 - ...:
 
-  Passed to the backend's reader.
+  Passed to the backend's reader. They must be plain serializable values
+  (numbers, strings, logicals and lists of them): they are recorded in
+  the image's source descriptor so a saved project can reopen the file
+  the same way.
 
 - call:
 
@@ -31,7 +34,10 @@ at_read_image(path, backend = NULL, ..., call = rlang::caller_env())
 ## Value
 
 An
-[annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
+[annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+whose `source` is the absolute path of the file, with a
+`source_descriptor` (path, backend, options, file signature) and a
+per-read cache identity.
 
 ## See also
 
@@ -40,9 +46,11 @@ An
 
 Other images:
 [`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md),
+[`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md),
 [`at_dims()`](https://cttir.github.io/hyperannotatR/reference/at_dims.md),
 [`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md),
 [`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md),
 [`at_is_pyramidal()`](https://cttir.github.io/hyperannotatR/reference/at_is_pyramidal.md),
 [`at_is_spectral()`](https://cttir.github.io/hyperannotatR/reference/at_is_spectral.md),
 [`at_meta()`](https://cttir.github.io/hyperannotatR/reference/at_meta.md),
@@ -58,7 +66,9 @@ Other backends:
 [`at_backend_get()`](https://cttir.github.io/hyperannotatR/reference/at_backend_get.md),
 [`at_backend_list()`](https://cttir.github.io/hyperannotatR/reference/at_backend_list.md),
 [`at_backend_register()`](https://cttir.github.io/hyperannotatR/reference/at_backend_register.md),
+[`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md),
 [`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md),
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
 [`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
 

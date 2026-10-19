@@ -43,15 +43,23 @@ at_tile(
 
 ## Value
 
-A numeric array with dimensions `[y, x, band]`.
+A numeric array with dimensions `[y, x, band]`. An image whose pixel
+handle was not saved is reopened from its source descriptor; a missing
+or ambiguous source is an error with code `IMAGE_UNAVAILABLE` and a
+changed source `IMAGE_CHANGED` (see
+[`at_inspect_source()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_source.md)
+and
+[`at_relink_source()`](https://cttir.github.io/hyperannotatR/reference/at_relink_source.md)).
 
 ## See also
 
 Other images:
 [`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md),
+[`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md),
 [`at_dims()`](https://cttir.github.io/hyperannotatR/reference/at_dims.md),
 [`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md),
 [`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md),
 [`at_is_pyramidal()`](https://cttir.github.io/hyperannotatR/reference/at_is_pyramidal.md),
 [`at_is_spectral()`](https://cttir.github.io/hyperannotatR/reference/at_is_spectral.md),
 [`at_meta()`](https://cttir.github.io/hyperannotatR/reference/at_meta.md),
@@ -67,7 +75,9 @@ Other backends:
 [`at_backend_get()`](https://cttir.github.io/hyperannotatR/reference/at_backend_get.md),
 [`at_backend_list()`](https://cttir.github.io/hyperannotatR/reference/at_backend_list.md),
 [`at_backend_register()`](https://cttir.github.io/hyperannotatR/reference/at_backend_register.md),
+[`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md),
 [`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md),
 [`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
 [`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
 

@@ -9,7 +9,8 @@ at_roi_area(
   roi,
   level = 0L,
   units = c("px", "physical"),
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  image = NULL
 )
 ```
 
@@ -27,11 +28,25 @@ at_roi_area(
 - units:
 
   Either `"px"` (pixels squared, the default) or `"physical"`. Physical
-  units require a `pixel_size` attribute on the ROI.
+  area uses `image` calibration at level zero, in squared
+  `image$pixel_unit`, and is invariant to reporting level. Unknown or
+  pixel-only image calibration rejects. Without an image, legacy ROI
+  `pixel_size=c(x,y)` is supported at stored level zero, in squared
+  calibration units. Nonzero ROI levels require explicit
+  `pixel_size_level` and `pixel_unit`; differing calibration and stored
+  levels require an image for the geometric transform. Pixel sizes must
+  be finite and positive. Geometric area is not raster support count.
 
 - call:
 
   The calling environment, for error reporting.
+
+- image:
+
+  Optional
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  defining actual pyramid dimensions. Required when `level` differs from
+  the ROI's stored level.
 
 ## Value
 

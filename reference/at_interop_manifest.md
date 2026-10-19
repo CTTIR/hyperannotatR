@@ -48,6 +48,12 @@ at_interop_manifest(
 
   The calling environment, for error reporting.
 
+  In a session manifest every ROI and layer record carries the
+  `entry_id` of its queue entry, so entries that share an image stay
+  separate. An ROI whose `review_status` attribute is not one of
+  `"unreviewed"`, `"reviewed"`, `"rejected"` or `"staged"` is refused
+  (`REVIEW_STATUS_INVALID`).
+
 ## Value
 
 The manifest (a list of class `at_interop_manifest`); invisibly when

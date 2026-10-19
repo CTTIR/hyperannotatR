@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,7 +84,10 @@ columns:</p><dl><dt><code>roi_id</code></dt>
 <dd><p>Geometry type, e.g. <code>"POLYGON"</code> (character).</p></dd>
 
 <dt><code>level</code></dt>
-<dd><p>Reference pyramid level (integer).</p></dd>
+<dd><p>Coordinate pyramid level, always 0 (integer).</p></dd>
+
+<dt><code>source_level</code></dt>
+<dd><p>Stored ROI reference level (integer provenance).</p></dd>
 
 <dt><code>area_px</code></dt>
 <dd><p>Area in level-0 pixels (double); <code>NA</code> for points/lines.</p></dd>
@@ -113,8 +116,11 @@ columns:</p><dl><dt><code>roi_id</code></dt>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Coordinates in the <code>geometry</code> column, together with <code>area_px</code> and the
-centroid, are expressed at pyramid level 0; the <code>level</code> column records the
-level at which each ROI was originally defined.</p>
+centroid, are expressed at pyramid level 0. The <code>level</code> column is 0;
+<code>source_level</code> records the stored level at which each ROI was defined.</p>
+<p>Older tables used <code>level</code> for the stored reference level despite
+returning level-0 geometry. Consumers needing that provenance must now use
+<code>source_level</code>. The stored ROI geometry, level, and identifier are unchanged.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

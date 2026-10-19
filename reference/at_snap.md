@@ -27,7 +27,9 @@ at_snap(roi, grid = 1, call = rlang::caller_env())
 
 An
 [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
-with vertices rounded to the nearest grid multiple.
+with vertices rounded to the nearest grid multiple. A geometry that
+snapping makes invalid (e.g. a collapsed ring) is repaired with a
+warning.
 
 ## See also
 

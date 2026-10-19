@@ -32,7 +32,7 @@
 
     <a class="navbar-brand me-2" href="index.html"><img src="logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -131,14 +131,14 @@
 </tr></thead>
 <tbody>
 <tr>
-<td>PNG / JPEG / TIFF</td>
+<td>PNG / JPEG</td>
 <td><code>raster</code></td>
-<td>magick or tiff</td>
+<td>magick</td>
 <td>no</td>
 <td>no</td>
 </tr>
 <tr>
-<td>Pyramidal / OME-TIFF</td>
+<td>TIFF, incl. pyramidal and multi-channel</td>
 <td><code>tiff</code></td>
 <td>tiff</td>
 <td>yes</td>
@@ -147,7 +147,7 @@
 <tr>
 <td>qptiff, OME-TIFF</td>
 <td><code>ometiff</code></td>
-<td>RBioFormats</td>
+<td>RBioFormats + xml2, windowed reads</td>
 <td>yes</td>
 <td>multiplex</td>
 </tr>
@@ -175,7 +175,8 @@
 </tr>
 </tbody>
 </table>
-<p>A TIFF is treated as spectral only when wavelengths are declared. <code><a href="reference/at_bands.html">at_bands()</a></code>, <code><a href="reference/at_hsi_meta.html">at_hsi_meta()</a></code> and <code><a href="reference/at_read_stats.html">at_read_stats()</a></code> report band wavelengths and gaps, value units, calibration and transform digests, and the bytes actually read.</p>
+<p>A TIFF is treated as spectral only when wavelengths are declared. <code><a href="reference/at_bands.html">at_bands()</a></code>, <code><a href="reference/at_hsi_meta.html">at_hsi_meta()</a></code> and <code><a href="reference/at_read_stats.html">at_read_stats()</a></code> report band wavelengths and gaps, value units, calibration and transform digests, and the bytes actually read. The ENVI, TIVITA and OME readers read windows from the file; the raster, TIFF and Cubert backends decode the whole image when it is opened, so it must fit in memory. <code><a href="reference/at_image_capabilities.html">at_image_capabilities()</a></code> reports which applies to an image.</p>
+<p>The <code>raster</code> backend converts samples to a 0–255 display convention and does not preserve original high-bit-depth intensities. The quantitative TIFF, OME and ENVI readers keep raw samples; format and optional-reader limits are documented in <code><a href="articles/images-and-backends.html">vignette("images-and-backends")</a></code>. Extraction never applies plot contrast stretches. It reports selected, finite and nonfinite counts, with an explicit <code>nonfinite</code> policy and declared spectral units.</p>
 </div>
 <div class="section level2">
 <h2 id="the-mask-workflow">The mask workflow<a class="anchor" aria-label="anchor" href="#the-mask-workflow"></a>
@@ -205,7 +206,7 @@
 <div class="section level2">
 <h2 id="related-work">Related work<a class="anchor" aria-label="anchor" href="#related-work"></a>
 </h2>
-<p>Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious, hyperannotatR is R-native and script-first, handles hyperspectral cubes alongside microscopy, and treats the batch <strong>mask</strong> export as a first-class, reproducible artifact.</p>
+<p>Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious, hyperannotatR is R-native and script-first, focuses on hyperspectral cubes and their display rasters, and treats the batch <strong>mask</strong> export as a first-class, reproducible artifact.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>

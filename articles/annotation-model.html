@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,10 +97,15 @@ GIS-oriented tooling, flip at the boundary with
 <code>i</code>, column <code>j</code>, both one-based – covers the
 half-open square <code>[j-1, j) x [i-1, i)</code>, so its centre lies at
 <code>(j - 0.5, i - 0.5)</code>. Membership follows that centre: a pixel
-belongs to a region when its centre falls inside the polygon, resolved
-with a half-open <code>[lower, upper)</code> tie rule along the lower
-and left edges. This single convention keeps rasterisation deterministic
-and stops abutting regions from double-counting a shared border.</p>
+belongs to a region when its centre falls inside the polygon. Boundary
+ties are evaluated symbolically at
+<code>(x + epsilon, y + epsilon^2)</code> as <code>epsilon</code> tends
+to zero from above. For axis-aligned rectangles this is the half-open
+<code>[lower, upper)</code> rule; it also defines sloping edges
+deterministically. Holes use ring parity and MultiPolygon components
+combine by union. Points instead select their half-open containing
+cells, so point <code>(5,5)</code> belongs to matrix row 6, column 6.
+Masks and extraction share these rules.</p>
 <pre><code>        x increases  ---&gt;
       0     1     2     3
     0 +-----+-----+-----+
@@ -153,8 +158,12 @@ it returns an extended copy.</p>
 named set of layers and records provenance. It is the object you query,
 validate, rasterise, and export. <code><a href="../reference/at_rois.html">at_rois()</a></code> returns a tidy
 table in which coordinates, areas, and centroids are expressed at level
-0, while the <code>level</code> column preserves where each ROI was
-originally defined.</p>
+0. The <code>level</code> column is therefore always 0;
+<code>source_level</code> records where each ROI was originally defined.
+Older query tables used <code>level</code> for that provenance:
+consumers must switch to <code>source_level</code> when they need the
+stored level. Empty tables have the same schema. Querying never changes
+the stored ROI.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">img</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"tissue"</span><span class="op">)</span></span>
 <span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_project.html">at_project</a></span><span class="op">(</span><span class="va">img</span>, <span class="va">regions</span>, name <span class="op">=</span> <span class="st">"demo"</span><span class="op">)</span></span>
@@ -163,12 +172,12 @@ originally defined.</p>
 <span><span class="co">#&gt;   name    n_rois labels    visible locked     z</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> regions      2 <span style="color: #949494;">&lt;chr [2]&gt;</span> TRUE    FALSE      1</span></span>
-<span><span class="fu"><a href="../reference/at_rois.html">at_rois</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"roi_id"</span>, <span class="st">"layer"</span>, <span class="st">"label"</span>, <span class="st">"geom_type"</span>, <span class="st">"level"</span>, <span class="st">"area_px"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 6</span></span></span>
-<span><span class="co">#&gt;   roi_id        layer   label  geom_type level area_px</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> roi_000000002 regions tumour POLYGON       0  <span style="text-decoration: underline;">19</span>600 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> roi_000000003 regions stroma POLYGON       0   <span style="text-decoration: underline;">5</span>018.</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/at_rois.html">at_rois</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"roi_id"</span>, <span class="st">"layer"</span>, <span class="st">"label"</span>, <span class="st">"geom_type"</span>, <span class="st">"level"</span>, <span class="st">"source_level"</span>, <span class="st">"area_px"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 7</span></span></span>
+<span><span class="co">#&gt;   roi_id        layer   label  geom_type level source_level area_px</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> roi_000000002 regions tumour POLYGON       0            0  <span style="text-decoration: underline;">19</span>600 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> roi_000000003 regions stroma POLYGON       0            0   <span style="text-decoration: underline;">5</span>018.</span></span></code></pre></div>
 <p>Finally, an <strong><code>annot_session</code></strong> wraps a queue
 of images with a manifest, a cursor, and shared label and layer
 templates, so a project can be materialised, annotated, and saved for
@@ -211,11 +220,12 @@ spills past the image edge and one with a duplicated vertex:</p>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> roi_000000004 out_of_bounds      warning  TRUE   </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> roi_000000005 duplicate_vertices warning  TRUE</span></span></code></pre></div>
-<p><code><a href="../reference/at_fix_geometry.html">at_fix_geometry()</a></code> repairs what it can – here the
-duplicate vertices – and reports the rest. Out-of-bounds vertices are a
-boundary advisory rather than a topological fault, so they are left
-untouched; clip them with <code><a href="../reference/at_clamp.html">at_clamp()</a></code> when you want the
-geometry confined to the image.</p>
+<p><code><a href="../reference/at_fix_geometry.html">at_fix_geometry()</a></code> repairs what it can: here it drops the
+duplicated vertex and pulls the rectangle that spills past the edge back
+inside the image bounds. Issues it cannot repair, such as zero-area
+rings or <code>NA</code> coordinates, are left in place and reported. To
+confine a single ROI to the image without the other repairs, use
+<code><a href="../reference/at_clamp.html">at_clamp()</a></code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_fix_geometry.html">at_fix_geometry</a></span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Repaired 2 ROIs.</span></span>
@@ -253,8 +263,16 @@ measure 512, 256, and 128 pixels, the two approaches agree:</p>
 <span><span class="co">#&gt; [1] 128 128</span></span>
 <span><span class="fu"><a href="../reference/at_roi_bbox.html">at_roi_bbox</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_transform.html">at_transform</a></span><span class="op">(</span><span class="va">r0</span>, from_level <span class="op">=</span> <span class="fl">0</span>, to_level <span class="op">=</span> <span class="fl">2</span>, img <span class="op">=</span> <span class="va">mimg</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1]  0  0 25 25</span></span></code></pre></div>
-<p>Both transforms are exactly invertible, so coordinates can round-trip
-through any level without drift.</p>
+<p>Coordinates can round-trip through pyramid levels within
+floating-point precision (relative tolerance <code>1e-12</code>).</p>
+<p>Computations that change levels require the actual image dimensions.
+Pass <code>image = img</code> to standalone masks, pixel-area
+measurements, set operations, and distance/overlap measurements, or use
+a project that carries its image. A bare ROI’s dimensions do not
+establish a pyramid scale. Set operations and intersection predicates
+can operate on standalone ROIs at the same stored level; mixed levels
+require image metadata. With image metadata, set-operation results use
+level 0. Distance and pairwise overlap areas always use level 0.</p>
 <p>The companion <strong>Masks</strong> vignette shows how these
 annotations are rasterised – applying the pixel-centre rule above – into
 binary, labelled, and multi-class integer masks.</p>

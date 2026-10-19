@@ -48,5 +48,5 @@ Other hsi:
 cube <- at_example_image("cube")
 invisible(at_tile(cube, xrange = c(1, 4), yrange = c(1, 4), bands = 1:2))
 at_read_stats(cube)$tiles
-#> [1] 3
+#> [1] 1
 ```

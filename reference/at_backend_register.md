@@ -16,7 +16,10 @@ at_backend_register(
   available_fn,
   description = "",
   extensions = character(),
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  capabilities = list(metadata_only = NA, window_read = NA, samples = "unqualified", io =
+    "unknown"),
+  close_fn = NULL
 )
 ```
 
@@ -57,6 +60,16 @@ at_backend_register(
 
   The calling environment, for error reporting.
 
+- capabilities:
+
+  Additive list declaring metadata_only, window_read, samples and io.
+  Omitted capabilities are unknown. Readers can override these per image
+  in meta\$capabilities.
+
+- close_fn:
+
+  Optional function(img) releasing runtime resources.
+
 ## Value
 
 The registered `annot_backend`, invisibly.
@@ -70,7 +83,9 @@ Other backends:
 [`at_backend_detect()`](https://cttir.github.io/hyperannotatR/reference/at_backend_detect.md),
 [`at_backend_get()`](https://cttir.github.io/hyperannotatR/reference/at_backend_get.md),
 [`at_backend_list()`](https://cttir.github.io/hyperannotatR/reference/at_backend_list.md),
+[`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md),
 [`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md),
 [`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
 [`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)

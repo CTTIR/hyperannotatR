@@ -64,9 +64,9 @@ at_plot_overlay(proj)
 
 | Format | Backend | Package required | Pyramid | Spectral |
 |----|----|----|----|----|
-| PNG / JPEG / TIFF | `raster` | magick or tiff | no | no |
-| Pyramidal / OME-TIFF | `tiff` | tiff | yes | multiplex |
-| qptiff, OME-TIFF | `ometiff` | RBioFormats | yes | multiplex |
+| PNG / JPEG | `raster` | magick | no | no |
+| TIFF, incl. pyramidal and multi-channel | `tiff` | tiff | yes | multiplex |
+| qptiff, OME-TIFF | `ometiff` | RBioFormats + xml2, windowed reads | yes | multiplex |
 | Cubert `.cu3s` | `cuvis` | cuvis.r + CUVIS SDK | no | yes |
 | ENVI cube (BSQ/BIL/BIP) | `envi` | base R, windowed reads | no | yes |
 | Diaspective Vision TIVITA | `tivita` | base R, declared profile or sidecar | no | yes |
@@ -77,7 +77,20 @@ A TIFF is treated as spectral only when wavelengths are declared.
 and
 [`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md)
 report band wavelengths and gaps, value units, calibration and transform
-digests, and the bytes actually read.
+digests, and the bytes actually read. The ENVI, TIVITA and OME readers
+read windows from the file; the raster, TIFF and Cubert backends decode
+the whole image when it is opened, so it must fit in memory.
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md)
+reports which applies to an image.
+
+The `raster` backend converts samples to a 0–255 display convention and
+does not preserve original high-bit-depth intensities. The quantitative
+TIFF, OME and ENVI readers keep raw samples; format and optional-reader
+limits are documented in
+[`vignette("images-and-backends")`](https://cttir.github.io/hyperannotatR/articles/images-and-backends.md).
+Extraction never applies plot contrast stretches. It reports selected,
+finite and nonfinite counts, with an explicit `nonfinite` policy and
+declared spectral units.
 
 ## The mask workflow
 
@@ -136,9 +149,9 @@ events and send typed commands to a running app. See
 ## Related work
 
 Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious,
-hyperannotatR is R-native and script-first, handles hyperspectral cubes
-alongside microscopy, and treats the batch **mask** export as a
-first-class, reproducible artifact.
+hyperannotatR is R-native and script-first, focuses on hyperspectral
+cubes and their display rasters, and treats the batch **mask** export as
+a first-class, reproducible artifact.
 
 ## Acknowledgements
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,8 @@
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a> with columns <code>name</code> (character), <code>description</code>
 (character), <code>extensions</code> (character, comma-separated), and <code>available</code>
-(logical). A 0-row tibble with these columns when nothing is registered.</p>
+(logical), plus metadata_only and window_read (logical; NA when unknown).
+A 0-row tibble with these columns when nothing is registered.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -68,7 +69,9 @@
 <code><a href="at_backend_detect.html">at_backend_detect()</a></code>,
 <code><a href="at_backend_get.html">at_backend_get()</a></code>,
 <code><a href="at_backend_register.html">at_backend_register()</a></code>,
+<code><a href="at_close_image.html">at_close_image()</a></code>,
 <code><a href="at_cubert_export_envi.html">at_cubert_export_envi()</a></code>,
+<code><a href="at_image_capabilities.html">at_image_capabilities()</a></code>,
 <code><a href="at_read_image.html">at_read_image()</a></code>,
 <code><a href="at_tile.html">at_tile()</a></code>,
 <code><a href="at_tivita_profile.html">at_tivita_profile()</a></code></p></div>
@@ -77,15 +80,15 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">at_backend_list</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   name    description                                 extensions       available</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> cuvis   Cubert hyperspectral (cuvis.r)              cu3, cu3s        FALSE    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> envi    ENVI header + binary cube                   hdr, dat, img, … TRUE     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> ometiff OME-TIFF and qptiff (RBioFormats)           ome.tif, ome.ti… TRUE     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> raster  PNG, JPEG, and single-plane TIFF            png, jpg, jpeg,… TRUE     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> tiff    Pyramidal / multi-directory TIFF            tif, tiff        TRUE     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> tivita  Diaspective Vision Tivita (ENVI-compatible) dat, hdr         TRUE     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 6</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   name    description             extensions available metadata_only window_read</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> cuvis   Cubert hyperspectral (… cu3, cu3s  FALSE     FALSE         FALSE      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> envi    ENVI header + binary c… hdr, dat,… TRUE      TRUE          TRUE       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> ometiff OME-TIFF and qptiff (R… ome.tif, … TRUE      FALSE         FALSE      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> raster  PNG, JPEG, and single-… png, jpg,… TRUE      FALSE         FALSE      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> tiff    Pyramidal / multi-dire… tif, tiff  TRUE      FALSE         FALSE      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> tivita  Diaspective Vision Tiv… dat, hdr   TRUE      TRUE          TRUE       </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

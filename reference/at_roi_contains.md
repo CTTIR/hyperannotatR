@@ -17,7 +17,8 @@ at_roi_contains(roi, x, y, call = rlang::caller_env())
 
 - x, y:
 
-  Numeric coordinate vectors of equal length.
+  Numeric coordinate vectors of equal length in the ROI's stored
+  coordinate level.
 
 - call:
 

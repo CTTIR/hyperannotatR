@@ -23,10 +23,13 @@ A pixel is a unit cell, not a point. Pixel `(i, j)` – row `i`, column
 `j`, both one-based – covers the half-open square `[j-1, j) x [i-1, i)`,
 so its centre lies at `(j - 0.5, i - 0.5)`. Membership follows that
 centre: a pixel belongs to a region when its centre falls inside the
-polygon, resolved with a half-open `[lower, upper)` tie rule along the
-lower and left edges. This single convention keeps rasterisation
-deterministic and stops abutting regions from double-counting a shared
-border.
+polygon. Boundary ties are evaluated symbolically at
+`(x + epsilon, y + epsilon^2)` as `epsilon` tends to zero from above.
+For axis-aligned rectangles this is the half-open `[lower, upper)` rule;
+it also defines sloping edges deterministically. Holes use ring parity
+and MultiPolygon components combine by union. Points instead select
+their half-open containing cells, so point `(5,5)` belongs to matrix row
+6, column 6. Masks and extraction share these rules.
 
             x increases  --->
           0     1     2     3
@@ -92,8 +95,11 @@ records provenance. It is the object you query, validate, rasterise, and
 export.
 [`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md)
 returns a tidy table in which coordinates, areas, and centroids are
-expressed at level 0, while the `level` column preserves where each ROI
-was originally defined.
+expressed at level 0. The `level` column is therefore always 0;
+`source_level` records where each ROI was originally defined. Older
+query tables used `level` for that provenance: consumers must switch to
+`source_level` when they need the stored level. Empty tables have the
+same schema. Querying never changes the stored ROI.
 
 ``` r
 
@@ -104,12 +110,12 @@ at_layers(proj)
 #>   name    n_rois labels    visible locked     z
 #>   <chr>    <int> <list>    <lgl>   <lgl>  <int>
 #> 1 regions      2 <chr [2]> TRUE    FALSE      1
-at_rois(proj)[, c("roi_id", "layer", "label", "geom_type", "level", "area_px")]
-#> # A tibble: 2 × 6
-#>   roi_id        layer   label  geom_type level area_px
-#>   <chr>         <chr>   <chr>  <chr>     <int>   <dbl>
-#> 1 roi_000000002 regions tumour POLYGON       0  19600 
-#> 2 roi_000000003 regions stroma POLYGON       0   5018.
+at_rois(proj)[, c("roi_id", "layer", "label", "geom_type", "level", "source_level", "area_px")]
+#> # A tibble: 2 × 7
+#>   roi_id        layer   label  geom_type level source_level area_px
+#>   <chr>         <chr>   <chr>  <chr>     <int>        <int>   <dbl>
+#> 1 roi_000000002 regions tumour POLYGON       0            0  19600 
+#> 2 roi_000000003 regions stroma POLYGON       0            0   5018.
 ```
 
 Finally, an **`annot_session`** wraps a queue of images with a manifest,
@@ -163,11 +169,12 @@ at_check_geometry(proj)
 ```
 
 [`at_fix_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_fix_geometry.md)
-repairs what it can – here the duplicate vertices – and reports the
-rest. Out-of-bounds vertices are a boundary advisory rather than a
-topological fault, so they are left untouched; clip them with
-[`at_clamp()`](https://cttir.github.io/hyperannotatR/reference/at_clamp.md)
-when you want the geometry confined to the image.
+repairs what it can: here it drops the duplicated vertex and pulls the
+rectangle that spills past the edge back inside the image bounds. Issues
+it cannot repair, such as zero-area rings or `NA` coordinates, are left
+in place and reported. To confine a single ROI to the image without the
+other repairs, use
+[`at_clamp()`](https://cttir.github.io/hyperannotatR/reference/at_clamp.md).
 
 ``` r
 
@@ -217,8 +224,17 @@ at_roi_bbox(at_transform(r0, from_level = 0, to_level = 2, img = mimg))
 #> [1]  0  0 25 25
 ```
 
-Both transforms are exactly invertible, so coordinates can round-trip
-through any level without drift.
+Coordinates can round-trip through pyramid levels within floating-point
+precision (relative tolerance `1e-12`).
+
+Computations that change levels require the actual image dimensions.
+Pass `image = img` to standalone masks, pixel-area measurements, set
+operations, and distance/overlap measurements, or use a project that
+carries its image. A bare ROI’s dimensions do not establish a pyramid
+scale. Set operations and intersection predicates can operate on
+standalone ROIs at the same stored level; mixed levels require image
+metadata. With image metadata, set-operation results use level 0.
+Distance and pairwise overlap areas always use level 0.
 
 The companion **Masks** vignette shows how these annotations are
 rasterised – applying the pixel-centre rule above – into binary,

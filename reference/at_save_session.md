@@ -1,6 +1,8 @@
 # Save a session
 
-Save a session
+The session is written atomically, with each stored project's image
+saved as a source descriptor rather than pixels (see
+[`at_save_project()`](https://cttir.github.io/hyperannotatR/reference/at_save_project.md)).
 
 ## Usage
 
@@ -26,7 +28,8 @@ at_save_session(
 
 - overwrite:
 
-  Logical; overwrite an existing file. Default `FALSE`.
+  Logical; overwrite an existing file, including the default
+  `_session.rds`. Default `FALSE`.
 
 - call:
 
@@ -34,7 +37,7 @@ at_save_session(
 
 ## Value
 
-The session, invisibly.
+The session as saved (validated, with persisted projects), invisibly.
 
 ## See also
 
@@ -42,11 +45,14 @@ The session, invisibly.
 [`at_resume()`](https://cttir.github.io/hyperannotatR/reference/at_resume.md)
 
 Other io:
+[`at_inspect_saved()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_saved.md),
+[`at_inspect_source()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_source.md),
 [`at_load_project()`](https://cttir.github.io/hyperannotatR/reference/at_load_project.md),
 [`at_load_session()`](https://cttir.github.io/hyperannotatR/reference/at_load_session.md),
 [`at_read_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_read_geojson.md),
 [`at_read_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_read_qupath.md),
 [`at_read_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.md),
+[`at_relink_source()`](https://cttir.github.io/hyperannotatR/reference/at_relink_source.md),
 [`at_roi_from_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_roi_from_geojson.md),
 [`at_save_project()`](https://cttir.github.io/hyperannotatR/reference/at_save_project.md),
 [`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md),

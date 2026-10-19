@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,9 @@
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
-<dd><p>Pyramid level to display; chosen automatically when <code>NULL</code>.</p></dd>
+<dd><p>Pyramid level to sample; chosen automatically when <code>NULL</code>.
+Plot axes always use level-0 image coordinates, scaled independently by
+actual width and height ratios.</p></dd>
 
 
 <dt id="arg-bands">bands<a class="anchor" aria-label="anchor" href="#arg-bands"></a></dt>
@@ -73,11 +75,18 @@
 
 <dt id="arg-rgb">rgb<a class="anchor" aria-label="anchor" href="#arg-rgb"></a></dt>
 <dd><p>Optional length-3 vector of band indices, or wavelengths in nm for
-a spectral cube, for a false-colour composite.</p></dd>
+a spectral cube, for a false-colour composite. Each channel of an <code>rgb</code>
+composite is contrast-stretched on its own; the default natural-colour
+display of an image with three or more bands shows an 8-bit image with its
+stored values and stretches deeper data in its first three bands jointly,
+preserving their colour balance.</p></dd>
 
 
 <dt id="arg-max-dim">max_dim<a class="anchor" aria-label="anchor" href="#arg-max-dim"></a></dt>
-<dd><p>Maximum display dimension (auto-downsampled). Default <code>1024</code>.</p></dd>
+<dd><p>Maximum display dimension (auto-downsampled). Default <code>1024</code>.
+Each displayed cell covers its full source block; final partial blocks
+end at the image boundary. When <code>level</code> is <code>NULL</code>, the finest pyramid
+level that fits within <code>max_dim</code> is sampled.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
@@ -86,7 +95,7 @@ a spectral cube, for a false-colour composite.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot2::ggplot</a> object.</p>
+    <p>A <a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot2::ggplot</a> object. Non-finite samples are drawn transparent.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

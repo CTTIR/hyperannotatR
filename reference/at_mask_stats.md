@@ -16,8 +16,9 @@ at_mask_stats(mask, pixel_size = NULL, call = rlang::caller_env())
 
 - pixel_size:
 
-  Optional numeric `c(x, y)` physical pixel size for physical area. When
-  `NULL`, `area_physical` is `NA`.
+  Optional positive physical pixel size `c(x, y)`, or one value for
+  square pixels, in the mask's own pixel grid. When `NULL`,
+  `area_physical` is `NA`.
 
 - call:
 
@@ -28,8 +29,11 @@ at_mask_stats(mask, pixel_size = NULL, call = rlang::caller_env())
 A [tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
 with one row per mask value: `value`, `label`, `n_px`, `area_px`,
 `area_physical`, `frac_total`, bounding box (`bbox_xmin`, `bbox_ymin`,
-`bbox_xmax`, `bbox_ymax`), and centroid (`centroid_x`, `centroid_y`). A
-0-row tibble when the mask is empty.
+`bbox_xmax`, `bbox_ymax`), and centroid (`centroid_x`, `centroid_y`).
+Every bitfield membership contributes to its class count, including
+composite samples; categorical counts are exclusive. Mapped-but-absent
+classes have zero counts. A 0-row tibble is returned only when the
+codebook is empty.
 
 ## See also
 

@@ -15,7 +15,7 @@ compute agreement against another mask."><meta property="og:image" content="http
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,10 +59,11 @@ compute agreement against another mask.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">at_read_npy</span><span class="op">(</span></span>
 <span>  <span class="va">path</span>,</span>
-<span>  level <span class="op">=</span> <span class="fl">0L</span>,</span>
+<span>  level <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  transpose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  legend <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  metadata <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -75,7 +76,9 @@ compute agreement against another mask.</p>
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
-<dd><p>Integer pyramid level to record. Default <code>0</code>.</p></dd>
+<dd><p>Integer pyramid level to record. <code>NULL</code> (default) recovers the
+sidecar level, falling back to 0 without metadata. Explicit values override
+the sidecar declaration without resampling pixels.</p></dd>
 
 
 <dt id="arg-transpose">transpose<a class="anchor" aria-label="anchor" href="#arg-transpose"></a></dt>
@@ -93,10 +96,31 @@ masks) so the result lands in hyperannotatR's <code>[y, x]</code> convention. De
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
 <dd><p>The calling environment, for error reporting.</p></dd>
 
+
+<dt id="arg-metadata">metadata<a class="anchor" aria-label="anchor" href="#arg-metadata"></a></dt>
+<dd><p>Optional named list overriding semantic <code>mask_metadata</code>
+fields, such as <code>encoding</code>, <code>background</code>, or <code>source</code>. Nested grid fields
+merge; explicit <code>level</code> and <code>legend</code> take precedence. No pixels are
+resampled. Versioned declarations must be structurally valid before
+overrides apply.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An <code>annot_mask</code>.</p>
+    <p>An integer <code>annot_mask</code> preserving encoding, background, codebook,
+grid and source metadata. Without encoding metadata, imports use exclusive
+instance values and zero background with status <code>legacy-default</code>; signed
+representable codes are preserved. A declared storage orientation must
+match <code>transpose</code>, even for square arrays. Malformed sidecars are rejected.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The header is validated strictly (NPY format versions 1-3, 2-D shapes,
+scalar integer dtypes of 1, 2, 4 or 8 bytes in either byte order) and the
+payload length is checked before reading; values that do not fit a 32-bit
+integer mask (including INT_MIN, R's missing-value code) are refused, never
+truncated. Reads are bounded by option <code>hyperannotatR.max_read_bytes</code> and
+headers by <code>hyperannotatR.max_npy_header_bytes</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

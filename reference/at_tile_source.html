@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,9 @@ self-contained canvas). Default <code>TRUE</code>.</p></dd>
 <dt id="arg-view">view<a class="anchor" aria-label="anchor" href="#arg-view"></a></dt>
 <dd><p>Optional band view: a list with <code>operation</code> (see
 <code><a href="at_band_operations.html">at_band_operations()</a></code>), <code>bands</code> and <code>params</code>. <code>NULL</code> shows natural-colour
-RGB (nearest bands to 640/550/460 nm for spectral cubes). Display only.</p></dd>
+RGB (nearest bands to 640/550/460 nm for spectral cubes). Display only. A
+view that does not apply to <code>img</code> (for example bands it does not have)
+falls back to the default view and is reported in <code>viewError</code>.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
@@ -89,8 +91,14 @@ RGB (nearest bands to 640/550/460 nm for spectral cubes). Display only.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list describing the image for the widget: <code>width</code>, <code>height</code>,
-<code>tileSize</code>, <code>minLevel</code>, <code>maxLevel</code>, <code>nBands</code>, and (when <code>embed</code>) <code>dataUri</code>.</p>
+    <p>A list describing the image for the widget: <code>width</code>, <code>height</code>
+(level-0 pixels), <code>nBands</code>, and the pyramid description <code>tileSize</code>,
+<code>minLevel</code> and <code>maxLevel</code> (informational: the built-in canvas displays a
+single embedded image rather than streaming tiles). When <code>embed</code> is
+<code>TRUE</code> it also has <code>dataUri</code> (a PNG data URI); when no image could be
+encoded, <code>dataUri</code> is absent and <code>displayError</code> says why, and the canvas
+shows that message instead of an image. <code>viewError</code> says why <code>view</code> was
+not applied, when it was not.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

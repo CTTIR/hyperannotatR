@@ -25,7 +25,10 @@ at_mask_preview(mask, max_dim = 1024L, call = rlang::caller_env())
 
 ## Value
 
-A downsampled `annot_mask` with the legend pixel counts recomputed.
+A downsampled `annot_mask` with membership-aware counts recomputed.
+Metadata records the preview dimensions and sampling stride, its parent
+grid, and the original source provenance. No full-resolution counts are
+copied onto the sampled matrix.
 
 ## See also
 

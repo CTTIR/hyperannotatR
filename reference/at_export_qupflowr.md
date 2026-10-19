@@ -35,7 +35,9 @@ at_export_qupflowr(
   [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   or
   [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
-  (materialised entries are exported under `entries/entry-NNNN/`).
+  (materialised entries are exported under `entries/<entry_id>/`, where
+  `entry_id` is the session's stable entry id, or `entry-NNNN` by queue
+  position for sessions without stable ids).
 
 - destination:
 
@@ -82,7 +84,10 @@ An `at_handoff_receipt` (invisibly): a list with `destination`,
 Files are written into a hidden sibling staging directory and moved into
 place only when complete, so a failed export never leaves a directory
 that looks valid. An existing destination is replaced only with
-`overwrite = TRUE`, and only when it is itself a handoff directory.
+`overwrite = TRUE`, and only when it is itself a handoff directory; if
+the new directory cannot be moved into place the previous one is
+restored. The optional `objects/project.rds` holds no pixels, read
+identity or local path (the image source is reduced to its file name).
 
 ## See also
 
@@ -102,11 +107,8 @@ Other interop:
 ``` r
 dest <- file.path(tempdir(), "handoff-example")
 rc <- at_export_qupflowr(at_example_project(), dest, overwrite = TRUE)
-#> Registered S3 method overwritten by 'stars':
-#>   method                  from
-#>   st_interpolate_aw.stars sf  
 rc$handoff_digest
-#> [1] "f4fe99fc7a20bacca4c827263df7924494ebe741f668a7c3ba579e0f49d5cee3"
+#> [1] "4ef808f02c5ab8ff5b976f181fca94abceb9a833f2b3115b2cbd6dbac473eada"
 rc$files[, c("path", "format")]
 #> # A tibble: 5 × 2
 #>   path                                   format        

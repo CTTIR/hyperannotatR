@@ -4,22 +4,42 @@ hyperannotatR result together with a conversion report. For a handoff directory
 the SHA-256 inventory (missing, extra, duplicate, resized, altered or
 symlinked files), the manifest schema and major version, ROI id uniqueness
 and the id join between manifest and GeoJSON, layers, planes, mask
-dimensions, integer values and legend completeness are all checked; any
-integrity or schema failure aborts with an at_validation_error. Nothing
-is written, no analysis is started, and foreign objects are never returned as
-if they were hyperannotatR objects: imported ROIs carry source = "imported" and
-partner fields under attributes$qupflowr. An RDS file is refused, because
-deserialising it is not a neutral read.'><meta property="og:description" content='Read only the neutral contract, validate it, and return a namespaced
+dimensions, integer values and legend completeness are all checked. Every
+file the manifest references must be a clean relative path listed in the
+verified inventory; unlisted operating-system metadata files (.DS_Store,
+._*, Thumbs.db, desktop.ini) are ignored with a warning. Any failure
+aborts with a classified at_error: at_validation_error for integrity,
+schema and join failures, at_protocol_error for an unsupported major
+version, at_limit_error for oversized inventories and at_io_error for
+missing files. Nothing is written, no analysis is started, and foreign
+objects are never returned as if they were hyperannotatR objects: imported ROIs
+carry source = "imported" and partner fields under
+attributes$qupflowr. Features of a single GeoJSON file that carry no id
+get a minted one and are flagged (attributes$qupflowr$id_minted), so
+at_stage_qupflowr() creates them instead of joining them to an existing
+ROI; two features with the same id are refused (DUPLICATE_ID). Handoff
+coordinates are read at the export level recorded in the manifest. An RDS
+file is refused, because deserialising it is not a neutral read.'><meta property="og:description" content='Read only the neutral contract, validate it, and return a namespaced
 hyperannotatR result together with a conversion report. For a handoff directory
 the SHA-256 inventory (missing, extra, duplicate, resized, altered or
 symlinked files), the manifest schema and major version, ROI id uniqueness
 and the id join between manifest and GeoJSON, layers, planes, mask
-dimensions, integer values and legend completeness are all checked; any
-integrity or schema failure aborts with an at_validation_error. Nothing
-is written, no analysis is started, and foreign objects are never returned as
-if they were hyperannotatR objects: imported ROIs carry source = "imported" and
-partner fields under attributes$qupflowr. An RDS file is refused, because
-deserialising it is not a neutral read.'><meta property="og:image" content="https://cttir.github.io/hyperannotatR/logo.svg"><meta name="theme-color" content="#1565c0"></head><body>
+dimensions, integer values and legend completeness are all checked. Every
+file the manifest references must be a clean relative path listed in the
+verified inventory; unlisted operating-system metadata files (.DS_Store,
+._*, Thumbs.db, desktop.ini) are ignored with a warning. Any failure
+aborts with a classified at_error: at_validation_error for integrity,
+schema and join failures, at_protocol_error for an unsupported major
+version, at_limit_error for oversized inventories and at_io_error for
+missing files. Nothing is written, no analysis is started, and foreign
+objects are never returned as if they were hyperannotatR objects: imported ROIs
+carry source = "imported" and partner fields under
+attributes$qupflowr. Features of a single GeoJSON file that carry no id
+get a minted one and are flagged (attributes$qupflowr$id_minted), so
+at_stage_qupflowr() creates them instead of joining them to an existing
+ROI; two features with the same id are refused (DUPLICATE_ID). Handoff
+coordinates are read at the export level recorded in the manifest. An RDS
+file is refused, because deserialising it is not a neutral read.'><meta property="og:image" content="https://cttir.github.io/hyperannotatR/logo.svg"><meta name="theme-color" content="#1565c0"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -27,7 +47,7 @@ deserialising it is not a neutral read.'><meta property="og:image" content="http
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,12 +85,22 @@ hyperannotatR result together with a conversion report. For a handoff directory
 the SHA-256 inventory (missing, extra, duplicate, resized, altered or
 symlinked files), the manifest schema and major version, ROI id uniqueness
 and the id join between manifest and GeoJSON, layers, planes, mask
-dimensions, integer values and legend completeness are all checked; any
-integrity or schema failure aborts with an <code>at_validation_error</code>. Nothing
-is written, no analysis is started, and foreign objects are never returned as
-if they were hyperannotatR objects: imported ROIs carry <code>source = "imported"</code> and
-partner fields under <code>attributes$qupflowr</code>. An RDS file is refused, because
-deserialising it is not a neutral read.</p>
+dimensions, integer values and legend completeness are all checked. Every
+file the manifest references must be a clean relative path listed in the
+verified inventory; unlisted operating-system metadata files (<code>.DS_Store</code>,
+<code>._*</code>, <code>Thumbs.db</code>, <code>desktop.ini</code>) are ignored with a warning. Any failure
+aborts with a classified <code>at_error</code>: <code>at_validation_error</code> for integrity,
+schema and join failures, <code>at_protocol_error</code> for an unsupported major
+version, <code>at_limit_error</code> for oversized inventories and <code>at_io_error</code> for
+missing files. Nothing is written, no analysis is started, and foreign
+objects are never returned as if they were hyperannotatR objects: imported ROIs
+carry <code>source = "imported"</code> and partner fields under
+<code>attributes$qupflowr</code>. Features of a single GeoJSON file that carry no id
+get a minted one and are flagged (<code>attributes$qupflowr$id_minted</code>), so
+<code><a href="at_stage_qupflowr.html">at_stage_qupflowr()</a></code> creates them instead of joining them to an existing
+ROI; two features with the same id are refused (<code>DUPLICATE_ID</code>). Handoff
+coordinates are read at the export level recorded in the manifest. An RDS
+file is refused, because deserialising it is not a neutral read.</p>
     </div>
 
     <div class="section level2">
@@ -115,8 +145,10 @@ caller expects the handoff to carry; a different revision aborts with an
 <code>status</code>, <code>detail</code>), <code>objects</code> (<code>layers</code>: named list of <a href="hyperannotatR-classes.html">annot_layer</a>;
 <code>masks</code>: named list of <code>annot_mask</code>; <code>images</code>: image records), <code>conversion</code>
 (tibble with one row per ROI: <code>roi_id</code>, <code>layer</code>, <code>label</code>,
-<code>source_object_id</code>, <code>object_type</code>, <code>geometry_fidelity</code>, <code>geometry_match</code>,
-<code>notes</code>) and <code>annotation_revision</code> of the imported layers.</p>
+<code>source_object_id</code>, <code>object_type</code>, <code>geometry_fidelity</code>, <code>geometry_match</code>
+(<code>"exact"</code> bytes, <code>"equivalent"</code> within 1e-9 after level normalisation,
+<code>"changed"</code>, or <code>NA</code> without a manifest record), <code>notes</code>) and
+<code>annotation_revision</code> of the imported layers.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -140,8 +172,8 @@ caller expects the handoff to carry; a different revision aborts with an
 <span class="r-out co"><span class="r-pr">#&gt;</span>   check               status detail                                            </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                             </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> integrity           ok     5 files verified                                  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> manifest_schema     ok     1.0                                               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> annotations:project ok     3 ROIs joined by id                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> manifest_schema     ok     1.1                                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> annotations:project ok     3 ROIs joined by id at level 0                    </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> masks               ok     1 masks: dimensions, integers and legends verified</span>
 </code></pre></div>
     </div>

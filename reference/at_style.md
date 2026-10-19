@@ -25,7 +25,8 @@ at_style(
   cycled over the layer's labels), a single colour recycled across
   labels, or a named character vector mapping labels to colours. The
   style is stored with the resolved mapping so colours are stable across
-  sessions.
+  sessions; the original specification is kept too, so labels added
+  later follow it.
 
 - fill_alpha:
 

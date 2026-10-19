@@ -13,10 +13,11 @@ mask.
 ``` r
 at_read_npy(
   path,
-  level = 0L,
+  level = NULL,
   transpose = FALSE,
   legend = NULL,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  metadata = NULL
 )
 ```
 
@@ -28,7 +29,9 @@ at_read_npy(
 
 - level:
 
-  Integer pyramid level to record. Default `0`.
+  Integer pyramid level to record. `NULL` (default) recovers the sidecar
+  level, falling back to 0 without metadata. Explicit values override
+  the sidecar declaration without resampling pixels.
 
 - transpose:
 
@@ -46,9 +49,32 @@ at_read_npy(
 
   The calling environment, for error reporting.
 
+- metadata:
+
+  Optional named list overriding semantic `mask_metadata` fields, such
+  as `encoding`, `background`, or `source`. Nested grid fields merge;
+  explicit `level` and `legend` take precedence. No pixels are
+  resampled. Versioned declarations must be structurally valid before
+  overrides apply.
+
 ## Value
 
-An `annot_mask`.
+An integer `annot_mask` preserving encoding, background, codebook, grid
+and source metadata. Without encoding metadata, imports use exclusive
+instance values and zero background with status `legacy-default`; signed
+representable codes are preserved. A declared storage orientation must
+match `transpose`, even for square arrays. Malformed sidecars are
+rejected.
+
+## Details
+
+The header is validated strictly (NPY format versions 1-3, 2-D shapes,
+scalar integer dtypes of 1, 2, 4 or 8 bytes in either byte order) and
+the payload length is checked before reading; values that do not fit a
+32-bit integer mask (including INT_MIN, R's missing-value code) are
+refused, never truncated. Reads are bounded by option
+`hyperannotatR.max_read_bytes` and headers by
+`hyperannotatR.max_npy_header_bytes`.
 
 ## See also
 

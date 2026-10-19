@@ -9,6 +9,7 @@
 <url><loc>https://cttir.github.io/hyperannotatR/articles/interop.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/articles/masks.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/articles/partner-interop.html</loc></url>
+<url><loc>https://cttir.github.io/hyperannotatR/articles/reproducible-analysis.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/articles/shiny-workflow.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/authors.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/index.html</loc></url>
@@ -39,6 +40,7 @@
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_check_containment.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_check_geometry.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_clamp.html</loc></url>
+<url><loc>https://cttir.github.io/hyperannotatR/reference/at_close_image.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_control_capabilities.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_control_close.html</loc></url>
@@ -66,7 +68,10 @@
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_flip_y.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_goto.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.html</loc></url>
+<url><loc>https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.html</loc></url>
+<url><loc>https://cttir.github.io/hyperannotatR/reference/at_inspect_saved.html</loc></url>
+<url><loc>https://cttir.github.io/hyperannotatR/reference/at_inspect_source.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_is_pyramidal.html</loc></url>
@@ -109,6 +114,7 @@
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_read_qupath.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_read_stats.html</loc></url>
+<url><loc>https://cttir.github.io/hyperannotatR/reference/at_relink_source.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_remove_layer.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_remove_roi.html</loc></url>
 <url><loc>https://cttir.github.io/hyperannotatR/reference/at_resume.html</loc></url>

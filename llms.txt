@@ -64,9 +64,9 @@ at_plot_overlay(proj)
 
 | Format | Backend | Package required | Pyramid | Spectral |
 |----|----|----|----|----|
-| PNG / JPEG / TIFF | `raster` | magick or tiff | no | no |
-| Pyramidal / OME-TIFF | `tiff` | tiff | yes | multiplex |
-| qptiff, OME-TIFF | `ometiff` | RBioFormats | yes | multiplex |
+| PNG / JPEG | `raster` | magick | no | no |
+| TIFF, incl. pyramidal and multi-channel | `tiff` | tiff | yes | multiplex |
+| qptiff, OME-TIFF | `ometiff` | RBioFormats + xml2, windowed reads | yes | multiplex |
 | Cubert `.cu3s` | `cuvis` | cuvis.r + CUVIS SDK | no | yes |
 | ENVI cube (BSQ/BIL/BIP) | `envi` | base R, windowed reads | no | yes |
 | Diaspective Vision TIVITA | `tivita` | base R, declared profile or sidecar | no | yes |
@@ -77,7 +77,20 @@ A TIFF is treated as spectral only when wavelengths are declared.
 and
 [`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md)
 report band wavelengths and gaps, value units, calibration and transform
-digests, and the bytes actually read.
+digests, and the bytes actually read. The ENVI, TIVITA and OME readers
+read windows from the file; the raster, TIFF and Cubert backends decode
+the whole image when it is opened, so it must fit in memory.
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md)
+reports which applies to an image.
+
+The `raster` backend converts samples to a 0–255 display convention and
+does not preserve original high-bit-depth intensities. The quantitative
+TIFF, OME and ENVI readers keep raw samples; format and optional-reader
+limits are documented in
+[`vignette("images-and-backends")`](https://cttir.github.io/hyperannotatR/articles/images-and-backends.md).
+Extraction never applies plot contrast stretches. It reports selected,
+finite and nonfinite counts, with an explicit `nonfinite` policy and
+declared spectral units.
 
 ## The mask workflow
 
@@ -136,9 +149,9 @@ events and send typed commands to a running app. See
 ## Related work
 
 Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious,
-hyperannotatR is R-native and script-first, handles hyperspectral cubes
-alongside microscopy, and treats the batch **mask** export as a
-first-class, reproducible artifact.
+hyperannotatR is R-native and script-first, focuses on hyperspectral
+cubes and their display rasters, and treats the batch **mask** export as
+a first-class, reproducible artifact.
 
 ## Acknowledgements
 
@@ -176,6 +189,7 @@ Read images and register formats.
 - [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md)
   : Read a tile from an image
 - [`at_dims()`](https://cttir.github.io/hyperannotatR/reference/at_dims.md)
+  [`dim(`*`<annot_image>`*`)`](https://cttir.github.io/hyperannotatR/reference/at_dims.md)
   : Image dimensions at a pyramid level
 - [`at_n_levels()`](https://cttir.github.io/hyperannotatR/reference/at_n_levels.md)
   : Number of pyramid levels
@@ -205,6 +219,10 @@ Read images and register formats.
   : Declare a TIVITA SpecCube layout profile
 - [`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md)
   : Export a Cubert measurement to a portable ENVI cube
+- [`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md)
+  : Inspect the effective reading capabilities of an image
+- [`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md)
+  : Release an image handle
 
 ## Hyperspectral metadata
 
@@ -432,7 +450,8 @@ ggplot2 plots.
 
 ## Import and export
 
-Interchange with GeoJSON, QuPath, CSV, and RDS.
+Interchange with GeoJSON, QuPath, CSV, and RDS; inspect and relink saved
+sources.
 
 - [`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md)
   : Write a project's ROIs to GeoJSON
@@ -452,6 +471,13 @@ Interchange with GeoJSON, QuPath, CSV, and RDS.
   : Save a session
 - [`at_load_session()`](https://cttir.github.io/hyperannotatR/reference/at_load_session.md)
   : Load a session
+- [`at_inspect_saved()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_saved.md)
+  : Inspect a saved checkpoint without modifying it
+- [`at_inspect_source()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_source.md)
+  : Inspect an image source without changing annotations or reading
+  pixels
+- [`at_relink_source()`](https://cttir.github.io/hyperannotatR/reference/at_relink_source.md)
+  : Explicitly relink or revalidate an image source
 - [`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)
   : Write a project's ROIs to CSV
 - [`at_read_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.md)
@@ -473,7 +499,7 @@ staging and commits.
 - [`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md)
   : Import a qupflowR handoff or neutral interchange file
 - [`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
-  : Stage partner changes against an hyperannotatR project
+  : Stage partner changes against a hyperannotatR project
 - [`at_commit_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.md)
   : Commit a staged partner patch
 
@@ -593,3 +619,5 @@ Bundled synthetic examples.
 - [Interoperability](https://cttir.github.io/hyperannotatR/articles/interop.md):
 - [Working with qupflowR: handoffs, control and training
   data](https://cttir.github.io/hyperannotatR/articles/partner-interop.md):
+- [Reproducible analytical
+  summaries](https://cttir.github.io/hyperannotatR/articles/reproducible-analysis.md):

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,8 @@
 
 
 <dt id="arg-bits">bits<a class="anchor" aria-label="anchor" href="#arg-bits"></a></dt>
-<dd><p>Integer bit depth for TIFF: <code>16</code> (default) or <code>8</code>.</p></dd>
+<dd><p>Single finite whole-number bit depth for TIFF: <code>16</code> (default)
+or <code>8</code>, including <code>16L</code>/<code>8L</code>. Explicit vectors are rejected.</p></dd>
 
 
 <dt id="arg-legend">legend<a class="anchor" aria-label="anchor" href="#arg-legend"></a></dt>
@@ -93,6 +94,18 @@ the mask. Default <code>TRUE</code>.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>The output path, invisibly.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>TIFF exports preserve unsigned 8/16-bit codes; PNG exports are
+unsigned 8-bit only, regardless of <code>bits</code>. Samples must be finite integers
+in the selected unsigned range; invalid samples reject before writing.
+TIFF writing requires <code>tiff</code> or a capable <code>magick</code> build. PNG writing
+requires <code>magick</code> with exact grayscale support. Missing exact conversion
+capability produces an error rather than a quantized output. The caller's
+explicit path is respected. Mask and legend are staged before either is
+replaced; a preexisting sidecar also requires <code>overwrite=TRUE</code>. Publication
+failure rolls back prior files. Concurrent writers must be serialized.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

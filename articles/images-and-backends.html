@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,14 +77,19 @@
     
 <p><img src="../reference/figures/logo.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
 <div class="section level2">
-<h2 id="a-handle-not-a-pixel-array">A handle, not a pixel array<a class="anchor" aria-label="anchor" href="#a-handle-not-a-pixel-array"></a>
+<h2 id="image-handles-and-windowed-readers">Image handles and windowed readers<a class="anchor" aria-label="anchor" href="#image-handles-and-windowed-readers"></a>
 </h2>
-<p>Whole-slide microscopy and hyperspectral cubes are routinely
-gigabytes in size, so hyperannotatR never loads them wholesale. Reading
-an image returns an <code>annot_image</code>: a lightweight,
-backend-agnostic <em>handle</em> that carries the metadata you need to
-annotate — dimensions, pyramid levels, bands, pixel size — together with
-a lazy accessor that fetches pixels only when asked.</p>
+<p>Reading an image returns an <code>annot_image</code> with dimensions,
+pyramid levels, bands, pixel size and a tile accessor,
+<code><a href="../reference/at_tile.html">at_tile()</a></code>. The ENVI, TIVITA SpecCube and OME readers open
+only the metadata and read the requested windows from the file. The
+plain TIFF and raster readers read the complete image when it is opened;
+TIFF decoding runs in a separate R process, which isolates native
+decoder failures but does not reduce the memory the decoded image needs.
+<code><a href="../reference/at_image_capabilities.html">at_image_capabilities()</a></code> reports the effective strategy,
+including images that still hold a pixel snapshot in memory. Allow
+additional memory for decoder buffers, returned tiles and the tile
+cache.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"tissue"</span><span class="op">)</span></span>
 <span><span class="va">img</span></span>
@@ -95,12 +100,19 @@ a lazy accessor that fetches pixels only when asked.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 512 512   3</span></span></code></pre></div>
 <p>The <code><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim()</a></code> of a handle is
-<code>c(width, height, bands)</code>. Printing it summarises the backend
-that opened it, the data type, and the extent, but nothing above has
-touched the pixels themselves. That is the point: you can inspect,
-transform and plan annotations against a huge image on a modest machine,
-because the handle is a few hundred bytes regardless of how large the
-underlying file is.</p>
+<code>c(width, height, bands)</code>. Printing it summarises the
+backend, data type and extent; the metadata accessors use the fields
+already read.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_image_capabilities.html">at_image_capabilities</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 5</span></span>
+<span><span class="co">#&gt;  $ metadata_only: logi FALSE</span></span>
+<span><span class="co">#&gt;  $ window_read  : logi FALSE</span></span>
+<span><span class="co">#&gt;  $ samples      : chr "display-converted-0-255"</span></span>
+<span><span class="co">#&gt;  $ io           : chr "memory"</span></span>
+<span><span class="co">#&gt;  $ lifecycle    : chr "retained pixel snapshot"</span></span>
+<span><span class="fu"><a href="../reference/at_image_capabilities.html">at_image_capabilities</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">window_read</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>A handle also exposes accessors for everything an annotation workflow
 needs: <code><a href="../reference/at_n_bands.html">at_n_bands()</a></code> and <code><a href="../reference/at_bands.html">at_bands()</a></code> for the
 channels, <code><a href="../reference/at_pixel_size.html">at_pixel_size()</a></code> for physical scale, and
@@ -115,7 +127,7 @@ involved.</p>
 resolutions — a pyramid. Level <code>0</code> is full resolution; each
 higher level is a coarser overview. The multiplex example is a
 three-level pyramidal TIFF.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"multiplex"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/at_n_levels.html">at_n_levels</a></span><span class="op">(</span><span class="va">mx</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 3</span></span>
@@ -133,9 +145,10 @@ three-level pyramidal TIFF.</p>
 <span><span class="co">#&gt; 2     1   256    256</span></span>
 <span><span class="co">#&gt; 3     2   128    128</span></span></code></pre></div>
 <p>Levels matter for two reasons. First, an overview lets you display
-and navigate the whole image without reading full resolution. Second, an
-ROI drawn on a coarse level records the <code>level</code> it was
-created at, so its coordinates can be rescaled exactly to level 0 (see
+and navigate the whole image at reduced resolution; windowed readers can
+do this without reading full-resolution pixels. Second, an ROI drawn on
+a coarse level records the <code>level</code> it was created at, so its
+coordinates can be rescaled to level 0 (see
 <code><a href="../reference/at_roi_rescale.html">at_roi_rescale()</a></code> and <code><a href="../reference/at_transform.html">at_transform()</a></code>). Every
 geometry in hyperannotatR is anchored to a pyramid level; the coordinate
 convention is image pixels with the origin at the top-left and
@@ -148,17 +161,17 @@ convention is image pixels with the origin at the top-left and
 The registry maps format names to four functions — read metadata, fetch
 a tile, detect a file, and report whether its optional dependencies are
 installed — so new formats can be added without touching core code.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/at_backend_list.html">at_backend_list</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
-<span><span class="co">#&gt;   name    description                                 extensions       available</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> cuvis   Cubert hyperspectral (cuvis.r)              cu3, cu3s        FALSE    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> envi    ENVI header + binary cube                   hdr, dat, img, … TRUE     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ometiff OME-TIFF and qptiff (RBioFormats)           ome.tif, ome.ti… TRUE     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> raster  PNG, JPEG, and single-plane TIFF            png, jpg, jpeg,… TRUE     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tiff    Pyramidal / multi-directory TIFF            tif, tiff        TRUE     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> tivita  Diaspective Vision Tivita (ENVI-compatible) dat, hdr         TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
+<span><span class="co">#&gt;   name    description             extensions available metadata_only window_read</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> cuvis   Cubert hyperspectral (… cu3, cu3s  FALSE     FALSE         FALSE      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> envi    ENVI header + binary c… hdr, dat,… TRUE      TRUE          TRUE       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ometiff OME-TIFF and qptiff (R… ome.tif, … TRUE      FALSE         FALSE      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> raster  PNG, JPEG, and single-… png, jpg,… TRUE      FALSE         FALSE      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tiff    Pyramidal / multi-dire… tif, tiff  TRUE      FALSE         FALSE      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> tivita  Diaspective Vision Tiv… dat, hdr   TRUE      TRUE          TRUE</span></span></code></pre></div>
 <p>The <code>available</code> column is evaluated lazily: a backend for
 a format whose support package is absent still appears in the list but
 reads nothing until you install the package. This keeps the package
@@ -170,6 +183,148 @@ first that recognises the file; more specific readers are tried before
 general ones, so an OME-TIFF is not claimed by the plain raster reader.
 You can always bypass detection by passing <code>backend =</code>
 explicitly.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Backend</th>
+<th>Open / tile strategy</th>
+<th>Qualified sample contract and limits</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>envi</code></td>
+<td>Metadata / bounded binary runs</td>
+<td>BSQ/BIL/BIP, both byte orders,
+uint8/int16/int32/uint16/uint32/float32/float64; offsets and trailing
+metadata</td>
+</tr>
+<tr class="even">
+<td><code>tivita</code></td>
+<td>Metadata / bounded binary runs</td>
+<td>ENVI exports, and big-endian float32 SpecCubes matched to a declared
+<code><a href="../reference/at_tivita_profile.html">at_tivita_profile()</a></code> or sidecar, including synthetic
+nonstandard dimensions</td>
+</tr>
+<tr class="odd">
+<td><code>ometiff</code></td>
+<td>Metadata / native subset windows</td>
+<td>RBioFormats + xml2; uint8/uint16/int16/int32/uint32/float32/float64
+scalar fixtures plus uint16 CYX/anisotropic pyramids; Z/time reject,
+explicit multiple-series selection</td>
+</tr>
+<tr class="even">
+<td><code>tiff</code></td>
+<td>Eager / memory subset</td>
+<td>Qualified raw TIFF sample types below; no window claim, ambiguous
+directories reject</td>
+</tr>
+<tr class="odd">
+<td><code>raster</code></td>
+<td>Eager / memory subset</td>
+<td>Display conversion to 0–255; original high-bit-depth intensities are
+not preserved</td>
+</tr>
+<tr class="even">
+<td><code>cuvis</code></td>
+<td>Eager / memory subset</td>
+<td>CUVIS SDK through cuvis.r 0.1.0; exercised on local vendor data
+only, not in CI; no bounded-read claim</td>
+</tr>
+<tr class="odd">
+<td>Third-party</td>
+<td>Declared by registration / reader</td>
+<td>Omitted capabilities remain unknown</td>
+</tr>
+</tbody>
+</table>
+<p>Plain TIFF remains the explicit eager fallback. Its pyramid
+directories are not silently replaced by a first-directory GDAL view.
+The qualified OME path uses BioFormats subsets with normalization
+disabled, preserving image orientation and actual per-level dimensions.
+Availability is not qualification of every vendor/qptiff layout or
+deployment. No vendor whole-slide fixture is qualified.</p>
+</div>
+<div class="section level2">
+<h2 id="raw-samples-and-input-validation">Raw samples and input validation<a class="anchor" aria-label="anchor" href="#raw-samples-and-input-validation"></a>
+</h2>
+<p>ENVI reads validate positive integer dimensions, interleave, byte
+order, sample type, header offset and payload length before allocation.
+Header offsets skip leading bytes; trailing metadata is permitted.
+Signed int32 image samples, including <code>-2147483648</code>, remain
+exact doubles. NPY masks accept 2-D scalar integer arrays in C or
+Fortran order, with version 1, 2 or 3 headers. Zero-sized masks,
+structured/object dtypes, malformed headers, truncated payloads and
+samples outside <code>[-2147483647, 2147483647]</code> are rejected. R
+reserves <code>-2147483648</code> for integer <code>NA</code>, so that
+value cannot be an integer mask code. Signed and unsigned 64-bit inputs
+are accepted only when every complete value fits this mask range. A NPY
+reader consumes the declared array and permits subsequent
+bytes/arrays.</p>
+<p>The default <code>hyperannotatR.max_read_bytes</code> budget is 1
+GiB. For windowed readers it limits the requested decoded double array,
+before allocation; a valid large source is not rejected because its full
+cube exceeds that budget. Binary file sizes/offsets must fit exact
+double integer arithmetic (at most 2^53-1 bytes), and each declared
+dimension and each returned window’s element count must fit R’s integer
+indexing limit. NPY remains eager and checks both payload and decoded
+bytes. These are array limits, not RSS guarantees: temporary buffers and
+the cache need additional memory. ENVI headers have a fixed 1 MiB limit;
+NPY headers have a separate 1 MiB default configurable with
+<code>hyperannotatR.max_npy_header_bytes</code>. For trusted larger
+arrays, set a positive finite <code>hyperannotatR.max_read_bytes</code>
+value.</p>
+<p>The <code>tiff</code> backend preserves raw grayscale uint8/uint16,
+signed int16 and float32 samples, and RGB uint16 samples. Sample type
+and photometric metadata determine decoding; integer display
+normalisation is reversed without scaling float samples. Unsupported
+encodings, including integer32/float64 TIFF in the qualified minimal
+<code>tiff</code> installation, fail explicitly. Independent equal-size
+TIFF directories are ambiguous and are rejected instead of discarding
+planes. A consistent decreasing pyramid retains its actual dimensions at
+every level.</p>
+<p>OME-TIFF and qptiff detection requires <code>RBioFormats</code> and
+<code>xml2</code>. The OME reader normalises <code>[x,y,channel]</code>
+to <code>[y,x,band]</code>, preserves actual resolution dimensions, and
+reads channel names, emission wavelengths and physical pixel sizes from
+OME-XML. Missing/incomplete calibration is labelled <code>missing</code>
+in image metadata; its pixel grid remains in <code>px</code>. Missing
+wavelengths remain <code>NULL</code>. Multiple series require
+<code>at_read_image(path, series = ...)</code>; non-singleton Z/time
+axes are rejected and must be selected/exported as a single plane
+beforehand.</p>
+<p>Automatic TIFF/OME detection errors when the required raw reader is
+absent. Explicit <code>backend = "raster"</code> selects the separate
+display-conversion semantics, which can lose sample depth and format
+metadata. TIFF mask imports likewise require the raw TIFF reader and a
+single finite integer plane.</p>
+</div>
+<div class="section level2">
+<h2 id="reopening-saved-reader-contracts">Reopening saved reader contracts<a class="anchor" aria-label="anchor" href="#reopening-saved-reader-contracts"></a>
+</h2>
+<p>Saved TIFF/OME images record a stable semantic contract
+(<code>axes = "yxb"</code>, <code>samples = "raw-scalar-v1"</code>) in
+image metadata and durable source descriptors. This describes pixel
+meaning, independently of package release or eager/windowed execution.
+Mask sidecars retain it; masks with missing affected contracts or
+conflicting contracts need an explicit alignment assertion rather than
+being certified as source-aligned. Custom backends without this marker
+retain their existing descriptor comparison semantics.</p>
+<p>On reopen, dimensions, levels, band count, dtype, channel names,
+wavelengths, units, pixel calibration and the reader contract must
+agree. A stale or ambiguous lightweight project still loads its
+annotations and IDs, but pixel access reports the mismatch. Inspect it
+and explicitly revalidate with
+<code>at_relink_source(project, project$image$source)</code>. Relinking
+refreshes reader metadata and retains its existing geometry/wavelength
+compatibility guard; an old transposed OME geometry or changed
+wavelength declaration is not guessed or automatically registered.
+Caller-modified calibration also requires explicit review if it differs
+from the reopened reader. Full legacy snapshots whose in-memory pixel
+handles remain available retain those original pixels.</p>
 </div>
 <div class="section level2">
 <h2 id="the-universal-tile-accessor">The universal tile accessor<a class="anchor" aria-label="anchor" href="#the-universal-tile-accessor"></a>
@@ -179,14 +334,16 @@ explicitly.</p>
 <code>[y, x, band]</code> numeric array — even for a single band. You
 choose the pyramid level, an optional pixel window, and an optional
 subset of bands.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tile</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_tile.html">at_tile</a></span><span class="op">(</span><span class="va">mx</span>, level <span class="op">=</span> <span class="fl">0</span>, xrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">64</span><span class="op">)</span>, yrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">64</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">tile</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 64 64  4</span></span></code></pre></div>
-<p>Because the request is scoped, only that 64x64x4 block is read. To
-display a cheap thumbnail of the whole image, read the coarsest level in
-full:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>The returned array contains only that 64 x 64 window of every band.
+Eager backends have already read the underlying image; the
+window-capable backends read only the requested runs or subsets. Band
+selections are finite whole indices, keep their order and may repeat. To
+request a thumbnail, read the coarsest level:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">overview</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_tile.html">at_tile</a></span><span class="op">(</span><span class="va">mx</span>, level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">overview</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 128 128   4</span></span>
@@ -196,7 +353,7 @@ full:</p>
 <p>Spectral cubes are handled by the very same accessor; their band
 metadata simply carries wavelengths, which you can read back with the
 image accessors.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/at_is_spectral.html">at_is_spectral</a></span><span class="op">(</span><span class="va">cu</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
@@ -221,7 +378,7 @@ turns a request into a <code>[y, x, band]</code> array. Here is a
 complete, self-contained backend for a toy “constant image” format that
 stores only a size and a fill value, and synthesises pixels on
 demand.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">const_read</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span>                 <span class="co"># list(width, height, bands, value)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/structure.html" class="external-link">structure</a></span><span class="op">(</span></span>
@@ -262,13 +419,13 @@ demand.</p>
 <p>The new backend now behaves like any other — it appears in the
 registry, is auto-detected from the file, and serves tiles through
 <code><a href="../reference/at_tile.html">at_tile()</a></code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".const"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">64L</span>, height <span class="op">=</span> <span class="fl">48L</span>, bands <span class="op">=</span> <span class="fl">2L</span>, value <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>, <span class="va">path</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_read_image.html">at_read_image</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
 <span><span class="va">cimg</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file363f4fd40962.const</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file34903ce67d43.const</span></span></span>
 <span><span class="co">#&gt; backend: <span style="color: #0000BB;">"const"</span>  |  dtype: <span style="color: #0000BB;">"double"</span></span></span>
 <span><span class="co">#&gt; size: 64 x 48 px  |  levels: 1  |  bands: 2</span></span>
 <span><span class="co">#&gt; pixel size: 1 x 1 px</span></span>
@@ -278,20 +435,108 @@ registry, is auto-detected from the file, and serves tiles through
 <div class="section level2">
 <h2 id="memory-discipline">Memory discipline<a class="anchor" aria-label="anchor" href="#memory-discipline"></a>
 </h2>
-<p>The lazy handle is not a convenience but a contract. Everything
-downstream reads tile-wise: <code><a href="../reference/at_extract.html">at_extract()</a></code> walks each ROI’s
-bounding box level by level, and <code><a href="../reference/at_mask.html">at_mask()</a></code> rasterises
-within the region’s extent rather than the whole slide. By requesting
-only the window and bands you need — as <code><a href="../reference/at_tile.html">at_tile()</a></code> above
-does — you can annotate and extract from images far larger than memory.
-A well-behaved backend honours the same discipline: its
-<code>tile_fn</code> should fetch just the requested window, never the
-entire level, so that the cost of a call scales with the tile rather
-than the image. The <code>const</code> backend above is the extreme case
-— it holds no pixels at all and synthesises each tile from a single
-value.</p>
+<p>Tile requests are bounded: <code><a href="../reference/at_tile.html">at_tile()</a></code> refuses a request
+larger than <code>options(hyperannotatR.max_tile_bytes)</code> (default
+2 GiB) before reading any pixels. Windowed <code><a href="../reference/at_tile.html">at_tile()</a></code> calls
+bound the returned array and binary reader buffers by the requested
+window. ENVI BSQ/BIL use contiguous x runs; BIP and SpecCube use
+contiguous selected-band runs (complete band selections coalesce spatial
+runs). Sparse band selections can require many seeks. This is a
+bounded-memory claim, not a speed guarantee. OME delegates subset
+decoding to BioFormats; compressed blocks may exceed the requested
+window and its native buffers are not directly controlled by the R array
+budget.</p>
+<p>Full-image <code><a href="../reference/at_tile.html">at_tile()</a></code> still requests a full image.
+Extraction reads one ROI bounding-box tile, without within-ROI
+streaming. <code><a href="../reference/at_mask.html">at_mask()</a></code> returns a full output matrix. Preview,
+queue and export memory require their own limits; windowing alone does
+not make every annotation workflow bounded.</p>
+<p><code>at_close_image(img)</code> returns a copy with its handle
+released; assign it back. The next tile reopens a verified durable
+descriptor. Closing does not purge the shared tile cache; its byte limit
+still governs retained cache entries. Built-in window handles contain
+only paths/layout metadata, open each binary connection per read and
+close it on exit, including errors. No native pointer is serialized.
+Registered backends can supply optional <code>capabilities</code> and
+<code>close_fn=function(img)</code> arguments; existing positional
+registration calls remain valid. Per-image
+<code>meta$capabilities</code> may refine registry declarations. A
+retained in-memory array always reports a memory snapshot through
+<code><a href="../reference/at_image_capabilities.html">at_image_capabilities()</a></code>.</p>
+<p>ENVI descriptors fingerprint both header and payload by normalized
+path, byte size and modification time, regardless of which input path
+the caller supplied. Every file-backed tile validates all fingerprints
+before consulting the cache and again before caching a new result.
+Changed/missing files require explicit <code><a href="../reference/at_relink_source.html">at_relink_source()</a></code>;
+cached pixels cannot hide replacement. These stat fingerprints detect
+ordinary replacements, not adversarial edits preserving size/mtime.
+Concurrent file writers are unsupported. Historical descriptors without
+the complete companion-file evidence stay unverified; today’s header is
+never used to backfill historical provenance. Mask alignment compares
+these composite descriptors and accepts an explicit alignment assertion
+when needed. Actual retained legacy pixel arrays remain usable even when
+sources change; saving such historical snapshots preserves their pixels.
+Releasing a snapshot may make those old pixels unavailable if its source
+cannot be revalidated.</p>
+<p>For qualification, internal <code>.read_telemetry_reset()</code> /
+<code>.read_telemetry()</code> counters can bracket open and tile
+operations. <code>binary_bytes</code> counts bytes actually returned by
+instrumented binary/header reads and <code>binary_calls</code> counts
+those calls. Native metadata/window calls and returned decoded-double
+bytes are separate; native encoded file traffic is unknown
+(<code>NA</code>), never estimated from the decoded request. These
+counters are not OS cache misses, disk throughput or RSS. Measure
+process memory separately from before open, including native
+startup.</p>
 <p>Next, see the <em>The annotation model</em> vignette to learn how
 ROIs, layers and projects build on these image handles.</p>
+</div>
+<div class="section level2">
+<h2 id="quantitative-extraction-contracts">Quantitative extraction contracts<a class="anchor" aria-label="anchor" href="#quantitative-extraction-contracts"></a>
+</h2>
+<p><code>at_extract(project, stat = "all", nonfinite = "omit")</code>
+computes each ROI and band separately using finite samples only.
+<code>n_px</code> (and statistic <code>n</code>) counts selected
+support; <code>n_valid</code> counts finite samples and
+<code>n_invalid</code> counts NA, NaN and infinities. The default
+<code>nonfinite = "propagate"</code> returns NA summary statistics for
+any affected ROI/band. <code>"error"</code> rejects selected nonfinite
+samples. Empty support emits no rows, a singleton has NA sample SD, and
+an all-invalid selection under omit has NA statistics including sum.
+Overlapping ROIs count shared pixels separately; ROI rows must not be
+pooled as independent pixels or images. The output <code>analysis</code>
+attribute records source, level, bands, policy and limitations.</p>
+<p>Wavelength values and their <code>unit</code> come from
+<code><a href="../reference/at_bands.html">at_bands()</a></code>. They are not silently converted or relabelled:
+missing ENVI units remain unknown. Spectrum output orders by ROI, unit,
+coordinate and band. <code><a href="../reference/at_plot_spectrum.html">at_plot_spectrum()</a></code> labels the declared
+spectral coordinate unit and rejects mixed units until explicitly
+converted. Display contrast does not change extracted tiles. The raster
+fallback already converts source samples to a 0–255 display convention,
+so its extraction is not an assertion of original high-bit-depth
+intensity preservation.</p>
+<p><code>at_roi_area(roi, units = "physical", image = image)</code> uses
+the image’s level-zero pixel calibration and actual pyramid dimensions;
+physical area is invariant to reporting level. The result is expressed
+in the square of <code>image$pixel_unit</code>. Unknown or pixel-only
+calibration rejects. Level-zero legacy ROI <code>pixel_size</code>
+attributes remain supported in squared calibration units; nonzero stored
+ROI levels require explicit <code>pixel_size_level</code> and
+<code>pixel_unit</code> instead of an inferred calibration. Geometric
+area differs from the number of raster-selected pixels.</p>
+<p><code><a href="../reference/at_mask_agreement.html">at_mask_agreement()</a></code> validates annotated masks’ grids,
+source descriptors, encodings and codebooks.
+<code>alignment = "assert"</code> records an explicit registration
+assertion; <code>code_alignment = "by-label"</code> separately aligns
+categorical or bitfield codes by semantic labels. Instance alignment
+uses stable ROI IDs via <code>"by-id"</code>, never repeated class
+names. Display <code>labels</code> cannot authorize remapping. Binary
+and categorical metrics compare equality; bitfield metrics compare
+memberships, with exact-set accuracy and no categorical kappa. Declared
+absent classes have NA Dice/IoU and do not contribute to macro means. A
+background-only pair has accuracy 1 and undefined (NA) kappa. Plain
+matrices remain explicit-code legacy categorical inputs and reject
+fractional, nonfinite or unrepresentable values.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

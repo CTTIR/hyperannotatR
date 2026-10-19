@@ -29,8 +29,11 @@ at_layer_add(layer, roi, call = rlang::caller_env())
 A new
 [annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 with the ROI appended. The label vocabulary and colour mapping are
-extended if the ROI introduces a new label. A colliding ROI identifier
-is re-minted to preserve uniqueness. The input is unchanged.
+extended if the ROI introduces a new label (following the colour
+specification given to
+[`at_layer()`](https://cttir.github.io/hyperannotatR/reference/at_layer.md)).
+A missing, empty or colliding ROI identifier is re-minted to one unused
+in the layer. The input is unchanged.
 
 ## See also
 

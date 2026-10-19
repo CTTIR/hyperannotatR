@@ -91,7 +91,9 @@ Other backends:
 [`at_backend_get()`](https://cttir.github.io/hyperannotatR/reference/at_backend_get.md),
 [`at_backend_list()`](https://cttir.github.io/hyperannotatR/reference/at_backend_list.md),
 [`at_backend_register()`](https://cttir.github.io/hyperannotatR/reference/at_backend_register.md),
+[`at_close_image()`](https://cttir.github.io/hyperannotatR/reference/at_close_image.md),
 [`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md),
 [`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md)
 

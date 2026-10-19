@@ -53,7 +53,9 @@ at_training_export(
 - split:
 
   Optional explicit assignment: a named list (`train`, `validation`,
-  `test`) of group ids. `NULL` assigns groups by `fractions` and `seed`.
+  `test`) of group ids. With `group_by = "image_id"` entry ids
+  (`"entry-0001"`) or entry names are accepted too and mapped to their
+  image's group. `NULL` assigns groups by `fractions` and `seed`.
 
 - tile_size:
 
@@ -73,7 +75,9 @@ at_training_export(
 
 - bands:
 
-  Band indices recorded (and written with `include_images`).
+  Band indices recorded (and written with `include_images`); every entry
+  must have them. With `include_images = TRUE` all entries must share
+  the same band table (`BAND_MISMATCH` otherwise).
 
 - include_images:
 
@@ -90,12 +94,14 @@ at_training_export(
 
 - groups:
 
-  Optional data frame with `entry_id` (or `name`) plus `subject_id`
+  Optional data frame with `entry_id` (the session's entry id, or the
+  queue-position id `"entry-NNNN"`; else `name`) plus `subject_id`
   and/or `sample_id` columns (character).
 
 - fractions:
 
-  Named split fractions.
+  Named split fractions. Split names (here and in `split`) are used as
+  directory names and must consist of letters, digits, `.`, `_` or `-`.
 
 - label_map:
 
@@ -148,10 +154,22 @@ Other training:
 ## Examples
 
 ``` r
-sess <- at_example_session(3)
-for (i in 1:3) sess$projects[[i]] <- at_example_project()
-ds <- at_training_export(sess, file.path(tempdir(), "train-example"), tile_size = 128,
+sess <- at_example_session(2)
+for (i in 1:2) sess$projects[[i]] <- at_example_project()
+ds <- at_training_export(sess, file.path(tempdir(), "train-example"), tile_size = 256,
                          overwrite = TRUE)
 ds$manifest$counts$tiles
-#> [1] 48
+#> [1] 8
+# Both example entries show the same picture, so they form one image
+# group and land in one split: tiles of one image never leak across splits.
+ds$manifest$counts$images_by_split
+#> $train
+#> [1] 2
+#> 
+#> $validation
+#> [1] 0
+#> 
+#> $test
+#> [1] 0
+#> 
 ```

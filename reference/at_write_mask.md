@@ -33,7 +33,8 @@ at_write_mask(
 
 - bits:
 
-  Integer bit depth for TIFF: `16` (default) or `8`.
+  Single finite whole-number bit depth for TIFF: `16` (default) or `8`,
+  including `16L`/`8L`. Explicit vectors are rejected.
 
 - legend:
 
@@ -51,6 +52,19 @@ at_write_mask(
 ## Value
 
 The output path, invisibly.
+
+## Details
+
+TIFF exports preserve unsigned 8/16-bit codes; PNG exports are unsigned
+8-bit only, regardless of `bits`. Samples must be finite integers in the
+selected unsigned range; invalid samples reject before writing. TIFF
+writing requires `tiff` or a capable `magick` build. PNG writing
+requires `magick` with exact grayscale support. Missing exact conversion
+capability produces an error rather than a quantized output. The
+caller's explicit path is respected. Mask and legend are staged before
+either is replaced; a preexisting sidecar also requires
+`overwrite=TRUE`. Publication failure rolls back prior files. Concurrent
+writers must be serialized.
 
 ## See also
 

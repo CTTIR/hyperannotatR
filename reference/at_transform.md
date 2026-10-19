@@ -10,7 +10,13 @@ so it is exact for pyramids with any downsampling ratio.
 ## Usage
 
 ``` r
-at_transform(roi, from_level, to_level, img, call = rlang::caller_env())
+at_transform(
+  roi,
+  from_level = roi$level,
+  to_level,
+  img,
+  call = rlang::caller_env()
+)
 ```
 
 ## Arguments
@@ -20,9 +26,14 @@ at_transform(roi, from_level, to_level, img, call = rlang::caller_env())
   An
   [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
-- from_level, to_level:
+- from_level:
 
-  Integer source and target pyramid levels.
+  Integer source pyramid level; defaults to, and must equal, the ROI's
+  `level`, because that is the level its coordinates are stored at.
+
+- to_level:
+
+  Integer target pyramid level.
 
 - img:
 
@@ -38,7 +49,8 @@ at_transform(roi, from_level, to_level, img, call = rlang::caller_env())
 
 An
 [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
-with coordinates at `to_level`. Exactly invertible.
+with coordinates at `to_level`. Invertible within floating-point
+precision (relative tolerance `1e-12`).
 
 ## See also
 
@@ -68,6 +80,6 @@ img <- at_example_image("multiplex")
 r <- at_roi_rect(0, 0, 100, 100, label = "a")
 at_transform(r, from_level = 0, to_level = 2, img = img)
 #> <annot_roi> a (POLYGON)
-#> id: "roi_000000131"  |  level: 2  |  source: manual
+#> id: "roi_000000117"  |  level: 2  |  source: manual
 #> bbox: [0, 0] - [25, 25]
 ```

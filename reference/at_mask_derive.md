@@ -1,11 +1,9 @@
 # Derive a training mask from layer masks
 
-Combine rasterised layer masks into the derived training mask
-`state WHERE anatomy == keep_label AND artefact == 0 AND state != background`.
-This is the cross-layer operation the four-layer HSI scheme relies on:
-it keeps a state (class) label only where the anatomy layer marks the
-region of interest, no artefact bit is set, and the state is actually
-labelled.
+Keep foreground state codes inside the requested anatomy class and
+outside artefacts, using each mask's declared background and class
+membership. An anatomy bitfield includes composite samples containing
+the requested bit.
 
 ## Usage
 
@@ -15,8 +13,9 @@ at_mask_derive(
   anatomy,
   artefact = NULL,
   keep_label = "wound",
-  background = 0L,
-  call = rlang::caller_env()
+  background = NULL,
+  call = rlang::caller_env(),
+  alignment = c("legacy", "assert")
 )
 ```
 
@@ -42,16 +41,28 @@ at_mask_derive(
 
 - background:
 
-  Integer background/unlabeled value. Default `0`.
+  Output background value. `NULL` (default) preserves the state mask's
+  background. Must not collide with any state class code.
 
 - call:
 
   The calling environment, for error reporting.
 
+- alignment:
+
+  `"legacy"` (default) validates declared source descriptors and grids;
+  masks with only legacy metadata use a recorded legacy assumption.
+  Modern masks with missing or conflicting provenance require
+  `"assert"`, explicitly asserting registration without resampling.
+  Dimensions must always agree. Entry IDs and runtime cache generations
+  do not establish source compatibility. Combining the same object
+  records `self-grid`.
+
 ## Value
 
-An `annot_mask` (multiclass) of the surviving state codes, with the
-state legend restricted to those classes and pixel counts recomputed.
+An `annot_mask` retaining state encoding and the full state codebook,
+with counts recomputed, zero counts for absent classes, and alignment
+provenance recorded in `mask_metadata$derivation`.
 
 ## See also
 
@@ -81,9 +92,11 @@ proj <- at_example_project()
 m <- at_mask(proj, "multiclass")
 at_mask_derive(m, m, keep_label = at_mask_legend(m)$label[1])
 #> <annot_mask> multiclass  |  512 x 512 px  |  level 0
-#> values: 1
-#> # A tibble: 1 × 6
-#>   value label  layer   roi_id  n_px colour 
-#>   <int> <chr>  <chr>   <chr>  <int> <chr>  
-#> 1     1 tumour regions NA     19600 #999999
+#> values: 3
+#> # A tibble: 3 × 6
+#>   value label    layer   roi_id  n_px colour 
+#>   <int> <chr>    <chr>   <chr>  <int> <chr>  
+#> 1     1 tumour   regions NA     19600 #999999
+#> 2     2 necrosis regions NA         0 #E69F00
+#> 3     3 stroma   regions NA         0 #56B4E9
 ```

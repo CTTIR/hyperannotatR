@@ -1,7 +1,8 @@
 # Validate a project's invariants
 
 Check that layer names are unique, ROI identifiers are unique across the
-project, and all geometries are valid.
+project, every ROI has one geometry at a pyramid level the image has,
+and all geometries are valid.
 
 ## Usage
 

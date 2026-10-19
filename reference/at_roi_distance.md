@@ -5,7 +5,7 @@ Distance between two ROIs
 ## Usage
 
 ``` r
-at_roi_distance(roi1, roi2, call = rlang::caller_env())
+at_roi_distance(roi1, roi2, call = rlang::caller_env(), image = NULL)
 ```
 
 ## Arguments
@@ -18,6 +18,12 @@ at_roi_distance(roi1, roi2, call = rlang::caller_env())
 - call:
 
   The calling environment, for error reporting.
+
+- image:
+
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  defining actual pyramid dimensions; required for any nonzero ROI level
+  because measurements are reported at level 0.
 
 ## Value
 

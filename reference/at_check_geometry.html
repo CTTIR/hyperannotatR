@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,8 +66,9 @@
 (character), <code>severity</code> (character, <code>"error"</code>/<code>"warning"</code>), and <code>fixable</code>
 (logical). Detected issues: self-intersection, invalid geometry, zero area,
 degenerate rings, out-of-bounds vertices, duplicate consecutive vertices,
-ring orientation, and <code>NA</code> coordinates. A 0-row tibble when all geometry is
-valid.</p>
+ring orientation, <code>NA</code> coordinates, empty geometry, and a pyramid level the
+image does not have (<code>level_out_of_range</code>). A 0-row tibble when all
+geometry is valid.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

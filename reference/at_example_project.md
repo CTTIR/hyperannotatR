@@ -43,12 +43,12 @@ Other projects:
 ``` r
 proj <- at_example_project()
 at_rois(proj)
-#> # A tibble: 3 × 14
-#>   roi_id    layer label geom_type level area_px centroid_x centroid_y n_vertices
-#>   <chr>     <chr> <chr> <chr>     <int>   <dbl>      <dbl>      <dbl>      <int>
-#> 1 roi_0000… regi… tumo… POLYGON       0   19600        190        220          5
-#> 2 roi_0000… regi… necr… POLYGON       0   72704        256        441          5
-#> 3 roi_0000… regi… stro… POLYGON       0   34200        390        125          5
-#> # ℹ 5 more variables: created <dttm>, modified <dttm>, author <chr>,
-#> #   source <chr>, geometry <POLYGON>
+#> # A tibble: 3 × 15
+#>   roi_id  layer label geom_type level source_level area_px centroid_x centroid_y
+#>   <chr>   <chr> <chr> <chr>     <int>        <int>   <dbl>      <dbl>      <dbl>
+#> 1 roi_00… regi… tumo… POLYGON       0            0   19600        190        220
+#> 2 roi_00… regi… necr… POLYGON       0            0   72704        256        441
+#> 3 roi_00… regi… stro… POLYGON       0            0   34200        390        125
+#> # ℹ 6 more variables: n_vertices <int>, created <dttm>, modified <dttm>,
+#> #   author <chr>, source <chr>, geometry <POLYGON>
 ```

@@ -21,7 +21,7 @@ and native ROI shapes, which hyperannotatR does not model, are reported as
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,7 +95,11 @@ content-derived <code>image_id</code>). Default <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
-<dd><p>The calling environment, for error reporting.</p></dd>
+<dd><p>The calling environment, for error reporting.</p>
+<p>In a session manifest every ROI and layer record carries the <code>entry_id</code> of
+its queue entry, so entries that share an image stay separate. An ROI whose
+<code>review_status</code> attribute is not one of <code>"unreviewed"</code>, <code>"reviewed"</code>,
+<code>"rejected"</code> or <code>"staged"</code> is refused (<code>REVIEW_STATUS_INVALID</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">

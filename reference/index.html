@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@
 
         <dt>
 
-          <code><a href="at_dims.html">at_dims()</a></code>
+          <code><a href="at_dims.html">at_dims()</a></code> <code><a href="at_dims.html">dim(<i>&lt;annot_image&gt;</i>)</a></code>
 
         </dt>
         <dd>Image dimensions at a pyramid level</dd>
@@ -165,6 +165,20 @@
 
         </dt>
         <dd>Export a Cubert measurement to a portable ENVI cube</dd>
+
+        <dt>
+
+          <code><a href="at_image_capabilities.html">at_image_capabilities()</a></code>
+
+        </dt>
+        <dd>Inspect the effective reading capabilities of an image</dd>
+
+        <dt>
+
+          <code><a href="at_close_image.html">at_close_image()</a></code>
+
+        </dt>
+        <dd>Release an image handle</dd>
       </dl></div><div class="section level2">
       <h2 id="hyperspectral-metadata">Hyperspectral metadata<a class="anchor" aria-label="anchor" href="#hyperspectral-metadata"></a></h2>
 
@@ -814,7 +828,7 @@
       </dl></div><div class="section level2">
       <h2 id="import-and-export">Import and export<a class="anchor" aria-label="anchor" href="#import-and-export"></a></h2>
 
-      <div class="section-desc"><p>Interchange with GeoJSON, QuPath, CSV, and RDS.</p></div>
+      <div class="section-desc"><p>Interchange with GeoJSON, QuPath, CSV, and RDS; inspect and relink saved sources.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -886,6 +900,27 @@
 
         <dt>
 
+          <code><a href="at_inspect_saved.html">at_inspect_saved()</a></code>
+
+        </dt>
+        <dd>Inspect a saved checkpoint without modifying it</dd>
+
+        <dt>
+
+          <code><a href="at_inspect_source.html">at_inspect_source()</a></code>
+
+        </dt>
+        <dd>Inspect an image source without changing annotations or reading pixels</dd>
+
+        <dt>
+
+          <code><a href="at_relink_source.html">at_relink_source()</a></code>
+
+        </dt>
+        <dd>Explicitly relink or revalidate an image source</dd>
+
+        <dt>
+
           <code><a href="at_write_rois_csv.html">at_write_rois_csv()</a></code>
 
         </dt>
@@ -947,7 +982,7 @@
           <code><a href="at_stage_qupflowr.html">at_stage_qupflowr()</a></code>
 
         </dt>
-        <dd>Stage partner changes against an hyperannotatR project</dd>
+        <dd>Stage partner changes against a hyperannotatR project</dd>
 
         <dt>
 

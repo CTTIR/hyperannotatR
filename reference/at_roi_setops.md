@@ -7,17 +7,21 @@ via `...`, or a single
 Multi-part results are returned as one ROI with `MULTIPOLYGON` geometry
 (the return type is always a single
 [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)).
+When every input is a polygon the result is a `POLYGON` or
+`MULTIPOLYGON`; parts of lower dimension (edges or corners that ROIs
+only touch along) are dropped, and an empty result is an empty polygon,
+with a warning.
 
 ## Usage
 
 ``` r
-at_roi_union(..., call = rlang::caller_env())
+at_roi_union(..., call = rlang::caller_env(), image = NULL)
 
-at_roi_intersect(..., call = rlang::caller_env())
+at_roi_intersect(..., call = rlang::caller_env(), image = NULL)
 
-at_roi_difference(..., call = rlang::caller_env())
+at_roi_difference(..., call = rlang::caller_env(), image = NULL)
 
-at_roi_symdiff(..., call = rlang::caller_env())
+at_roi_symdiff(..., call = rlang::caller_env(), image = NULL)
 ```
 
 ## Arguments
@@ -33,11 +37,26 @@ at_roi_symdiff(..., call = rlang::caller_env())
 
   The calling environment, for error reporting.
 
+- image:
+
+  Optional
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  defining actual pyramid dimensions. Required for mixed levels. With
+  it, results use level 0; without it, all operands must share a level
+  and the result retains that level.
+
 ## Value
 
 A single
 [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 with `source = "derived"`.
+
+## Details
+
+Bare ROIs at different pyramid levels are an error with code
+`MIXED_LEVELS`; pass `image` to combine them at level 0. The result
+takes the label and author of the first ROI, but not its lock, review
+status, QuPath object identity or shape attributes.
 
 ## See also
 

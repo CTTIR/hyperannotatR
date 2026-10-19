@@ -15,7 +15,7 @@ error instead of being approximated."><meta property="og:image" content="https:/
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,7 +86,10 @@ error instead of being approximated.</p>
 
 <dt id="arg-calibration">calibration<a class="anchor" aria-label="anchor" href="#arg-calibration"></a></dt>
 <dd><p>For <code>raw -&gt; reflectance</code>, a list with numeric <code>white</code>
-and <code>dark</code> references (scalars, or one value per band for arrays).</p></dd>
+and <code>dark</code> references: scalars, or one value per band. Per-band references
+apply along the band axis of a <code>[y, x, band]</code> array, the columns of a
+pixel-by-band matrix, or the elements of a single spectrum vector; any
+other length is refused.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>

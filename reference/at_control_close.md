@@ -4,7 +4,9 @@ Close the control service a handle refers to. For a local handle this is
 [`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md);
 for a remote handle it sends `POST /v1/close`, after which that service
 stops accepting requests while its host process and any app keep
-running. Neither path terminates a process.
+running. Neither path terminates a process. A close is not
+revision-checked, so concurrent edits in an attached app never make it
+fail; unsaved app edits stay in the app.
 
 ## Usage
 

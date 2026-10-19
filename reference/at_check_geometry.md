@@ -26,8 +26,9 @@ with columns `roi_id` (character), `issue` (character), `severity`
 (character, `"error"`/`"warning"`), and `fixable` (logical). Detected
 issues: self-intersection, invalid geometry, zero area, degenerate
 rings, out-of-bounds vertices, duplicate consecutive vertices, ring
-orientation, and `NA` coordinates. A 0-row tibble when all geometry is
-valid.
+orientation, `NA` coordinates, empty geometry, and a pyramid level the
+image does not have (`level_out_of_range`). A 0-row tibble when all
+geometry is valid.
 
 ## See also
 

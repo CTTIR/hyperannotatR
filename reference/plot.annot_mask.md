@@ -26,5 +26,9 @@ plot(x, legend = TRUE, ...)
 ## Value
 
 A [ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)
-object (discrete fill from the legend colours, image orientation). Not
-drawn; print it to render.
+object (discrete fill from the legend colours, image orientation, axes
+in pixel coordinates at the mask's level, framed to the whole grid; a
+preview from
+[`at_mask_preview()`](https://cttir.github.io/hyperannotatR/reference/at_mask_preview.md)
+is drawn in its parent grid's coordinates). Not drawn; print it to
+render.

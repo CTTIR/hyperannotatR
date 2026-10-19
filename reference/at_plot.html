@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,11 +53,14 @@
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An <a href="hyperannotatR-classes.html">annot_image</a>, <a href="hyperannotatR-classes.html">annot_project</a>, or <code>annot_mask</code>.</p></dd>
+<dd><p>An <a href="hyperannotatR-classes.html">annot_image</a>, <a href="hyperannotatR-classes.html">annot_project</a>, <a href="hyperannotatR-classes.html">annot_layer</a>, or <code>annot_mask</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Passed to the specific plot function.</p></dd>
+<dd><p>Passed to the specific plot function. For layers, passed to
+<code><a href="at_layer_rois.html">at_layer_rois()</a></code>: supply <code>image = img</code> for any nonzero stored ROI level.
+Layer plot geometry uses level-0 coordinates. The same image argument is
+supported by <code>ggplot2::autoplot(layer, image = img)</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

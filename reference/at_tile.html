@@ -9,7 +9,7 @@ dimensions [y, x, band] — always three-dimensional, even for a single band."><
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,15 +85,21 @@ inclusive) at <code>level</code>. <code>NULL</code> (default) means the full ext
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A numeric array with dimensions <code>[y, x, band]</code>.</p>
+    <p>A numeric array with dimensions <code>[y, x, band]</code>. An image whose
+pixel handle was not saved is reopened from its source descriptor; a
+missing or ambiguous source is an error with code <code>IMAGE_UNAVAILABLE</code> and
+a changed source <code>IMAGE_CHANGED</code> (see <code><a href="at_inspect_source.html">at_inspect_source()</a></code> and
+<code><a href="at_relink_source.html">at_relink_source()</a></code>).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other images:
 <code><a href="at_bands.html">at_bands()</a></code>,
+<code><a href="at_close_image.html">at_close_image()</a></code>,
 <code><a href="at_dims.html">at_dims()</a></code>,
 <code><a href="at_example_image.html">at_example_image()</a></code>,
 <code><a href="at_hsi_meta.html">at_hsi_meta()</a></code>,
+<code><a href="at_image_capabilities.html">at_image_capabilities()</a></code>,
 <code><a href="at_is_pyramidal.html">at_is_pyramidal()</a></code>,
 <code><a href="at_is_spectral.html">at_is_spectral()</a></code>,
 <code><a href="at_meta.html">at_meta()</a></code>,
@@ -108,7 +114,9 @@ inclusive) at <code>level</code>. <code>NULL</code> (default) means the full ext
 <code><a href="at_backend_get.html">at_backend_get()</a></code>,
 <code><a href="at_backend_list.html">at_backend_list()</a></code>,
 <code><a href="at_backend_register.html">at_backend_register()</a></code>,
+<code><a href="at_close_image.html">at_close_image()</a></code>,
 <code><a href="at_cubert_export_envi.html">at_cubert_export_envi()</a></code>,
+<code><a href="at_image_capabilities.html">at_image_capabilities()</a></code>,
 <code><a href="at_read_image.html">at_read_image()</a></code>,
 <code><a href="at_tivita_profile.html">at_tivita_profile()</a></code></p></div>
     </div>

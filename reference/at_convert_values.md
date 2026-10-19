@@ -37,7 +37,10 @@ at_convert_values(
 - calibration:
 
   For `raw -> reflectance`, a list with numeric `white` and `dark`
-  references (scalars, or one value per band for arrays).
+  references: scalars, or one value per band. Per-band references apply
+  along the band axis of a `[y, x, band]` array, the columns of a
+  pixel-by-band matrix, or the elements of a single spectrum vector; any
+  other length is refused.
 
 - call:
 

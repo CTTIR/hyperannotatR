@@ -19,7 +19,7 @@ file references only below root. There is no endpoint that evaluates code.'><met
 
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -110,7 +110,10 @@ the lifecycle manifest; defaults to <code>&lt;session out_dir&gt;/control</code>
 
 <dt id="arg-token-file">token_file<a class="anchor" aria-label="anchor" href="#arg-token-file"></a></dt>
 <dd><p>Optional path of a new file to receive the token (for a
-client process). It must not exist yet.</p></dd>
+client process). It must not exist yet.</p>
+<p>The token needs a cryptographically secure random source (<code>/dev/urandom</code>,
+or the <span class="pkg">openssl</span> package where there is none, as on Windows); without
+one the service is not started (<code>CAPABILITY_UNAVAILABLE</code>).</p></dd>
 
 
 <dt id="arg-read-only">read_only<a class="anchor" aria-label="anchor" href="#arg-read-only"></a></dt>
@@ -140,9 +143,24 @@ method never shows the token.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The token is never written into URLs, logs, downloads, manifests or RDS
 files. In-process calls use the returned handle; a separate client process
-reads the token from <code>token_file</code> (created with owner-only permissions).
-A sanitised lifecycle manifest <code>annotatr-control-&lt;instance_id&gt;.json</code> is
-written to <code>root</code> at start and rewritten when the service stops.</p>
+reads the token from <code>token_file</code>, which is created exclusively with
+owner-only permissions (on Windows, file modes are not enforced; keep the
+file in a directory only the user can read). A sanitised lifecycle manifest
+<code>annotatr-control-&lt;instance_id&gt;.json</code> is written to <code>root</code> at start and
+rewritten when the service stops.</p>
+<p>The service stops itself when the token expires: either when the expiry
+timer runs or, if a request arrives first (for example after the computer
+slept), on that request. Error messages sent to clients never contain
+absolute local paths. Request bodies whose declared <code>Content-Length</code>
+exceeds <code>max_body_bytes</code>, and requests that fail the Host, Origin or token
+checks, are refused before the body is read (a chunked body without
+<code>Content-Length</code> is buffered by httpuv and then refused).</p>
+<p>Two options bound work done for clients: <code>hyperannotatR.control_mask_max_pixels</code>
+(default <code>4096^2</code>) is the largest mask <code>mask.preview</code> builds (without a
+<code>level</code> it picks the finest pyramid level within the budget), and
+<code>hyperannotatR.control_hash_max_bytes</code> (default 256 MiB) is the largest queue
+entry whose content id <code>GET /v1/state</code> computes before the entry is visited
+(larger entries report <code>image_id: null</code> until then).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

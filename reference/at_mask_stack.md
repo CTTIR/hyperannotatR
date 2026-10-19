@@ -17,7 +17,8 @@ at_mask_stack(project, layers = NULL, level = 0L, call = rlang::caller_env())
 
 - layers:
 
-  Optional layer name(s) to include; all by default.
+  Optional layer name(s) to include; all by default. Unknown names are
+  an error.
 
 - level:
 
@@ -30,7 +31,10 @@ at_mask_stack(project, layers = NULL, level = 0L, call = rlang::caller_env())
 ## Value
 
 A 3D integer array `[y, x, layer]`, one multi-class plane per layer; the
-third dimension is named by layer.
+third dimension is named by layer. Codes are local to each layer; the
+`legends` attribute is a named list of the per-layer legends (see
+[`at_mask_legend()`](https://cttir.github.io/hyperannotatR/reference/at_mask_legend.md))
+that maps them back to labels.
 
 ## See also
 
