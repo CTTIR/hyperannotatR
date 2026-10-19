@@ -184,3 +184,78 @@ test_that("at_mask_stats reports zero pixels for a fully occluded label", {
   st <- at_mask_stats(m)
   expect_true(0L %in% st$n_px)
 })
+
+test_that("mask plots put pixel (i, j) on [j-1, j) x [i-1, i)", {
+  m <- at_mask(at_roi_rect(2, 1, 3, 2, label = "a"), "labelled", dims = c(4, 3))
+  layers <- ggplot2::ggplot_build(at_plot_mask(m))$data
+  # Layer 1 frames the whole 4 x 3 grid; layer 2 holds the foreground tiles.
+  expect_equal(c(layers[[1]]$xmin, layers[[1]]$xmax), c(0, 4))
+  expect_equal(sort(c(-layers[[1]]$ymin, -layers[[1]]$ymax)), c(0, 3))
+  built <- layers[[2]]
+  expect_equal(c(built$xmin, built$xmax), c(2, 3))
+  expect_equal(sort(c(-built$ymin, -built$ymax)), c(1, 2))
+})
+
+test_that("bitfield defaults use single bits and labelled bitor is refused (M7)", {
+  lyr <- at_layer_add(at_layer("a"), at_roi_rect(0, 0, 6, 6, label = "s"))
+  lyr <- at_layer_add(lyr, at_roi_rect(4, 4, 10, 10, label = "b"))
+  lyr <- at_layer_add(lyr, at_roi_rect(8, 0, 10, 2, label = "c"))
+  m <- at_mask(lyr, "multiclass", overlap = "bitor", dims = c(10, 10))
+  lg <- at_mask_legend(m)
+  expect_identical(lg$value, c(1L, 2L, 4L))
+  # The s/b overlap is 1 | 2, distinct from class c (4).
+  expect_identical(as.matrix(m)[5, 5], 3L)
+  expect_identical(lg$n_px[lg$label == "c"], 4L)
+  expect_identical(attr(m, "mask_metadata")$encoding, "bitfield")
+  expect_error(at_mask(lyr, "labelled", overlap = "bitor", dims = c(10, 10)), "multiclass")
+})
+
+test_that("unknown layer names are errors, not empty masks", {
+  proj <- demo_project()
+  expect_error(at_mask(proj, layer = "typo"), class = "at_validation_error")
+  expect_error(at_mask(proj, layer = c("tissue", "typo")), "typo")
+  expect_error(at_mask_stack(proj, layers = "typo"), "typo")
+  expect_identical(dim(at_mask_stack(proj, layers = "tumour"))[3], 1L)
+})
+
+test_that("at_mask_stack keeps each layer's legend", {
+  proj <- demo_project()
+  stk <- at_mask_stack(proj)
+  lgs <- attr(stk, "legends")
+  expect_identical(names(lgs), dimnames(stk)[[3]])
+  expect_identical(lgs$tumour$label, "tumour")
+  expect_identical(lgs$tumour$n_px, as.integer(sum(stk[, , "tumour"] == lgs$tumour$value)))
+})
+
+test_that("mask statistics match an independent per-value scan", {
+  set.seed(42)
+  m <- matrix(sample(c(0L, 3L, 7L, 9L), 12 * 8, replace = TRUE), 8, 12)
+  lg <- tibble::tibble(value = c(3L, 7L, 9L, 11L), label = c("a", "b", "c", "absent"))
+  mask <- .new_annot_mask(m, lg, 0L, c(12L, 8L), "multiclass", encoding = "categorical")
+  st <- at_mask_stats(mask, pixel_size = 0.5)
+  for (k in seq_len(nrow(lg))) {
+    idx <- which(m == lg$value[k], arr.ind = TRUE)
+    expect_identical(st$n_px[k], nrow(idx))
+    if (nrow(idx)) {
+      expect_equal(st$centroid_x[k], mean(idx[, 2] - 0.5))
+      expect_equal(st$centroid_y[k], mean(idx[, 1] - 0.5))
+      expect_equal(c(st$bbox_xmin[k], st$bbox_xmax[k]), c(min(idx[, 2]) - 1, max(idx[, 2])))
+      expect_equal(c(st$bbox_ymin[k], st$bbox_ymax[k]), c(min(idx[, 1]) - 1, max(idx[, 1])))
+    }
+    # A single pixel size means square pixels.
+    expect_equal(st$area_physical[k], nrow(idx) * 0.25)
+  }
+  expect_error(at_mask_stats(mask, pixel_size = c(1, 1, 1)), "pixel_size")
+  expect_error(at_mask_stats(mask, pixel_size = -1), "pixel_size")
+})
+
+test_that("all-touched masks of mixed points and polygons work with both engines", {
+  skip_if_not_installed("terra")
+  lyr <- at_layer_add(at_layer_add(at_layer("l"), at_roi_rect(1, 1, 4, 4, label = "a")),
+                      at_roi_point(6.5, 6.5, label = "p"))
+  for (engine in c("stars", "terra")) {
+    m <- as.matrix(at_mask(lyr, "labelled", dims = c(10, 10), touches = TRUE, engine = engine))
+    expect_identical(sum(m == 1L), 9L, info = engine)
+    expect_identical(which(m == 2L), 67L, info = engine) # row 7, column 7
+  }
+})

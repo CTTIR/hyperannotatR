@@ -19,23 +19,31 @@ at_save_project(project, path, overwrite = FALSE, call = rlang::caller_env())
 The path, invisibly.
 }
 \description{
-Save a project
+The project is written atomically: to a temporary file in the target
+directory that then replaces \code{path}, so a failed write keeps the previous
+file. An image read with \code{\link[=at_read_image]{at_read_image()}} is saved with a versioned source
+descriptor (path, reader, options and file signature) instead of its
+pixels, and is reopened from it on load. A hand-built in-memory image keeps
+its pixels.
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-p <- withr::local_tempfile(fileext = ".rds")
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+p <- tempfile(fileext = ".rds")
 at_save_project(at_example_project(), p)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=at_load_project]{at_load_project()}}
+\code{\link[=at_load_project]{at_load_project()}}, \code{\link[=at_inspect_saved]{at_inspect_saved()}}
 
 Other io:
+\code{\link[=at_inspect_saved]{at_inspect_saved()}},
+\code{\link[=at_inspect_source]{at_inspect_source()}},
 \code{\link[=at_load_project]{at_load_project()}},
 \code{\link[=at_load_session]{at_load_session()}},
 \code{\link[=at_read_geojson]{at_read_geojson()}},
 \code{\link[=at_read_qupath]{at_read_qupath()}},
 \code{\link[=at_read_rois_csv]{at_read_rois_csv()}},
+\code{\link[=at_relink_source]{at_relink_source()}},
 \code{\link[=at_roi_from_geojson]{at_roi_from_geojson()}},
 \code{\link[=at_save_session]{at_save_session()}},
 \code{\link[=at_write_geojson]{at_write_geojson()}},

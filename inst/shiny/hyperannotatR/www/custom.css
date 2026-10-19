@@ -70,6 +70,9 @@ h5 { font-family: var(--at-mono-font); font-size: .78rem; text-transform: upperc
 table { font-size: .85rem; }
 .table td, .table th { border-color: var(--at-border); }
 .at-queue table, .at-metrics { font-family: var(--at-mono-font); }
+/* A narrow queue column scrolls its table instead of clipping the status and n columns. */
+.at-queue .card-body { overflow-x: auto; }
+.at-queue table { white-space: nowrap; }
 
 /* ---- Canvas -------------------------------------------------------------- */
 /* Force a tall working canvas; the widget's browser.fill sizing otherwise
@@ -79,7 +82,8 @@ table { font-size: .85rem; }
   border: 1px solid var(--at-border); border-radius: 6px; overflow: hidden;
   background: #060a12;
 }
-.at-canvas-header { padding-top: 6px; padding-bottom: 6px; }
+.at-canvas-header { padding-top: 6px; padding-bottom: 6px; display: flex; flex-wrap: wrap;
+                    align-items: center; gap: 4px; }
 
 /* ---- Dashboard metric tiles --------------------------------------------- */
 .at-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
@@ -88,8 +92,9 @@ table { font-size: .85rem; }
 .at-tile .at-tile-lab { font-size: .72rem; text-transform: uppercase; letter-spacing: .6px; color: var(--at-muted); margin-top: 6px; }
 
 /* label/layer add rows: input + button side by side */
-.at-add-row { display: flex; gap: 6px; align-items: center; margin: 4px 0 12px; }
-.at-add-row .form-group, .at-add-row .shiny-input-container { flex: 1; margin: 0; }
+.at-add-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; margin: 4px 0 12px; }
+/* On narrow columns the button wraps below the field instead of crushing it. */
+.at-add-row .form-group, .at-add-row .shiny-input-container { flex: 1 1 140px; min-width: 120px; margin: 0; }
 .at-add-row .btn { white-space: nowrap; font-family: var(--at-mono-font); font-size: .82rem; }
 
 .btn-primary { --bs-btn-bg: var(--at-blue); --bs-btn-border-color: var(--at-blue); --bs-btn-hover-bg: var(--at-blue-2); --bs-btn-hover-border-color: var(--at-blue-2); }
@@ -114,3 +119,10 @@ a, .nav-link.active { color: var(--at-blue-2); }
 .at-badge-committed { border-color: #2da44e; color: #2da44e; }
 .at-staged { border-color: var(--at-blue-2); margin-bottom: 8px; }
 .at-control { margin: 6px 0; }
+
+/* The drawing surface stays visible when reached by keyboard. */
+.atcanvas-canvas:focus-visible { outline: 3px solid #5E2C8E; outline-offset: 2px; }
+.atcanvas-status { font-size: 0.85rem; min-height: 1.2em; }
+/* Checkpoint time and folder next to the state badge. */
+.at-saved { margin-left: 8px; white-space: normal; overflow-wrap: anywhere; }
+.at-badge-unavailable { border-color: var(--at-muted); color: var(--at-muted); font-style: italic; }

@@ -25,13 +25,15 @@ at_plot_project(
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-A \link[ggplot2:ggplot]{ggplot2::ggplot} object. Empty projects give a valid empty plot.
+A \link[ggplot2:ggplot]{ggplot2::ggplot} object in level-0 image coordinates with the
+y axis pointing down, as in the image. Empty projects give a valid empty
+plot.
 }
 \description{
 Plot a project's ROIs
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_plot_project(at_example_project())
 \dontshow{\}) # examplesIf}
 }

@@ -45,3 +45,11 @@ test_that("cuvis and ometiff report availability matching installation", {
     requireNamespace("RBioFormats", quietly = TRUE)
   )
 })
+
+test_that("Cubert processing modes the SDK does not report map to unknown values", {
+  expect_identical(.cuvis_value_unit("Reflectance"), "reflectance")
+  expect_identical(.cuvis_value_unit("DarkSubtract"), "raw")
+  expect_identical(.cuvis_value_unit("unknown"), "unknown")
+  expect_identical(.cuvis_value_unit(NA_character_), "unknown")
+  expect_identical(.cuvis_value_unit(character()), "unknown")
+})

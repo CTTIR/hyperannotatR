@@ -85,7 +85,7 @@ test_that("at_write_masks emits a receipt and files per scope", {
   dir <- withr::local_tempdir()
   receipt <- at_write_masks(proj, dir, per = "layer")
   expect_s3_class(receipt, "tbl_df")
-  expect_identical(names(receipt), c("path", "type", "n_px", "bytes"))
+  expect_identical(names(receipt), c("path", "type", "n_px", "bytes", "name", "status", "message", "sidecar_path", "sidecar_bytes"))
   expect_true(all(file.exists(receipt$path)))
 })
 
@@ -97,4 +97,24 @@ test_that("at_write_masks supports every split", {
     expect_true(nrow(receipt) >= 1L)
     expect_true(all(file.exists(receipt$path)))
   }
+})
+
+test_that("public mask writers store non-square distinct codes for independent decoders", {
+  m <- matrix(c(0L, 1L, 2L, 3L, 4L,
+                5L, 6L, 7L, 8L, 9L,
+                10L, 11L, 12L, 13L, 250L), 3, byrow = TRUE)
+  lg <- tibble::tibble(value = setdiff(sort(unique(as.vector(m))), 0L))
+  lg$label <- paste0("c", lg$value)
+  mask <- .new_annot_mask(m, lg, 0L, c(5L, 3L), "multiclass")
+  p <- withr::local_tempfile(fileext = ".tif")
+  at_write_mask(mask, p, bits = 8L)
+  expect_identical(matrix(as.integer(tiff::readTIFF(p, as.is = TRUE)), 3), m)
+  expect_identical(.read_mask_matrix(p, environment())$m, m)
+  skip_if_not_installed("magick")
+  q <- withr::local_tempfile(fileext = ".png")
+  at_write_mask(mask, q, format = "png")
+  # GDAL (via stars) decodes the PNG independently of the magick writer.
+  gdal <- stars::read_stars(q, quiet = TRUE)[[1]]
+  expect_identical(t(matrix(as.integer(gdal), nrow = dim(gdal)[1])), m)
+  expect_identical(.read_mask_matrix(q, environment())$m, m)
 })

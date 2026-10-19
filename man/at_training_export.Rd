@@ -32,8 +32,9 @@ at_training_export(
 \item{destination}{New dataset directory.}
 
 \item{split}{Optional explicit assignment: a named list
-(\code{train}, \code{validation}, \code{test}) of group ids. \code{NULL} assigns groups by
-\code{fractions} and \code{seed}.}
+(\code{train}, \code{validation}, \code{test}) of group ids. With \code{group_by = "image_id"} entry ids (\code{"entry-0001"}) or entry names are accepted too
+and mapped to their image's group. \code{NULL} assigns groups by \code{fractions}
+and \code{seed}.}
 
 \item{tile_size}{Tile edge length in pixels at \code{level}.}
 
@@ -43,7 +44,9 @@ at_training_export(
 
 \item{mask_type}{\code{"labelled"}, \code{"instance"} or \code{"binary"}.}
 
-\item{bands}{Band indices recorded (and written with \code{include_images}).}
+\item{bands}{Band indices recorded (and written with \code{include_images});
+every entry must have them. With \code{include_images = TRUE} all entries must
+share the same band table (\code{BAND_MISMATCH} otherwise).}
 
 \item{include_images}{Logical; also write float32 NPY image tiles.}
 
@@ -52,10 +55,13 @@ at_training_export(
 \item{group_by}{Group column used for splitting: \code{"image_id"} (default),
 \code{"sample_id"} or \code{"subject_id"}.}
 
-\item{groups}{Optional data frame with \code{entry_id} (or \code{name}) plus
-\code{subject_id} and/or \code{sample_id} columns (character).}
+\item{groups}{Optional data frame with \code{entry_id} (the session's entry id,
+or the queue-position id \code{"entry-NNNN"}; else \code{name}) plus \code{subject_id}
+and/or \code{sample_id} columns (character).}
 
-\item{fractions}{Named split fractions.}
+\item{fractions}{Named split fractions. Split names (here and in \code{split})
+are used as directory names and must consist of letters, digits, \code{.},
+\verb{_} or \code{-}.}
 
 \item{label_map}{Optional named integer class codes (\code{label = code}, codes
 \verb{>= 1}); defaults to first-seen label order.}
@@ -94,12 +100,15 @@ mask (hyperannotatR \code{"multiclass"}), \code{"instance"} has one id per ROI (
 manifest.
 }
 \examples{
-\dontshow{if (requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-sess <- at_example_session(3)
-for (i in 1:3) sess$projects[[i]] <- at_example_project()
-ds <- at_training_export(sess, file.path(tempdir(), "train-example"), tile_size = 128,
+\dontshow{if (requireNamespace("tiff", quietly = TRUE) && requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sess <- at_example_session(2)
+for (i in 1:2) sess$projects[[i]] <- at_example_project()
+ds <- at_training_export(sess, file.path(tempdir(), "train-example"), tile_size = 256,
                          overwrite = TRUE)
 ds$manifest$counts$tiles
+# Both example entries show the same picture, so they form one image
+# group and land in one split: tiles of one image never leak across splits.
+ds$manifest$counts$images_by_split
 \dontshow{\}) # examplesIf}
 }
 \seealso{

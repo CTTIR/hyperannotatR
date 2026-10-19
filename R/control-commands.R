@@ -27,13 +27,66 @@
   list(status = as.integer(status), body = body)
 }
 
-.control_error_body <- function(cnd) {
+# The error object of a response. Messages and string details are redacted so
+# no absolute local path reaches a client (paths below the root become
+# root-relative, other absolute paths keep only their last component); the
+# full message is kept in the hub's private error log. `class` carries the
+# hyperannotatR condition class so a client raises the same class as a local call.
+.control_error_body <- function(cnd, hub = NULL) {
   code <- .condition_code(cnd)
-  msg <- cli::ansi_strip(conditionMessage(cnd))
+  raw_msg <- cli::ansi_strip(conditionMessage(cnd))
   details <- cnd$details %||% list()
-  list(code = code, message_key = tolower(code), message = msg,
-       details = if (length(details)) .json_safe(details) else .json_object(),
-       retryable = .control_retryable(code))
+  if (!is.null(hub)) {
+    hub$error_log <- utils::tail(c(hub$error_log, list(list(time = .utc_stamp(), code = code,
+                                                            message = raw_msg))), 50L)
+  }
+  list(code = code, message_key = tolower(code), message = .control_redact(raw_msg, hub),
+       details = if (length(details)) .control_redact(.json_safe(details), hub) else .json_object(),
+       retryable = .control_retryable(code), class = .control_condition_class(cnd))
+}
+
+# The hyperannotatR class family of a condition ("validation", "conflict", ...);
+# errors that are not hyperannotatR conditions are reported as "io".
+.control_condition_class <- function(cnd) {
+  cls <- grep("^at_[a-z]+_error$", class(cnd), value = TRUE)
+  cls <- setdiff(cls, "at_error")
+  if (length(cls)) sub("^at_([a-z]+)_error$", "\\1", cls[1]) else "io"
+}
+
+# Remove local absolute paths from a message (or recursively from the strings
+# of a list).
+.control_redact <- function(x, hub = NULL) {
+  if (is.list(x)) {
+    return(lapply(x, .control_redact, hub = hub))
+  }
+  if (!is.character(x) || length(x) == 0L) {
+    return(x)
+  }
+  norm <- function(p) {
+    p <- p[!is.na(p) & nzchar(p)]
+    unique(c(p, normalizePath(p, winslash = "/", mustWork = FALSE)))
+  }
+  root <- if (is.null(hub)) character() else norm(hub$root)
+  prefixes <- list()
+  for (r in root) prefixes[[r]] <- ""
+  if (!is.null(hub) && .is_string(hub$session$out_dir)) {
+    for (r in norm(hub$session$out_dir)) prefixes[[r]] <- "<session>/"
+  }
+  for (r in norm(tempdir())) prefixes[[r]] <- "<tmp>/"
+  home <- norm(path.expand("~"))
+  home <- home[nchar(home) > 1L]
+  for (r in home) prefixes[[r]] <- "~/"
+  keys <- names(prefixes)
+  keys <- keys[order(nchar(keys), decreasing = TRUE)]
+  for (k in keys) {
+    x <- gsub(paste0(.regex_escape(k), "/"), prefixes[[k]], x, perl = TRUE)
+    x <- gsub(paste0(.regex_escape(k), "(?![A-Za-z0-9._-])"),
+              if (nzchar(prefixes[[k]])) sub("/$", "", prefixes[[k]]) else ".", x, perl = TRUE)
+  }
+  # Any remaining absolute path: keep only its last component.
+  x <- gsub("(^|[\\s'\"`(\\[{=:,])(?:[A-Za-z]:)?(?:[/\\\\][^/\\\\\\s'\"`]+)+[/\\\\]([^/\\\\\\s'\"`]+)",
+            "\\1\\2", x, perl = TRUE)
+  x
 }
 
 .header <- function(headers, name) {
@@ -64,14 +117,67 @@
   if (is.null(token) || !.constant_time_equal(sub("^Bearer ", "", auth), token)) {
     .control_fail("TOKEN_INVALID", "The bearer token is not valid for this instance.", class = "auth")
   }
-  if (Sys.time() > hub$expires_at) {
-    hub$status <- "expired"
+  if (.control_now() > hub$expires_at) {
+    .control_expire(hub)
     .control_fail("TOKEN_EXPIRED", "The control session has expired.", class = "auth")
   }
   if (!identical(hub$status, "running")) {
     .control_fail("SERVICE_CLOSED", "The control service is closed.", class = "protocol")
   }
   invisible(TRUE)
+}
+
+# A request found the TTL passed: mark the hub expired and shut it down. With a
+# listener the shutdown is deferred to the event loop (the listener is not
+# stopped from inside its own request callback); without one it happens now.
+# Either way the port, token and registry entry are released and the manifest
+# records `expired`, even if the expiry timer never runs (e.g. after sleep).
+.control_expire <- function(hub) {
+  if (identical(hub$status, "stopped")) {
+    return(invisible(FALSE))
+  }
+  hub$status <- "expired"
+  if (!is.null(hub$server) && requireNamespace("later", quietly = TRUE)) {
+    if (!isTRUE(hub$expiry_scheduled)) {
+      hub$expiry_scheduled <- TRUE
+      later::later(function() .control_shutdown(hub, "ttl expired"), delay = 0)
+    }
+  } else {
+    .control_shutdown(hub, "ttl expired")
+  }
+  invisible(TRUE)
+}
+
+# HTTP status for an error code, including the codes this file adds.
+.control_status_for <- function(code) {
+  switch(
+    code,
+    UNSAVED_CHANGES = , IDEMPOTENCY_EXPIRED = , IDENTITY_MISMATCH = 409L,
+    MASK_TOO_LARGE = 413L,
+    .control_http_status(code)
+  )
+}
+
+# Is a Content-Type header exactly application/json (any case), with an
+# optional UTF-8 charset parameter?
+.control_media_ok <- function(ctype) {
+  if (!.is_string(ctype)) {
+    return(FALSE)
+  }
+  parts <- strsplit(ctype, ";", fixed = TRUE)[[1]]
+  if (length(parts) == 0L || !identical(tolower(trimws(parts[1])), "application/json")) {
+    return(FALSE)
+  }
+  for (p in trimws(parts[-1])) {
+    if (!nzchar(p)) next
+    kv <- strsplit(p, "=", fixed = TRUE)[[1]]
+    key <- tolower(trimws(kv[1]))
+    val <- tolower(gsub("^\"|\"$", "", trimws(paste(kv[-1], collapse = "="))))
+    if (identical(key, "charset") && !val %in% c("utf-8", "utf8")) {
+      return(FALSE)
+    }
+  }
+  TRUE
 }
 
 .parse_query <- function(query) {
@@ -101,7 +207,7 @@
     }
   }, error = function(cnd) {
     code <- .condition_code(cnd)
-    .control_response(hub, .control_http_status(code), request_id, error = .control_error_body(cnd))
+    .control_response(hub, .control_status_for(code), request_id, error = .control_error_body(cnd, hub))
   })
   result
 }
@@ -113,7 +219,15 @@
   if (identical(path, "/v1/capabilities")) return(ok(at_control_capabilities()))
   if (identical(path, "/v1/state")) return(ok(.hub_state(hub)))
   if (identical(path, "/v1/events")) {
-    return(ok(.hub_events_after(hub, query$after, query$limit %||% 100L)))
+    limit <- query$limit %||% "100"
+    if (!grepl("^[0-9]{1,6}$", limit) || as.integer(limit) < 1L) {
+      .control_fail("VALIDATION_FAILED", "'limit' must be a positive integer.")
+    }
+    after <- query$after
+    if (!is.null(after) && (nchar(after) > 256L || grepl("[[:cntrl:]]", after))) {
+      .control_fail("VALIDATION_FAILED", "'after' is not an event cursor.")
+    }
+    return(ok(.hub_events_after(hub, after, as.integer(limit))))
   }
   if (grepl("^/v1/requests/[A-Za-z0-9._:-]{1,128}$", path)) {
     id <- sub("^/v1/requests/", "", path)
@@ -137,16 +251,21 @@
     }
     .control_fail("ENDPOINT_NOT_FOUND", "Unknown endpoint.")
   }
-  ctype <- .header(headers, "content-type") %||% ""
-  if (!grepl("^application/json", ctype)) {
-    .control_fail("UNSUPPORTED_MEDIA_TYPE", "Requests must be application/json.")
+  if (!.control_media_ok(.header(headers, "content-type") %||% "")) {
+    .control_fail("UNSUPPORTED_MEDIA_TYPE", "Requests must be application/json (UTF-8).")
   }
   if (length(body) > hub$max_body_bytes) {
     .control_fail("PAYLOAD_TOO_LARGE", "The request body exceeds the size limit.",
                   details = list(limit_bytes = hub$max_body_bytes), class = "limit")
   }
+  if (any(body == as.raw(0L))) {
+    .control_fail("INVALID_JSON", "The request body contains a NUL byte.")
+  }
   txt <- rawToChar(body)
   Encoding(txt) <- "UTF-8"
+  if (!validUTF8(txt)) {
+    .control_fail("INVALID_JSON", "The request body is not valid UTF-8.")
+  }
   env <- tryCatch(jsonlite::fromJSON(txt, simplifyVector = FALSE), error = function(e) NULL)
   if (!is.list(env) || is.null(names(env))) {
     .control_fail("INVALID_JSON", "The request body is not a JSON object.")
@@ -174,19 +293,27 @@
                     class = "conflict")
     }
     rec <- hub$requests[[prior_key$request_id]]
-    if (!is.null(rec)) {
-      resp <- rec$response
-      resp$body$replayed <- TRUE
-      return(resp)
+    if (is.null(rec)) {
+      .control_fail("IDEMPOTENCY_EXPIRED", "The record of this idempotency key is no longer retained; re-read the state.",
+                    class = "conflict")
     }
+    resp <- rec$response
+    resp$body$replayed <- TRUE
+    return(resp)
+  }
+  if (exists(env$idempotency_key, envir = hub$idempotency_evicted, inherits = FALSE)) {
+    .control_fail("IDEMPOTENCY_EXPIRED", "The record of this idempotency key is no longer retained; re-read the state.",
+                  class = "conflict")
   }
   if (!is.null(prior_req) && !identical(prior_req$content_sha256, digest)) {
     .control_fail("IDEMPOTENCY_CONFLICT", "This request id was used for a different request.",
                   class = "conflict")
   }
+  # `close` is not revision-checked: it changes no annotation state, and a
+  # concurrent edit in an attached app must not make a close fail.
   mutating <- operation %in% c("session.load", "context.goto", "context.view",
                                "context.selection", "annotations.stage", "annotations.commit",
-                               "session.save", "close")
+                               "session.save")
   if (mutating && !identical(as.character(env$expected_revision), as.character(hub$revision))) {
     .control_fail("REVISION_CONFLICT", "The state revision changed; re-read the state.",
                   details = list(expected = env$expected_revision,
@@ -201,12 +328,12 @@
     .control_response(hub, 200L, request_id, data = data)
   }, error = function(cnd) {
     code <- .condition_code(cnd)
-    .control_response(hub, .control_http_status(code), request_id, error = .control_error_body(cnd))
+    .control_response(hub, .control_status_for(code), request_id, error = .control_error_body(cnd, hub))
   })
   record$status <- if (is.null(resp$body$error)) "completed" else "failed"
   record$http_status <- resp$status
   record$completed_at <- .utc_stamp()
-  record$response <- resp
+  record$response <- .control_compact_response(resp)
   .hub_record_request(hub, record)
   if (is.null(resp$body$error)) {
     assign(env$idempotency_key, list(content_sha256 = digest, operation = operation,
@@ -230,6 +357,26 @@
 
 .control_execute <- function(hub, operation, payload, env) {
   origin <- list(kind = "control", request_id = env$request_id)
+  tryCatch(.control_dispatch(hub, operation, payload, env, origin),
+           error = function(cnd) .control_reclassify(cnd))
+}
+
+# Persistence refuses to save or load a project stored in another queue
+# entry's slot with a plain error; report it as a conflict a client can act
+# on (re-read the state or reload the session) instead of INTERNAL_ERROR.
+# Every other condition is re-raised unchanged.
+.control_reclassify <- function(cnd) {
+  if (!inherits(cnd, "at_error") &&
+      grepl("identity does not match", conditionMessage(cnd), fixed = TRUE)) {
+    .control_fail("IDENTITY_MISMATCH",
+                  "A project is stored under another queue entry; re-read the state or reload the session.",
+                  class = "conflict")
+  }
+  # Re-raise the original condition, keeping its class.
+  rlang::cnd_signal(cnd)
+}
+
+.control_dispatch <- function(hub, operation, payload, env, origin) {
   switch(
     operation,
     "session.load" = .cmd_session_load(hub, payload, origin),
@@ -251,13 +398,23 @@
 
 .cmd_session_load <- function(hub, payload, origin) {
   .require_writable(hub)
+  if (hub$annotation_status %in% c("unsaved", "staged") && !isTRUE(payload$discard_unsaved)) {
+    .control_fail("UNSAVED_CHANGES",
+                  "The current session has unsaved or staged changes; save or commit them, or set 'discard_unsaved' to true.",
+                  details = list(annotation_status = hub$annotation_status), class = "conflict")
+  }
   imgs <- payload$images
   if (!is.list(imgs) || length(imgs) == 0L) {
     .control_fail("VALIDATION_FAILED", "'images' must list image paths relative to the root.")
   }
   paths <- vapply(imgs, function(p) .resolve_under_root(hub$root, as.character(p)), character(1))
   labels <- as.character(unlist(payload$labels %||% list()))
-  sess <- at_session(paths, labels = labels, out_dir = hub$session$out_dir)
+  # A loaded session saves into its own directory under the root, so it never
+  # overwrites the checkpoint of the session it replaces.
+  session_dir <- paste0("sessions/session-", format(Sys.time(), "%Y%m%dT%H%M%S"), "-", .random_hex(4L))
+  out_dir <- file.path(hub$root, session_dir)
+  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+  sess <- at_session(paths, labels = labels, out_dir = out_dir)
   if (!is.null(payload$handoff)) {
     dir <- .resolve_under_root(hub$root, as.character(payload$handoff))
     rep <- at_import_qupflowr(dir)
@@ -272,13 +429,14 @@
     }
   }
   hub$session <- sess
+  hub$generation <- hub$generation + 1L
   hub$view$bounds <- NULL
   hub$view$band_group <- NULL
   hub$selection <- character()
   hub$staged <- NULL
   hub$annotation_status <- "clean"
-  .hub_bump(hub, "session.loaded", list(n_images = length(paths)), origin)
-  list(n_images = length(paths), queue_index = 1L,
+  .hub_bump(hub, "session.loaded", list(n_images = length(paths), generation = hub$generation), origin)
+  list(n_images = length(paths), queue_index = 1L, session_dir = session_dir,
        annotation_revision = at_annotation_revision(sess))
 }
 
@@ -299,22 +457,47 @@
   if (!is.null(payload$queue_index)) {
     target <- .payload_int(payload$queue_index, "queue_index", 1L)
   } else if (!is.null(payload$entry_id)) {
-    target <- suppressWarnings(as.integer(sub("^entry-", "", payload$entry_id)))
+    # The session's stable entry id (as in handoff manifests); the positional
+    # "entry-NNNN" is accepted as an alias.
+    want <- as.character(unlist(payload$entry_id))[1]
+    ids <- vapply(seq_len(n), function(i) .session_entry_id(hub$session, i), character(1))
+    target <- match(want, ids)
+    if (is.na(target) && grepl("^entry-[0-9]{4,}$", want %||% "")) {
+      target <- suppressWarnings(as.integer(sub("^entry-", "", want)))
+    }
   } else if (!is.null(payload$image_id)) {
-    ids <- vapply(seq_len(n), function(i) .hub_image_id(hub, i), character(1))
-    target <- match(payload$image_id, ids)
+    # Cached ids first; then hash entries one at a time until one matches.
+    want <- as.character(payload$image_id)[1]
+    ids <- vapply(seq_len(n), function(i) .hub_image_id(hub, i, lazy = TRUE), character(1))
+    target <- match(want, ids)
+    if (is.na(target)) {
+      for (i in which(is.na(ids))) {
+        if (identical(.hub_image_id(hub, i), want)) {
+          target <- i
+          break
+        }
+      }
+    }
   }
   if (is.null(target) || is.na(target) || target < 1L || target > n) {
     .control_fail("IMAGE_NOT_FOUND", "No queue entry matches the request.")
   }
-  hub$session <- at_goto(hub$session, target)
+  # Build the new state completely before the hub changes, so a project that
+  # cannot be materialised (unreadable, or IDENTITY_MISMATCH) leaves the hub
+  # on its current entry.
+  sess <- at_goto(hub$session, target)
+  proj <- sess$projects[[target]]
+  if (is.null(proj)) {
+    proj <- .materialize_project(sess, target)
+    sess$projects[[target]] <- proj
+  }
+  hub$session <- sess
   hub$selection <- character()
   hub$staged <- NULL
   hub$view$bounds <- NULL
-  proj <- .hub_project(hub)
-  .hub_bump(hub, "image.changed", list(queue_index = target,
-                                       entry_id = sprintf("entry-%04d", target)), origin)
-  list(queue_index = target, entry_id = sprintf("entry-%04d", target),
+  eid <- .session_entry_id(hub$session, target)
+  .hub_bump(hub, "image.changed", list(queue_index = target, entry_id = eid), origin)
+  list(queue_index = target, entry_id = eid,
        image_id = .hub_image_id(hub, target), annotation_revision = at_annotation_revision(proj))
 }
 
@@ -442,11 +625,16 @@
   }
   rc <- at_commit_qupflowr(st, idempotency_key = paste0("control:", env$idempotency_key))
   i <- hub$session$cursor
-  hub$session$projects[[i]] <- rc$project
-  hub$session$manifest$n_rois[i] <- nrow(at_rois(rc$project))
+  # Save the committed session first; the hub changes only after the save
+  # succeeded, so a failed save leaves the hub, its revision and the staged
+  # patch as they were and the client can retry.
   sess <- hub$session
-  sess$projects <- lapply(sess$projects, .lite_project)
-  at_save_session(sess, overwrite = TRUE)
+  sess$projects[[i]] <- rc$project
+  sess$manifest$n_rois[i] <- nrow(at_rois(rc$project))
+  saved <- sess
+  saved$projects <- lapply(saved$projects, .lite_project)
+  at_save_session(saved, overwrite = TRUE)
+  hub$session <- sess
   hub$staged <- NULL
   hub$annotation_status <- "committed"
   hub$last_commit <- list(patch_id = rc$patch_id, new_revision = rc$new_revision,
@@ -467,9 +655,24 @@
   if (!overlap %in% c("last", "first", "max", "min", "bitor")) {
     .control_fail("VALIDATION_FAILED", "Unknown overlap policy.")
   }
-  level <- .payload_int(payload$level %||% 0L, "level", 0L)
-  if (level > proj$image$n_levels - 1L) {
+  img <- proj$image
+  budget <- .control_mask_max_pixels()
+  px <- vapply(img$level_dims, function(d) as.numeric(d[1]) * as.numeric(d[2]), numeric(1))
+  if (is.null(payload$level)) {
+    # The finest level whose full mask fits the pixel budget.
+    fits <- which(px <= budget)
+    level <- if (length(fits)) min(fits) - 1L else img$n_levels - 1L
+  } else {
+    level <- .payload_int(payload$level, "level", 0L)
+  }
+  if (level > img$n_levels - 1L) {
     .control_fail("VALIDATION_FAILED", "The level does not exist for this image.")
+  }
+  if (px[level + 1L] > budget) {
+    .control_fail("MASK_TOO_LARGE",
+                  "A mask at this level exceeds the preview pixel budget; request a coarser level.",
+                  details = list(level = level, pixels = px[level + 1L], limit_pixels = budget),
+                  class = "limit")
   }
   max_dim <- min(.payload_int(payload$max_dim %||% 256L, "max_dim", 1L),
                  .interop_limits()$mask_preview_max_dim)
@@ -487,13 +690,35 @@
   out
 }
 
+# Pixel budget of a full mask built for mask.preview (the mask is rasterised at
+# the chosen level before it is downsampled).
+.control_mask_max_pixels <- function() {
+  as.numeric(getOption("hyperannotatR.control_mask_max_pixels", 4096^2))
+}
+
+# An output directory `<root>/<sub>/<name>`. The resolved parent and an
+# existing destination (including a symbolic link) must stay below the root.
 .control_output_dir <- function(hub, sub, name) {
   if (!.is_string(name) || !grepl("^[A-Za-z0-9._-]{1,64}$", name) || name %in% c(".", "..")) {
     .control_fail("VALIDATION_FAILED", "'destination' must be a simple name of letters, digits, '.', '_' or '-'.")
   }
-  base <- file.path(hub$root, sub)
+  root <- normalizePath(hub$root, winslash = "/", mustWork = TRUE)
+  inside <- function(p) identical(p, root) || startsWith(p, paste0(root, "/"))
+  outside <- function() {
+    .at_abort("The output destination resolves outside the negotiated root.", class = "io",
+              code = "PATH_OUTSIDE_ROOT")
+  }
+  base <- file.path(root, sub)
+  if (.is_symlink(base) && !dir.exists(base)) outside()
   dir.create(base, recursive = TRUE, showWarnings = FALSE)
-  file.path(normalizePath(base, winslash = "/"), name)
+  real_base <- normalizePath(base, winslash = "/", mustWork = TRUE)
+  if (!inside(real_base)) outside()
+  dest <- file.path(real_base, name)
+  if (.is_symlink(dest)) {
+    target <- normalizePath(dest, winslash = "/", mustWork = FALSE)
+    if (!file.exists(dest) || !inside(target)) outside()
+  }
+  dest
 }
 
 .cmd_export <- function(hub, payload, origin) {

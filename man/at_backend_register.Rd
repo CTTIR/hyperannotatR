@@ -12,7 +12,10 @@ at_backend_register(
   available_fn,
   description = "",
   extensions = character(),
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  capabilities = list(metadata_only = NA, window_read = NA, samples = "unqualified", io =
+    "unknown"),
+  close_fn = NULL
 )
 }
 \arguments{
@@ -34,6 +37,12 @@ dependencies are installed.}
 \item{extensions}{Character vector of file extensions the backend handles.}
 
 \item{call}{The calling environment, for error reporting.}
+
+\item{capabilities}{Additive list declaring metadata_only, window_read,
+samples and io. Omitted capabilities are unknown. Readers can override
+these per image in meta$capabilities.}
+
+\item{close_fn}{Optional function(img) releasing runtime resources.}
 }
 \value{
 The registered \code{annot_backend}, invisibly.
@@ -50,7 +59,9 @@ Other backends:
 \code{\link[=at_backend_detect]{at_backend_detect()}},
 \code{\link[=at_backend_get]{at_backend_get()}},
 \code{\link[=at_backend_list]{at_backend_list()}},
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_cubert_export_envi]{at_cubert_export_envi()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_read_image]{at_read_image()}},
 \code{\link[=at_tile]{at_tile()}},
 \code{\link[=at_tivita_profile]{at_tivita_profile()}}

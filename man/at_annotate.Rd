@@ -25,7 +25,9 @@ the bundled example session).}
 \item{layers}{An \link{annot_layer}, a list of them, or \code{NULL}. Applied as a
 template to every image.}
 
-\item{out_dir}{Directory for autosave and exports.}
+\item{out_dir}{Directory for autosave and exports. When \code{NULL}, a new
+folder inside R's temporary directory is used, which R deletes when it
+exits; a message says so at launch.}
 
 \item{launch.browser}{Passed to \code{\link[shiny:runApp]{shiny::runApp()}}.}
 

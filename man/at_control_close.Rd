@@ -18,7 +18,9 @@ The close response (remote) or \code{TRUE} (local), invisibly.
 Close the control service a handle refers to. For a local handle this is
 \code{\link[=at_control_stop]{at_control_stop()}}; for a remote handle it sends \code{POST /v1/close}, after
 which that service stops accepting requests while its host process and any
-app keep running. Neither path terminates a process.
+app keep running. Neither path terminates a process. A close is not
+revision-checked, so concurrent edits in an attached app never make it
+fail; unsaved app edits stay in the app.
 }
 \seealso{
 Other control:

@@ -17,6 +17,8 @@ An \link{annot_project}.
 \description{
 Return the project for the image at the cursor, materialising it from the
 image (and applying the session's layer template) if it has not been visited.
+A stored project whose pixel handle was not saved is reopened from its
+recorded source (see \code{\link[=at_inspect_source]{at_inspect_source()}} when that is impossible).
 }
 \seealso{
 Other sessions:

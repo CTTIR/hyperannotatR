@@ -1,15 +1,10 @@
 # Bundled front-end libraries
 
-For v0.0.1 the annotation canvas (`atcanvas`) is implemented as a self-contained
-HTML5 canvas in `inst/htmlwidgets/atcanvas.js`, with no external JavaScript
-libraries. The widget therefore has no third-party front-end code to attribute
-and works fully offline (no CDN requests).
+The annotation canvas (`atcanvas`) is a self-contained HTML5 canvas implemented
+in `inst/htmlwidgets/atcanvas.js` and styled by `atcanvas/atcanvas.css`. Both are
+part of hyperannotatR and covered by its MIT licence. The widget uses no third-party
+JavaScript or CSS, so there is nothing further to attribute, and it makes no
+network (CDN) requests.
 
-## Planned for a later release
-
-The locked design targets OpenSeadragon (BSD-3-Clause) for gigapixel deep-zoom
-and Annotorious (BSD-3-Clause) for W3C Web Annotation drawing. When those are
-vendored here, their exact versions and licences will be recorded in this file,
-and attribution added to the README Acknowledgements. The R interface in
-`R/widget-canvas.R` and the JS message protocol are already shaped for that
-swap; see STATE.md ("Deferred to v0.0.2").
+If a third-party front-end library is ever vendored here, record its name, exact
+version, licence and source URL in this file and add attribution to the README.

@@ -19,7 +19,7 @@ The mask's legend \link[tibble:tibble]{tibble::tibble} (\code{value}, \code{labe
 Legend of a mask
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_mask_legend(at_mask(at_example_project(), "labelled"))
 \dontshow{\}) # examplesIf}
 }

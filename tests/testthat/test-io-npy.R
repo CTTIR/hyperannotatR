@@ -111,3 +111,88 @@ test_that("reads a real Python-written ground-truth .npy (integration)", {
   expect_true(all(unique(as.integer(m)) %in% 0:5))
   expect_gt(sum(m == 1L), 0L) # some 'wound' pixels
 })
+
+# A hand-written .npy: any descr and shape, with an explicit raw payload.
+write_npy_raw <- function(path, descr, shape, payload, fortran = FALSE, version = 1L) {
+  dict <- sprintf("{'descr': '%s', 'fortran_order': %s, 'shape': (%s), }",
+                  descr, if (fortran) "True" else "False", shape)
+  pre <- if (version >= 2L) 12L else 10L
+  pad <- (64L - ((pre + nchar(dict) + 1L) %% 64L)) %% 64L
+  dict <- paste0(dict, strrep(" ", pad), "\n")
+  con <- file(path, "wb")
+  on.exit(close(con))
+  writeBin(as.raw(c(0x93, 0x4e, 0x55, 0x4d, 0x50, 0x59, version, 0)), con)
+  writeBin(as.integer(nchar(dict)), con, size = if (version >= 2L) 4L else 2L, endian = "little")
+  writeBin(charToRaw(dict), con)
+  writeBin(payload, con)
+}
+
+# Little-endian bytes of 32-bit words.
+le32 <- function(v) writeBin(as.integer(v), raw(), size = 4L, endian = "little")
+
+test_that("a short NPY payload is refused, never recycled (A13)", {
+  f <- withr::local_tempfile(fileext = ".npy")
+  write_npy_raw(f, "<i4", "2, 2", le32(1:2))
+  err <- tryCatch(.npy_read_matrix(f), error = function(e) e)
+  expect_s3_class(err, "at_io_error")
+  expect_identical(err$code, "PAYLOAD_SHORT")
+})
+
+test_that("int64 values are exact when they fit 32 bits and refused otherwise", {
+  f <- withr::local_tempfile(fileext = ".npy")
+  # 2 x 2 C-order: 1, -2, 70000, 0 as (low, high) little-endian word pairs.
+  write_npy_raw(f, "<i8", "2, 2", le32(c(1, 0, -2, -1, 70000, 0, 0, 0)))
+  expect_identical(.npy_read_matrix(f), matrix(c(1L, 70000L, -2L, 0L), 2, 2))
+  write_npy_raw(f, ">i8", "1, 2", c(writeBin(c(0L, 5L, -1L, -3L), raw(), size = 4L, endian = "big")))
+  expect_identical(.npy_read_matrix(f), matrix(c(5L, -3L), 1, 2))
+  write_npy_raw(f, "<i8", "1, 1", le32(c(1, 1))) # 2^32 + 1
+  expect_identical(tryCatch(.npy_read_matrix(f), error = function(e) e$code), "VALUE_OUT_OF_RANGE")
+})
+
+test_that("unsigned 32/64-bit values beyond the integer range are refused, not negated", {
+  f <- withr::local_tempfile(fileext = ".npy")
+  write_npy_raw(f, "<u4", "1, 2", le32(c(7, -1))) # 7 and 2^32 - 1
+  expect_identical(tryCatch(.npy_read_matrix(f), error = function(e) e$code), "VALUE_OUT_OF_RANGE")
+  write_npy_raw(f, "<u4", "1, 2", le32(c(7, 9)))
+  expect_identical(.npy_read_matrix(f), matrix(c(7L, 9L), 1, 2))
+  write_npy_raw(f, "<u8", "1, 1", le32(c(-1, 0))) # 2^32 - 1
+  expect_identical(tryCatch(.npy_read_matrix(f), error = function(e) e$code), "VALUE_OUT_OF_RANGE")
+  write_npy_raw(f, "<u2", "1, 2", writeBin(c(65535L, 3L), raw(), size = 2L, endian = "little"))
+  expect_identical(.npy_read_matrix(f), matrix(c(65535L, 3L), 1, 2))
+})
+
+test_that("malformed NPY headers and widths are refused with codes", {
+  f <- withr::local_tempfile(fileext = ".npy")
+  write_npy_raw(f, "<i3", "1, 1", as.raw(c(1, 0, 0)))
+  expect_identical(tryCatch(.npy_read_matrix(f), error = function(e) e$code), "NPY_INVALID")
+  write_npy_raw(f, "<i4", "1, 1", le32(4), version = 2L)
+  expect_identical(.npy_read_matrix(f), matrix(4L, 1, 1))
+  write_npy_raw(f, "<i4", "2, 3, 4", le32(1:24))
+  expect_error(.npy_read_matrix(f), "2-D")
+  write_npy_raw(f, "<f4", "1, 1", le32(0))
+  expect_error(.npy_read_matrix(f), "integer")
+})
+
+test_that("C- and Fortran-order non-square arrays decode to the same matrix", {
+  m <- matrix(1:6, 2, 3)
+  fc <- withr::local_tempfile(fileext = ".npy")
+  write_npy_raw(fc, "<i4", "2, 3", le32(t(m)))
+  ff <- withr::local_tempfile(fileext = ".npy")
+  write_npy_raw(ff, "<i4", "2, 3", le32(m), fortran = TRUE)
+  expect_identical(.npy_read_matrix(fc), m)
+  expect_identical(.npy_read_matrix(ff), m)
+})
+
+test_that("the NPY writer refuses values outside the dtype and missing values", {
+  m <- .mask_recover(matrix(c(-1L, 0L, 1L, 2L), 2, 2))
+  f <- withr::local_tempfile(fileext = ".npy")
+  expect_error(at_write_npy(m, f, dtype = "uint8", legend = FALSE), "range")
+  expect_false(file.exists(f))
+  at_write_npy(m, f, dtype = "int16", legend = FALSE)
+  expect_identical(.npy_read_matrix(f), matrix(c(-1L, 0L, 1L, 2L), 2, 2))
+  m2 <- m
+  m2[1, 1] <- NA_integer_
+  expect_error(at_write_npy(m2, f, dtype = "int32", legend = FALSE, overwrite = TRUE),
+               "finite|integer")
+  expect_identical(.npy_read_matrix(f), matrix(c(-1L, 0L, 1L, 2L), 2, 2))
+})

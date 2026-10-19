@@ -107,3 +107,34 @@ test_that("a TIFF is spectral only when wavelengths are declared", {
   expect_identical(tryCatch(at_read_image(at_example_path("multiplex"), wavelengths = 1:2),
                             error = function(e) e$code), "VALIDATION_FAILED")
 })
+
+test_that("per-band calibration references follow the band axis of matrices and spectra", {
+  # Two pixels (rows) x two bands (columns); band b has white w_b, dark 0.
+  x <- matrix(c(10, 20, 30, 40), 2, 2)
+  out <- at_convert_values(x, from = "raw", to = "reflectance",
+                           calibration = list(white = c(100, 200), dark = c(0, 0)))
+  expect_equal(unclass(out)[, 1], c(10, 20) / 100)
+  expect_equal(unclass(out)[, 2], c(30, 40) / 200)
+  expect_identical(dim(out), c(2L, 2L))
+  spec <- at_convert_values(c(50, 50, 50), from = "raw", to = "reflectance",
+                            calibration = list(white = c(100, 200, 50), dark = c(0, 0, 50)))
+  expect_equal(as.vector(spec), c(0.5, 0.25, NA))
+  err <- tryCatch(at_convert_values(x, from = "raw", to = "reflectance",
+                                    calibration = list(white = c(1, 2, 3), dark = 0)),
+                  error = function(e) e$code)
+  expect_identical(err, "CALIBRATION_INVALID")
+})
+
+test_that("equally named images in different folders have different identities", {
+  d1 <- withr::local_tempdir()
+  d2 <- withr::local_tempdir()
+  img <- function(dir) {
+    f <- file.path(dir, "cube.dat")
+    writeBin(as.raw(1:8), f)
+    new_annot_image(f, "envi", c(2L, 2L), 1L, list(c(2L, 2L)), 1L)
+  }
+  a <- img(d1)
+  b <- img(d2)
+  expect_false(identical(.image_identity_digest(a), .image_identity_digest(b)))
+  expect_identical(.image_identity_digest(a), .image_identity_digest(a))
+})

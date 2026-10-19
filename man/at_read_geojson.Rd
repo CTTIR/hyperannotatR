@@ -10,7 +10,9 @@ at_read_geojson(
   level = 0L,
   flip_y = FALSE,
   height = NULL,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  coordinate_level = NULL,
+  legacy_levels = c("error", "recorded")
 )
 }
 \arguments{
@@ -26,6 +28,18 @@ at_read_geojson(
 \item{height}{Image height in pixels, required when \code{flip_y = TRUE}.}
 
 \item{call}{The calling environment, for error reporting.}
+
+\item{coordinate_level}{Optional integer overriding every recorded \code{level}
+without scaling coordinates. Use only when the actual coordinate level is
+known, for example \code{0L} for legacy hyperannotatR exports that wrote level-0
+coordinates beside a nonzero source level. \code{NULL} (default) uses the
+schema and \code{legacy_levels} policy. Coordinates are never automatically
+repaired.}
+
+\item{legacy_levels}{How to interpret files without the coordinate schema
+marker: \code{"error"} (default) rejects ambiguous nonzero recorded levels;
+\code{"recorded"} explicitly trusts those levels. Level-0 files remain
+unambiguous.}
 }
 \value{
 A named list of \link{annot_layer} objects (one per distinct \code{layer}
@@ -34,12 +48,21 @@ property), or a single \link{annot_layer} when \code{layer_name} is supplied.
 \description{
 Read ROIs from a GeoJSON file
 }
+\details{
+A FeatureCollection, a single Feature or a bare array of features
+is accepted. Features without a geometry (\code{"geometry": null}) carry no
+region and are skipped with a warning; any other document is refused with
+an \code{at_validation_error} of code \code{INVALID_GEOJSON}.
+}
 \seealso{
 Other io:
+\code{\link[=at_inspect_saved]{at_inspect_saved()}},
+\code{\link[=at_inspect_source]{at_inspect_source()}},
 \code{\link[=at_load_project]{at_load_project()}},
 \code{\link[=at_load_session]{at_load_session()}},
 \code{\link[=at_read_qupath]{at_read_qupath()}},
 \code{\link[=at_read_rois_csv]{at_read_rois_csv()}},
+\code{\link[=at_relink_source]{at_relink_source()}},
 \code{\link[=at_roi_from_geojson]{at_roi_from_geojson()}},
 \code{\link[=at_save_project]{at_save_project()}},
 \code{\link[=at_save_session]{at_save_session()}},

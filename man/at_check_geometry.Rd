@@ -16,14 +16,17 @@ A \link[tibble:tibble]{tibble::tibble} with columns \code{roi_id} (character), \
 (character), \code{severity} (character, \code{"error"}/\code{"warning"}), and \code{fixable}
 (logical). Detected issues: self-intersection, invalid geometry, zero area,
 degenerate rings, out-of-bounds vertices, duplicate consecutive vertices,
-ring orientation, and \code{NA} coordinates. A 0-row tibble when all geometry is
-valid.
+ring orientation, \code{NA} coordinates, empty geometry, and a pyramid level the
+image does not have (\code{level_out_of_range}). A 0-row tibble when all
+geometry is valid.
 }
 \description{
 Check the geometry of every ROI in a project
 }
 \examples{
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_check_geometry(at_example_project())
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=at_fix_geometry]{at_fix_geometry()}}, \code{\link[=at_validate]{at_validate()}}

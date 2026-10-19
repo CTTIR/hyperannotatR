@@ -34,7 +34,11 @@ at_control_start(
 the lifecycle manifest; defaults to \verb{<session out_dir>/control}.}
 
 \item{token_file}{Optional path of a new file to receive the token (for a
-client process). It must not exist yet.}
+client process). It must not exist yet.
+
+The token needs a cryptographically secure random source (\verb{/dev/urandom},
+or the \pkg{openssl} package where there is none, as on Windows); without
+one the service is not started (\code{CAPABILITY_UNAVAILABLE}).}
 
 \item{read_only}{Logical; refuse annotation mutations.}
 
@@ -62,9 +66,26 @@ file references only below \code{root}. There is no endpoint that evaluates code
 \details{
 The token is never written into URLs, logs, downloads, manifests or RDS
 files. In-process calls use the returned handle; a separate client process
-reads the token from \code{token_file} (created with owner-only permissions).
-A sanitised lifecycle manifest \verb{annotatr-control-<instance_id>.json} is
-written to \code{root} at start and rewritten when the service stops.
+reads the token from \code{token_file}, which is created exclusively with
+owner-only permissions (on Windows, file modes are not enforced; keep the
+file in a directory only the user can read). A sanitised lifecycle manifest
+\verb{annotatr-control-<instance_id>.json} is written to \code{root} at start and
+rewritten when the service stops.
+
+The service stops itself when the token expires: either when the expiry
+timer runs or, if a request arrives first (for example after the computer
+slept), on that request. Error messages sent to clients never contain
+absolute local paths. Request bodies whose declared \code{Content-Length}
+exceeds \code{max_body_bytes}, and requests that fail the Host, Origin or token
+checks, are refused before the body is read (a chunked body without
+\code{Content-Length} is buffered by httpuv and then refused).
+
+Two options bound work done for clients: \code{hyperannotatR.control_mask_max_pixels}
+(default \code{4096^2}) is the largest mask \code{mask.preview} builds (without a
+\code{level} it picks the finest pyramid level within the budget), and
+\code{hyperannotatR.control_hash_max_bytes} (default 256 MiB) is the largest queue
+entry whose content id \code{GET /v1/state} computes before the entry is visited
+(larger entries report \code{image_id: null} until then).
 }
 \examples{
 \dontshow{if (requireNamespace("httpuv", quietly = TRUE)) withAutoprint(\{ # examplesIf}

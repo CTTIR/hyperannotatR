@@ -1,5 +1,7 @@
-# The annot_image class: a lightweight, backend-agnostic image handle holding
-# metadata and a lazy accessor, never pixel data for large images.
+# The annot_image class: a backend-agnostic image handle holding metadata, the
+# backend's pixel handle and a source descriptor. Windowed backends (ENVI,
+# TIVITA) hold only file references; the raster and TIFF backends hold decoded
+# arrays. Saved projects keep the descriptor and reopen the pixels from it.
 
 # Internal constructor. Users obtain an annot_image from at_read_image().
 new_annot_image <- function(source,
@@ -15,7 +17,13 @@ new_annot_image <- function(source,
                             pixel_unit = "px",
                             dtype = "uint8",
                             handle = NULL,
-                            meta = list()) {
+                            meta = list(),
+                            source_descriptor = NULL,
+                            read_generation = NULL,
+                            cache_identity = NULL) {
+  if (is.null(cache_identity)) {
+    cache_identity <- .new_identity_id("image")
+  }
   structure(
     list(
       source          = as.character(source),
@@ -31,7 +39,10 @@ new_annot_image <- function(source,
       pixel_unit      = as.character(pixel_unit),
       dtype           = as.character(dtype),
       handle          = handle,
-      meta            = meta
+      meta            = meta,
+      source_descriptor = source_descriptor,
+      read_generation = read_generation,
+      cache_identity  = as.character(cache_identity)
     ),
     class = "annot_image"
   )
@@ -102,7 +113,9 @@ at_n_bands <- function(x, call = rlang::caller_env()) {
 #'     \item{`name`}{Band name (character); a default `"Band k"` when unnamed.}
 #'     \item{`wavelength`}{Centre wavelength (double); `NA` when not spectral
 #'       or unknown for that band. Never interpolated.}
-#'     \item{`unit`}{Wavelength unit (character); `NA` when not spectral.}
+#'     \item{`unit`}{Declared spectral coordinate unit (character); `NA` when
+#'       not spectral or when the unit is unknown. Scalar metadata applies to
+#'       all bands; per-band units are preserved without conversion.}
 #'     \item{`fwhm`}{Full width at half maximum in the wavelength unit
 #'       (double); `NA` when the source does not declare it.}
 #'     \item{`order`}{Position of the band in file/manifest order (integer).}
@@ -127,7 +140,11 @@ at_bands <- function(x, call = rlang::caller_env()) {
   status <- .wavelength_status(x$wavelengths, n)
   wl <- if (spectral) suppressWarnings(as.numeric(rep_len(as.character(x$wavelengths), n))) else rep(NA_real_, n)
   if (spectral && length(x$wavelengths) < n) wl[seq_len(n) > length(x$wavelengths)] <- NA_real_
-  unit <- if (spectral) rep(x$wavelength_unit %||% NA_character_, n) else rep(NA_character_, n)
+  unit <- if (spectral) x[["wavelength_unit"]] %||% NA_character_ else NA_character_
+  if (!is.character(unit) || !length(unit) %in% c(1L, n)) {
+    cli::cli_abort("Wavelength units must be a character scalar or one value per band.", call = call)
+  }
+  unit <- rep(unit, length.out = n)
   fwhm <- suppressWarnings(as.numeric(x$meta$fwhm))
   fwhm <- if (length(fwhm) == n) fwhm else rep(NA_real_, n)
   tibble::tibble(
@@ -193,7 +210,7 @@ at_is_pyramidal <- function(x, call = rlang::caller_env()) {
 #' @export
 at_pixel_size <- function(x, call = rlang::caller_env()) {
   .check_image(x, call = call)
-  x$pixel_size
+  x[["pixel_size"]]
 }
 
 #' Image metadata
@@ -213,7 +230,9 @@ at_meta <- function(x, key = NULL, call = rlang::caller_env()) {
     source     = x$source,
     backend    = x$backend,
     dtype      = x$dtype,
-    pixel_unit = x$pixel_unit
+    pixel_unit = x$pixel_unit,
+    source_descriptor = x$source_descriptor,
+    read_generation = x$read_generation
   )
   full <- utils::modifyList(base, x$meta)
   if (is.null(key)) {
@@ -256,6 +275,10 @@ summary.annot_image <- function(object, ...) {
   invisible(at_bands(object))
 }
 
+#' @rdname at_dims
+#' @details `dim()` on an [annot_image] returns `c(width, height, bands)` at
+#'   level 0. Note the order: width first, unlike the `[y, x, band]` arrays
+#'   returned by [at_tile()], so `nrow()` gives the width.
 #' @export
 dim.annot_image <- function(x) {
   c(x$level_dims[[1]], x$n_bands)

@@ -19,11 +19,16 @@ at_write_rois_csv(project, path, overwrite = FALSE, call = rlang::caller_env())
 The path, invisibly.
 }
 \description{
-One row per ROI with a WKT \code{geometry} column.
+One row per ROI with a WKT \code{geometry} column. Coordinates and \code{level} are
+at level 0; \code{source_level} records the stored ROI level as provenance, and
+\code{coordinate_schema} marks the file as recording the level of its
+coordinates. WKT coordinates use 17 significant digits and a decimal point,
+independently of session display options, to preserve double-precision
+geometry.
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-p <- withr::local_tempfile(fileext = ".csv")
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+p <- tempfile(fileext = ".csv")
 at_write_rois_csv(at_example_project(), p)
 \dontshow{\}) # examplesIf}
 }
@@ -31,11 +36,14 @@ at_write_rois_csv(at_example_project(), p)
 \code{\link[=at_read_rois_csv]{at_read_rois_csv()}}
 
 Other io:
+\code{\link[=at_inspect_saved]{at_inspect_saved()}},
+\code{\link[=at_inspect_source]{at_inspect_source()}},
 \code{\link[=at_load_project]{at_load_project()}},
 \code{\link[=at_load_session]{at_load_session()}},
 \code{\link[=at_read_geojson]{at_read_geojson()}},
 \code{\link[=at_read_qupath]{at_read_qupath()}},
 \code{\link[=at_read_rois_csv]{at_read_rois_csv()}},
+\code{\link[=at_relink_source]{at_relink_source()}},
 \code{\link[=at_roi_from_geojson]{at_roi_from_geojson()}},
 \code{\link[=at_save_project]{at_save_project()}},
 \code{\link[=at_save_session]{at_save_session()}},

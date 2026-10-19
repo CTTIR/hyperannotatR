@@ -34,7 +34,8 @@
     "      invokeRestart('muffleWarning')})",
     "  list(ok=TRUE, value=value, warnings=warnings)",
     "}, error=function(e) list(ok=FALSE, error=conditionMessage(e)))",
-    "saveRDS(result, args[[2]])"
+    "# Uncompressed: gzip of a large decoded image costs more than the decode.",
+    "saveRDS(result, args[[2]], compress=FALSE)"
   ), script)
   arguments <- c(
     "--vanilla", "--default-packages=NULL", script, request, response
@@ -44,9 +45,17 @@
     stdout = log, stderr = log, timeout = timeout
   )
   if (status != 0L || !file.exists(response)) {
+    why <- if (identical(as.integer(status), 124L)) {
+      sprintf("timed out after %d s (option hyperannotatR.tiff_timeout)", as.integer(timeout))
+    } else {
+      sprintf("exit %s", status)
+    }
+    tail_log <- if (file.exists(log)) utils::tail(readLines(log, warn = FALSE), 5L) else character()
+    tail_log <- tail_log[nzchar(trimws(tail_log))]
     stop( # nolint: cttir_condition. Preserve base decoder conditions.
-      sprintf(
-        "Isolated TIFF decoder failed (exit %s); no image returned", status
+      paste0(
+        sprintf("Isolated TIFF decoder failed (%s); no image returned", why),
+        if (length(tail_log)) paste0("\n", paste(tail_log, collapse = "\n")) else ""
       ),
       call. = FALSE
     )

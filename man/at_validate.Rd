@@ -17,10 +17,13 @@ violated invariant.
 }
 \description{
 Check that layer names are unique, ROI identifiers are unique across the
-project, and all geometries are valid.
+project, every ROI has one geometry at a pyramid level the image has, and
+all geometries are valid.
 }
 \examples{
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 proj <- at_validate(at_example_project())
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{at_check_geometry()}

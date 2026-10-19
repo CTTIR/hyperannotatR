@@ -55,6 +55,34 @@ key_js <- function(key, shift = FALSE) {
           key, if (shift) "true" else "false")
 }
 
+# The canvas accepts gestures, and stamps actions with its identity, only once
+# the displayed image has decoded; wait for that after loading or navigating.
+# Actions carry the entry and revision the canvas displays; the server rejects
+# them as stale until the canvas has caught up with its latest revision.
+wait_ready <- function(app, timeout = 60000, idle = TRUE) {
+  # An app attached to a control service polls the hub, so it is never idle.
+  if (idle) app$wait_for_idle()
+  app$wait_for_js(sprintf(
+    "(function(){var s=window.atcanvasInspect&&window.atcanvasInspect('canvas-canvas');
+      var i=window.atcanvasIdentity&&window.atcanvasIdentity('canvas-canvas');
+      return !!(s&&s.ready&&i&&i.entry_id==='%s'&&i.revision===%d);})()",
+    value(app, "entry_id"), as.integer(value(app, "revision"))
+  ), timeout = timeout)
+}
+
+# Select a tool and wait until the canvas itself uses it.
+use_tool <- function(app, tool) {
+  click_dom(app, paste0("canvas-tool_", tool))
+  app$wait_for_js(sprintf("window.atcanvasInspect('canvas-canvas').tool === '%s'", tool))
+}
+
+# Mutating buttons are intent buttons: keys.js captures the real DOM click and
+# sends it stamped with the displayed entry and revision. AppDriver$click()
+# sets the Shiny input directly, bypassing that capture, so click the element.
+click_dom <- function(app, id) {
+  app$run_js(sprintf("document.getElementById('%s').click();", id))
+}
+
 value <- function(app, name) app$get_value(export = name)
 canvas_uri <- function(app) {
   out <- app$get_value(output = "canvas-canvas")
@@ -69,22 +97,25 @@ test_that("draw, navigate by keyboard, change bands, probe, overlay, stage, comm
                                    load_timeout = 90000, timeout = 30000, height = 1000, width = 1400)
   withr::defer(app$stop())
   app$wait_for_js("document.querySelector('#canvas-canvas canvas') !== null", timeout = 60000)
+  wait_ready(app)
   expect_identical(value(app, "cursor"), 1L)
   expect_identical(value(app, "n_rois"), 0L)
 
-  app$click("canvas-tool_rect")
-  app$wait_for_value(export = "tool", ignore = list("pan"))
+  use_tool(app, "rect")
   app$run_js(drag_js(0.3, 0.3, 0.6, 0.6))
   app$wait_for_value(export = "n_rois", ignore = list(0L))
   expect_identical(value(app, "n_rois"), 1L)
   expect_identical(value(app, "annotation_status"), "unsaved")
+  wait_ready(app)
 
   app$run_js(key_js("n"))
   app$wait_for_value(export = "cursor", ignore = list(1L))
   expect_identical(value(app, "n_rois"), 0L)
+  wait_ready(app)
   app$run_js(key_js("p"))
   app$wait_for_value(export = "cursor", ignore = list(2L))
   expect_identical(value(app, "n_rois"), 1L)
+  wait_ready(app)
 
   before_uri <- canvas_uri(app)
   app$set_inputs(`view-mode` = "single")
@@ -95,9 +126,9 @@ test_that("draw, navigate by keyboard, change bands, probe, overlay, stage, comm
   app$wait_for_idle()
   after_uri <- canvas_uri(app)
   expect_false(identical(before_uri, after_uri))
+  wait_ready(app)
 
-  app$click("canvas-tool_probe")
-  app$wait_for_value(export = "tool", ignore = list("rect"))
+  use_tool(app, "probe")
   app$run_js(sprintf("(function(){var c=document.querySelector('#canvas-canvas canvas');var r=c.getBoundingClientRect();
     c.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,clientX:r.left+r.width/2,clientY:r.top+r.height/2}));})();"))
   app$wait_for_value(export = "probe")
@@ -113,11 +144,12 @@ test_that("draw, navigate by keyboard, change bands, probe, overlay, stage, comm
   at_export_qupflowr(proj, handoff, formats = "qupath_geojson")
   app$set_inputs(nav = "Data")
   app$set_inputs(`data-handoff` = handoff)
-  app$click("data-stage")
+  click_dom(app, "data-stage")
   app$wait_for_value(export = "staged", ignore = list(FALSE))
   app$set_inputs(nav = "Annotate")
   app$wait_for_js("document.querySelector('#staging-commit') !== null")
-  app$click("staging-commit")
+  wait_ready(app)
+  click_dom(app, "staging-commit")
   app$wait_for_value(export = "annotation_status", ignore = list("staged", "unsaved", "saved"))
   expect_identical(value(app, "annotation_status"), "committed")
   expect_identical(value(app, "n_rois"), 2L)
@@ -154,9 +186,11 @@ test_that("a saved session resumes in a fresh app with its annotations", {
   app <- shinytest2::AppDriver$new(browser_app_dir(sess_rds), name = "annotatr-resume",
                                    load_timeout = 90000, timeout = 30000, width = 1400, height = 1000)
   app$wait_for_js("document.querySelector('#canvas-canvas canvas') !== null", timeout = 60000)
-  app$click("canvas-tool_rect")
+  wait_ready(app)
+  use_tool(app, "rect")
   app$run_js(drag_js(0.2, 0.2, 0.5, 0.5))
   app$wait_for_value(export = "n_rois", ignore = list(0L))
+  wait_ready(app)
   app$run_js(key_js("s"))
   app$wait_for_value(export = "saved", ignore = list("unsaved", "saving"))
   saved <- file.path(work, "out", "_session.rds")
@@ -189,14 +223,16 @@ test_that("a browser app attached to the control service follows commands and re
                                    width = 1400, height = 1000)
   withr::defer(app$stop())
   app$wait_for_js("document.querySelector('#canvas-canvas canvas') !== null", timeout = 60000)
+  wait_ready(app, idle = FALSE)
   ctl <- at_control_connect(readLines(file.path(work, "manifest.txt")), file.path(work, "token"))
   st <- at_control_state(ctl)
   at_control_command(ctl, list(operation = "context.goto", payload = list(queue_index = 2),
                                expected_revision = st$state_revision))
   app$wait_for_value(export = "cursor", ignore = list(1L), timeout = 20000)
   expect_identical(value(app, "cursor"), 2L)
+  wait_ready(app, idle = FALSE)
   after <- at_control_events(ctl)$next_cursor
-  app$click("canvas-tool_rect")
+  use_tool(app, "rect")
   app$run_js(drag_js(0.3, 0.3, 0.7, 0.7))
   app$wait_for_value(export = "n_rois", ignore = list(0L))
   deadline <- Sys.time() + 10

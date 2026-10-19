@@ -23,6 +23,15 @@ tiff_process_fixture <- function(mode, target) {
         if (mode == "inherited") Sys.setenv(R_DEFAULT_PACKAGES = "magick")
       }
       p <- system.file("extdata", "example_multiplex.tif", package = "hyperannotatR")
+      if (target == "mask") {
+        # Masks are single planes: a 16-bit code image written before any
+        # ImageMagick use.
+        p <- tempfile(fileext = ".tif")
+        on.exit(unlink(p), add = TRUE)
+        tiff::writeTIFF(matrix(c(0, 1, 256, 65535, 7, 2), 2, 3) / 65535, p,
+          bits.per.sample = 16L, compression = "none"
+        )
+      }
       warnings <- character()
       value <- withCallingHandlers(
         {
@@ -146,10 +155,25 @@ test_that("a real child timeout cleans temporary decoder files", {
     tempdir(),
     pattern = "^annotatr-tiff-", full.names = TRUE
   )
-  expect_error(suppressWarnings(decoder(path)), "exit 124")
+  expect_error(suppressWarnings(decoder(path)), "timed out after 1 s")
   after <- list.files(
     tempdir(),
     pattern = "^annotatr-tiff-", full.names = TRUE
   )
   expect_identical(after, before)
+})
+
+test_that("a failing decoder reports the end of its log", {
+  path <- file.path(withr::local_tempdir(), "input.tif")
+  writeLines("fixture", path)
+  decoder <- .tiff_read_isolated
+  scope <- new.env(parent = environment(decoder))
+  scope$system2 <- function(command, args, stdout, stderr, timeout) {
+    writeLines(c("loading", "", "libtiff: corrupt strip offsets"), stdout)
+    3L
+  }
+  environment(decoder) <- scope
+  err <- tryCatch(decoder(path), error = function(e) conditionMessage(e))
+  expect_match(err, "exit 3", fixed = TRUE)
+  expect_match(err, "libtiff: corrupt strip offsets", fixed = TRUE)
 })

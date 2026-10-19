@@ -15,7 +15,7 @@ mod_view_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::h5("Display"),
-    shiny::selectInput(ns("mode"), NULL, choices = c(
+    shiny::selectInput(ns("mode"), .sr_label("Display mode"), choices = c(
       "Natural colour" = "natural", "Single band" = "single", "Pseudo-RGB / false colour" = "rgb",
       "Band ratio" = "ratio", "Normalised difference" = "normalized_difference",
       "Mean of bands" = "band_mean", "Wavelength window mean" = "wavelength_window_mean"
@@ -29,29 +29,50 @@ mod_view_ui <- function(id) {
   )
 }
 
+# The live image as a reactive that changes only when the image does, not on
+# every annotation edit (reactiveVal ignores identical values), so controls
+# built from it keep the user's choices while they draw.
+.image_reactive <- function(rv) {
+  img <- shiny::reactiveVal(NULL)
+  shiny::observe({
+    p <- rv$project
+    img(if (is.null(p)) NULL else p$image)
+  })
+  img
+}
+
+# Keep a still-valid previous choice of a select input, else the default.
+.keep_choice <- function(previous, choices, default) {
+  prev <- previous[previous %in% choices]
+  if (length(prev)) prev else default
+}
+
 mod_view_server <- function(id, rv) {
   shiny::moduleServer(id, function(input, output, session) {
+    image <- .image_reactive(rv)
     output$band_inputs <- shiny::renderUI({
-      shiny::req(rv$project)
-      img <- rv$project$image
+      img <- image()
+      shiny::req(img)
       ch <- .band_choices(img)
       ns <- session$ns
       mode <- input$mode %||% "natural"
       def <- as.character(.default_rgb_bands(img, img$n_bands))
+      keep <- function(id, default) .keep_choice(shiny::isolate(input[[id]]), ch, default)
       switch(
         mode,
         natural = NULL,
-        single = shiny::selectInput(ns("b1"), "Band", ch, selected = ch[1]),
+        single = shiny::selectInput(ns("b1"), "Band", ch, selected = keep("b1", ch[1])),
         rgb = shiny::tagList(
-          shiny::selectInput(ns("b1"), "Red", ch, selected = def[1]),
-          shiny::selectInput(ns("b2"), "Green", ch, selected = def[2]),
-          shiny::selectInput(ns("b3"), "Blue", ch, selected = def[3])
+          shiny::selectInput(ns("b1"), "Red", ch, selected = keep("b1", def[1])),
+          shiny::selectInput(ns("b2"), "Green", ch, selected = keep("b2", def[2])),
+          shiny::selectInput(ns("b3"), "Blue", ch, selected = keep("b3", def[3]))
         ),
         ratio = , normalized_difference = shiny::tagList(
-          shiny::selectInput(ns("b1"), "Band a", ch, selected = ch[1]),
-          shiny::selectInput(ns("b2"), "Band b", ch, selected = ch[min(2L, length(ch))])
+          shiny::selectInput(ns("b1"), "Band a", ch, selected = keep("b1", ch[1])),
+          shiny::selectInput(ns("b2"), "Band b", ch, selected = keep("b2", ch[min(2L, length(ch))]))
         ),
-        band_mean = shiny::selectInput(ns("bands"), "Bands", ch, multiple = TRUE, selected = ch[1]),
+        band_mean = shiny::selectInput(ns("bands"), "Bands", ch, multiple = TRUE,
+                                       selected = keep("bands", ch[1])),
         wavelength_window_mean = {
           wl <- at_wavelengths(img)
           if (!length(wl) || all(is.na(wl))) {
@@ -85,21 +106,24 @@ mod_view_server <- function(id, rv) {
         .check_band_view(img, view$operation, view$bands, view$params %||% list())
         TRUE
       }, error = function(e) {
-        shiny::showNotification(conditionMessage(e), type = "warning")
+        shiny::showNotification(.app_error_text(e), type = "warning")
         FALSE
       })
       if (ok) rv$view <- view
     })
     output$status <- shiny::renderTable({
-      shiny::req(rv$project)
-      img <- rv$project$image
+      img <- image()
+      shiny::req(img)
+      # Read counters change when the canvas or a spectrum reads pixels, which
+      # happens outside this output's dependencies: refresh them periodically.
+      shiny::invalidateLater(2000)
       hm <- at_hsi_meta(img)
       rs <- at_read_stats(img)
       bands <- at_bands(img)
       gaps <- sum(bands$wavelength_status != "ok")
       data.frame(
         field = c("kind", "size", "bands", "wavelengths", "value unit", "calibration",
-                  "level", "plane (c, z, t)", "window reads", "bytes read",
+                  "pyramid levels", "plane (c, z, t)", "window reads", "bytes read so far",
                   "display", "coordinates"),
         value = c(
           hm$image_kind, sprintf("%d x %d px", hm$width, hm$height), as.character(hm$n_bands),
@@ -108,7 +132,7 @@ mod_view_server <- function(id, rv) {
                                                    max(bands$wavelength, na.rm = TRUE),
                                                    hm$wavelength_unit, gaps) else "none",
           hm$value_unit, hm$calibration$status %||% "missing",
-          sprintf("%d of %d", 0L, hm$n_levels),
+          as.character(hm$n_levels),
           sprintf("%s, %s, %s", ifelse(is.na(hm$plane$c), "all", hm$plane$c), hm$plane$z, hm$plane$t),
           if (isTRUE(hm$window_read)) "yes" else "no (in memory)",
           format(rs$file_bytes, big.mark = ","),
@@ -139,19 +163,21 @@ mod_spectrum_ui <- function(id) {
   b <- at_bands(img)
   tibble::tibble(roi_id = sprintf("pixel(%d,%d)", col, row), layer = NA_character_,
                  label = "pixel", band = b$index, band_name = b$name,
-                 wavelength = b$wavelength, stat = "value", value = as.numeric(v),
+                 wavelength = b$wavelength, unit = b$unit, stat = "value", value = as.numeric(v),
                  n_px = 1L)
 }
 
 mod_spectrum_server <- function(id, rv) {
   shiny::moduleServer(id, function(input, output, session) {
+    image <- .image_reactive(rv)
     is_spectral <- shiny::reactive({
-      shiny::req(rv$project)
-      at_is_spectral(rv$project$image)
+      shiny::req(image())
+      at_is_spectral(image())
     })
     output$panel <- shiny::renderUI({
       if (!is_spectral()) {
-        return(NULL)
+        return(shiny::div(class = "at-progress at-hint",
+                          "Spectra are shown for spectral images (cubes with wavelengths)."))
       }
       ns <- session$ns
       shiny::tagList(
@@ -167,9 +193,19 @@ mod_spectrum_server <- function(id, rv) {
     output$source_sel <- shiny::renderUI({
       shiny::req(rv$project)
       ns <- session$ns
+      # Re-rendered after edits; keep the user's layer or ROI while it exists.
       switch(input$source %||% "all",
-             layer = shiny::selectInput(ns("layer"), NULL, names(rv$project$layers)),
-             roi = shiny::selectInput(ns("roi"), NULL, at_rois(rv$project)$roi_id),
+             layer = {
+               ch <- names(rv$project$layers)
+               shiny::selectInput(ns("layer"), .sr_label("Layer"), ch,
+                                  selected = .keep_choice(shiny::isolate(input$layer), ch, ch[1]))
+             },
+             roi = {
+               ch <- at_rois(rv$project)$roi_id
+               if (!length(ch)) return(shiny::div(class = "at-progress", "No ROIs yet."))
+               shiny::selectInput(ns("roi"), .sr_label("ROI"), ch,
+                                  selected = .keep_choice(shiny::isolate(input$roi), ch, ch[1]))
+             },
              NULL)
     })
     spectra <- shiny::reactive({
@@ -197,8 +233,15 @@ mod_spectrum_server <- function(id, rv) {
       )
     })
     output$plot <- shiny::renderPlot({
-      sp <- spectra()
-      shiny::req(sp)
+      sp <- tryCatch(spectra(), error = function(e) {
+        if (inherits(e, "shiny.silent.error")) NULL else e
+      })
+      if (inherits(sp, "error")) {
+        return(.message_plot(paste("Spectrum unavailable:", .app_error_text(sp))))
+      }
+      if (is.null(sp) || nrow(sp) == 0L) {
+        return(.message_plot("Draw a region or probe a pixel to see spectra."))
+      }
       at_plot_spectrum(sp)
     })
     output$caption <- shiny::renderText({
@@ -316,12 +359,22 @@ mod_region_server <- function(id, rv) {
       filename = function() "hyperannotatR_region.zip",
       content = function(file) {
         shiny::req(rv$project)
-        b <- bounds()
         img <- rv$project$image
         dir <- tempfile("hyperannotatR-region-")
         dir.create(dir)
         on.exit(unlink(dir, recursive = TRUE), add = TRUE)
-        paths <- .write_region(img, b$x, b$y, seq_len(img$n_bands), dir)
+        paths <- tryCatch({
+          b <- bounds()
+          .write_region(img, b$x, b$y, seq_len(img$n_bands), dir)
+        }, error = function(e) {
+          # A failed download carries no explanation: ship the reason instead.
+          shiny::showNotification(paste("Region download failed:", .app_error_text(e)),
+                                  type = "error")
+          note <- file.path(dir, "README.txt")
+          writeLines(c("hyperannotatR region download",
+                       paste("No region was written:", .app_error_text(e))), note)
+          note
+        })
         .zip_into(file, paths, dir)
       }
     )
@@ -346,8 +399,8 @@ mod_staging_server <- function(id, rv) {
         bslib::card_header("Staged changes"),
         shiny::tableOutput(ns("ops")),
         shiny::div(
-          shiny::actionButton(ns("commit"), "Commit staged changes", class = "btn-primary"),
-          shiny::actionButton(ns("discard"), "Discard")
+          .at_action(ns("commit"), "Commit staged changes", class = "btn-primary"),
+          .at_action(ns("discard"), "Discard")
         )
       )
     })
@@ -357,8 +410,9 @@ mod_staging_server <- function(id, rv) {
       as.data.frame(st$operations[st$operations$op != "unchanged", ])
     })
     shiny::observeEvent(input$commit, {
+      event <- .state_event(rv, input$commit)
       st <- rv$staged
-      shiny::req(st)
+      shiny::req(event, st, rv$project)
       if (isTRUE(rv$read_only)) {
         shiny::showNotification("Read-only session: commit refused.", type = "warning")
         return()
@@ -371,18 +425,24 @@ mod_staging_server <- function(id, rv) {
       }
       rc <- tryCatch(at_commit_qupflowr(st), error = function(e) e)
       if (inherits(rc, "error")) {
-        shiny::showNotification(paste("Commit failed:", conditionMessage(rc)), type = "error")
+        shiny::showNotification(paste("Commit failed:", .app_error_text(rc)), type = "error")
         return()
       }
-      rv$undo <- c(rv$undo, list(rv$project))
-      rv$project <- rc$project
-      rv$staged <- NULL
       rv$last_commit <- rc
-      rv$last_action <- "commit"
-      rv$saved <- "unsaved"
-      rv$trigger_save <- Sys.time()
+      # The committed layers replace the live ones through the shared
+      # transition (history, protection, identity); the entry keeps its meta.
+      committed <- .state_mutate(rv, function(p) {
+        q <- rc$project
+        q$meta <- p$meta
+        q
+      }, event, action = "commit")
+      if (!isTRUE(committed)) return()
+      rv$staged <- NULL
+      # A commit is persisted at once, with or without autosave.
+      if (identical(rv$saved, "unsaved")) .state_save(rv)
     })
     shiny::observeEvent(input$discard, {
+      shiny::req(.state_event(rv, input$discard))
       rv$staged <- NULL
     })
   })

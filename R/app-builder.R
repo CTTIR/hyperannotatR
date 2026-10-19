@@ -5,15 +5,22 @@
 #
 # Cross-module state lives in one reactiveValues object `rv`:
 #   session, cursor, project      queue, current index, current image project
+#   entry_id, revision            identity of the live project (app-state.R)
+#   history, dirty                per-entry undo/redo stacks and unsaved flags
+#   session_generation            queue replacement counter
+#   load_project, save_callback   image loader and checkpoint writer
+#   display_ready, display_error  canvas decode handshake
+#   recovery_queue                previous queue kept after a folder load
+#   store, hub, controlled        app-level store shared by tabs; attached hub
 #   tool, active_layer, active_label, mask_type, overlap
-#   undo, redo                    project history of the current image
-#   saved                         "saved" | "saving" | "unsaved"
+#   undo, redo                    history of the current entry
+#   saved, save_error, last_saved "saved" | "saving" | "unsaved" | "unavailable"
 #   read_only                     edits disabled
 #   view                          band view list(operation, bands, params) or NULL
 #   probe, selection, viewport    last probed pixel, selected ROI ids, view bounds
 #   overlay_on, overlay_alpha     mask overlay on the canvas
 #   staged, last_commit           staged partner patch and last commit receipt
-#   last_action, generation       last transition name, queue replacement counter
+#   last_action                   last transition name
 #   fit_bounds                    bounds requested by a controller
 #   paste_forward, trigger_save, trigger_help   keyboard event relays
 
@@ -33,9 +40,12 @@
   invisible(TRUE)
 }
 
-# Normalise what to annotate into an annot_session.
+# Normalise what to annotate into an annot_session. Without `out_dir`, each
+# session gets its own temporary folder, so two launches in one R process never
+# share (and overwrite) one `_session.rds`. A project or image is kept as the
+# session's first entry (with its pixels), not re-read from its source.
 .to_session <- function(x, labels, layers, out_dir, call = rlang::caller_env()) {
-  od <- out_dir %||% tempdir()
+  od <- out_dir %||% .session_out_dir()
   if (inherits(x, "annot_session")) {
     return(x)
   }
@@ -43,17 +53,23 @@
     return(at_example_session(3, call = call))
   }
   if (inherits(x, "annot_project")) {
-    s <- at_session(x$image$source, labels = labels, layers = layers, out_dir = od, call = call)
-    s$projects[[1]] <- x
-    return(s)
+    .validate_project_structure(x)
+    entry_id <- x$meta$entry_id %||% .new_identity_id("entry")
+    x$meta$entry_id <- entry_id
+    if (!grepl("^(?:/|[A-Za-z]:[/\\\\]|\\\\\\\\)", path.expand(od), perl = TRUE)) od <- file.path(getwd(), od)
+    return(new_annot_session(.session_manifest(x$image$source, entry_id), list(x),
+                             labels = labels, layer_spec = .normalize_layer_spec(layers, call = call),
+                             out_dir = normalizePath(path.expand(od), mustWork = FALSE)))
   }
   if (inherits(x, "annot_image")) {
-    return(at_session(x$source, labels = labels, layers = layers, out_dir = od, call = call))
+    p <- at_project(x)
+    for (layer in .normalize_layer_spec(layers, call = call)) p <- at_add_layer(p, layer)
+    if (!length(p$layers)) p <- at_add_layer(p, at_layer("annotations", labels = labels))
+    return(.to_session(p, labels, layers, od, call = call))
   }
   if (is.character(x)) {
     if (length(x) == 1L && dir.exists(x)) {
-      x <- list.files(x, pattern = "\\.(png|jpe?g|tiff?|qptiff|cu3|cu3s|hdr|dat)$",
-                      full.names = TRUE, ignore.case = TRUE)
+      x <- as.character(.app_list_images(x, max_depth = 0L))
       if (length(x) == 0L) {
         cli::cli_abort("No supported images found in the directory.", call = call)
       }
@@ -147,122 +163,135 @@
   )
 }
 
-# The initial reactive state for a session.
-.app_state <- function(sess, read_only = FALSE, view = NULL) {
+# The initial reactive state for a session. Identity, history and checkpoint
+# fields are added by .state_init() (app-state.R).
+.app_state <- function(sess, read_only = FALSE, view = NULL, store = NULL, generation = 0,
+                       hub = NULL) {
   shiny::reactiveValues(
-    session = sess, cursor = sess$cursor, project = NULL, tool = "pan",
-    active_layer = NULL, active_label = NULL, mask_type = "labelled",
-    overlap = "last", undo = list(), redo = list(), saved = "saved",
+    session = sess, cursor = sess$cursor, project = NULL, store = store, hub = hub,
+    controlled = !is.null(hub), tool = "pan", active_layer = NULL, active_label = NULL,
+    mask_type = "labelled", overlap = "last", undo = list(), redo = list(), saved = "saved",
     read_only = isTRUE(read_only), view = view, probe = NULL, selection = character(),
     viewport = NULL, overlay_on = FALSE, overlay_alpha = 0.5, staged = NULL,
-    last_commit = NULL, last_action = NULL, generation = 0L, fit_bounds = NULL,
+    last_commit = NULL, last_action = NULL, last_saved = NULL,
+    session_generation = generation, fit_bounds = NULL,
     paste_forward = NULL, trigger_save = NULL, trigger_help = NULL
   )
 }
 
+# A band view that applies to `img`, or NULL (natural colour) when it does
+# not: a cube's band selection never carries over to an image without them.
+.app_valid_view <- function(img, view) {
+  if (is.null(view)) {
+    return(NULL)
+  }
+  ok <- tryCatch({
+    .check_band_view(img, view$operation, view$bands, view$params %||% list())
+    TRUE
+  }, error = function(e) FALSE)
+  if (ok) view else NULL
+}
+
+# Open queue entry `i` of `session` (the app's image loader).
+.app_load_project <- function(session, i) .materialize_project(session, i)
+
 # Server factory: closes over the explicit session, options and control hub.
+# Without a hub, one store per app object is shared by its Shiny sessions, so
+# a reload or second tab starts from the latest in-memory state.
 .app_server <- function(sess, read_only = FALSE, view = NULL, hub = NULL) {
   force(sess)
   force(read_only)
   force(view)
   force(hub)
+  if (!is.null(hub)) hub$session <- .state_identify(hub$session)
+  store <- if (is.null(hub)) .app_store(sess) else NULL
   function(input, output, session) {
-    s0 <- if (!is.null(hub)) hub$session else sess
-    rv <- .app_state(s0, read_only = read_only || isTRUE(hub$read_only), view = view)
+    s0 <- if (!is.null(hub)) hub$session else store$session
+    rv <- .app_state(s0, read_only = read_only || isTRUE(hub$read_only), view = view,
+                     store = store, generation = if (is.null(store)) 0 else store$generation,
+                     hub = hub)
+    .state_init(rv, load_project = .app_load_project)
+
+    if (.app_is_temp(s0$out_dir) && !isTRUE(shiny::isolate(rv$read_only))) {
+      shiny::showNotification(
+        paste("Annotations are saved under a temporary folder that R deletes when it exits:",
+              s0$out_dir, "\u2014 pass out_dir to keep them."),
+        type = "warning", duration = 15)
+    }
+
+    # The browser keeps the live identity for navigation shortcuts and
+    # disables edit controls until the canvas reports a decoded image.
+    shiny::observe({
+      session$sendCustomMessage("annotatr-state", c(.state_stamp(rv), list(
+        ready = isTRUE(rv$display_ready), error = rv$display_error)))
+    })
+
+    # Observe queue identity changes only; annotation/session writes must not
+    # reload the canvas or restart a failed read/save.
+    shiny::observeEvent(list(rv$cursor, rv$session_generation), {
+      .state_load(rv)
+    }, ignoreNULL = FALSE)
 
     shiny::observeEvent(input$key_next, {
-      rv$session <- at_next(rv$session); rv$cursor <- rv$session$cursor
+      .state_navigate(rv, rv$cursor + 1L, .state_event(rv, input$key_next, keyboard = TRUE))
     })
     shiny::observeEvent(input$key_prev, {
-      rv$session <- at_prev(rv$session); rv$cursor <- rv$session$cursor
+      .state_navigate(rv, rv$cursor - 1L, .state_event(rv, input$key_prev, keyboard = TRUE))
     })
     shiny::observeEvent(input$key_tool, {
-      if (isTRUE(rv$read_only) && !input$key_tool %in% .read_only_tools) return()
-      rv$tool <- input$key_tool
+      event <- .state_event(rv, input$key_tool, keyboard = TRUE)
+      shiny::req(event, event$payload %in% .canvas_tools)
+      if (isTRUE(rv$read_only) && !event$payload %in% .read_only_tools) return()
+      rv$tool <- event$payload
     })
     shiny::observeEvent(input$key_label, {
-      shiny::req(rv$project, rv$active_layer)
+      event <- .state_event(rv, input$key_label, keyboard = TRUE)
+      shiny::req(event, rv$active_layer, is.numeric(event$payload))
       labs <- rv$project$layers[[rv$active_layer]]$labels
-      if (input$key_label <= length(labs)) rv$active_label <- labs[input$key_label]
+      if (event$payload <= length(labs)) rv$active_label <- labs[event$payload]
     })
     shiny::observeEvent(input$key_flag, {
-      rv$session <- at_set_status(rv$session, rv$cursor, "flagged")
+      .state_status(rv, "flagged", .state_event(rv, input$key_flag, keyboard = TRUE))
     })
     shiny::observeEvent(input$key_undo, {
-      if (length(rv$undo) > 0L && !isTRUE(rv$read_only)) {
-        rv$redo <- c(rv$redo, list(rv$project))
-        rv$project <- rv$undo[[length(rv$undo)]]
-        rv$undo <- rv$undo[-length(rv$undo)]
-        rv$saved <- "unsaved"
-      }
+      .state_undo(rv, event = .state_event(rv, input$key_undo, keyboard = TRUE))
     })
     shiny::observeEvent(input$key_redo, {
-      if (length(rv$redo) > 0L && !isTRUE(rv$read_only)) {
-        rv$undo <- c(rv$undo, list(rv$project))
-        rv$project <- rv$redo[[length(rv$redo)]]
-        rv$redo <- rv$redo[-length(rv$redo)]
-        rv$saved <- "unsaved"
-      }
+      .state_undo(rv, redo = TRUE, event = .state_event(rv, input$key_redo, keyboard = TRUE))
     })
-    shiny::observeEvent(input$key_paste_forward, rv$paste_forward <- input$key_paste_forward)
+    shiny::observeEvent(input$key_paste_forward, {
+      event <- .state_event(rv, input$key_paste_forward, keyboard = TRUE)
+      previous <- .previous_project(rv)
+      shiny::req(event, previous)
+      .state_mutate(rv, function(p) .copy_forward(previous, p), event, action = "paste_forward")
+    })
     shiny::observeEvent(input$key_next_pending, {
-      m <- at_session_status(rv$session)
-      pending <- which(m$status == "pending")
-      nxt <- pending[pending > rv$cursor]
-      target <- if (length(nxt)) nxt[1] else if (length(pending)) pending[1] else rv$cursor
-      rv$session <- at_goto(rv$session, target)
-      rv$cursor <- target
+      .state_navigate(rv, .state_pending(rv), .state_event(rv, input$key_next_pending, keyboard = TRUE))
     })
-    shiny::observeEvent(input$key_export,
-                        bslib::nav_select("nav", "Export", session = session))
-    # Shift+Enter: store the current project in its own queue slot, mark it
-    # complete, persist, then advance.
+    shiny::observeEvent(input$key_export, {
+      shiny::req(.state_event(rv, input$key_export, keyboard = TRUE))
+      bslib::nav_select("nav", "Export", session = session)
+    })
+    # Shift+Enter: save the entry as complete, then advance; a failed save
+    # neither completes nor advances.
     shiny::observeEvent(input$key_commit_advance, {
-      if (!is.null(rv$project)) {
-        rv$session$projects[[rv$cursor]] <- rv$project
-      }
-      rv$session <- at_set_status(rv$session, rv$cursor, "complete")
-      rv$trigger_save <- input$key_commit_advance
-      rv$session <- at_next(rv$session)
-      rv$cursor <- rv$session$cursor
+      .state_save(rv, complete = TRUE, advance = TRUE,
+                  event = .state_event(rv, input$key_commit_advance, keyboard = TRUE))
     })
     shiny::observeEvent(input$key_delete, {
-      shiny::req(rv$project)
+      event <- .state_event(rv, input$key_delete, keyboard = TRUE)
+      shiny::req(event, rv$project)
       rt <- at_rois(rv$project)
-      if (nrow(rt) > 0L) {
-        .app_edit(rv, at_remove_roi(rv$project, rt$roi_id[nrow(rt)]), "delete")
-      }
+      if (nrow(rt)) .state_mutate(rv, function(p) at_remove_roi(p, rt$roi_id[nrow(rt)]), event,
+                                  action = "delete")
     })
-    shiny::observeEvent(input$key_save, rv$trigger_save <- input$key_save)
-    shiny::observeEvent(input$key_help, rv$trigger_help <- input$key_help)
-
-    # Materialise the project of the entry under the cursor. The previous
-    # entry's live project is kept in the session before switching, so
-    # navigation never discards edits (independent of autosave).
-    last_cursor <- NULL
-    shiny::observeEvent(list(rv$cursor, rv$generation), {
-      if (!is.null(last_cursor) && !is.null(rv$project) &&
-          last_cursor <= length(rv$session$projects) &&
-          identical(shiny::isolate(rv$generation), attr(last_cursor, "generation"))) {
-        rv$session$projects[[last_cursor]] <- shiny::isolate(rv$project)
-      }
-      proj <- tryCatch(.materialize_project(rv$session, rv$cursor), error = function(e) e)
-      last_cursor <<- structure(rv$cursor, generation = shiny::isolate(rv$generation))
-      if (inherits(proj, "error")) {
-        rv$session <- at_set_status(rv$session, rv$cursor, "skipped")
-        rv$project <- NULL
-        shiny::showNotification(paste("Skipped image:", conditionMessage(proj)), type = "error")
-        return()
-      }
-      rv$project <- proj
-      rv$undo <- list()
-      rv$redo <- list()
-      rv$staged <- NULL
-      rv$selection <- character()
-      rv$active_layer <- names(proj$layers)[1]
-      rv$active_label <- proj$layers[[1]]$labels[1]
-      rv$saved <- "saved"
-    }, ignoreNULL = FALSE)
+    shiny::observeEvent(input$key_save, {
+      .state_save(rv, event = .state_event(rv, input$key_save, keyboard = TRUE))
+    })
+    shiny::observeEvent(input$key_help, {
+      event <- .state_event(rv, input$key_help, keyboard = TRUE)
+      if (!is.null(event)) rv$trigger_help <- Sys.time()
+    })
 
     mod_data_server("data", rv)
     mod_dashboard_server("dashboard", rv)
@@ -285,6 +314,9 @@
     # Values read by shinytest2 browser tests (only exposed in test mode).
     shiny::exportTestValues(
       cursor = rv$cursor,
+      entry_id = rv$entry_id,
+      revision = rv$revision,
+      image = if (is.null(rv$project)) NA_character_ else basename(rv$project$image$source),
       n_rois = if (is.null(rv$project)) NA_integer_ else nrow(at_rois(rv$project)),
       annotation_status = .annotation_status(rv),
       view_operation = rv$view$operation %||% "natural",
@@ -320,6 +352,23 @@
 #'   `list(operation = "rgb", bands = c(30, 20, 10))`.
 #' @param ... Reserved; must be empty.
 #' @param call The calling environment, for error reporting.
+#'
+#' @details
+#' All Shiny sessions of one app object share its in-memory queue: reloading
+#' the page or opening a second tab continues from the latest edits instead of
+#' the session the app was built with. Edits are stored per queue entry; two
+#' tabs editing the same image keep the last edit.
+#'
+#' Annotations autosave to the session's `out_dir` (unless the session was
+#' created with `autosave = FALSE`); the app warns when that folder is inside
+#' R's temporary directory, which is deleted when R exits. Before it first
+#' replaces an existing `_session.rds` that holds another queue or more ROIs,
+#' the app keeps a timestamped `_session-*.previous.rds` copy.
+#'
+#' The Data page reads folder and handoff paths on the machine running R. The
+#' app is meant for local use; for a shared deployment set
+#' `options(hyperannotatR.app_root = "/allowed/folder")` to refuse paths outside one
+#' folder.
 #'
 #' @return A `shiny.appobj`.
 #' @family shiny
@@ -385,7 +434,9 @@ at_app <- function(input = NULL, session = NULL, control = "off", labels = chara
 #' @param labels Character vector of the global label vocabulary.
 #' @param layers An [annot_layer], a list of them, or `NULL`. Applied as a
 #'   template to every image.
-#' @param out_dir Directory for autosave and exports.
+#' @param out_dir Directory for autosave and exports. When `NULL`, a new
+#'   folder inside R's temporary directory is used, which R deletes when it
+#'   exits; a message says so at launch.
 #' @param launch.browser Passed to [shiny::runApp()].
 #' @param port Passed to [shiny::runApp()].
 #' @param ... Passed to [at_app()] (`control`, `read_only`, `view`).
@@ -412,6 +463,12 @@ at_annotate <- function(x = NULL, labels = character(), layers = NULL,
                   view = dots$view, call = call)
   } else {
     session <- .to_session(x, labels, layers, out_dir, call = call)
+    if (.app_is_temp(session$out_dir) && !isTRUE(dots$read_only)) {
+      cli::cli_inform(c(
+        "!" = "Annotations will be saved under {.path {session$out_dir}}, inside R's temporary directory.",
+        "i" = "R deletes it on exit; pass {.arg out_dir} to keep your work."
+      ))
+    }
     app <- at_app(session = session, read_only = isTRUE(dots$read_only), view = dots$view,
                   call = call)
   }

@@ -1,23 +1,32 @@
 skip_if_not_installed("shiny")
+skip_if_not_installed("shinyjs")
+skip_if_not_installed("htmlwidgets")
 
 # The app's module servers live in R/ (see R/app-modules.R) and are tested
-# directly with testServer.
+# directly with testServer. Their inputs are browser envelopes
+# {entry_id, revision, payload} stamped with the live identity.
 
 make_rv <- function(project = demo_project(), session = demo_session(3)) {
-  shiny::reactiveValues(
+  rv <- shiny::reactiveValues(
     session = session, cursor = 1L, project = project, tool = "pan",
     active_layer = "tissue", active_label = "tissue", mask_type = "labelled",
     overlap = "last", undo = list(), redo = list(), saved = "saved",
     paste_forward = NULL
   )
+  .state_init(rv)
+  rv
 }
 
-test_that("queue module navigates the session", {
+stamp <- function(rv, payload = list()) c(.state_stamp(rv), list(payload = payload))
+
+test_that("queue module navigates the session with envelopes only", {
   rv <- make_rv()
   shiny::testServer(mod_queue_server, args = list(id = "q", rv = rv), {
     session$setInputs(filter = "all", nxt = 1)
+    expect_identical(rv$cursor, 1L)
+    session$setInputs(nxt = stamp(rv))
     expect_identical(rv$cursor, 2L)
-    session$setInputs(prev = 1)
+    session$setInputs(prev = stamp(rv))
     expect_identical(rv$cursor, 1L)
   })
 })
@@ -25,7 +34,8 @@ test_that("queue module navigates the session", {
 test_that("layers module tracks the active layer and label", {
   rv <- make_rv()
   shiny::testServer(mod_layers_server, args = list(id = "l", rv = rv), {
-    session$setInputs(layer = "tumour", label = "tumour")
+    session$setInputs(layer_intent = stamp(rv, list(value = "tumour")))
+    session$setInputs(label_intent = stamp(rv, list(value = "tumour", layer = "tumour")))
     expect_identical(rv$active_layer, "tumour")
     expect_identical(rv$active_label, "tumour")
   })
@@ -40,13 +50,24 @@ test_that("mask module toggles type and overlap", {
   })
 })
 
+test_that("one-click mask export uses the queue entry stem", {
+  rv <- make_rv()
+  shiny::testServer(mod_mask_server, args = list(id = "m", rv = rv), {
+    session$setInputs(export = 1)
+    path <- file.path(rv$session$out_dir, "masks",
+                      paste0(.app_stems(rv$session)[rv$cursor], ".tif"))
+    expect_true(file.exists(path))
+  })
+})
+
 test_that("canvas module commits a drawn ROI and marks unsaved", {
   rv <- make_rv()
   shiny::testServer(mod_canvas_server, args = list(id = "c", rv = rv), {
     before <- nrow(at_rois(rv$project))
     feat <- list(geometry = list(type = "Polygon",
                                  coordinates = list(list(c(2, 2), c(6, 2), c(6, 6), c(2, 6), c(2, 2)))))
-    session$setInputs(canvas_created = feat)
+    feat$target <- list(layer = rv$active_layer, label = rv$active_label)
+    session$setInputs(canvas_created = stamp(rv, feat))
     expect_identical(nrow(at_rois(rv$project)), before + 1L)
     expect_identical(rv$saved, "unsaved")
     expect_length(rv$undo, 1L)
@@ -68,15 +89,16 @@ test_that("roitable module deletes an ROI", {
   rv <- make_rv()
   shiny::testServer(mod_roitable_server, args = list(id = "t", rv = rv), {
     id <- at_rois(rv$project)$roi_id[1]
-    session$setInputs(del_id = id, delete = 1)
+    session$setInputs(del_id = id, delete = stamp(rv, list(del_id = id)))
     expect_false(id %in% at_rois(rv$project)$roi_id)
   })
 })
 
-test_that("spectrum module shows a panel only for spectral images", {
+test_that("spectrum module shows spectra only for spectral images", {
   rv_rgb <- make_rv()
   shiny::testServer(mod_spectrum_server, args = list(id = "s", rv = rv_rgb), {
-    expect_null(output$panel)
+    expect_match(as.character(output$panel$html), "spectral images")
+    expect_false(grepl("s-source", as.character(output$panel$html), fixed = TRUE))
   })
   cube <- cube_image()
   # Give the cube real pixel data so the spectrum actually extracts (a bare
@@ -88,7 +110,7 @@ test_that("spectrum module shows a panel only for spectral images", {
                                                        at_roi_circle(16, 16, 4, label = "a"))))
   shiny::testServer(mod_spectrum_server, args = list(id = "s", rv = rv_cube), {
     rv$active_layer <- "l"
-    expect_false(is.null(output$panel))
+    expect_match(as.character(output$panel$html), "s-source", fixed = TRUE)
   })
 })
 
@@ -96,8 +118,14 @@ test_that("session module saves and reports status", {
   rv <- make_rv()
   shiny::testServer(mod_session_server, args = list(id = "s", rv = rv), {
     session$setInputs(save = 1)
+    expect_null(shiny::isolate(rv$last_saved))
+    session$setInputs(save = stamp(rv))
     expect_identical(rv$saved, "saved")
-    session$setInputs(complete = 1)
+    path <- rv$session$manifest$project_path[1]
+    expect_true(file.exists(path))
+    expect_true(startsWith(basename(path), .app_stems(rv$session)[1]))
+    expect_identical(readRDS(file.path(rv$session$out_dir, "_session.rds"))$manifest$project_path[1], path)
+    session$setInputs(complete = stamp(rv))
     expect_identical(at_session_status(rv$session)$status[1], "complete")
   })
 })
@@ -106,17 +134,31 @@ test_that("export writes the selected formats for the scope", {
   rv <- make_rv()
   dir <- tempfile("atexport"); dir.create(dir)
   rc <- shiny::isolate(.write_exports(rv, c("geojson", "csv"), "current", dir))
+  entry_id <- shiny::isolate(rv$session$manifest$entry_id[rv$cursor])
+  stem <- shiny::isolate(.app_stems(rv$session)[rv$cursor])
   expect_true(any(grepl("\\.geojson$", list.files(dir))))
   expect_true(any(grepl("\\.csv$", list.files(dir))))
   expect_setequal(rc$format, c("geojson", "csv"))
+  expect_identical(unique(rc$entry_id), entry_id)
+  expect_true(all(startsWith(basename(rc$path), stem)))
 })
 
 test_that("export scope 'all' covers every annotated image, skipping empties", {
   rv <- make_rv()  # 3-image session, only the current image has a project/ROIs
   dir <- tempfile("atexport"); dir.create(dir)
   rc <- shiny::isolate(.write_exports(rv, "geojson", "all", dir))
-  expect_true(nrow(rc) >= 1L)
+  expect_identical(sum(rc$status == "ok"), 1L)
   expect_length(attr(rc, "skipped"), 2L)  # the two unvisited images
+})
+
+test_that("app export includes failed and skipped rows and complete sibling formats", {
+  rv <- make_rv(); dir <- withr::local_tempdir()
+  testthat::local_mocked_bindings(at_write_qupath = function(...) stop("injected format failure"))
+  rc <- shiny::isolate(.write_exports(rv, c("qupath", "csv"), "all", dir))
+  expect_identical(rc$status, c("error", "ok", "skipped", "skipped", "skipped", "skipped"))
+  expect_equal(nrow(utils::read.csv(file.path(dir, "_export_manifest.csv"))), 6)
+  expect_true(file.exists(rc$path[rc$status == "ok"]))
+  expect_match(rc$message[1], "injected format failure")
 })
 
 test_that("export zips selected files flat, by basename", {
@@ -130,11 +172,18 @@ test_that("export zips selected files flat, by basename", {
   expect_setequal(zip::zip_list(zf)$filename, c("a.geojson", "b.tif"))
 })
 
-test_that("help module renders the shortcut table", {
+test_that("help module renders the shortcut table with every bound key", {
   rv <- make_rv()
   shiny::testServer(mod_help_server, args = list(id = "h", rv = rv), {
-    expect_s3_class(.shortcut_table(), "data.frame")
+    tab <- .shortcut_table()
+    expect_s3_class(tab, "data.frame")
+    expect_match(output$shortcuts, "Shift+Enter", fixed = TRUE)
   })
+  js <- paste(readLines(system.file("shiny", "hyperannotatR", "www", "keys.js", package = "hyperannotatR")),
+              collapse = "\n")
+  tools <- regmatches(js, regexpr("toolKeys = \\{[^}]*\\}", js))
+  for (key in c("q", "w", "e", "r", "t", "y")) expect_match(tools, paste0(key, ":"), fixed = TRUE)
+  expect_true(any(grepl("q w e r t y", .shortcut_table()$key, fixed = TRUE)))
 })
 
 test_that("live mask preview matches at_mask at the same settings", {
@@ -173,8 +222,9 @@ test_that("app www assets make no external requests", {
   expect_length(hits, 0L)
 })
 
-test_that("the keyboard handler guards against text-field focus", {
+test_that("the keyboard handler leaves focused form controls their native keys", {
   js <- readLines(system.file("shiny", "hyperannotatR", "www", "keys.js", package = "hyperannotatR"))
-  expect_true(any(grepl("inTextField", js)))
+  expect_true(any(grepl("inControl", js)))
   expect_true(any(grepl("TEXTAREA", js)))
+  expect_true(any(grepl("data-at-action", js)))
 })

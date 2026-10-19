@@ -60,20 +60,41 @@ at_control_connect <- function(manifest, token_file, call = rlang::caller_env())
   handle
 }
 
-# Raise the error carried by a control response as a classified condition.
-.control_raise <- function(body, status, call) {
-  err <- body$error
-  code <- err$code %||% "INTERNAL_ERROR"
-  class <- switch(
+# The condition classes a control error can carry.
+.control_error_classes <- c("validation", "capability", "conflict", "io", "protocol", "auth", "limit")
+
+# Class of an error code when the response does not name one (older
+# services), matching the class the local function raises.
+.control_code_class <- function(code, status) {
+  by_code <- switch(
+    code,
+    PATH_OUTSIDE_ROOT = , FILE_MISSING = , DESTINATION_EXISTS = , WRITE_FAILED = ,
+    IMAGE_UNAVAILABLE = , LISTEN_FAILED = , INTERNAL_ERROR = "io",
+    PROTOCOL_MISMATCH = , SERVICE_CLOSED = "protocol",
+    NULL
+  )
+  by_code %||% switch(
     as.character(status),
     "401" = , "403" = "auth",
     "409" = "conflict",
     "413" = "limit",
     "501" = "capability",
     "410" = "protocol",
+    "500" = "io",
     "validation"
   )
-  if (identical(code, "PROTOCOL_MISMATCH")) class <- "protocol"
+}
+
+# Raise the error carried by a control response as a classified condition:
+# the class the service reports, else one derived from the code and status.
+.control_raise <- function(body, status, call) {
+  err <- body$error
+  code <- err$code %||% "INTERNAL_ERROR"
+  class <- if (.is_string(err$class) && err$class %in% .control_error_classes) {
+    err$class
+  } else {
+    .control_code_class(code, status)
+  }
   .at_abort(c("Control request failed ({code}).", "x" = "{err$message %||% ''}"),
             class = class, code = code,
             details = list(http_status = status, request_id = body$request_id,
@@ -112,7 +133,9 @@ at_control_connect <- function(manifest, token_file, call = rlang::caller_env())
                           postfields = body_raw)
     }
     do.call(curl::handle_setheaders, c(list(h), hdr))
-    curl::handle_setopt(h, timeout = 30L)
+    # Loopback only: never send the bearer token through a proxy configured in
+    # the environment (http_proxy), and never follow a redirect elsewhere.
+    curl::handle_setopt(h, timeout = 30L, proxy = "", noproxy = "*", followlocation = FALSE)
     url <- sprintf("http://%s:%d%s%s", handle$host, handle$port, path,
                    if (nzchar(query)) paste0("?", query) else "")
     resp <- tryCatch(curl::curl_fetch_memory(url, handle = h), error = function(e) {
@@ -156,7 +179,8 @@ at_control_state <- function(handle, call = rlang::caller_env()) {
 #' @param after Optional event cursor (`"<instance_id>:<seq>"`); `NULL` returns
 #'   the retained buffer. A cursor from another instance or older than the
 #'   buffer yields `resync_required = TRUE`.
-#' @param limit Maximum number of events to return.
+#' @param limit Maximum number of events to return (a positive integer; the
+#'   service caps a page at 500).
 #' @param call The calling environment, for error reporting.
 #' @return A list with `events`, `next_cursor`, `resync_required`, `has_more`
 #'   and `state_revision`.
@@ -181,7 +205,13 @@ at_control_events <- function(handle, after = NULL, limit = 100L, call = rlang::
 #' `content_sha256` is always computed from the canonical payload. A stale
 #' revision raises an `at_conflict_error` (`REVISION_CONFLICT`); re-sending the
 #' same command with the same idempotency key returns the original result
-#' (`replayed = TRUE` in the response) instead of applying it twice.
+#' (`replayed = TRUE` in the response) instead of applying it twice. The
+#' service keeps the most recent 1000 request records; a replay of an older
+#' key raises `IDEMPOTENCY_EXPIRED` instead of executing again, and a large
+#' stored response (for example a mask preview PNG) is replayed in compact
+#' form with `response_truncated = TRUE`. `close` is the only operation that
+#' does not check `expected_revision`. Errors carry the same condition class
+#' as the corresponding local call.
 #'
 #' @param handle An `at_control_handle`.
 #' @param command A list with `operation`, `payload`, `expected_revision` and

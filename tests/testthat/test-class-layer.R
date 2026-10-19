@@ -62,3 +62,29 @@ test_that("layer print and format produce output", {
   expect_output(print(lyr), "annot_layer")
   expect_type(format(lyr), "character")
 })
+
+test_that("a single layer colour applies to labels added later (C11)", {
+  lyr <- at_layer("l", style = at_style(colour = "#FF0000"))
+  lyr <- at_layer_add(lyr, at_roi_rect(0, 0, 1, 1, label = "a"))
+  lyr <- at_layer_add(lyr, at_roi_rect(0, 0, 1, 1, label = "b"))
+  expect_identical(unname(lyr$style$colour), c("#FF0000", "#FF0000"))
+  named <- at_layer("n", style = at_style(colour = c(b = "#00FF00")))
+  named <- at_layer_add(named, at_roi_rect(0, 0, 1, 1, label = "a"))
+  named <- at_layer_add(named, at_roi_rect(0, 0, 1, 1, label = "b"))
+  expect_identical(named$style$colour[["b"]], "#00FF00")
+  # Existing assignments never change when a label is added.
+  dflt <- at_layer("d", labels = c("x", "y"))
+  before <- dflt$style$colour
+  dflt <- at_layer_add(dflt, at_roi_rect(0, 0, 1, 1, label = "z"))
+  expect_identical(dflt$style$colour[c("x", "y")], before)
+})
+
+test_that("a re-minted layer id is unique within the layer after a counter restart", {
+  .reset_id_counter()
+  l <- at_layer("l")
+  for (i in 1:3) l <- at_layer_add(l, at_roi_point(i, i, label = "a"))
+  .reset_id_counter()
+  l <- at_layer_add(l, at_roi_point(9, 9, label = "a", id = "roi_000000002"))
+  ids <- vapply(l$rois, `[[`, character(1), "id")
+  expect_false(anyDuplicated(ids) > 0L)
+})

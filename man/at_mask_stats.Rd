@@ -9,8 +9,9 @@ at_mask_stats(mask, pixel_size = NULL, call = rlang::caller_env())
 \arguments{
 \item{mask}{An \code{annot_mask}.}
 
-\item{pixel_size}{Optional numeric \code{c(x, y)} physical pixel size for physical
-area. When \code{NULL}, \code{area_physical} is \code{NA}.}
+\item{pixel_size}{Optional positive physical pixel size \code{c(x, y)}, or one
+value for square pixels, in the mask's own pixel grid. When \code{NULL},
+\code{area_physical} is \code{NA}.}
 
 \item{call}{The calling environment, for error reporting.}
 }
@@ -18,13 +19,16 @@ area. When \code{NULL}, \code{area_physical} is \code{NA}.}
 A \link[tibble:tibble]{tibble::tibble} with one row per mask value: \code{value}, \code{label},
 \code{n_px}, \code{area_px}, \code{area_physical}, \code{frac_total}, bounding box
 (\code{bbox_xmin}, \code{bbox_ymin}, \code{bbox_xmax}, \code{bbox_ymax}), and centroid
-(\code{centroid_x}, \code{centroid_y}). A 0-row tibble when the mask is empty.
+(\code{centroid_x}, \code{centroid_y}). Every bitfield membership contributes to its
+class count, including composite samples; categorical counts are exclusive.
+Mapped-but-absent classes have zero counts. A 0-row tibble is returned only
+when the codebook is empty.
 }
 \description{
 Per-value statistics of a mask
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_mask_stats(at_mask(at_example_project(), "labelled"))
 \dontshow{\}) # examplesIf}
 }

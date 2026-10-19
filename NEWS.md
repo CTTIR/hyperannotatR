@@ -1,8 +1,149 @@
-# hyperannotatR (development version)
+# hyperannotatR 0.3.0
 
 * Renamed the R package to hyperannotatR and focused its scope on HSI.
   Existing at_* APIs, object classes and saved version fields are retained.
   Microscopy cell annotation and correction are owned by segmantR.
+* Options are renamed from `annotatR.*` to `hyperannotatR.*`: the 0.2.0 options
+  `author`, `cache_size`, `max_tile_bytes` and `tiff_timeout`, and the new ones
+  listed below. The old names are no longer read.
+
+This release also ports the roadmap fixes (work packages T00–T14, findings
+A01–A33, previously on the unmerged `improve/roadmap` branch) onto the 0.2.0
+code base and adds the fixes from a full audit of 0.2.0 that included
+real-browser checks of the app. Several results change; see *Behaviour
+changes*. The finding register and evidence are in `planning/` (not part of
+the package).
+
+## Behaviour changes
+
+* PNG and JPEG images read through magick returned scrambled pixels: magick's
+  `as.integer()` already transposes its bitmap and hyperannotatR transposed it
+  again. Every value taken from such an image (canvas display, plots,
+  extraction, spectra, masks of derived data, training tiles) was wrong. Pixels
+  now match an independent decoder exactly; grey+alpha PNGs keep their alpha.
+* `at_rois()` reports coordinates at level 0: its `level` column is always 0
+  and the stored level moved to a new `source_level` column. Implicit level
+  changes (`at_rois()`, `at_roi_area(level =)`, masks, extraction, distances and
+  exports) use the image's real pyramid and fail with `PYRAMID_REQUIRED`
+  without one; `at_roi_rescale()` remains the explicit power-of-two conversion,
+  and its `from_level` must equal the ROI's level. Set operations and
+  predicates on ROIs at different levels take `image =` or fail with
+  `MIXED_LEVELS`.
+* GeoJSON, CSV and QuPath writers record the level of the coordinates they
+  write (`level`, plus `source_level` and `coordinate_schema =
+  "annotatR-pixel-level-v1"`), so round trips at any level are exact (A06).
+  Files without the schema marker and with a nonzero `level` are ambiguous and
+  now error unless `coordinate_level =` or `legacy_levels = "recorded"` is given.
+* A point covers the pixel holding it under the documented half-open rule:
+  `(5, 5)` now selects pixel `[6, 6]`, and points at `x = 0` or `y = 0` no
+  longer vanish. Masks, extraction and the rectangle fast path agree; the fast
+  path no longer fills right triangles as rectangles (A05, A15).
+* TIFF reads return stored sample values (A26): the multiplex example now holds
+  0–58981 instead of 0–0.9. Unsupported 32-bit integer and 64-bit float TIFFs
+  and planar-separate TIFFs, which decoded as mostly zeros, are refused
+  (`TIFF_UNSUPPORTED`, A35), as are TIFFs whose pages are equal-sized
+  (ambiguous bands or pyramid; `TIFF_AMBIGUOUS`). PNG and JPEG require magick.
+* Masks carry validated metadata (encoding, background, grid, source) and
+  complete legends. A background code that collides with a foreground code is
+  refused (A17); RDS legends survive import (A19); bitfield statistics count
+  overlapping memberships (A20); `overlap = "bitor"` assigns power-of-two class
+  codes, needs `background = 0` (at most 31 classes) and is refused for
+  labelled masks (`INVALID_OVERLAP`). Agreement validates grids, sources and
+  codebooks: conflicting codebooks are refused unless `code_alignment =
+  "by-label"` (or `"by-id"` for instance maps) remaps them, and annotated masks
+  whose source cannot be verified need `alignment = "assert"`.
+* Extraction gains `nonfinite =`: by default (`"propagate"`) any non-finite
+  sample makes the affected ROI/band statistics `NA`, `"omit"` uses finite
+  samples only and reports valid and invalid counts, and `"error"` refuses
+  them. Unknown layer names are an error instead of an empty result.
+* `at_roi_area(units = "physical")` refuses a scalar ROI `pixel_size`
+  attribute: give `c(x, y)` or pass `image =` to use its calibration.
+  `at_mask_stats(pixel_size =)` accepts one value for square pixels.
+* An explicitly supplied choice vector (e.g. `units = c("px", "physical")`) is
+  an error instead of silently using its first element.
+* Sessions get their own default `out_dir` (a unique temporary folder) and
+  saves are atomic. The default session path honours `overwrite = FALSE` (A23).
+  Saved projects store a source descriptor instead of pixels and reopen their
+  images on load (A01).
+* Export files are named by stable queue-entry stems, so images sharing a file
+  name no longer overwrite each other (A08); receipts carry `entry_id`.
+* The default display of an 8-bit image (canvas and plots) shows its stored
+  values; contrast stretching remains for deeper and multichannel data and for
+  explicitly chosen views.
+
+## Identity, persistence and coordinates
+
+* Queue entries have stable identities (`entry_id`, `export_stem`); ROI ids are
+  re-minted until unique across a project and after a restart (A07); tile
+  caches are keyed by read identity, so equal relative paths, replaced files or
+  re-reads with other options never share pixels (A09).
+* New `at_inspect_saved()`, `at_inspect_source()` and `at_relink_source()`
+  inspect checkpoints and relink moved sources; legacy 0.1 files migrate.
+* Per-ROI mask exports use the project's real pyramid (A21); plots align ROIs
+  with downsampled images and choose the finest pyramid level that fits
+  (A18); empty or lower-dimensional set-operation results stay valid areal
+  geometries.
+* Errors from persistence and exports are classified conditions with codes
+  (for example `WRITE_FAILED`, `PATH_OUTSIDE_ROOT`, `IDENTITY_MISMATCH`).
+
+## Readers and interchange
+
+* ENVI keeps the full signed and unsigned 32-bit range (A30), bounds header
+  reads (fixed 1 MiB) and payload reads (`options(hyperannotatR.max_read_bytes)`,
+  default 1 GiB), and requires `data type`. NPY reading is strict and NPY writing refuses values outside the
+  chosen type (A13, A28).
+* New `at_image_capabilities()` and `at_close_image()`; OME-TIFF keeps its axes,
+  calibration and series (A27; needs RBioFormats, not verified on all hosts).
+* QuPath native feature arrays, current class colours and pre-0.4 measurement
+  arrays are read (A31). Contradictory duplicate fields, conflicting colours or
+  object types and repeated ROI ids are refused, while identical duplicates (as
+  QuPath 0.7.0 writes them) are accepted. Source and mask metadata keys are
+  matched exactly and duplicated provenance keys are refused (A33).
+  GeoJSON accepts bare arrays and single features; CSV keeps text columns and
+  17-digit coordinates.
+
+## Partner interop and control service
+
+* Contract families are version 1.1 (readers accept any 1.x). Handoff paths are
+  checked against the verified inventory, entries use stable ids, minted ids
+  are staged as new ROIs, locked target layers produce conflicts, and dates and
+  other attribute types serialise safely. Tokens require `/dev/urandom` or the
+  openssl package.
+* The control service shuts down on expiry, ignores HTTP proxies, applies a
+  commit only after a successful save, refuses `session.load` over unsaved work
+  unless `discard_unsaved`, bounds request bodies, records and mask previews,
+  and never returns absolute paths to clients.
+
+## App and canvas
+
+* Every browser action carries the entry and revision it was made on; stale
+  actions are rejected, so edits can no longer land on another image (A02–A04,
+  A11, A12). Shift+Enter saves synchronously under the right entry.
+* A reload or a second tab continues the in-memory session; before replacing a
+  session file that holds other work the app keeps a `.previous.rds` copy.
+* Label colours are drawn; drawings stay dashed until accepted; polygons finish
+  on the first vertex or a double-click (including slow system double-click
+  settings) and Escape cancels; pointer, touch and high-density displays are
+  supported; holes and multipolygons render and hit-test correctly (A24); each
+  canvas instance routes its own messages (A25). Clicking a canvas that is
+  partly scrolled out of view no longer scrolls the page under the pointer.
+* Mask overlays reach the app canvas (module proxies were mis-addressed), mask
+  previews show the whole image in image coordinates, and error notices are
+  plain text.
+* One save badge with a checkpoint line that warns about temporary folders;
+  keyboard shortcuts work after clicking a toolbar button and are inactive in
+  dialogs and off the Annotate page. `options(hyperannotatR.app_root)` restricts the
+  folders the Data page may open.
+
+## Packaging and documentation
+
+* `digest` moved to Imports; `bslib (>= 0.6.0)`; `png` and `openssl` added to
+  Suggests; `scales` dropped. The app logo ships again (it was build-ignored).
+* New vignette *Reproducible analysis*; vignettes and README describe the
+  shipped behaviour (memory and window-read claims, keyboard table, coordinate
+  levels).
+
+## Earlier development changes
 
 * Stopping a local control listener now cancels its pending expiry callback.
   This releases the stopped service and prevents subsequent Shiny module tests

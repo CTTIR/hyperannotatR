@@ -29,7 +29,9 @@ position for spectra) or \code{"select"} (emit the clicked ROI id).}
 
 \item{elementId}{Optional element id.}
 
-\item{options}{A list of extra options passed to the widget.}
+\item{options}{A list of extra options passed to the widget:
+\code{creationTarget} (a list with \code{layer}, \code{label} and \code{locked}; drawing is
+refused on a locked target) and \code{selection} (ROI ids to highlight).}
 
 \item{view}{Optional band view passed to \code{\link[=at_tile_source]{at_tile_source()}}.}
 
@@ -39,10 +41,40 @@ position for spectra) or \code{"select"} (emit the clicked ROI id).}
 An \code{htmlwidget} object.
 }
 \description{
-An annotation canvas widget
+The canvas shows one embedded, downsampled image with the project's ROIs
+drawn in their label colours (hidden layers are left out; locked layers
+cannot be erased or moved on the canvas). It pans with a drag and zooms
+with the mouse wheel or a two-finger pinch. When no image can be shown, it
+says why instead of keeping a previous image.
 }
+\section{Shiny inputs}{
+
+In Shiny, the canvas with output id \code{id} sends these inputs. Each value is a
+list \code{entry_id}, \code{revision}, \code{payload}: the identity rendered when the
+gesture began (the project's \code{meta$entry_id} and \code{meta$annotation_revision},
+or the element id and \code{0} for a project without them) and the event data.
+A render or \code{\link[=at_canvas_set_annotations]{at_canvas_set_annotations()}} with a different identity cancels
+unfinished gestures, and stale events are never sent.
+\describe{
+\item{\verb{<id>_created}}{A drawn GeoJSON feature in level-0 pixels; \code{target}
+holds \code{options$creationTarget} (\code{layer}, \code{label}) as it was when the
+drawing began. A click with the rectangle or circle tool is not a shape.}
+\item{\verb{<id>_edited}}{\code{roi_id}, \code{layer}, \code{label} and the moved \code{geometry}
+(sent only after an actual drag).}
+\item{\verb{<id>_erased}}{The erased ROI id.}
+\item{\verb{<id>_selected}}{The ids of the selected ROIs (possibly none).}
+\item{\verb{<id>_probed}}{\code{x}, \code{y}: the probed level-0 pixel position.}
+\item{\verb{<id>_viewport}}{\code{zoom}, \code{center_x}, \code{center_y} and \code{bounds}
+(\code{xmin}, \code{ymin}, \code{xmax}, \code{ymax} in level-0 pixels) after a pan or zoom.}
+\item{\verb{<id>_ready}}{\code{ready} and \code{error}: whether the image is displayed.}
+}
+A drawn or moved shape is shown dashed until new annotations arrive, and
+disappears after a few seconds if none do, so the canvas does not keep
+showing an ROI the app did not accept.
+}
+
 \examples{
-\dontshow{if (requireNamespace("htmlwidgets", quietly = TRUE) && (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE))) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("htmlwidgets", quietly = TRUE) && requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_canvas(at_example_image("tissue"))
 \dontshow{\}) # examplesIf}
 }

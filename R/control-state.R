@@ -8,6 +8,17 @@
 .control_registry <- new.env(parent = emptyenv())
 .control_tokens <- new.env(parent = emptyenv())
 
+# The clock every TTL decision uses. A function so tests can move time forward
+# without sleeping.
+.control_now <- function() Sys.time()
+
+# Retention limits for request records. Records (and the idempotency keys that
+# point at them) beyond `.control_max_requests()` are evicted oldest first; a
+# stored response larger than `.control_record_max_bytes()` is kept in compact
+# form (scalar fields only, `response_truncated = TRUE`).
+.control_max_requests <- function() 1000L
+.control_record_max_bytes <- function() 65536
+
 .new_control_hub <- function(session, root, ttl_seconds, host, port, read_only,
                              max_body_bytes) {
   hub <- new.env(parent = emptyenv())
@@ -31,6 +42,16 @@
   hub$requests <- new.env(parent = emptyenv())
   hub$request_order <- character()
   hub$idempotency <- new.env(parent = emptyenv())
+  # Keys whose records were evicted, so a late retry is refused instead of
+  # being executed a second time (bounded; see .hub_record_request()).
+  hub$idempotency_evicted <- new.env(parent = emptyenv())
+  hub$idempotency_evicted_order <- character()
+  # Full, unredacted error messages for the owning process only; clients get
+  # path-redacted messages (see .control_error_body()).
+  hub$error_log <- list()
+  # Incremented whenever the hub's session is replaced (session.load), so an
+  # attached app can tell a project of the previous session from a current one.
+  hub$generation <- 1L
   hub$view <- list(level = 0L, bounds = NULL, band_group = NULL, tool = "pan",
                    overlay = list(show = FALSE, mask_type = "labelled", alpha = 0.5))
   hub$selection <- character()
@@ -60,7 +81,13 @@
 }
 
 # Content-derived image id for a queue entry, cached by path, size and mtime.
-.hub_image_id <- function(hub, i) {
+# The id depends only on the file content (all source files of an ENVI pair),
+# never on whether the entry has been visited, so it is stable across hubs.
+# With `lazy = TRUE` an uncached id is computed only when the source files are
+# at most `getOption("hyperannotatR.control_hash_max_bytes")` (default 256 MiB) in
+# total; larger entries report NA (JSON null) until they are visited, so a
+# state read never hashes a whole queue of slides synchronously.
+.hub_image_id <- function(hub, i, lazy = FALSE) {
   path <- hub$session$manifest$path[i]
   info <- file.info(path)
   key <- paste(path, info$size, as.numeric(info$mtime), sep = "|")
@@ -68,14 +95,22 @@
   if (!is.null(hit)) {
     return(hit)
   }
-  p <- hub$session$projects[[i]]
-  id <- if (!is.null(p)) {
-    .image_id(p$image, .source_files(p$image))
-  } else if (!is.na(info$size)) {
-    paste0("sha256:", substr(.digest_json(list(files = list(.sha256_file(path)))), 1L, 16L))
-  } else {
-    NA_character_
+  if (is.na(info$size)) {
+    return(NA_character_)
   }
+  p <- hub$session$projects[[i]]
+  stub <- if (!is.null(p)) p$image else {
+    list(backend = if (grepl("\\.hdr$", path, ignore.case = TRUE)) "envi" else "unknown",
+         source = path, level_dims = list(), n_bands = NA_integer_)
+  }
+  if (lazy) {
+    sizes <- vapply(.source_files(stub, hash = FALSE), function(f) f$size_bytes %||% NA_real_, numeric(1))
+    cap <- as.numeric(getOption("hyperannotatR.control_hash_max_bytes", 256 * 1024^2))
+    if (anyNA(sizes) || sum(sizes) > cap) {
+      return(NA_character_)
+    }
+  }
+  id <- .image_id(stub, .source_files(stub))
   assign(key, id, envir = hub$image_ids)
   id
 }
@@ -183,12 +218,12 @@
     expires_at = .utc_stamp(hub$expires_at),
     coordinate_convention = .coordinate_convention(),
     queue = lapply(seq_len(nrow(m)), function(i) {
-      list(entry_id = sprintf("entry-%04d", i), queue_index = i, name = m$name[i],
+      list(entry_id = .session_entry_id(s, i), queue_index = i, name = m$name[i],
            status = m$status[i], n_rois = as.integer(m$n_rois[i]),
-           image_id = .hub_image_id(hub, i))
+           image_id = .hub_image_id(hub, i, lazy = i != s$cursor))
     }),
     current = if (is.null(proj)) NULL else list(
-      entry_id = sprintf("entry-%04d", s$cursor),
+      entry_id = .session_entry_id(s, s$cursor),
       queue_index = as.integer(s$cursor),
       annotation_revision = at_annotation_revision(proj),
       image = list(
@@ -257,18 +292,76 @@
   )
 }
 
-# Store a request record, keeping the registry bounded.
+# Store a request record, keeping the registry bounded. Evicting a record also
+# evicts the idempotency keys that point at it; those keys are remembered (up
+# to ten times the record limit) so a late retry gets IDEMPOTENCY_EXPIRED
+# rather than being executed again.
 .hub_record_request <- function(hub, record) {
   id <- record$request_id
   if (!exists(id, envir = hub$requests, inherits = FALSE)) {
     hub$request_order <- c(hub$request_order, id)
   }
   assign(id, record, envir = hub$requests)
-  cap <- 1000L
+  cap <- .control_max_requests()
   if (length(hub$request_order) > cap) {
     drop <- hub$request_order[seq_len(length(hub$request_order) - cap)]
     rm(list = drop, envir = hub$requests)
     hub$request_order <- utils::tail(hub$request_order, cap)
+    keys <- ls(hub$idempotency, all.names = TRUE)
+    stale <- keys[vapply(keys, function(k) hub$idempotency[[k]]$request_id %in% drop, logical(1))]
+    if (length(stale)) {
+      rm(list = stale, envir = hub$idempotency)
+      for (k in stale) assign(k, TRUE, envir = hub$idempotency_evicted)
+      hub$idempotency_evicted_order <- c(hub$idempotency_evicted_order, stale)
+      keep <- 10L * cap
+      if (length(hub$idempotency_evicted_order) > keep) {
+        old <- hub$idempotency_evicted_order[seq_len(length(hub$idempotency_evicted_order) - keep)]
+        rm(list = intersect(old, ls(hub$idempotency_evicted, all.names = TRUE)),
+           envir = hub$idempotency_evicted)
+        hub$idempotency_evicted_order <- utils::tail(hub$idempotency_evicted_order, keep)
+      }
+    }
   }
   invisible(record)
+}
+
+# A stored response small enough to keep: unchanged when it is at most
+# `max_bytes`, otherwise only the small top-level data fields (each at most
+# `max_bytes / 64`, 1 KiB by default) are kept and the
+# envelope is marked `response_truncated = TRUE` (mask PNGs, operation lists
+# and file inventories are dropped from the record; the live response is not
+# affected).
+.control_compact_response <- function(resp, max_bytes = .control_record_max_bytes()) {
+  if (as.numeric(utils::object.size(resp)) <= max_bytes) {
+    return(resp)
+  }
+  d <- resp$body$data
+  if (is.list(d) && length(d)) {
+    small <- vapply(d, function(v) as.numeric(utils::object.size(v)) <= max_bytes / 64, logical(1))
+    d <- d[small]
+  }
+  resp$body$data <- if (is.list(d) && length(d)) d else .json_object()
+  resp$body$response_truncated <- TRUE
+  resp
+}
+
+# ---- Helpers for an attached app ---------------------------------------------
+
+# The hub's session generation: an attached app records it when it adopts the
+# hub's session and must not push projects or navigation from an older
+# generation (the hub replaced its session in between, e.g. session.load).
+.hub_generation <- function(hub) hub$generation
+
+# Does `project` belong to queue entry `cursor` of the hub's current session?
+# Compares the normalised image source with the manifest path, so an app can
+# refuse to store a project in another image's slot.
+.hub_entry_matches <- function(hub, cursor, project) {
+  m <- hub$session$manifest
+  cursor <- suppressWarnings(as.integer(cursor))
+  if (is.null(project) || is.null(project$image) || length(cursor) != 1L || is.na(cursor) ||
+      cursor < 1L || cursor > nrow(m)) {
+    return(FALSE)
+  }
+  norm <- function(p) normalizePath(p, winslash = "/", mustWork = FALSE)
+  identical(norm(project$image$source), norm(m$path[cursor]))
 }

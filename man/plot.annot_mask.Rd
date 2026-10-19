@@ -15,7 +15,9 @@
 }
 \value{
 A \link[ggplot2:ggplot]{ggplot2::ggplot} object (discrete fill from the legend colours,
-image orientation). Not drawn; print it to render.
+image orientation, axes in pixel coordinates at the mask's level, framed to
+the whole grid; a preview from \code{\link[=at_mask_preview]{at_mask_preview()}} is drawn in its parent
+grid's coordinates). Not drawn; print it to render.
 }
 \description{
 Plot a mask

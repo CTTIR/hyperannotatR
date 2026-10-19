@@ -26,13 +26,21 @@ self-contained canvas). Default \code{TRUE}.}
 
 \item{view}{Optional band view: a list with \code{operation} (see
 \code{\link[=at_band_operations]{at_band_operations()}}), \code{bands} and \code{params}. \code{NULL} shows natural-colour
-RGB (nearest bands to 640/550/460 nm for spectral cubes). Display only.}
+RGB (nearest bands to 640/550/460 nm for spectral cubes). Display only. A
+view that does not apply to \code{img} (for example bands it does not have)
+falls back to the default view and is reported in \code{viewError}.}
 
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-A list describing the image for the widget: \code{width}, \code{height},
-\code{tileSize}, \code{minLevel}, \code{maxLevel}, \code{nBands}, and (when \code{embed}) \code{dataUri}.
+A list describing the image for the widget: \code{width}, \code{height}
+(level-0 pixels), \code{nBands}, and the pyramid description \code{tileSize},
+\code{minLevel} and \code{maxLevel} (informational: the built-in canvas displays a
+single embedded image rather than streaming tiles). When \code{embed} is
+\code{TRUE} it also has \code{dataUri} (a PNG data URI); when no image could be
+encoded, \code{dataUri} is absent and \code{displayError} says why, and the canvas
+shows that message instead of an image. \code{viewError} says why \code{view} was
+not applied, when it was not.
 }
 \description{
 Build a tile-source descriptor for the canvas

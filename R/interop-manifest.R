@@ -12,21 +12,23 @@
   format(as.POSIXct(t), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
 }
 
+# ROI attributes can hold partner JSON, so they are read with exact lookups
+# (`$` would partially match, e.g. "shape_note" for "shape").
 .geometry_fidelity <- function(r) {
-  if (identical(r$attributes$qupath$geometry_fidelity, "approximated") ||
-      isTRUE(r$attributes$shape %in% c("circle", "ellipse"))) {
+  if (identical(.jget(r$attributes, "qupath", "geometry_fidelity"), "approximated") ||
+      isTRUE(r$attributes[["shape"]] %in% c("circle", "ellipse"))) {
     return("approximated")
   }
   "exact"
 }
 
 .roi_plane <- function(r) {
-  p <- r$attributes$plane
+  p <- r$attributes[["plane"]]
   if (!is.list(p)) {
     return(list(c = NA_integer_, z = 0L, t = 0L))
   }
-  list(c = as.integer(p$c %||% NA_integer_), z = as.integer(p$z %||% 0L),
-       t = as.integer(p$t %||% 0L))
+  list(c = as.integer(p[["c"]] %||% NA_integer_), z = as.integer(p[["z"]] %||% 0L),
+       t = as.integer(p[["t"]] %||% 0L))
 }
 
 .geometry_sha256 <- function(geom) {
@@ -35,13 +37,16 @@
 
 # Stable record of one ROI. Timestamps and authors are excluded from the
 # revision digest (they are not annotation content) but kept in the manifest.
-.roi_record <- function(r, layer_name, image_id = NA_character_) {
+# `entry_id` names the session queue entry the ROI belongs to (NA for a
+# project), so entries that share an image stay separate.
+.roi_record <- function(r, layer_name, image_id = NA_character_, entry_id = NA_character_) {
   bb <- as.numeric(sf::st_bbox(r$geometry))
   attrs <- r$attributes[setdiff(names(r$attributes), c("qupath", "qupflowr", "plane",
                                                        "locked", "review_status", "shape"))]
   list(
     roi_id = as.character(r$id),
     image_id = image_id,
+    entry_id = entry_id,
     layer = layer_name,
     label = r$label,
     level = as.integer(r$level),
@@ -49,22 +54,25 @@
     geometry_sha256 = .geometry_sha256(r$geometry),
     bbox = list(xmin = bb[1], ymin = bb[2], xmax = bb[3], ymax = bb[4]),
     source = r$source,
-    locked = isTRUE(r$attributes$locked),
-    review_status = r$attributes$review_status %||% "unreviewed",
+    locked = isTRUE(r$attributes[["locked"]]),
+    review_status = r$attributes[["review_status"]] %||% "unreviewed",
     geometry_fidelity = .geometry_fidelity(r),
     native_roi = if (identical(.geometry_fidelity(r), "approximated")) "approximated" else "unknown",
     hierarchy = "unknown",
     plane = .roi_plane(r),
-    qupath_object_type = r$attributes$qupath$object_type %||% NA_character_,
-    qupath_object_id = r$attributes$qupath$object_id %||% NA_character_,
+    qupath_object_type = .json_chr(.jget(r$attributes, "qupath", "object_type")),
+    qupath_object_id = .json_chr(.jget(r$attributes, "qupath", "object_id")),
     attributes_sha256 = if (length(attrs)) .digest_json(.json_safe(attrs)) else NA_character_,
     created = .iso_time(r$created),
     modified = .iso_time(r$modified)
   )
 }
 
-# Coerce arbitrary attribute values to JSON-safe lists (drops functions and
-# environments, turns non-finite numbers into strings).
+# Coerce arbitrary attribute values to JSON-safe lists: drops functions and
+# environments, turns non-finite numbers into strings, dates and times into
+# ISO 8601 strings, durations into "<value> <units>", raw vectors into hex and
+# complex numbers into their character form, so one exotic attribute can never
+# break a revision digest or a manifest.
 .json_safe <- function(x) {
   if (is.null(x)) {
     return(NULL)
@@ -73,7 +81,25 @@
     return(NULL)
   }
   if (inherits(x, "POSIXt")) {
-    return(.iso_time(x))
+    out <- format(as.POSIXct(x), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+    return(.json_safe_vector(out))
+  }
+  if (inherits(x, "Date")) {
+    return(.json_safe_vector(format(x, "%Y-%m-%d")))
+  }
+  if (inherits(x, "difftime")) {
+    out <- paste(format(as.numeric(x), digits = 15), units(x))
+    out[is.na(x)] <- NA_character_
+    return(.json_safe_vector(out))
+  }
+  if (is.factor(x)) {
+    return(.json_safe_vector(as.character(x)))
+  }
+  if (is.raw(x)) {
+    return(paste(sprintf("%02x", as.integer(x)), collapse = ""))
+  }
+  if (is.complex(x)) {
+    return(.json_safe_vector(as.character(x)))
   }
   if (is.data.frame(x)) {
     return(lapply(as.list(x), .json_safe))
@@ -97,9 +123,45 @@
   NULL
 }
 
-.layer_record <- function(L) {
+.json_safe_vector <- function(x) {
+  x <- unname(x)
+  attributes(x) <- NULL
+  if (length(x) == 1L) x else as.list(x)
+}
+
+.review_states <- c("unreviewed", "reviewed", "rejected", "staged")
+
+# Abort when an ROI carries a review status the contract does not define
+# (e.g. "approved"): a partner would not treat it as protected.
+.check_review_status <- function(layers, call = rlang::caller_env()) {
+  bad <- character()
+  vals <- character()
+  for (L in layers) {
+    for (r in L$rois) {
+      st <- r$attributes[["review_status"]]
+      if (!is.null(st) && !(length(st) == 1L && !is.na(st) && st %in% .review_states)) {
+        bad <- c(bad, r$id)
+        vals <- c(vals, paste(as.character(st), collapse = ","))
+      }
+    }
+  }
+  if (length(bad)) {
+    shown <- unique(vals)
+    .at_abort(
+      c("An unknown review status is set on ROI {.val {bad}}.",
+        "x" = "Found {.val {shown}}.",
+        "i" = "Use one of {.val {(.review_states)}}."),
+      code = "REVIEW_STATUS_INVALID", details = list(roi_ids = as.list(bad)), call = call
+    )
+  }
+  invisible(TRUE)
+}
+
+# Layer record. `entry_id` is added only for session entries, so the
+# annotation revision (which uses this record) is unchanged for projects.
+.layer_record <- function(L, entry_id = NA_character_) {
   cols <- L$style$colour
-  list(
+  out <- list(
     name = L$name,
     labels = as.list(L$labels),
     colours = if (length(cols)) as.list(stats::setNames(unname(cols), names(cols))) else .json_object(),
@@ -108,6 +170,8 @@
     locked = isTRUE(L$style$locked),
     n_rois = length(L$rois)
   )
+  if (!is.na(entry_id)) out$entry_id <- entry_id
+  out
 }
 
 .revision_core <- function(project) {
@@ -184,6 +248,11 @@ at_annotation_revision <- function(x, call = rlang::caller_env()) {
   })
 }
 
+# Content-derived image id: the source file digests plus, when not the
+# default, which pixels of the source were read (series, plane, measurement).
+# Reader options that only change interpretation (declared wavelengths, value
+# unit) are deliberately excluded: training splits group by image id, and two
+# readings of the same pixels must never land in different splits.
 .image_id <- function(img, files) {
   hashes <- vapply(files, function(f) f$sha256 %||% NA_character_, character(1))
   basis <- if (length(hashes) && !anyNA(hashes)) {
@@ -191,7 +260,30 @@ at_annotation_revision <- function(x, call = rlang::caller_env()) {
   } else {
     list(identity = .image_identity_digest(img))
   }
+  sel <- .image_selection(img)
+  if (length(sel)) basis$selection <- sel
   paste0("sha256:", substr(.digest_json(basis), 1L, 16L))
+}
+
+# Non-default pixel selection of an image read; an empty list for the default
+# (series 0, all channels of plane z = 0, t = 0, first measurement).
+.image_selection <- function(img) {
+  m <- img$meta %||% list()
+  out <- list()
+  s <- suppressWarnings(as.integer(m[["series_id"]] %||% 0L))
+  if (length(s) == 1L && !is.na(s) && s != 0L) out$series_id <- s
+  p <- m[["plane"]]
+  if (is.list(p)) {
+    pc <- suppressWarnings(as.integer(p[["c"]] %||% NA_integer_))
+    pz <- suppressWarnings(as.integer(p[["z"]] %||% 0L))
+    pt <- suppressWarnings(as.integer(p[["t"]] %||% 0L))
+    if (!(is.na(pc) && identical(pz, 0L) && identical(pt, 0L))) {
+      out$plane <- list(c = pc, z = pz, t = pt)
+    }
+  }
+  mi <- suppressWarnings(as.integer(m[["measurement_index"]] %||% 1L))
+  if (length(mi) == 1L && !is.na(mi) && mi != 1L) out$measurement_index <- mi
+  out
 }
 
 .image_record <- function(img, hash = TRUE) {
@@ -249,27 +341,31 @@ at_annotation_revision <- function(x, call = rlang::caller_env()) {
   "int32"
 }
 
+# Manifest record of a mask, from its validated legend and semantic metadata
+# (encoding, background, overlap, grid); see .mask_info().
 .mask_record <- function(mask, file = NA_character_, mask_id = NA_character_) {
-  lg <- attr(mask, "legend")
-  legend <- if (is.null(lg) || nrow(lg) == 0L) list() else lapply(seq_len(nrow(lg)), function(i) {
+  info <- .mask_info(mask)
+  lg <- info$legend
+  md <- info$metadata
+  legend <- if (nrow(lg) == 0L) list() else lapply(seq_len(nrow(lg)), function(i) {
     list(value = as.integer(lg$value[i]), label = as.character(lg$label[i]),
-         layer = as.character(lg$layer[i] %||% NA_character_),
-         roi_id = as.character(lg$roi_id[i] %||% NA_character_),
-         n_px = as.integer(lg$n_px[i]), colour = as.character(lg$colour[i] %||% NA_character_))
+         layer = as.character(lg$layer[i]), roi_id = as.character(lg$roi_id[i]),
+         n_px = as.integer(lg$n_px[i]), colour = as.character(lg$colour[i]))
   })
-  d <- attr(mask, "dims")
+  d <- md$grid$dims
   list(
     mask_id = mask_id,
     file = file,
     mask_type = attr(mask, "mask_type") %||% "labelled",
+    encoding = md$encoding,
     dtype = .mask_dtype(mask),
-    background = as.integer(attr(mask, "background") %||% 0L),
+    background = as.integer(md$background),
     width = as.integer(d[1]),
     height = as.integer(d[2]),
-    level = as.integer(attr(mask, "level") %||% 0L),
+    level = as.integer(md$grid$level),
     legend = legend,
     legend_sha256 = .digest_json(legend),
-    overlap = attr(mask, "overlap") %||% NA_character_,
+    overlap = md$overlap %||% NA_character_,
     coverage_rule = "pixel centre inside geometry; half-open [lower, upper) ties",
     pixel_convention = "row 1 is the top image row; pixel (i, j) covers [j-1, j) x [i-1, i)",
     source_project = attr(mask, "source_project") %||% NA_character_
@@ -277,6 +373,22 @@ at_annotation_revision <- function(x, call = rlang::caller_env()) {
 }
 
 # ---- Manifest ---------------------------------------------------------------------
+
+# Entry id of queue entry `i`: the session's stable `entry_id` (manifest
+# column, else the project's `meta$entry_id`) when it is a safe identifier,
+# otherwise the positional "entry-NNNN" of sessions without stable ids.
+.session_entry_id <- function(session, i) {
+  m <- session$manifest
+  id <- if ("entry_id" %in% names(m)) .json_chr(m[["entry_id"]][i]) else NA_character_
+  if (is.na(id)) {
+    p <- session$projects[[i]]
+    id <- if (is.null(p)) NA_character_ else .json_chr(p$meta[["entry_id"]])
+  }
+  if (is.na(id) || !grepl("^[A-Za-z0-9._-]{1,128}$", id)) {
+    id <- sprintf("entry-%04d", i)
+  }
+  id
+}
 
 .manifest_base <- function(object_kind) {
   caps <- at_interop_capabilities()
@@ -299,11 +411,11 @@ at_annotation_revision <- function(x, call = rlang::caller_env()) {
   img_rec <- .image_record(project$image, hash = hash)
   iid <- img_rec$image_id
   rois <- unlist(lapply(project$layers, function(L) {
-    lapply(L$rois, .roi_record, layer_name = L$name, image_id = iid)
+    lapply(L$rois, .roi_record, layer_name = L$name, image_id = iid, entry_id = entry_id)
   }), recursive = FALSE)
   list(
     image = img_rec,
-    layers = unname(lapply(project$layers, .layer_record)),
+    layers = unname(lapply(project$layers, .layer_record, entry_id = entry_id)),
     annotations = list(
       count = length(rois),
       annotation_revision = at_annotation_revision(project),
@@ -340,18 +452,32 @@ at_annotation_revision <- function(x, call = rlang::caller_env()) {
 #'   content-derived `image_id`). Default `TRUE`.
 #' @param call The calling environment, for error reporting.
 #'
+#' In a session manifest every ROI and layer record carries the `entry_id` of
+#' its queue entry, so entries that share an image stay separate. An ROI whose
+#' `review_status` attribute is not one of `"unreviewed"`, `"reviewed"`,
+#' `"rejected"` or `"staged"` is refused (`REVIEW_STATUS_INVALID`).
+#'
 #' @return The manifest (a list of class `at_interop_manifest`); invisibly when
 #'   `destination` is given.
 #' @family interop
 #' @seealso [at_export_qupflowr()], [at_interop_capabilities()]
 #' @export
-#' @examplesIf requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' m <- at_interop_manifest(at_example_project())
 #' m$annotations$annotation_revision
 #' m$images[[1]]$image_id
 at_interop_manifest <- function(x, destination = NULL, hash_sources = TRUE,
                                 call = rlang::caller_env()) {
   .check_flag(hash_sources, call = call)
+  if (inherits(x, "annot_project")) {
+    .check_review_status(x$layers, call = call)
+  } else if (inherits(x, "annot_session")) {
+    for (p in Filter(Negate(is.null), x$projects)) .check_review_status(p$layers, call = call)
+  } else if (inherits(x, "annot_layer")) {
+    .check_review_status(list(x), call = call)
+  } else if (inherits(x, "annot_roi")) {
+    .check_review_status(list(list(rois = list(x))), call = call)
+  }
   if (inherits(x, "annot_project")) {
     parts <- .project_manifest_parts(x, hash = hash_sources)
     out <- c(.manifest_base("project"), list(
@@ -362,7 +488,7 @@ at_interop_manifest <- function(x, destination = NULL, hash_sources = TRUE,
     m <- x$manifest
     entries <- lapply(seq_len(nrow(m)), function(i) {
       p <- x$projects[[i]]
-      rec <- list(entry_id = sprintf("entry-%04d", i), queue_index = i, name = m$name[i],
+      rec <- list(entry_id = .session_entry_id(x, i), queue_index = i, name = m$name[i],
                   status = m$status[i], n_rois = as.integer(m$n_rois[i]),
                   materialised = !is.null(p), image_id = NA_character_,
                   annotation_revision = NA_character_)
@@ -381,12 +507,12 @@ at_interop_manifest <- function(x, destination = NULL, hash_sources = TRUE,
     projects <- lapply(seq_len(nrow(m)), function(i) {
       p <- x$projects[[i]]
       if (is.null(p)) NULL else .project_manifest_parts(p, hash = hash_sources,
-                                                        entry_id = sprintf("entry-%04d", i))
+                                                        entry_id = .session_entry_id(x, i))
     })
     kept <- Filter(Negate(is.null), projects)
     out <- c(.manifest_base("session"), list(
       images = lapply(kept, `[[`, "image"),
-      layers = if (length(kept)) kept[[1]]$layers else list(),
+      layers = unlist(lapply(kept, `[[`, "layers"), recursive = FALSE) %||% list(),
       annotations = list(
         count = sum(vapply(kept, function(p) as.integer(p$annotations$count), integer(1))),
         annotation_revision = at_annotation_revision(x),
@@ -420,7 +546,7 @@ at_interop_manifest <- function(x, destination = NULL, hash_sources = TRUE,
       masks = list(.mask_record(x, mask_id = "mask-0001")), projects = list(), session = NULL
     ))
   } else {
-    .at_abort("{.arg x} must be an hyperannotatR project, session, image, layer, ROI or mask.",
+    .at_abort("{.arg x} must be a hyperannotatR project, session, image, layer, ROI or mask.",
               call = call)
   }
   out$provenance <- list(

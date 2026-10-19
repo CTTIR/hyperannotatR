@@ -33,7 +33,7 @@
     "groups": {
       "type": "array",
       "items": {"type": "object", "required": ["group_id", "split", "entry_ids"],
-                "properties": {"group_id": {"type": "string"}, "split": {"type": "string"},
+                "properties": {"group_id": {"type": "string"}, "split": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
                                "entry_ids": {"type": "array", "items": {"type": "string"}}}}
     },
     "tile_policy": {
@@ -69,7 +69,7 @@
       "items": {"type": "object",
                 "required": ["entry_id", "image_id", "group_id", "split", "width", "height", "level",
                              "annotation_revision", "transform_digest"],
-                "properties": {"image_id": {"type": "string"}, "split": {"type": "string"},
+                "properties": {"image_id": {"type": "string"}, "split": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
                                "annotation_revision": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}}
     },
     "tiles": {
@@ -77,6 +77,7 @@
       "items": {"type": "object",
                 "required": ["tile_id", "entry_id", "split", "x", "y", "width", "height", "level", "status"],
                 "properties": {"status": {"type": "string", "enum": ["included", "excluded"]},
+                               "split": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
                                "x": {"type": "integer", "minimum": 0}, "y": {"type": "integer", "minimum": 0}}}
     },
     "counts": {"type": "object", "required": ["tiles", "tiles_by_split", "images_by_split", "excluded", "flagged", "class_balance"]},

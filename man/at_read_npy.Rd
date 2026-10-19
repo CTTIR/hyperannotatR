@@ -6,16 +6,19 @@
 \usage{
 at_read_npy(
   path,
-  level = 0L,
+  level = NULL,
   transpose = FALSE,
   legend = NULL,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  metadata = NULL
 )
 }
 \arguments{
 \item{path}{Path to a \code{.npy} file.}
 
-\item{level}{Integer pyramid level to record. Default \code{0}.}
+\item{level}{Integer pyramid level to record. \code{NULL} (default) recovers the
+sidecar level, falling back to 0 without metadata. Explicit values override
+the sidecar declaration without resampling pixels.}
 
 \item{transpose}{Logical; transpose the array on read, for files stored in
 the native cube order \verb{(width, height)} = \verb{[x, y]} (e.g. TIVITA/HyperGui
@@ -26,9 +29,19 @@ masks) so the result lands in hyperannotatR's \verb{[y, x]} convention. Default
 / pixel-value labelling.}
 
 \item{call}{The calling environment, for error reporting.}
+
+\item{metadata}{Optional named list overriding semantic \code{mask_metadata}
+fields, such as \code{encoding}, \code{background}, or \code{source}. Nested grid fields
+merge; explicit \code{level} and \code{legend} take precedence. No pixels are
+resampled. Versioned declarations must be structurally valid before
+overrides apply.}
 }
 \value{
-An \code{annot_mask}.
+An integer \code{annot_mask} preserving encoding, background, codebook,
+grid and source metadata. Without encoding metadata, imports use exclusive
+instance values and zero background with status \code{legacy-default}; signed
+representable codes are preserved. A declared storage orientation must
+match \code{transpose}, even for square arrays. Malformed sidecars are rejected.
 }
 \description{
 Read a NumPy integer array (e.g. a ground-truth annotation mask) into a
@@ -37,8 +50,16 @@ bitfield codes. Use this (not \code{\link[=at_read_mask]{at_read_mask()}}, which
 raw integer matrix is what you need, for example to derive a training mask or
 compute agreement against another mask.
 }
+\details{
+The header is validated strictly (NPY format versions 1-3, 2-D shapes,
+scalar integer dtypes of 1, 2, 4 or 8 bytes in either byte order) and the
+payload length is checked before reading; values that do not fit a 32-bit
+integer mask (including INT_MIN, R's missing-value code) are refused, never
+truncated. Reads are bounded by option \code{hyperannotatR.max_read_bytes} and
+headers by \code{hyperannotatR.max_npy_header_bytes}.
+}
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 m <- at_mask(at_example_project(), "labelled")
 f <- tempfile(fileext = ".npy")
 at_write_npy(m, f)

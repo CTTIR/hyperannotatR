@@ -1,7 +1,15 @@
 .atcanvas-canvas {
   display: block;
   background: #1a1a1a;
+  /* Pointer events drive pan, zoom and drawing, including on touch screens. */
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+.atcanvas-canvas:focus-visible {
+  outline: 2px solid #e3a008;
+  outline-offset: -2px;
 }
 .html-widget.atcanvas {
   width: 100%;
@@ -10,4 +18,14 @@
   overflow: hidden;
   border: 1px solid #3a3a3a;
   border-radius: 4px;
+}
+/* Status line above the canvas (image readiness, display errors, keyboard
+   cursor). Explicit colours keep it readable on the dark canvas frame in both
+   light and dark page themes. */
+.atcanvas-status {
+  background: #1a1a1a;
+  color: #d8d8d8;
+  font-size: 0.8rem;
+  padding: 0 0.5rem;
+  text-overflow: ellipsis;
 }

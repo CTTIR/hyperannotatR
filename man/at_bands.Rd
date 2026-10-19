@@ -18,7 +18,9 @@ A \link[tibble:tibble]{tibble::tibble} with one row per band and the columns:
 \item{\code{name}}{Band name (character); a default \code{"Band k"} when unnamed.}
 \item{\code{wavelength}}{Centre wavelength (double); \code{NA} when not spectral
 or unknown for that band. Never interpolated.}
-\item{\code{unit}}{Wavelength unit (character); \code{NA} when not spectral.}
+\item{\code{unit}}{Declared spectral coordinate unit (character); \code{NA} when
+not spectral or when the unit is unknown. Scalar metadata applies to
+all bands; per-band units are preserved without conversion.}
 \item{\code{fwhm}}{Full width at half maximum in the wavelength unit
 (double); \code{NA} when the source does not declare it.}
 \item{\code{order}}{Position of the band in file/manifest order (integer).}
@@ -33,9 +35,11 @@ Band (channel) table
 }
 \seealso{
 Other images:
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_example_image]{at_example_image()}},
 \code{\link[=at_hsi_meta]{at_hsi_meta()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_is_pyramidal]{at_is_pyramidal()}},
 \code{\link[=at_is_spectral]{at_is_spectral()}},
 \code{\link[=at_meta]{at_meta()}},

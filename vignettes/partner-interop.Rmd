@@ -12,8 +12,9 @@ knitr::include_graphics("../man/figures/logo.png")
 ```
 
 ```{r setup, include=FALSE}
-has_raster <- requireNamespace("tiff", quietly = TRUE) &&
-  (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE))
+# The example project is a PNG (read with magick); masks are written as TIFF.
+has_raster <- requireNamespace("magick", quietly = TRUE) &&
+  requireNamespace("tiff", quietly = TRUE)
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = has_raster)
 library(hyperannotatR)
 ```
@@ -60,7 +61,7 @@ receipt$handoff_digest
 ```
 
 - `annotations_qupath.geojson` uses the QuPath 0.4+ dialect with a stable UUID
-  per ROI and hyperannotatR's ROI id, layer, source and level in
+  per ROI and hyperannotatR's ROI id, layer, source and coordinate level in
   `properties.metadata`.
 - `masks/<layer>_labelled.tif` holds one integer value per ROI; its
   `.legend.json` joins values to ROI ids, labels and colours.
@@ -74,6 +75,12 @@ receipt$handoff_digest
 Files are written to a hidden staging directory and moved into place only when
 complete. An existing destination is replaced only with `overwrite = TRUE`, and
 only if it is itself a handoff directory.
+
+A session export writes each queue entry under `entries/<entry_id>/`. Entry ids
+come from the session manifest's stable `entry_id` (falling back to
+`entry-0001`, ... for older sessions), and the manifest's ROI, layer and file
+records carry the `entry_id` they belong to, so two entries showing the same
+image stay separate. Project masks have the ids `project:<layer>`.
 
 ### The manifest
 
@@ -97,7 +104,15 @@ hyperannotatR does not model, are reported as `"unknown"` or `"approximated"`
 inventory (missing, extra, duplicate, resized, altered and symlinked files), the
 manifest schema and its major version, the id join between manifest and
 GeoJSON, labels, mask dimensions, integer values and legend completeness. Any
-failure is a classified error; nothing is written and no analysis runs.
+failure is a classified error with a machine-readable `code` (for example
+`DUPLICATE_ID`, `LEGEND_INCOMPLETE`, `MASK_INVALID`, `FORMAT_UNRECOGNISED` or
+`INVALID_JSON`, which also covers duplicate JSON keys); nothing is written and
+no analysis runs. Operating-system metadata files that are not in the inventory
+(`.DS_Store`, `._*`, `Thumbs.db`, `desktop.ini`) are ignored with a warning.
+The conversion table's `geometry_match` reports `"exact"` when the geometry is
+byte-identical to its manifest record, `"equivalent"` when an export at another
+pyramid level agrees with it within a relative `1e-9` after rescaling, and
+`"changed"` otherwise.
 
 ```{r import}
 report <- at_import_qupflowr(dest, expected_revision = at_annotation_revision(proj))
@@ -105,8 +120,10 @@ report$checks
 ```
 
 Changes are applied in two explicit steps. Staging joins ROIs by id and
-classifies each change; reviewed or locked ROIs and locked layers are never
-changed automatically but reported as conflicts:
+classifies each change. Reviewed or locked ROIs and locked layers, including a
+locked target layer of a new or moved ROI, are never changed automatically but
+reported as conflicts. ROIs whose ids were minted on import, because the file
+carried none, are always staged as new ROIs:
 
 ```{r stage}
 partner <- report$objects$layers$regions
@@ -162,9 +179,15 @@ ds$manifest$counts[c("tiles", "tiles_by_split", "excluded")]
 ds$checks
 ```
 
-Splits are assigned per group — per image by default, or per `sample_id` or
-`subject_id` supplied in `groups` — so tiles of one source never occur in two
-splits. The manifest records tile size, overlap, level, pixel origin, coverage
+Splits are assigned per group, so tiles of one group never occur in two
+splits. The default group is the image, identified by its content hash
+(including any non-default series, plane or measurement). The three example
+entries are copies of one picture, so they form a single image group and all
+land in one split: tiles of one image never leak across splits. Distinct images
+spread over the splits. Group by `sample_id` or `subject_id`, supplied in
+`groups`, when several images come from one sample or one patient; entries
+that show the same pixels must still share a split, and `at_training_check()`
+reports an image found in two splits as leakage. The manifest records tile size, overlap, level, pixel origin, coverage
 rule, class legend (background `0`), band list with wavelengths and FWHM,
 value unit, calibration and transform digests, annotation revisions and review
 status counts. `at_training_check()` re-verifies the inventory, split leakage,
@@ -191,7 +214,9 @@ A partner process can drive a running app through the loopback service. It is
 off unless started, binds only to `127.0.0.1`, authenticates with a random
 bearer token that expires, rejects browser-origin requests and oversized
 bodies, resolves file references only below its root, and offers no endpoint
-that evaluates R, shell or Python code.
+that evaluates R, shell or Python code. Tokens come from the operating system's
+random source (`/dev/urandom`) or, where that does not exist (Windows), from the
+optional `openssl` package; without either, the service refuses to start.
 
 ```{r control, eval = has_raster && requireNamespace("httpuv", quietly = TRUE)}
 handle <- at_control_start(at_example_session(2), serve = FALSE)
@@ -219,6 +244,29 @@ is a conflict; a lost response is resolved with
 a command twice. Events are read with a cursor; a cursor from another instance
 or older than the retained buffer yields `resync_required = TRUE`.
 
+A few further rules matter to clients:
+
+- `session.load` refuses with `UNSAVED_CHANGES` (409) while the current session
+  has unsaved or staged edits, unless the payload sets `discard_unsaved: true`.
+  A loaded session gets its own output directory under `<root>/sessions/`,
+  reported as the relative `session_dir`.
+- Re-sending an idempotency key whose record has already been evicted returns
+  `IDEMPOTENCY_EXPIRED` (409) instead of running the command again.
+- `mask.preview` refuses masks larger than
+  `options(hyperannotatR.control_mask_max_pixels)` (default 4096^2 pixels) with
+  `MASK_TOO_LARGE` (413).
+- `GET /v1/state` reports `image_id: null` for unvisited queue entries larger
+  than `options(hyperannotatR.control_hash_max_bytes)` (default 256 MiB) rather than
+  hashing them while the app waits.
+- `close` is not revision-checked. Once the token has expired, the listener
+  shuts down.
+- Error bodies carry the condition `class` alongside the `code`. Paths in errors
+  are reported relative to the root, never as absolute paths.
+- The remote client ignores `http_proxy`/`https_proxy` and never follows
+  redirects, so the token only ever goes to the loopback address.
+- On Windows the operating system does not enforce the token file's owner-only
+  permission; keep it in a directory only you can read.
+
 The JSON Schemas for all documents ship with the package:
 
 ```{r schemas, eval = TRUE}
@@ -227,9 +275,11 @@ basename(list.files(system.file("schema", package = "hyperannotatR"), recursive 
 
 ## Versions and migration
 
-Schema versions are independent of the package version. Readers reject an
-unknown major version and keep unknown optional data only under `extensions`.
-hyperannotatR 0.2.0 introduces `annotatr-handoff-v1`, `annotatr-control-v1`,
-`annotatr-training-v1` and `annotatr-hsi-v1` (all `1.0`). Existing 0.1 files
-remain readable: legacy QuPath GeoJSON (`object_type`, `colorRGB`) is imported,
-and `at_write_qupath(dialect = "legacy")` still writes it.
+Schema versions are independent of the package version. Readers accept any
+`1.x` version, reject an unknown major version and keep unknown optional data
+only under `extensions`. hyperannotatR 0.2.0 introduced `annotatr-handoff-v1`,
+`annotatr-control-v1`, `annotatr-training-v1` and `annotatr-hsi-v1`; they are
+now at version `1.1`. The `integrity.json` format stays at `1.0`, because its
+digest rule is shared with qupflowR. Existing 0.1 files remain readable: legacy
+QuPath GeoJSON (`object_type`, `colorRGB`) is imported, and
+`at_write_qupath(dialect = "legacy")` still writes it.

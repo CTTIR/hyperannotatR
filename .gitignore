@@ -11,3 +11,12 @@ STATE.md
 
 # Local HSI data workbench (not distributed)
 hsi-workbench/
+
+# testthat failure artifacts (written by testthat >= 3.3)
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds
+
+# Node artifacts from installing Playwright for tests/browser
+node_modules/
+/package.json
+/package-lock.json

@@ -16,7 +16,8 @@ at_batch_apply(
 \arguments{
 \item{session}{An \link{annot_session}.}
 
-\item{fn}{A function \code{fn(project, image, idx)} returning an \link{annot_project}.}
+\item{fn}{A function \code{fn(project, image, idx, ...)} returning an
+\link{annot_project}.}
 
 \item{...}{Passed to \code{fn}.}
 
@@ -27,7 +28,11 @@ at_batch_apply(
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-The \link{annot_session} with modified projects.
+The \link{annot_session} with modified projects. An image whose project
+cannot be materialised, or for which \code{fn} errors or does not return an
+\link{annot_project}, keeps its previous project; the failures are reported in
+one warning and attached as the \code{"batch_errors"} attribute, a
+\link[tibble:tibble]{tibble::tibble} with columns \code{idx}, \code{image} and \code{message}.
 }
 \description{
 Apply a function to every project in a session

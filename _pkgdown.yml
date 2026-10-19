@@ -30,6 +30,8 @@ reference:
       - at_backend_register
       - at_tivita_profile
       - at_cubert_export_envi
+      - at_image_capabilities
+      - at_close_image
   - title: Hyperspectral metadata
     desc: Band tables, value semantics, display band operations and read accounting.
     contents:
@@ -140,7 +142,7 @@ reference:
       - at_plot_spectrum
       - at_plot_summary
   - title: Import and export
-    desc: Interchange with GeoJSON, QuPath, CSV, and RDS.
+    desc: Interchange with GeoJSON, QuPath, CSV, and RDS; inspect and relink saved sources.
     contents:
       - at_write_geojson
       - at_read_geojson
@@ -151,6 +153,9 @@ reference:
       - at_load_project
       - at_save_session
       - at_load_session
+      - at_inspect_saved
+      - at_inspect_source
+      - at_relink_source
       - at_write_rois_csv
       - at_read_rois_csv
   - title: Partner interoperability
@@ -223,3 +228,4 @@ articles:
       - shiny-workflow
       - interop
       - partner-interop
+      - reproducible-analysis

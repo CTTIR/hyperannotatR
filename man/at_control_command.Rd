@@ -26,7 +26,13 @@ on). \code{request_id} and \code{idempotency_key} are generated when absent and
 \code{content_sha256} is always computed from the canonical payload. A stale
 revision raises an \code{at_conflict_error} (\code{REVISION_CONFLICT}); re-sending the
 same command with the same idempotency key returns the original result
-(\code{replayed = TRUE} in the response) instead of applying it twice.
+(\code{replayed = TRUE} in the response) instead of applying it twice. The
+service keeps the most recent 1000 request records; a replay of an older
+key raises \code{IDEMPOTENCY_EXPIRED} instead of executing again, and a large
+stored response (for example a mask preview PNG) is replayed in compact
+form with \code{response_truncated = TRUE}. \code{close} is the only operation that
+does not check \code{expected_revision}. Errors carry the same condition class
+as the corresponding local call.
 }
 \examples{
 \dontshow{if (requireNamespace("httpuv", quietly = TRUE)) withAutoprint(\{ # examplesIf}

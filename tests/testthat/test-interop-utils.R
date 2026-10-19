@@ -83,3 +83,79 @@ test_that("atomic JSON writes leave no temporary files", {
   expect_identical(list.files(d, all.files = TRUE, no.. = TRUE), "x.json")
   expect_identical(jsonlite::read_json(file.path(d, "x.json"))$a, 1L)
 })
+
+test_that("canonical JSON is byte-identical to the qupflowR accept vectors (X11)", {
+  d <- test_path("fixtures", "interop", "qupflowr-canonical")
+  cases <- sub("\\.canonical$", "", list.files(d, pattern = "\\.canonical$"))
+  expect_gte(length(cases), 8L)
+  for (nm in cases) {
+    value <- jsonlite::fromJSON(file.path(d, paste0(nm, ".json")), simplifyVector = FALSE)
+    want <- readBin(file.path(d, paste0(nm, ".canonical")), "raw",
+                    file.size(file.path(d, paste0(nm, ".canonical"))))
+    got <- charToRaw(enc2utf8(.canonical_json(value)))
+    expect_identical(got, want, label = nm)
+    sha <- sub("[[:space:]].*$", "", readLines(file.path(d, paste0(nm, ".sha256")), warn = FALSE)[1])
+    expect_identical(.sha256_bytes(.canonical_json(value)), sha, label = nm)
+  }
+  # Negative zero is written as 0, like qupflowR.
+  expect_identical(.canonical_json(list(a = -0, b = c(0, -0))), '{"a":0,"b":[0,0]}')
+})
+
+test_that("bearer tokens need a secure random source; identifiers do not (X10)", {
+  local_mocked_bindings(.urandom_available = function() FALSE,
+                        .openssl_available = function() FALSE)
+  err <- tryCatch(.random_hex(32L), error = function(e) e)
+  expect_s3_class(err, "at_capability_error")
+  expect_identical(err$code, "CAPABILITY_UNAVAILABLE")
+  set.seed(3)
+  before <- .Random.seed
+  expect_match(.uuid(), "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
+  expect_match(.random_hex(6L, secure = FALSE), "^[0-9a-f]{12}$")
+  expect_identical(.Random.seed, before)
+})
+
+test_that("a failed atomic write leaves neither the target nor a temporary file", {
+  d <- withr::local_tempdir()
+  local_mocked_bindings(.rename_path = function(from, to) FALSE)
+  err <- tryCatch(.write_json_atomic(list(a = 1L), file.path(d, "x.json")), error = function(e) e)
+  expect_identical(err$code, "WRITE_FAILED")
+  expect_length(list.files(d, all.files = TRUE, no.. = TRUE), 0L)
+})
+
+test_that("a failed directory replacement restores the previous copy", {
+  base <- withr::local_tempdir()
+  dest <- file.path(base, "out")
+  stage <- file.path(base, ".out.partial")
+  dir.create(dest)
+  writeLines("old", file.path(dest, "a.txt"))
+  dir.create(stage)
+  writeLines("new", file.path(stage, "a.txt"))
+  real <- .rename_path
+  local_mocked_bindings(.rename_path = function(from, to) {
+    if (identical(from, stage)) FALSE else real(from, to)
+  })
+  err <- tryCatch(.replace_dir(stage, dest), error = function(e) e)
+  expect_identical(err$code, "WRITE_FAILED")
+  expect_identical(readLines(file.path(dest, "a.txt")), "old")
+  expect_false(any(grepl("previous", list.files(base, all.files = TRUE))))
+})
+
+test_that("JSON documents with repeated keys are refused (X19)", {
+  f <- withr::local_tempfile(fileext = ".json")
+  writeLines('{"a": 1, "b": {"c": 1, "c": 2}}', f)
+  err <- tryCatch(.read_json_doc(f), error = function(e) e)
+  expect_identical(err$code, "INVALID_JSON")
+  expect_identical(err$details$reason, "duplicate_key")
+})
+
+test_that("a new path below a symlinked directory cannot escape the root", {
+  skip_on_os("windows")
+  root <- withr::local_tempdir()
+  outside <- withr::local_tempdir()
+  file.symlink(outside, file.path(root, "linked"))
+  err <- tryCatch(.resolve_under_root(root, "linked/new/file.txt", must_exist = FALSE),
+                  error = function(e) e)
+  expect_identical(err$code, "PATH_OUTSIDE_ROOT")
+  ok <- .resolve_under_root(root, "fresh/new.txt", must_exist = FALSE)
+  expect_true(startsWith(ok, normalizePath(root, winslash = "/")))
+})

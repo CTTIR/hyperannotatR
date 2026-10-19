@@ -12,7 +12,8 @@ at_backend_list(call = rlang::caller_env())
 \value{
 A \link[tibble:tibble]{tibble::tibble} with columns \code{name} (character), \code{description}
 (character), \code{extensions} (character, comma-separated), and \code{available}
-(logical). A 0-row tibble with these columns when nothing is registered.
+(logical), plus metadata_only and window_read (logical; NA when unknown).
+A 0-row tibble with these columns when nothing is registered.
 }
 \description{
 List registered image backends
@@ -25,7 +26,9 @@ Other backends:
 \code{\link[=at_backend_detect]{at_backend_detect()}},
 \code{\link[=at_backend_get]{at_backend_get()}},
 \code{\link[=at_backend_register]{at_backend_register()}},
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_cubert_export_envi]{at_cubert_export_envi()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_read_image]{at_read_image()}},
 \code{\link[=at_tile]{at_tile()}},
 \code{\link[=at_tivita_profile]{at_tivita_profile()}}

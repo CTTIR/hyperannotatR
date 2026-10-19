@@ -11,19 +11,24 @@ at_read_image(path, backend = NULL, ..., call = rlang::caller_env())
 
 \item{backend}{Optional backend name; auto-detected when \code{NULL}.}
 
-\item{...}{Passed to the backend's reader.}
+\item{...}{Passed to the backend's reader. They must be plain serializable
+values (numbers, strings, logicals and lists of them): they are recorded
+in the image's source descriptor so a saved project can reopen the file
+the same way.}
 
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-An \link{annot_image}.
+An \link{annot_image} whose \code{source} is the absolute path of the file,
+with a \code{source_descriptor} (path, backend, options, file signature) and a
+per-read cache identity.
 }
 \description{
 Read an image into a lightweight \link{annot_image} handle, auto-detecting the
 backend from the file unless one is named.
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 img <- at_read_image(at_example_path("tissue"))
 at_dims(img)
 \dontshow{\}) # examplesIf}
@@ -33,9 +38,11 @@ at_dims(img)
 
 Other images:
 \code{\link[=at_bands]{at_bands()}},
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_example_image]{at_example_image()}},
 \code{\link[=at_hsi_meta]{at_hsi_meta()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_is_pyramidal]{at_is_pyramidal()}},
 \code{\link[=at_is_spectral]{at_is_spectral()}},
 \code{\link[=at_meta]{at_meta()}},
@@ -51,7 +58,9 @@ Other backends:
 \code{\link[=at_backend_get]{at_backend_get()}},
 \code{\link[=at_backend_list]{at_backend_list()}},
 \code{\link[=at_backend_register]{at_backend_register()}},
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_cubert_export_envi]{at_cubert_export_envi()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_tile]{at_tile()}},
 \code{\link[=at_tivita_profile]{at_tivita_profile()}}
 }

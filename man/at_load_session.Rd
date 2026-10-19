@@ -12,7 +12,9 @@ at_load_session(path, call = rlang::caller_env())
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-The \link{annot_session}. Warns if written by a newer hyperannotatR.
+The \link{annot_session}. A file written before sessions recorded queue
+entry identities gets one per queue row. Stored projects are reopened
+lazily by \code{\link[=at_current]{at_current()}}. Warns if written by a newer hyperannotatR.
 }
 \description{
 Load a session
@@ -21,10 +23,13 @@ Load a session
 \code{\link[=at_save_session]{at_save_session()}}, \code{\link[=at_resume]{at_resume()}}
 
 Other io:
+\code{\link[=at_inspect_saved]{at_inspect_saved()}},
+\code{\link[=at_inspect_source]{at_inspect_source()}},
 \code{\link[=at_load_project]{at_load_project()}},
 \code{\link[=at_read_geojson]{at_read_geojson()}},
 \code{\link[=at_read_qupath]{at_read_qupath()}},
 \code{\link[=at_read_rois_csv]{at_read_rois_csv()}},
+\code{\link[=at_relink_source]{at_relink_source()}},
 \code{\link[=at_roi_from_geojson]{at_roi_from_geojson()}},
 \code{\link[=at_save_project]{at_save_project()}},
 \code{\link[=at_save_session]{at_save_session()}},

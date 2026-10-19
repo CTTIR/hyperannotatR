@@ -12,9 +12,12 @@ at_manifest(session, call = rlang::caller_env())
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-A \link[tibble:tibble]{tibble::tibble} with \code{idx}, \code{name}, \code{path}, \code{status}, \code{n_layers},
-\code{n_rois}, and one integer column per label in the session vocabulary giving
-its ROI count per image.
+A \link[tibble:tibble]{tibble::tibble} with \code{idx}, \code{entry_id}, \code{export_stem}, \code{name},
+\code{path}, \code{status}, \code{n_layers}, \code{n_rois}, and one integer column per label in
+the session vocabulary giving its ROI count per image. \code{n_rois} counts the
+ROIs of materialised projects (otherwise the manifest's stored count). A
+label that clashes with one of the fixed column names gets a \code{label_}
+prefix.
 }
 \description{
 Session progress manifest with per-label counts

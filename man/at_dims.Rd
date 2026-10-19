@@ -2,9 +2,12 @@
 % Please edit documentation in R/class-image.R
 \name{at_dims}
 \alias{at_dims}
+\alias{dim.annot_image}
 \title{Image dimensions at a pyramid level}
 \usage{
 at_dims(x, level = 0L, call = rlang::caller_env())
+
+\method{dim}{annot_image}(x)
 }
 \arguments{
 \item{x}{An \link{annot_image}.}
@@ -21,6 +24,11 @@ An integer vector of length 2, \code{c(width, height)}.
 Return the pixel dimensions \code{c(width, height)} of an \link{annot_image} at a
 given pyramid level.
 }
+\details{
+\code{dim()} on an \link{annot_image} returns \code{c(width, height, bands)} at
+level 0. Note the order: width first, unlike the \verb{[y, x, band]} arrays
+returned by \code{\link[=at_tile]{at_tile()}}, so \code{nrow()} gives the width.
+}
 \examples{
 # Image handles come from at_read_image(); see the images vignette.
 }
@@ -29,8 +37,10 @@ given pyramid level.
 
 Other images:
 \code{\link[=at_bands]{at_bands()}},
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_example_image]{at_example_image()}},
 \code{\link[=at_hsi_meta]{at_hsi_meta()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_is_pyramidal]{at_is_pyramidal()}},
 \code{\link[=at_is_spectral]{at_is_spectral()}},
 \code{\link[=at_meta]{at_meta()}},

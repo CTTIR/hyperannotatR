@@ -20,9 +20,11 @@ Number of pyramid levels
 \seealso{
 Other images:
 \code{\link[=at_bands]{at_bands()}},
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_example_image]{at_example_image()}},
 \code{\link[=at_hsi_meta]{at_hsi_meta()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_is_pyramidal]{at_is_pyramidal()}},
 \code{\link[=at_is_spectral]{at_is_spectral()}},
 \code{\link[=at_meta]{at_meta()}},

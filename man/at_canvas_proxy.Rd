@@ -16,7 +16,9 @@ An \code{atcanvas_proxy} object.
 }
 \description{
 Mirrors the \code{leafletProxy()} pattern: update a live canvas without
-re-rendering the whole widget.
+re-rendering the whole widget. Inside a Shiny module, pass the module's
+(un-namespaced) output id; it is namespaced with the module session, as
+\code{leaflet::leafletProxy()} does.
 }
 \seealso{
 Other shiny:

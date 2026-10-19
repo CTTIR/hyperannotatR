@@ -16,25 +16,34 @@ at_plot_image(
 \arguments{
 \item{img}{An \link{annot_image}.}
 
-\item{level}{Pyramid level to display; chosen automatically when \code{NULL}.}
+\item{level}{Pyramid level to sample; chosen automatically when \code{NULL}.
+Plot axes always use level-0 image coordinates, scaled independently by
+actual width and height ratios.}
 
 \item{bands}{Optional band index for single-band display.}
 
 \item{rgb}{Optional length-3 vector of band indices, or wavelengths in nm for
-a spectral cube, for a false-colour composite.}
+a spectral cube, for a false-colour composite. Each channel of an \code{rgb}
+composite is contrast-stretched on its own; the default natural-colour
+display of an image with three or more bands shows an 8-bit image with its
+stored values and stretches deeper data in its first three bands jointly,
+preserving their colour balance.}
 
-\item{max_dim}{Maximum display dimension (auto-downsampled). Default \code{1024}.}
+\item{max_dim}{Maximum display dimension (auto-downsampled). Default \code{1024}.
+Each displayed cell covers its full source block; final partial blocks
+end at the image boundary. When \code{level} is \code{NULL}, the finest pyramid
+level that fits within \code{max_dim} is sampled.}
 
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-A \link[ggplot2:ggplot]{ggplot2::ggplot} object.
+A \link[ggplot2:ggplot]{ggplot2::ggplot} object. Non-finite samples are drawn transparent.
 }
 \description{
 Plot an image
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_plot_image(at_example_image("tissue"))
 \dontshow{\}) # examplesIf}
 }

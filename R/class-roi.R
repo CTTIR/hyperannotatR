@@ -35,8 +35,13 @@ new_annot_roi <- function(geometry,
 }
 
 # Coerce/validate an incoming geometry to a length-1, null-CRS sfc, repairing
-# invalid geometries with a warning.
-.finalize_geometry <- function(g, arg = "geometry", call = rlang::caller_env()) {
+# invalid geometries with a warning. A length-0 result (sf drops empty overlay
+# results) becomes an explicit `POLYGON EMPTY`, and a GEOMETRYCOLLECTION (from
+# repairs or overlays) keeps only its highest-dimensional parts. With `areal =
+# TRUE` (set operations on polygons) lower-dimensional parts are dropped too, so
+# two polygons that only touch intersect in an empty polygon, not a line.
+.finalize_geometry <- function(g, arg = "geometry", areal = FALSE, warn_empty = TRUE,
+                               call = rlang::caller_env()) {
   if (inherits(g, "sf")) {
     g <- sf::st_geometry(g)
   }
@@ -53,6 +58,15 @@ new_annot_roi <- function(geometry,
     )
   }
   suppressWarnings(sf::st_crs(g) <- sf::NA_crs_)
+  if (length(g) == 0L) {
+    if (warn_empty) {
+      cli::cli_warn(c(
+        "The geometry for {.arg {arg}} is empty.",
+        "i" = "Stored as an empty polygon with zero area."
+      ))
+    }
+    return(.empty_polygon_sfc())
+  }
   if (length(g) > 1L) {
     g <- sf::st_sfc(sf::st_combine(g)[[1]], crs = sf::NA_crs_)
   }
@@ -67,31 +81,128 @@ new_annot_roi <- function(geometry,
       )
     )
   }
-  g
+  .collapse_collection(g, areal = areal)
+}
+
+# An empty polygon as a length-1, null-CRS sfc.
+.empty_polygon_sfc <- function() {
+  sf::st_sfc(sf::st_polygon(), crs = sf::NA_crs_)
+}
+
+# Reduce a GEOMETRYCOLLECTION (or, with `areal`, any non-polygonal result) to
+# one simple geometry of its highest dimension. Polygonal parts are unioned into
+# a POLYGON or MULTIPOLYGON; with `areal`, a result without polygonal parts is
+# an empty polygon.
+.collapse_collection <- function(g, areal = FALSE) {
+  type <- as.character(sf::st_geometry_type(g))
+  if (type %in% c("POLYGON", "MULTIPOLYGON") || (!areal && type != "GEOMETRYCOLLECTION")) {
+    return(g)
+  }
+  if (all(sf::st_is_empty(g))) {
+    return(if (areal) .empty_polygon_sfc() else g)
+  }
+  flatten <- function(x) {
+    if (inherits(x, "GEOMETRYCOLLECTION")) {
+      do.call(c, lapply(unclass(x), flatten))
+    } else {
+      list(x)
+    }
+  }
+  parts <- flatten(g[[1]])
+  parts <- parts[!vapply(parts, function(p) isTRUE(sf::st_is_empty(sf::st_sfc(p))), logical(1))]
+  kind <- vapply(parts, function(p) class(p)[2], character(1))
+  pick <- function(types) parts[kind %in% types]
+  polys <- pick(c("POLYGON", "MULTIPOLYGON"))
+  lines <- pick(c("LINESTRING", "MULTILINESTRING"))
+  points <- pick(c("POINT", "MULTIPOINT"))
+  chosen <- if (length(polys)) polys else if (areal) list() else if (length(lines)) lines else points
+  if (length(chosen) == 0L) {
+    return(.empty_polygon_sfc())
+  }
+  out <- sf::st_union(sf::st_sfc(chosen, crs = sf::NA_crs_))
+  sf::st_sfc(out[[1]], crs = sf::NA_crs_)
+}
+
+# Attributes describing a particular geometry (a fitted circle or ellipse,
+# QuPath measurements and nuclei) no longer hold once the geometry changes.
+.reshaped_attributes <- function(attrs) {
+  attrs$shape <- NULL
+  if (is.list(attrs$qupath)) {
+    attrs$qupath[c("nucleus_geometry", "measurements", "roi_native",
+                   "geometry_fidelity")] <- NULL
+  }
+  attrs
+}
+
+# A new ROI derived from others (set operations, rings) is a different object:
+# it inherits no lock, review state or external object identity.
+.derived_attributes <- function(attrs) {
+  attrs <- .reshaped_attributes(attrs)
+  attrs[setdiff(names(attrs), c("locked", "review_status", "qupath"))]
 }
 
 # Assemble an annot_roi from a finalised geometry plus the shared `...` handling.
 .build_roi <- function(geometry, label, level, dots, call = rlang::caller_env()) {
   .check_string(label, call = call)
   level <- .check_count(level, call = call)
+  if (length(dots) > 0L && (is.null(names(dots)) || any(!nzchar(names(dots))))) {
+    .check_abort(
+      c("Every argument in {.arg ...} must be named.",
+        "i" = "Pass attributes as {.code name = value}, e.g. {.code author = \"me\"}."),
+      call = call
+    )
+  }
+  for (nm in intersect(c("author", "source", "id"), names(dots))) {
+    v <- dots[[nm]]
+    if (!.is_string(v) || !nzchar(v)) {
+      .check_abort(
+        c("{.arg {nm}} must be a single non-empty string.",
+          "x" = "You supplied {.cls {class(v)[1]}} of length {length(v)}."),
+        call = call
+      )
+    }
+  }
   g <- .finalize_geometry(geometry, call = call)
   author <- dots$author %||% .default_author()
   source <- dots$source %||% "manual"
   id     <- dots$id %||% .new_id("roi")
   attrs  <- dots[setdiff(names(dots), c("author", "source", "id"))]
-  if (is.null(names(dots))) attrs <- list()
   new_annot_roi(
     geometry = g, id = id, label = label, level = level,
     attributes = attrs, author = author, source = source
   )
 }
 
-# Close a coordinate ring if it is not already closed.
+# Close a coordinate ring if it is not already closed. The test is exact: a
+# ring whose last vertex is only nearly equal to its first is closed with an
+# extra vertex, as sf requires.
 .close_ring <- function(m) {
-  if (!isTRUE(all.equal(m[1, ], m[nrow(m), ]))) {
+  if (any(m[1, ] != m[nrow(m), ])) {
     m <- rbind(m, m[1, , drop = FALSE])
   }
   m
+}
+
+# Validate one ring of polygon vertices.
+.check_ring <- function(m, arg, call) {
+  if (!is.matrix(m) || !is.numeric(m) || ncol(m) != 2L) {
+    .check_abort(
+      c("{.arg {arg}} must be two-column numeric matrices of x, y vertices.",
+        "x" = "Got {.cls {class(m)[1]}} with {if (is.matrix(m)) ncol(m) else NA} column{?s}."),
+      call = call
+    )
+  }
+  if (any(!is.finite(m))) {
+    .check_abort("{.arg {arg}} contains missing or non-finite coordinates.", call = call)
+  }
+  if (nrow(unique(m)) < 3L) {
+    .check_abort(
+      c("Each ring in {.arg {arg}} needs at least 3 distinct vertices.",
+        "x" = "A ring has {nrow(unique(m))}."),
+      call = call
+    )
+  }
+  invisible(m)
 }
 
 # ---- Exported constructors -------------------------------------------------
@@ -252,7 +363,8 @@ at_roi_polygon <- function(coords, label, level = 0L, hole = NULL, ...,
     hole <- if (is.matrix(hole)) list(hole) else hole
     rings <- c(rings, hole)
   }
-  rings <- lapply(rings, function(m) .close_ring(as.matrix(m)))
+  for (m in rings) .check_ring(m, "coords", call)
+  rings <- lapply(rings, function(m) .close_ring(m))
   g <- sf::st_sfc(sf::st_polygon(rings), crs = sf::NA_crs_)
   .build_roi(g, label, level, list(...), call = call)
 }
@@ -283,6 +395,7 @@ at_roi_freehand <- function(coords, label, level = 0L, simplify = 0, ...,
       call = call
     )
   }
+  .check_ring(coords, "coords", call)
   .check_number(simplify, min = 0, call = call)
   ring <- .close_ring(coords)
   g <- sf::st_sfc(sf::st_polygon(list(ring)), crs = sf::NA_crs_)
@@ -330,11 +443,15 @@ at_roi_from_sf <- function(geometry, label, level = 0L, ...,
 #' [annot_image].
 #'
 #' @param roi An [annot_roi].
-#' @param from_level,to_level Integer source and target pyramid levels.
+#' @param from_level Integer source pyramid level. Defaults to the ROI's own
+#'   `level`; any other value is an error, because the coordinates are stored
+#'   at that level.
+#' @param to_level Integer target pyramid level.
 #' @param call The calling environment, for error reporting.
 #'
 #' @return An [annot_roi] with coordinates at `to_level` and its `level` field
-#'   set to `to_level`. The transform is exactly invertible.
+#'   set to `to_level`. Power-of-two scaling is exact in floating point, so the
+#'   transform is exactly invertible.
 #' @family geometry
 #' @seealso `at_transform()`
 #' @export
@@ -345,16 +462,31 @@ at_roi_from_sf <- function(geometry, label, level = 0L, ...,
 #'   sf::st_coordinates(sf::st_geometry(r)),
 #'   sf::st_coordinates(sf::st_geometry(at_roi_rescale(r2, 2, 0)))
 #' )
-at_roi_rescale <- function(roi, from_level, to_level, call = rlang::caller_env()) {
+at_roi_rescale <- function(roi, from_level = roi$level, to_level,
+                           call = rlang::caller_env()) {
   .check_roi(roi, call = call)
   from_level <- .check_count(from_level, call = call)
   to_level <- .check_count(to_level, call = call)
+  .check_from_level(roi, from_level, call)
   g <- .rescale_geom(roi$geometry, from_level, to_level)
   new_annot_roi(
     geometry = g, id = roi$id, label = roi$label, level = to_level,
     attributes = roi$attributes, created = roi$created, modified = .now(),
     author = roi$author, source = roi$source
   )
+}
+
+# The coordinates of an ROI are at its `level`; transforming them as if they
+# were at another level would silently mis-scale them.
+.check_from_level <- function(roi, from_level, call) {
+  if (!identical(as.integer(from_level), as.integer(roi$level))) {
+    .check_abort(
+      c("{.arg from_level} must equal the ROI's level.",
+        "x" = "ROI {.val {roi$id}} is stored at level {roi$level}; {.arg from_level} is {from_level}."),
+      call = call
+    )
+  }
+  invisible(from_level)
 }
 
 # ---- Measurements ----------------------------------------------------------
@@ -369,7 +501,15 @@ at_roi_rescale <- function(roi, from_level, to_level, call = rlang::caller_env()
 #' @param roi An [annot_roi].
 #' @param level Integer pyramid level at which to express the area. Default `0`.
 #' @param units Either `"px"` (pixels squared, the default) or `"physical"`.
-#'   Physical units require a `pixel_size` attribute on the ROI.
+#'   Physical area uses `image` calibration at level zero, in squared
+#'   `image$pixel_unit`, and is invariant to reporting level. Unknown or pixel-only
+#'   image calibration rejects. Without an image, legacy ROI `pixel_size=c(x,y)`
+#'   is supported at stored level zero, in squared calibration units. Nonzero
+#'   ROI levels require explicit `pixel_size_level` and `pixel_unit`; differing calibration and
+#'   stored levels require an image for the geometric transform. Pixel sizes
+#'   must be finite and positive. Geometric area is not raster support count.
+#' @param image Optional [annot_image] defining actual pyramid dimensions.
+#'   Required when `level` differs from the ROI's stored level.
 #' @param call The calling environment, for error reporting.
 #'
 #' @return A numeric scalar area, or `NA_real_` for non-areal geometry (points,
@@ -379,27 +519,46 @@ at_roi_rescale <- function(roi, from_level, to_level, call = rlang::caller_env()
 #' @examples
 #' at_roi_area(at_roi_rect(0, 0, 10, 5, label = "a"))
 at_roi_area <- function(roi, level = 0L, units = c("px", "physical"),
-                        call = rlang::caller_env()) {
+                        call = rlang::caller_env(), image = NULL) {
   .check_roi(roi, call = call)
   level <- .check_count(level, call = call)
-  units <- .check_choice(units, c("px", "physical"), call = call)
+  units <- .check_choice(units, c("px", "physical"), default = missing(units), call = call)
   if (!.is_areal(roi$geometry)) {
     return(NA_real_)
   }
-  g <- .rescale_geom(roi$geometry, roi$level, level)
+  # Validate the requested reporting grid even though physical area is measured
+  # at the calibration grid and is independent of reporting level.
+  g <- .transform_geom(roi$geometry, roi$level, level, image, call = call)
   a <- as.numeric(sf::st_area(g))
   if (units == "physical") {
-    ps <- roi$attributes$pixel_size
-    if (is.null(ps)) {
-      cli::cli_abort(
-        c(
-          "Physical area requires a {.field pixel_size} attribute on the ROI.",
-          "i" = "Attach it via the {.arg ...} of a constructor, or use pixel units."
-        ),
-        call = call
-      )
+    if (!is.null(image)) {
+      ps <- at_pixel_size(image, call = call)
+      unit <- image[["pixel_unit"]]
+      calibration_level <- 0L
+      if (!is.character(unit) || length(unit) != 1L || is.na(unit) || !nzchar(unit) ||
+          tolower(unit) %in% c("px", "pixel", "pixels", "unknown"))
+        cli::cli_abort("Physical area requires a known physical pixel_size calibration and unit.", call = call)
+    } else {
+      .check_provenance_keys(roi$attributes, c("pixel_size", "pixel_size_level", "pixel_unit"), "ROI calibration")
+      unit <- roi$attributes[["pixel_unit"]]
+      if (!is.null(unit) && (length(unit) != 1L || !is.character(unit) || is.na(unit) ||
+          !nzchar(unit) || tolower(unit) %in% c("px", "pixel", "pixels", "unknown")))
+        cli::cli_abort("Physical area requires a physical calibration unit.", call = call)
+      ps <- roi$attributes[["pixel_size"]]
+      calibration_level <- roi$attributes[["pixel_size_level"]]
+      if (is.null(calibration_level)) {
+        if (roi$level != 0L)
+          cli::cli_abort("Legacy pixel_size calibration level is ambiguous for a nonzero-level ROI; provide image calibration or pixel_size_level.", call = call)
+        calibration_level <- 0L
+      }
+      if (roi$level != 0L && is.null(unit))
+        cli::cli_abort("Nonzero-level ROI calibration requires an explicit physical pixel_unit.", call = call)
+      calibration_level <- .check_count(calibration_level, call = call)
     }
-    a <- a * prod(ps)
+    if (!is.numeric(ps) || length(ps) != 2L || any(!is.finite(ps)) || any(ps <= 0))
+      cli::cli_abort("Physical area requires two finite positive pixel_size calibration values.", call = call)
+    calibrated <- .transform_geom(roi$geometry, roi$level, calibration_level, image, call = call)
+    a <- as.numeric(sf::st_area(calibrated)) * prod(ps)
   }
   a
 }
@@ -449,10 +608,11 @@ at_roi_bbox <- function(roi, call = rlang::caller_env()) {
 at_roi_buffer <- function(roi, dist, call = rlang::caller_env()) {
   .check_roi(roi, call = call)
   .check_number(dist, call = call)
-  g <- sf::st_buffer(roi$geometry, dist = dist)
+  g <- .finalize_geometry(sf::st_buffer(roi$geometry, dist = dist), call = call)
   new_annot_roi(
     geometry = g, id = roi$id, label = roi$label, level = roi$level,
-    attributes = roi$attributes, created = roi$created, modified = .now(),
+    attributes = .reshaped_attributes(roi$attributes), created = roi$created,
+    modified = .now(),
     author = roi$author, source = roi$source
   )
 }
@@ -473,7 +633,8 @@ at_roi_simplify <- function(roi, tolerance, call = rlang::caller_env()) {
   g <- sf::st_simplify(roi$geometry, dTolerance = tolerance, preserveTopology = TRUE)
   new_annot_roi(
     geometry = g, id = roi$id, label = roi$label, level = roi$level,
-    attributes = roi$attributes, created = roi$created, modified = .now(),
+    attributes = .reshaped_attributes(roi$attributes), created = roi$created,
+    modified = .now(),
     author = roi$author, source = roi$source
   )
 }

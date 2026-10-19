@@ -16,12 +16,14 @@ at_fix_geometry(project, verbose = TRUE, call = rlang::caller_env())
 \value{
 The \link{annot_project} with repaired geometry. Repairs are reported via
 \code{\link[cli:cli_inform]{cli::cli_inform()}} when \code{verbose} is \code{TRUE}. Issues that cannot be repaired
-(zero area, degenerate, \code{NA} coordinates) are left in place and reported.
+(zero area, degenerate, empty, \code{NA} coordinates, or a clip that would
+leave nothing inside the image) are left in place and reported.
 }
 \description{
-Apply \code{sf::st_make_valid()} to invalid ROIs (which also drops duplicate
-consecutive vertices) and clamp out-of-bounds vertices into the image bounds,
-reporting what changed.
+Apply \code{sf::st_make_valid()} to invalid ROIs, drop duplicate consecutive
+vertices, re-orient holes that wind like their exterior ring, and clip
+out-of-bounds geometry to the image bounds (an intersection, so a polygon
+stays a polygon), reporting what changed.
 }
 \seealso{
 \code{\link[=at_check_geometry]{at_check_geometry()}}

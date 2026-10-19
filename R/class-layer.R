@@ -27,7 +27,8 @@ new_annot_layer <- function(name,
 #' @param colour Either `NULL` (default; the Okabe-Ito colourblind-safe palette
 #'   is cycled over the layer's labels), a single colour recycled across labels,
 #'   or a named character vector mapping labels to colours. The style is stored
-#'   with the resolved mapping so colours are stable across sessions.
+#'   with the resolved mapping so colours are stable across sessions; the
+#'   original specification is kept too, so labels added later follow it.
 #' @param fill_alpha Fill opacity in `[0, 1]`. Default `0.3`.
 #' @param stroke_width Stroke width in pixels. Default `2`.
 #' @param visible Logical; whether the layer is drawn. Default `TRUE`.
@@ -88,6 +89,7 @@ at_layer <- function(name, labels = character(), style = at_style(), ...,
   .check_string(name, call = call)
   .check_class(style, "annot_style", call = call)
   labels <- unique(as.character(labels))
+  style$colour_spec <- style$colour_spec %||% style$colour
   style$colour <- .resolve_palette(labels, style$colour)
   new_annot_layer(name = name, rois = list(), labels = labels, style = style,
                   meta = list(...))
@@ -100,8 +102,10 @@ at_layer <- function(name, labels = character(), style = at_style(), ...,
 #' @param call The calling environment, for error reporting.
 #'
 #' @return A new [annot_layer] with the ROI appended. The label vocabulary and
-#'   colour mapping are extended if the ROI introduces a new label. A colliding
-#'   ROI identifier is re-minted to preserve uniqueness. The input is unchanged.
+#'   colour mapping are extended if the ROI introduces a new label (following
+#'   the colour specification given to [at_layer()]). A missing, empty or
+#'   colliding ROI identifier is re-minted to one unused in the layer. The
+#'   input is unchanged.
 #' @family layers
 #' @export
 #' @examples
@@ -112,15 +116,38 @@ at_layer_add <- function(layer, roi, call = rlang::caller_env()) {
   .check_layer(layer, call = call)
   .check_roi(roi, call = call)
   existing <- vapply(layer$rois, `[[`, character(1), "id")
-  if (roi$id %in% existing) {
-    roi$id <- .new_id("roi")
+  if (!.valid_roi_id(roi$id) || roi$id %in% existing) {
+    repeat {
+      candidate <- .new_id("roi")
+      if (!candidate %in% existing) break
+    }
+    roi$id <- candidate
   }
   if (!roi$label %in% layer$labels) {
     layer$labels <- c(layer$labels, roi$label)
-    layer$style$colour <- .resolve_palette(layer$labels, layer$style$colour)
+    layer$style$colour <- .extend_palette(layer$style, layer$labels)
   }
   layer$rois <- c(layer$rois, list(roi))
   layer
+}
+
+# Colours for a grown label vocabulary: existing labels keep their colour; new
+# labels follow the specification the layer was created with (a single colour,
+# a named map, or the default palette cycle).
+.extend_palette <- function(style, labels) {
+  cur <- style$colour
+  spec <- style$colour_spec
+  if (is.character(spec) && length(spec) > 0L) {
+    if (is.null(names(spec))) {
+      out <- .resolve_palette(labels, spec)
+    } else {
+      out <- .resolve_palette(labels, c(spec, cur[setdiff(names(cur), names(spec))]))
+    }
+    keep <- intersect(names(cur), labels)
+    out[keep] <- cur[keep]
+    return(out)
+  }
+  .resolve_palette(labels, cur)
 }
 
 #' Remove an ROI from a layer
@@ -148,7 +175,8 @@ at_layer_remove <- function(layer, id, call = rlang::caller_env()) {
 #' Layer ROI table
 #'
 #' @param layer An [annot_layer].
-#' @param image Optional [annot_image] for accurate level-0 coordinate transforms.
+#' @param image [annot_image] defining actual pyramid dimensions. Required when
+#'   any ROI is stored at a nonzero level; no scale is inferred without it.
 #' @param call The calling environment, for error reporting.
 #' @return An ROI table (see [at_rois()] for the column contract). A 0-row table
 #'   with the same columns when the layer has no ROIs.

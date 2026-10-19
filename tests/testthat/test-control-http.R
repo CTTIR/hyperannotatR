@@ -5,7 +5,7 @@ skip_if_not_installed("callr")
 skip_if_not_installed("httpuv")
 skip_if_not_installed("later")
 skip_if_not_installed("curl")
-skip_if_not(requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE))
+skip_if_not_installed("magick")
 
 # How the child process loads the same hyperannotatR build as this test process: the
 # source tree for a development load, otherwise the library this copy came from
@@ -84,10 +84,18 @@ test_that("two controlled instances in another process are isolated and speak th
 
   st <- at_control_state(a)
   expect_identical(st$state_revision, "0")
+  # (S9) A proxy configured in the environment is never used for loopback
+  # requests: with the proxy honoured, this request would fail.
+  dead_proxy <- "http://127.0.0.1:9"
+  withr::with_envvar(
+    c(http_proxy = dead_proxy, HTTP_PROXY = dead_proxy, all_proxy = dead_proxy, ALL_PROXY = dead_proxy,
+      no_proxy = "", NO_PROXY = ""),
+    expect_identical(at_control_state(b)$state_revision, "0")
+  )
   g <- at_control_command(a, list(operation = "context.goto", payload = list(queue_index = 2),
                                   expected_revision = "0", request_id = "http-req-1",
                                   idempotency_key = "http-key-1"))
-  expect_identical(g$entry_id, "entry-0002")
+  expect_identical(g$entry_id, st$queue[[2]]$entry_id)
   expect_identical(at_control_state(b)$state_revision, "0")
   # Response loss: resolve by request id, then a re-send replays without a new revision.
   expect_identical(at_control_request_status(a, "http-req-1")$status, "completed")

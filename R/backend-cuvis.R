@@ -17,6 +17,13 @@
   SpectralRadiance = "radiance", Preview = "unknown"
 )
 
+# Value semantics of a processing mode; modes the SDK does not report (or
+# reports under a name not listed above) are "unknown".
+.cuvis_value_unit <- function(mode) {
+  v <- unname(.cuvis_value_units[as.character(mode)[1]])
+  if (length(v) != 1L || is.na(v)) "unknown" else v
+}
+
 .cuvis_fn <- function(name) getExportedValue("cuvis.r", name)
 
 # Availability: the package must be installed and its SDK library usable.
@@ -95,12 +102,13 @@
       acquisition_id = if (.is_string(md$name)) paste0("sha256:", substr(.sha256_bytes(md$name), 1, 16)) else NA_character_,
       format = if (grepl("\\.cu3s$", path, ignore.case = TRUE)) "cu3s" else "cu3",
       measurement_index = measurement, measurement_count = session$count %||% NA_integer_,
-      value_unit = value_unit %||% (.cuvis_value_units[[mode]] %||% "unknown"),
+      value_unit = value_unit %||% .cuvis_value_unit(mode),
       calibration = calib, calibration_digest = .digest_json(calib),
       pan_sharpened = NA, pan_sharpening_status = "not_reported_by_sdk",
       sdk = list(package = "cuvis.r", package_version = .pkg_version_or_na("cuvis.r"),
                  sdk_version = sdk_version),
       axis_order = "y,x,band", window_read = FALSE,
+      capabilities = .eager_capabilities("unqualified"),
       capture_time_ms = md$capture_time %||% NA_real_
     )
   )

@@ -39,13 +39,16 @@ The output path, invisibly.
 }
 \description{
 Write an \code{annot_mask} as a lossless integer NumPy array, for interchange with
-Python tools. A \verb{<path>.legend.json} sidecar (value -> label) is written
-alongside so the array stays self-describing. Unlike \code{\link[=at_write_mask]{at_write_mask()}}, values
-are stored raw (no bit-depth normalisation), so bitfield artefact masks
-survive intact.
+Python tools. A \verb{<path>.legend.json} sidecar (value -> label, plus the mask
+metadata and storage orientation) is written alongside so the array stays
+self-describing. Unlike \code{\link[=at_write_mask]{at_write_mask()}}, values are stored raw (no
+bit-depth normalisation), so bitfield artefact masks survive intact. The
+array and legend are staged as one output bundle; an existing sidecar also
+requires \code{overwrite = TRUE}. Values outside the chosen \code{dtype} are refused
+before anything is written. Concurrent writers must be serialised.
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 m <- at_mask(at_example_project(), "labelled")
 f <- tempfile(fileext = ".npy")
 at_write_npy(m, f)

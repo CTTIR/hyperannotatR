@@ -14,7 +14,9 @@ at_snap(roi, grid = 1, call = rlang::caller_env())
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-An \link{annot_roi} with vertices rounded to the nearest grid multiple.
+An \link{annot_roi} with vertices rounded to the nearest grid multiple. A
+geometry that snapping makes invalid (e.g. a collapsed ring) is repaired
+with a warning.
 }
 \description{
 Snap ROI vertices to a grid

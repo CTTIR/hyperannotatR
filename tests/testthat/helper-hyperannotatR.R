@@ -4,6 +4,17 @@
 # stability matters, and nothing depends on wall-clock time or locale. Internal
 # package objects are reachable directly from tests under testthat edition 3.
 
+# ---- Caches ----------------------------------------------------------------
+
+# Clear the tile cache and the cache of reopened pixel handles. Call this in a
+# test that must observe a fresh read (e.g. read accounting, or a file that is
+# rewritten in place); it is not run automatically, to keep the suite fast.
+clear_image_caches <- function() {
+  .tile_cache_clear()
+  .handle_cache_clear()
+  invisible(NULL)
+}
+
 # ---- Image fixtures --------------------------------------------------------
 
 # 10x10 single-band image for exact pixel arithmetic (the mask reference case).

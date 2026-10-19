@@ -4,6 +4,13 @@
 # reported as `planned`, missing runtimes as `unavailable`, each with a reason.
 
 # Contract identifiers. Schema versions are independent of the package version.
+# 1.1 (hyperannotatR 0.3.0) adds fields within major version 1: entry ids on
+# manifest ROI and layer records, path patterns for manifest file references,
+# split-name patterns and per-image band-table digests in training manifests,
+# and the control additions (session.load `discard_unsaved`, `session_dir`,
+# `generation`, `response_truncated`, error `class`, `queue.status_changed`).
+# Readers accept any 1.x document. The integrity format, whose digest rule is
+# shared with qupflowR's bundle digest, is unchanged at 1.0.
 .contract <- list(
   consumer = "qupflowR",
   capabilities = "annotatr-capabilities-v1",
@@ -11,7 +18,7 @@
   control = "annotatr-control-v1",
   training = "annotatr-training-v1",
   hsi = "annotatr-hsi-v1",
-  version = "1.0",
+  version = "1.1",
   integrity_format = "1.0",
   fixture_version = "2026.09.14"
 )
@@ -28,9 +35,13 @@
     control_max_events_buffer = 1000L,
     control_max_events_page = 500L,
     control_max_inline_features = 10000L,
+    control_max_requests = .control_max_requests(),
+    control_mask_max_pixels = .control_mask_max_pixels(),
+    control_hash_max_bytes = as.numeric(getOption("hyperannotatR.control_hash_max_bytes", 256 * 1024^2)),
     control_default_ttl_seconds = 900L,
     control_max_ttl_seconds = 86400L,
     handoff_max_json_bytes = 16L * 1048576L,
+    training_max_json_bytes = 256L * 1048576L,
     handoff_max_files = 100000L,
     mask_preview_max_dim = 1024L,
     region_download_max_pixels = 4194304L,

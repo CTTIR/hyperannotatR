@@ -53,3 +53,12 @@ test_that("major versions other than 1 are rejected with PROTOCOL_MISMATCH", {
   expect_identical(err$code, "PROTOCOL_MISMATCH")
   expect_error(.check_major_version("one", 1L, "doc"), class = "at_protocol_error")
 })
+
+test_that("tuple-form items are refused and const null is honoured (X19)", {
+  expect_error(.schema_check_keywords(list(type = "array", items = list(list(type = "string"))), "t"),
+               "tuple form")
+  schema <- jsonlite::fromJSON('{"type": "object", "properties": {"x": {"const": null}}}',
+                               simplifyVector = FALSE)
+  expect_length(.schema_validate(list(x = NULL), schema), 0L)
+  expect_match(.schema_validate(list(x = 1L), schema), "must equal null")
+})

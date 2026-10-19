@@ -95,6 +95,15 @@
       call = call
     )
   }
+  if (abs(x) > .Machine$integer.max) {
+    .check_abort(
+      c(
+        "{.arg {arg}} is too large.",
+        "x" = "You supplied {.val {x}}; the maximum is {.val {(.Machine$integer.max)}}."
+      ),
+      call = call
+    )
+  }
   xi <- as.integer(round(x))
   if (xi < min) {
     .check_abort(
@@ -164,50 +173,53 @@
   invisible(x)
 }
 
-# `x` must be exactly one of `choices` (no partial matching). Returns the match.
-# When `x` is the full `choices` vector (the `c(...)` default idiom), the first
-# choice is returned, mirroring `match.arg()`.
-.check_choice <- function(x,
-                          choices,
+# Exact scalar choices: a single non-missing string, or for numeric choices a
+# single finite whole number of any numeric type (8 and 8L both match 8L; the
+# matching choice is returned). An explicitly supplied vector is invalid even
+# when it equals the choices. Only an omitted `c(...)` default stands for its
+# first element: callers may say so with `default = missing(arg)`; otherwise
+# omission of the caller's argument is detected in the caller's frame with the
+# same semantics as `missing()`.
+.check_choice <- function(x, choices,
                           arg = rlang::caller_arg(x),
-                          call = rlang::caller_env()) {
-  if (identical(x, choices)) {
-    return(choices[[1]])
+                          call = rlang::caller_env(), default = NULL) {
+  if (is.null(default)) {
+    default <- .arg_omitted(substitute(x), parent.frame())
   }
-  if (length(x) == 0L) {
-    .check_abort(
-      c(
-        "{.arg {arg}} must be one of {.or {.val {choices}}}.",
-        "x" = "You supplied a length-0 value."
-      ),
-      call = call
-    )
+  if (isTRUE(default) && length(x) > 1L && !anyNA(x) && length(x) == length(choices) &&
+      !anyDuplicated(x) && all(x %in% choices)) {
+    return(choices[[match(x[[1]], choices)]])
   }
-  if (length(x) != 1L) {
-    x <- x[[1]]
+  valid <- if (is.numeric(choices)) {
+    is.numeric(x) && !is.complex(x) && length(x) == 1L &&
+      !is.na(x) && is.finite(x) && x == trunc(x) && x %in% choices
+  } else {
+    is.character(x) && length(x) == 1L && !is.na(x) && x %in% choices
   }
-  if (is.numeric(choices)) {
-    if (!is.numeric(x) || is.na(x) || !x %in% choices) {
-      .check_abort(
-        c(
-          "{.arg {arg}} must be one of {.or {.val {choices}}}.",
-          "x" = "You supplied {.val {x}}."
-        ),
-        call = call
-      )
+  if (!valid) {
+    supplied <- if (length(x) == 0L) {
+      "You supplied a length-0 value."
+    } else if (length(x) > 1L) {
+      paste0("You supplied ", length(x), " values; explicit vectors are not defaults.")
+    } else {
+      paste0("You supplied ", format(x), ".")
     }
-    return(choices[match(x, choices)])
-  }
-  if (!is.character(x) || is.na(x) || !x %in% choices) {
     .check_abort(
-      c(
-        "{.arg {arg}} must be one of {.or {.val {choices}}}.",
-        "x" = "You supplied {.val {x}}."
-      ),
+      c("{.arg {arg}} must be one of {.or {.val {choices}}}.",
+        "x" = "{supplied}",
+        "i" = "Supply a single non-missing {if (is.numeric(choices)) 'finite whole number' else 'string'}."),
       call = call
     )
   }
-  x
+  if (is.numeric(choices)) choices[[match(x, choices)]] else x
+}
+
+# Was `expr` (a caller's argument, passed on as a bare symbol) omitted by the
+# caller's caller? Equivalent to calling `missing()` inside the caller; FALSE
+# for anything that is not one of the caller's formal arguments.
+.arg_omitted <- function(expr, env) {
+  if (!is.symbol(expr)) return(FALSE)
+  isTRUE(tryCatch(eval(call("missing", expr), env), error = function(e) FALSE))
 }
 
 # Domain-object validators.
