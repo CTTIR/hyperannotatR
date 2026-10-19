@@ -1,0 +1,109 @@
+* using log directory ‘<check-dir>/hyperannotatR.Rcheck’
+* using R version 4.6.1 (2026-06-24)
+* using platform: aarch64-apple-darwin27.0.0
+* R was compiled by
+    Apple clang version 21.0.0 (clang-2100.3.34.2)
+    GNU Fortran (Homebrew GCC 16.2.0) 16.2.0
+* running under: macOS Golden Gate 27.0.1
+* using session charset: UTF-8
+* current time: 2026-10-19 12:57:44 UTC
+* using options ‘--no-manual --as-cran’
+* checking for file ‘hyperannotatR/DESCRIPTION’ ... OK
+* checking extension type ... Package
+* this is package ‘hyperannotatR’ version ‘0.3.0’
+* package encoding: UTF-8
+* checking CRAN incoming feasibility ... [0m/19m] NOTE
+Maintainer: ‘Raban Heller <raban.heller@charite.de>’
+
+New submission
+
+Found the following (possibly) invalid URLs:
+  URL: https://github.com/CTTIR/hyperannotatR
+    From: DESCRIPTION
+          man/hyperannotatR-package.Rd
+    Status: Error
+    Message: libcurl error code 28:
+      	Connection timed out after 60002 milliseconds
+  URL: https://github.com/CTTIR/hyperannotatR/actions/workflows/R-CMD-check.yaml
+    From: README.md
+    Status: Error
+    Message: libcurl error code 28:
+      	Connection timed out after 60001 milliseconds
+  URL: https://github.com/CTTIR/hyperannotatR/issues
+    From: DESCRIPTION
+          man/hyperannotatR-package.Rd
+    Status: Error
+    Message: libcurl error code 28:
+      	Connection timed out after 60002 milliseconds
+  URL: https://lifecycle.r-lib.org/articles/stages.html#experimental
+    From: README.md
+    Status: Error
+    Message: libcurl error code 28:
+      	Connection timed out after 60005 milliseconds
+  URL: https://shiny.posit.co/
+    From: README.md
+    Status: Error
+    Message: libcurl error code 28:
+      	Connection timed out after 60006 milliseconds
+* checking package namespace information ... OK
+* checking package dependencies ... INFO
+Package suggested but not available for checking: ‘RBioFormats’
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for executable files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking for sufficient/correct file permissions ... OK
+* checking whether package ‘hyperannotatR’ can be installed ... OK
+* checking installed package size ... INFO
+  installed size is  6.9Mb
+  sub-directories of 1Mb or more:
+    R         2.0Mb
+    doc       1.1Mb
+    extdata   2.7Mb
+* checking package directory ... OK
+* checking for future file timestamps ... OK
+* checking ‘build’ directory ... OK
+* checking DESCRIPTION meta-information ... OK
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking code files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking whether startup messages can be suppressed ... OK
+* checking use of S3 registration ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... [16s/16s] OK
+* checking Rd files ... OK
+* checking Rd metadata ... OK
+* checking Rd line widths ... OK
+* checking Rd cross-references ... OK
+* checking for missing documentation entries ... OK
+* checking for code/documentation mismatches ... OK
+* checking Rd \usage sections ... OK
+* checking Rd contents ... OK
+* checking for unstated dependencies in examples ... OK
+* checking installed files from ‘inst/doc’ ... OK
+* checking files in ‘vignettes’ ... OK
+* checking examples ... [17s/18s] OK
+* checking examples with --run-donttest ... [16s/17s] OK
+* checking for unstated dependencies in ‘tests’ ... OK
+* checking tests ... [234s/257s] OK
+  Running ‘testthat.R’ [234s/257s]
+* checking for unstated dependencies in vignettes ... OK
+* checking package vignettes ... OK
+* checking re-building of vignette outputs ... [25s/27s] OK
+* checking for non-standard things in the check directory ... OK
+* checking for detritus in the temp directory ... OK
+* DONE
+Status: 1 NOTE

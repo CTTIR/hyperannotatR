@@ -1,0 +1,16 @@
+Registered S3 method overwritten by 'stars':
+  method                  from
+  st_interpolate_aw.stars sf  
+Loading required package: shiny
+files: 56  tests: 389  expectations: 1678  failed: 0  errors: 0  skipped: 4  warnings: 0  minutes: 2.3 
+skipped:
+                     file
+ test-backend-cuvis-sdk.R
+    test-backend-tivita.R
+            test-io-npy.R
+            test-io-npy.R
+                                                                             test
+       an installed CUVIS SDK reads a permitted local measurement with provenance
+                        reads a real TIVITA cube from the workbench (integration)
+ transpose brings a TIVITA (width, height) ground truth into [y, x] (integration)
+                      reads a real Python-written ground-truth .npy (integration)

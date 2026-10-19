@@ -1,0 +1,72 @@
+CTTIR house linters (config/lint-cttir.R from CTTIR/.github main)
+
+                 
+                  inst  R tests vignettes
+  cttir_condition    5  0    44         4
+  cttir_quiet        0  1     4         0
+
+Findings in R/:
+     filename line_number      linter
+ R/geometry.R         695 cttir_quiet
+                                                                 message
+ Use `quiet` (readr/usethis spelling) as the single chattiness argument.
+
+All findings outside R/:
+                                    filename line_number          linter
+       inst/examples/reproducible-analysis.R          18 cttir_condition
+       inst/examples/reproducible-analysis.R          22 cttir_condition
+       inst/examples/reproducible-analysis.R          25 cttir_condition
+       inst/examples/reproducible-analysis.R          27 cttir_condition
+       inst/examples/reproducible-analysis.R         169 cttir_condition
+               tests/audit/run-regressions.R           6 cttir_condition
+                 tests/browser/minimal-app.R           4 cttir_condition
+                 tests/browser/minimal-app.R          10 cttir_condition
+                 tests/browser/minimal-app.R          12 cttir_condition
+    tests/qualification/installed-identity.R           5 cttir_condition
+    tests/qualification/installed-identity.R           9 cttir_condition
+    tests/qualification/installed-identity.R          72 cttir_condition
+    tests/qualification/installed-identity.R          82 cttir_condition
+ tests/qualification/installed-persistence.R           4 cttir_condition
+ tests/qualification/installed-persistence.R          24 cttir_condition
+ tests/qualification/installed-persistence.R          40 cttir_condition
+ tests/qualification/installed-persistence.R          43 cttir_condition
+ tests/qualification/installed-persistence.R          46 cttir_condition
+ tests/qualification/installed-persistence.R          53 cttir_condition
+     tests/qualification/installed-windows.R          22 cttir_condition
+     tests/qualification/installed-windows.R          26 cttir_condition
+     tests/qualification/installed-windows.R          29 cttir_condition
+      tests/qualification/qupath-roundtrip.R           5 cttir_condition
+      tests/qualification/qupath-roundtrip.R          21 cttir_condition
+      tests/qualification/qupath-roundtrip.R          23 cttir_condition
+      tests/qualification/qupath-roundtrip.R          24 cttir_condition
+      tests/qualification/qupath-roundtrip.R          25 cttir_condition
+      tests/qualification/qupath-roundtrip.R          26 cttir_condition
+      tests/qualification/qupath-roundtrip.R          27 cttir_condition
+      tests/qualification/qupath-roundtrip.R          30 cttir_condition
+      tests/qualification/window-resources.R          34 cttir_condition
+      tests/qualification/window-resources.R          36 cttir_condition
+      tests/testthat/test-app-capabilities.R          37 cttir_condition
+     tests/testthat/test-app-modules-extra.R         146 cttir_condition
+             tests/testthat/test-audit-app.R         299 cttir_condition
+             tests/testthat/test-audit-app.R         330 cttir_condition
+                 tests/testthat/test-batch.R         141 cttir_condition
+      tests/testthat/test-control-protocol.R         349 cttir_condition
+       tests/testthat/test-export-contract.R          18 cttir_condition
+       tests/testthat/test-export-contract.R          29 cttir_condition
+       tests/testthat/test-export-contract.R          81 cttir_condition
+       tests/testthat/test-export-contract.R          86 cttir_condition
+       tests/testthat/test-export-contract.R          93 cttir_condition
+              tests/testthat/test-geometry.R         118     cttir_quiet
+              tests/testthat/test-geometry.R         229     cttir_quiet
+              tests/testthat/test-geometry.R         240     cttir_quiet
+  tests/testthat/test-persistence-contract.R          63 cttir_condition
+  tests/testthat/test-persistence-contract.R          91 cttir_condition
+    tests/testthat/test-persistence-source.R          44 cttir_condition
+    tests/testthat/test-refine-correctness.R          48     cttir_quiet
+         tests/testthat/test-shiny-modules.R         156 cttir_condition
+              tests/testthat/test-training.R         174 cttir_condition
+         tests/testthat/test-widget-canvas.R          98 cttir_condition
+         vignettes/reproducible-analysis.Rmd          61 cttir_condition
+         vignettes/reproducible-analysis.Rmd          63 cttir_condition
+         vignettes/reproducible-analysis.Rmd         117 cttir_condition
+         vignettes/reproducible-analysis.Rmd         118 cttir_condition

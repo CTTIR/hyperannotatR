@@ -1,0 +1,10 @@
+* checking for file ‘annotatR/DESCRIPTION’ ... OK
+* preparing ‘annotatR’:
+* checking DESCRIPTION meta-information ... OK
+* installing the package (it is needed to build vignettes)
+* creating vignettes ... OK
+* checking for LF line-endings in source and make files and shell scripts
+* checking for empty or unneeded directories
+* building ‘annotatR_0.3.0.tar.gz’
+
+build exit 0
