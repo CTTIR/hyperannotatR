@@ -154,7 +154,11 @@ test_that("a not-yet-created session output directory keeps its original cwd", {
   )
   expected <- file.path(normalizePath(root), "future-output")
 
-  expect_identical(session$out_dir, expected)
+  # Compare canonical forms: Windows may spell the same folder with an 8.3
+  # short name or other separators.
+  expect_identical(normalizePath(dirname(session$out_dir), winslash = "/"),
+                   normalizePath(root, winslash = "/"))
+  expect_identical(basename(session$out_dir), "future-output")
   withr::with_dir(other, at_save_session(session))
   expect_true(file.exists(file.path(expected, "_session.rds")))
 })

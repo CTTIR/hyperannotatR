@@ -6,7 +6,7 @@ test_that('derived mask filenames are contained, unique and retain display label
   rc <- at_write_masks(p,d,per='class')
   expect_identical(rc$status, c('ok','ok'))
   expect_length(unique(tolower(rc$path)),2)
-  expect_true(all(startsWith(normalizePath(rc$path),paste0(normalizePath(d),'/'))))
+  expect_true(all(startsWith(normalizePath(rc$path,winslash='/'),paste0(normalizePath(d,winslash='/'),'/'))))
   expect_setequal(rc$name,c('../escaped_a/b','../escaped_a\\b'))
   expect_true(all(file.exists(rc$sidecar_path)))
   expect_type(rc$bytes,'double')
@@ -111,7 +111,7 @@ test_that('every mask split applies the same filename policy', {
   for(per in c('project','layer','class','roi')) {
     d <- withr::local_tempdir();rc <- at_write_masks(p,d,per=per)
     expect_identical(rc$status,'ok')
-    expect_true(startsWith(normalizePath(rc$path),paste0(normalizePath(d),'/')))
+    expect_true(startsWith(normalizePath(rc$path,winslash='/'),paste0(normalizePath(d,winslash='/'),'/')))
     expect_true(file.exists(rc$sidecar_path))
   }
 })
