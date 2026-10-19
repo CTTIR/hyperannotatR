@@ -339,7 +339,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>         "schema_version": 1,
 #>         "signature": {
 #>           "size": 526756,
-#>           "mtime": 1792422470
+#>           "mtime": 1792423014
 #>         },
 #>         "files": null,
 #>         "path": "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png",
@@ -375,7 +375,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>   },
 #>   "storage": null,
 #>   "annotatR_version": "0.3.0",
-#>   "created": "2026-10-19T15:09:35+0000",
+#>   "created": "2026-10-19T15:18:18+0000",
 #>   "mask_type": "multiclass",
 #>   "level": 0,
 #>   "dims": [512, 512],

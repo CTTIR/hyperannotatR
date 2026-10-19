@@ -108,7 +108,7 @@ Other interop:
 dest <- file.path(tempdir(), "handoff-example")
 rc <- at_export_qupflowr(at_example_project(), dest, overwrite = TRUE)
 rc$handoff_digest
-#> [1] "4ef808f02c5ab8ff5b976f181fca94abceb9a833f2b3115b2cbd6dbac473eada"
+#> [1] "60f5a508f888f7c06054621c19d58cb84bf6e755bfc9fb3797b072054981d00f"
 rc$files[, c("path", "format")]
 #> # A tibble: 5 × 2
 #>   path                                   format        
