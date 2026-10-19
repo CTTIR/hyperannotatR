@@ -23,13 +23,13 @@ at_canvas(
 - img:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   to display.
 
 - project:
 
   Optional
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   whose ROIs are shown initially.
 
 - tool:
@@ -53,7 +53,7 @@ at_canvas(
 - view:
 
   Optional band view passed to
-  [`at_tile_source()`](https://cttir.github.io/annotatR/reference/at_tile_source.md).
+  [`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md).
 
 - call:
 
@@ -65,22 +65,22 @@ An `htmlwidget` object.
 
 ## See also
 
-[`at_canvas_proxy()`](https://cttir.github.io/annotatR/reference/at_canvas_proxy.md),
-[`at_tile_source()`](https://cttir.github.io/annotatR/reference/at_tile_source.md)
+[`at_canvas_proxy()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_proxy.md),
+[`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md)
 
 Other shiny:
-[`atCanvasOutput()`](https://cttir.github.io/annotatR/reference/atCanvasOutput.md),
-[`at_annotate()`](https://cttir.github.io/annotatR/reference/at_annotate.md),
-[`at_app()`](https://cttir.github.io/annotatR/reference/at_app.md),
-[`at_canvas_fit()`](https://cttir.github.io/annotatR/reference/at_canvas_fit.md),
-[`at_canvas_proxy()`](https://cttir.github.io/annotatR/reference/at_canvas_proxy.md),
-[`at_canvas_set_annotations()`](https://cttir.github.io/annotatR/reference/at_canvas_set_annotations.md),
-[`at_canvas_set_band()`](https://cttir.github.io/annotatR/reference/at_canvas_set_band.md),
-[`at_canvas_set_overlay()`](https://cttir.github.io/annotatR/reference/at_canvas_set_overlay.md),
-[`at_canvas_set_selection()`](https://cttir.github.io/annotatR/reference/at_canvas_set_selection.md),
-[`at_canvas_set_tool()`](https://cttir.github.io/annotatR/reference/at_canvas_set_tool.md),
-[`at_tile_source()`](https://cttir.github.io/annotatR/reference/at_tile_source.md),
-[`renderAtCanvas()`](https://cttir.github.io/annotatR/reference/renderAtCanvas.md)
+[`atCanvasOutput()`](https://cttir.github.io/hyperannotatR/reference/atCanvasOutput.md),
+[`at_annotate()`](https://cttir.github.io/hyperannotatR/reference/at_annotate.md),
+[`at_app()`](https://cttir.github.io/hyperannotatR/reference/at_app.md),
+[`at_canvas_fit()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_fit.md),
+[`at_canvas_proxy()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_proxy.md),
+[`at_canvas_set_annotations()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_annotations.md),
+[`at_canvas_set_band()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_band.md),
+[`at_canvas_set_overlay()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_overlay.md),
+[`at_canvas_set_selection()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_selection.md),
+[`at_canvas_set_tool()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_tool.md),
+[`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md),
+[`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)
 
 ## Examples
 

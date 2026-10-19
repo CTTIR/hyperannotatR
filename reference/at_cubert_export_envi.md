@@ -1,8 +1,9 @@
 # Export a Cubert measurement to a portable ENVI cube
 
 The portable fallback for Cubert data: the CUVIS SDK itself writes an
-ENVI export, which annotatR (and tools without the SDK) can then read
-through the `envi` backend. Requires `cuvis.r` and a usable CUVIS SDK.
+ENVI export, which hyperannotatR (and tools without the SDK) can then
+read through the `envi` backend. Requires `cuvis.r` and a usable CUVIS
+SDK.
 
 ## Usage
 
@@ -35,21 +36,21 @@ The files written into `dir` (character), invisibly.
 ## See also
 
 Other backends:
-[`at_backend_detect()`](https://cttir.github.io/annotatR/reference/at_backend_detect.md),
-[`at_backend_get()`](https://cttir.github.io/annotatR/reference/at_backend_get.md),
-[`at_backend_list()`](https://cttir.github.io/annotatR/reference/at_backend_list.md),
-[`at_backend_register()`](https://cttir.github.io/annotatR/reference/at_backend_register.md),
-[`at_read_image()`](https://cttir.github.io/annotatR/reference/at_read_image.md),
-[`at_tile()`](https://cttir.github.io/annotatR/reference/at_tile.md),
-[`at_tivita_profile()`](https://cttir.github.io/annotatR/reference/at_tivita_profile.md)
+[`at_backend_detect()`](https://cttir.github.io/hyperannotatR/reference/at_backend_detect.md),
+[`at_backend_get()`](https://cttir.github.io/hyperannotatR/reference/at_backend_get.md),
+[`at_backend_list()`](https://cttir.github.io/hyperannotatR/reference/at_backend_list.md),
+[`at_backend_register()`](https://cttir.github.io/hyperannotatR/reference/at_backend_register.md),
+[`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
+[`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
+[`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
 
 Other hsi:
-[`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md),
-[`at_band_view()`](https://cttir.github.io/annotatR/reference/at_band_view.md),
-[`at_convert_values()`](https://cttir.github.io/annotatR/reference/at_convert_values.md),
-[`at_hsi_meta()`](https://cttir.github.io/annotatR/reference/at_hsi_meta.md),
-[`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md),
-[`at_tivita_profile()`](https://cttir.github.io/annotatR/reference/at_tivita_profile.md)
+[`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md),
+[`at_band_view()`](https://cttir.github.io/hyperannotatR/reference/at_band_view.md),
+[`at_convert_values()`](https://cttir.github.io/hyperannotatR/reference/at_convert_values.md),
+[`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md),
+[`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
 
 ## Examples
 

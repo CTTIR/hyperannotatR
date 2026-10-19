@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Working with qupflowR: handoffs, control and training data • annotatR</title>
+<title>Working with qupflowR: handoffs, control and training data • hyperannotatR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -27,7 +27,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">annotatR</a>
+    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
@@ -45,7 +45,7 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/annotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/hyperannotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
@@ -69,27 +69,28 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Working with qupflowR: handoffs, control and training data</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/CTTIR/annotatR/blob/main/vignettes/partner-interop.Rmd" class="external-link"><code>vignettes/partner-interop.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CTTIR/hyperannotatR/blob/main/vignettes/partner-interop.Rmd" class="external-link"><code>vignettes/partner-interop.Rmd</code></a></small>
       <div class="d-none name"><code>partner-interop.Rmd</code></div>
     </div>
 
     
     
-<p><img src="../reference/figures/logo.png" class="r-plt" alt="annotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
-<p>annotatR and the qupflowR package (a QuPath bridge, analysis and
+<p><img src="../reference/figures/logo.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<p>hyperannotatR and the qupflowR package (a QuPath bridge, analysis and
 workflow package) exchange annotations, masks, hyperspectral metadata
 and deep-learning datasets through a small, versioned contract. qupflowR
-never reaches into annotatR internals, Shiny state, <code>inst/</code>
-files or the browser DOM; it uses the public functions below, the files
-they write, or the optional local control service. This vignette
-describes that contract from the annotatR side.</p>
+never reaches into hyperannotatR internals, Shiny state,
+<code>inst/</code> files or the browser DOM; it uses the public
+functions below, the files they write, or the optional local control
+service. This vignette describes that contract from the hyperannotatR
+side.</p>
 <div class="section level2">
 <h2 id="what-this-installation-supports">What this installation supports<a class="anchor" aria-label="anchor" href="#what-this-installation-supports"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">caps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_interop_capabilities.html">at_interop_capabilities</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">caps</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;at_capabilities&gt;</span> annotatR 0.2.0 for qupflowR</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;at_capabilities&gt;</span> hyperannotatR 0.2.0 for qupflowR</span></span>
 <span><span class="co">#&gt;   I0 supported   file interchange (handoff directory)</span></span>
 <span><span class="co">#&gt;   I1 supported   public R API</span></span>
 <span><span class="co">#&gt;   I2 planned     loopback control service - implemented and tested locally; no qualified qupflowR client run recorded</span></span>
@@ -173,15 +174,15 @@ directory of neutral files:</p>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> annotations_qupath.geojson                   <span style="text-decoration: underline;">2</span>228 qupath_geojson</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> image.json                                   <span style="text-decoration: underline;">1</span>824 image_json    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> manifest.json                                <span style="text-decoration: underline;">8</span>289 manifest      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> manifest.json                                <span style="text-decoration: underline;">8</span>294 manifest      </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> masks/regions_labelled.tif                   <span style="text-decoration: underline;">2</span>936 mask_tiff     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> masks/regions_labelled.tif.legend.json        675 legend_json</span></span>
 <span><span class="va">receipt</span><span class="op">$</span><span class="va">handoff_digest</span></span>
-<span><span class="co">#&gt; [1] "b4a0c1013c1e616dc88f7d0c3b36f652146cb8157151ef3a1b1a808d7879a9fb"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "b4dd67578ff8492227edd3bc81b0e5bf65071436ae24bdceaf08e34c64291222"</span></span></code></pre></div>
 <ul>
 <li>
 <code>annotations_qupath.geojson</code> uses the QuPath 0.4+ dialect
-with a stable UUID per ROI and annotatR’s ROI id, layer, source and
+with a stable UUID per ROI and hyperannotatR’s ROI id, layer, source and
 level in <code>properties.metadata</code>.</li>
 <li>
 <code>masks/&lt;layer&gt;_labelled.tif</code> holds one integer
@@ -251,7 +252,7 @@ directory.</p>
 <p>The coordinate convention is explicit: pixel units, origin at the
 top-left corner, <code>y</code> increasing downward, planes indexed from
 zero, and the pixel coverage rule for masks. QuPath object hierarchy and
-native ROI shapes, which annotatR does not model, are reported as
+native ROI shapes, which hyperannotatR does not model, are reported as
 <code>"unknown"</code> or <code>"approximated"</code> (circles and
 ellipses are polygons) instead of being invented.</p>
 </div>
@@ -465,7 +466,7 @@ cursor from another instance or older than the retained buffer yields
 <code>resync_required = TRUE</code>.</p>
 <p>The JSON Schemas for all documents ship with the package:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"schema"</span>, package <span class="op">=</span> <span class="st">"annotatR"</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"schema"</span>, package <span class="op">=</span> <span class="st">"hyperannotatR"</span><span class="op">)</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "command.schema.json"           "event.schema.json"            </span></span>
 <span><span class="co">#&gt;  [3] "events-page.schema.json"       "handshake.schema.json"        </span></span>
 <span><span class="co">#&gt;  [5] "health.schema.json"            "request-record.schema.json"   </span></span>
@@ -478,7 +479,7 @@ cursor from another instance or older than the retained buffer yields
 </h2>
 <p>Schema versions are independent of the package version. Readers
 reject an unknown major version and keep unknown optional data only
-under <code>extensions</code>. annotatR 0.2.0 introduces
+under <code>extensions</code>. hyperannotatR 0.2.0 introduces
 <code>annotatr-handoff-v1</code>, <code>annotatr-control-v1</code>,
 <code>annotatr-training-v1</code> and <code>annotatr-hsi-v1</code> (all
 <code>1.0</code>). Existing 0.1 files remain readable: legacy QuPath
@@ -497,7 +498,7 @@ it.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">
-  <p><span class="themakr-footer-pkg">annotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
+  <p><span class="themakr-footer-pkg">hyperannotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
 </div>
 
 <div class="pkgdown-footer-right">

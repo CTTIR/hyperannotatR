@@ -18,10 +18,10 @@ at_annotation_revision(x, call = rlang::caller_env())
 - x:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
-  [annot_layer](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
+  [annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
   or
-  [annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+  [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   (combining every materialised project and the queue statuses).
 
 - call:
@@ -35,12 +35,12 @@ A single string `"sha256:<64 hex>"`.
 ## See also
 
 Other interop:
-[`at_commit_qupflowr()`](https://cttir.github.io/annotatR/reference/at_commit_qupflowr.md),
-[`at_export_qupflowr()`](https://cttir.github.io/annotatR/reference/at_export_qupflowr.md),
-[`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md),
-[`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md),
-[`at_interop_manifest()`](https://cttir.github.io/annotatR/reference/at_interop_manifest.md),
-[`at_stage_qupflowr()`](https://cttir.github.io/annotatR/reference/at_stage_qupflowr.md)
+[`at_commit_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.md),
+[`at_export_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_export_qupflowr.md),
+[`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md),
+[`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md),
+[`at_interop_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.md),
+[`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
 
 ## Examples
 

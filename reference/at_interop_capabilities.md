@@ -1,16 +1,16 @@
 # Partner interoperability capabilities
 
-Report what this annotatR installation can exchange with a partner
+Report what this hyperannotatR installation can exchange with a partner
 package such as qupflowR, and how far each capability has been
 qualified. Profiles follow the partner contract: I0 file interchange, I1
 public R API, I2 the local control service (`annotatr-control-v1`) and
 I3 the embeddable app object from
-[`at_app()`](https://cttir.github.io/annotatR/reference/at_app.md). A
-profile is `"supported"` only with implementation, runtime dependencies
-and qualification evidence; implemented profiles that have not passed
-their tests against a real partner client are `"planned"`; profiles
-whose optional runtime is missing are `"unavailable"`. Every entry
-carries a `reason` when it is not supported.
+[`at_app()`](https://cttir.github.io/hyperannotatR/reference/at_app.md).
+A profile is `"supported"` only with implementation, runtime
+dependencies and qualification evidence; implemented profiles that have
+not passed their tests against a real partner client are `"planned"`;
+profiles whose optional runtime is missing are `"unavailable"`. Every
+entry carries a `reason` when it is not supported.
 
 ## Usage
 
@@ -41,16 +41,16 @@ JSON of the report without `digest` itself.
 
 ## See also
 
-[`at_interop_manifest()`](https://cttir.github.io/annotatR/reference/at_interop_manifest.md),
-[`at_control_capabilities()`](https://cttir.github.io/annotatR/reference/at_control_capabilities.md)
+[`at_interop_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.md),
+[`at_control_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_control_capabilities.md)
 
 Other interop:
-[`at_annotation_revision()`](https://cttir.github.io/annotatR/reference/at_annotation_revision.md),
-[`at_commit_qupflowr()`](https://cttir.github.io/annotatR/reference/at_commit_qupflowr.md),
-[`at_export_qupflowr()`](https://cttir.github.io/annotatR/reference/at_export_qupflowr.md),
-[`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md),
-[`at_interop_manifest()`](https://cttir.github.io/annotatR/reference/at_interop_manifest.md),
-[`at_stage_qupflowr()`](https://cttir.github.io/annotatR/reference/at_stage_qupflowr.md)
+[`at_annotation_revision()`](https://cttir.github.io/hyperannotatR/reference/at_annotation_revision.md),
+[`at_commit_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.md),
+[`at_export_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_export_qupflowr.md),
+[`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md),
+[`at_interop_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.md),
+[`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
 
 ## Examples
 

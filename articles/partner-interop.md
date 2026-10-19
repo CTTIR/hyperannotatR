@@ -1,14 +1,14 @@
 # Working with qupflowR: handoffs, control and training data
 
-![annotatR logo](../reference/figures/logo.png)
+![hyperannotatR logo](../reference/figures/logo.png)
 
-annotatR and the qupflowR package (a QuPath bridge, analysis and
+hyperannotatR and the qupflowR package (a QuPath bridge, analysis and
 workflow package) exchange annotations, masks, hyperspectral metadata
 and deep-learning datasets through a small, versioned contract. qupflowR
-never reaches into annotatR internals, Shiny state, `inst/` files or the
-browser DOM; it uses the public functions below, the files they write,
-or the optional local control service. This vignette describes that
-contract from the annotatR side.
+never reaches into hyperannotatR internals, Shiny state, `inst/` files
+or the browser DOM; it uses the public functions below, the files they
+write, or the optional local control service. This vignette describes
+that contract from the hyperannotatR side.
 
 ## What this installation supports
 
@@ -16,7 +16,7 @@ contract from the annotatR side.
 
 caps <- at_interop_capabilities()
 caps
-#> <at_capabilities> annotatR 0.2.0 for qupflowR
+#> <at_capabilities> hyperannotatR 0.2.0 for qupflowR
 #>   I0 supported   file interchange (handoff directory)
 #>   I1 supported   public R API
 #>   I2 planned     loopback control service - implemented and tested locally; no qualified qupflowR client run recorded
@@ -43,7 +43,7 @@ The profiles are:
 | I0 | file interchange: handoff directories, QuPath GeoJSON, masks with legends | supported |
 | I1 | public R API (`at_*` functions) | supported |
 | I2 | loopback control service `annotatr-control-v1` | `planned` until qualified with a real qupflowR client; `unavailable` without httpuv/later |
-| I3 | embeddable app object from [`at_app()`](https://cttir.github.io/annotatR/reference/at_app.md) | `planned` until qualified; `unavailable` without shiny/bslib/shinyjs/htmlwidgets |
+| I3 | embeddable app object from [`at_app()`](https://cttir.github.io/hyperannotatR/reference/at_app.md) | `planned` until qualified; `unavailable` without shiny/bslib/shinyjs/htmlwidgets |
 
 A capability is never advertised as supported because it merely exists.
 The report carries a `digest` (SHA-256 of its canonical JSON) that
@@ -52,7 +52,7 @@ to exactly this set.
 
 ## Handoff directories
 
-[`at_export_qupflowr()`](https://cttir.github.io/annotatR/reference/at_export_qupflowr.md)
+[`at_export_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_export_qupflowr.md)
 writes a new, self-contained directory of neutral files:
 
 ``` r
@@ -70,16 +70,16 @@ receipt$files[, c("path", "size_bytes", "format")]
 #>   <chr>                                       <dbl> <chr>         
 #> 1 annotations_qupath.geojson                   2228 qupath_geojson
 #> 2 image.json                                   1824 image_json    
-#> 3 manifest.json                                8289 manifest      
+#> 3 manifest.json                                8294 manifest      
 #> 4 masks/regions_labelled.tif                   2936 mask_tiff     
 #> 5 masks/regions_labelled.tif.legend.json        675 legend_json
 receipt$handoff_digest
-#> [1] "b4a0c1013c1e616dc88f7d0c3b36f652146cb8157151ef3a1b1a808d7879a9fb"
+#> [1] "b4dd67578ff8492227edd3bc81b0e5bf65071436ae24bdceaf08e34c64291222"
 ```
 
 - `annotations_qupath.geojson` uses the QuPath 0.4+ dialect with a
-  stable UUID per ROI and annotatR’s ROI id, layer, source and level in
-  `properties.metadata`.
+  stable UUID per ROI and hyperannotatR’s ROI id, layer, source and
+  level in `properties.metadata`.
 - `masks/<layer>_labelled.tif` holds one integer value per ROI; its
   `.legend.json` joins values to ROI ids, labels and colours.
 - `image.json` and `manifest.json` identify images by content hash and
@@ -144,13 +144,13 @@ man$annotations$annotation_revision
 The coordinate convention is explicit: pixel units, origin at the
 top-left corner, `y` increasing downward, planes indexed from zero, and
 the pixel coverage rule for masks. QuPath object hierarchy and native
-ROI shapes, which annotatR does not model, are reported as `"unknown"`
-or `"approximated"` (circles and ellipses are polygons) instead of being
-invented.
+ROI shapes, which hyperannotatR does not model, are reported as
+`"unknown"` or `"approximated"` (circles and ellipses are polygons)
+instead of being invented.
 
 ## Importing, staging and committing
 
-[`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md)
+[`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md)
 reads only the neutral contract. It verifies the inventory (missing,
 extra, duplicate, resized, altered and symlinked files), the manifest
 schema and its major version, the id join between manifest and GeoJSON,
@@ -245,19 +245,19 @@ at_hsi_meta(cube)[c("image_kind", "value_unit", "interleave", "byte_order", "hea
 
 Raw values, reflectance, radiance, intensity and absorbance are never
 mixed:
-[`at_convert_values()`](https://cttir.github.io/annotatR/reference/at_convert_values.md)
+[`at_convert_values()`](https://cttir.github.io/hyperannotatR/reference/at_convert_values.md)
 implements the named conversions and refuses to guess a missing
 calibration. ENVI and TIVITA cubes are read window by window, so
 opening, printing or displaying a cube does not load it;
-[`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md)
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md)
 reports the bytes read. A TIVITA `*_SpecCube.dat` is decoded only
 through a declared
-[`at_tivita_profile()`](https://cttir.github.io/annotatR/reference/at_tivita_profile.md)
+[`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
 or a `<cube>.tivita.json` sidecar. Cubert `.cu3s` files need `cuvis.r`
 and the CUVIS SDK; without them the backend reports itself unavailable
 and an SDK-written ENVI export is the portable fallback. Display
 products from
-[`at_band_view()`](https://cttir.github.io/annotatR/reference/at_band_view.md)
+[`at_band_view()`](https://cttir.github.io/hyperannotatR/reference/at_band_view.md)
 (ratios, normalised differences, band means) carry their parent digest
 and band list and are never used as analysis input.
 
@@ -310,7 +310,7 @@ occur in two splits. The manifest records tile size, overlap, level,
 pixel origin, coverage rule, class legend (background `0`), band list
 with wavelengths and FWHM, value unit, calibration and transform
 digests, annotation revisions and review status counts.
-[`at_training_check()`](https://cttir.github.io/annotatR/reference/at_training_check.md)
+[`at_training_check()`](https://cttir.github.io/hyperannotatR/reference/at_training_check.md)
 re-verifies the inventory, split leakage, mask dimensions, label range
 and a mask-to-ROI round trip.
 
@@ -379,7 +379,7 @@ remote <- at_control_connect(manifest_path, "/run/user/1000/annotatr.token")
 Every mutation carries a `request_id`, the `expected_revision` it is
 based on, an `idempotency_key` and the SHA-256 of its canonical payload.
 A stale revision is a conflict; a lost response is resolved with
-[`at_control_request_status()`](https://cttir.github.io/annotatR/reference/at_control_request_status.md),
+[`at_control_request_status()`](https://cttir.github.io/hyperannotatR/reference/at_control_request_status.md),
 and re-sending with the same key never applies a command twice. Events
 are read with a cursor; a cursor from another instance or older than the
 retained buffer yields `resync_required = TRUE`.
@@ -388,7 +388,7 @@ The JSON Schemas for all documents ship with the package:
 
 ``` r
 
-basename(list.files(system.file("schema", package = "annotatR"), recursive = TRUE))
+basename(list.files(system.file("schema", package = "hyperannotatR"), recursive = TRUE))
 #>  [1] "command.schema.json"           "event.schema.json"            
 #>  [3] "events-page.schema.json"       "handshake.schema.json"        
 #>  [5] "health.schema.json"            "request-record.schema.json"   
@@ -401,7 +401,7 @@ basename(list.files(system.file("schema", package = "annotatR"), recursive = TRU
 
 Schema versions are independent of the package version. Readers reject
 an unknown major version and keep unknown optional data only under
-`extensions`. annotatR 0.2.0 introduces `annotatr-handoff-v1`,
+`extensions`. hyperannotatR 0.2.0 introduces `annotatr-handoff-v1`,
 `annotatr-control-v1`, `annotatr-training-v1` and `annotatr-hsi-v1` (all
 `1.0`). Existing 0.1 files remain readable: legacy QuPath GeoJSON
 (`object_type`, `colorRGB`) is imported, and

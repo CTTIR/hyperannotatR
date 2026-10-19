@@ -20,12 +20,12 @@ at_batch_apply(
 - session:
 
   An
-  [annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - fn:
 
   A function `fn(project, image, idx)` returning an
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - ...:
 
@@ -46,12 +46,12 @@ at_batch_apply(
 ## Value
 
 The
-[annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+[annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 with modified projects.
 
 ## See also
 
 Other batch:
-[`at_batch_check_geometry()`](https://cttir.github.io/annotatR/reference/at_batch_check_geometry.md),
-[`at_export_all()`](https://cttir.github.io/annotatR/reference/at_export_all.md),
-[`at_summary_table()`](https://cttir.github.io/annotatR/reference/at_summary_table.md)
+[`at_batch_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_batch_check_geometry.md),
+[`at_export_all()`](https://cttir.github.io/hyperannotatR/reference/at_export_all.md),
+[`at_summary_table()`](https://cttir.github.io/hyperannotatR/reference/at_summary_table.md)

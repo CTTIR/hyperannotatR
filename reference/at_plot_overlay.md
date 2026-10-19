@@ -13,12 +13,12 @@ at_plot_overlay(project, img = NULL, layer = NULL, call = rlang::caller_env())
 - project:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - img:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md);
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md);
   the project's image by default.
 
 - layer:
@@ -37,12 +37,12 @@ object with the image and ROI outlines.
 ## See also
 
 Other plots:
-[`at_plot()`](https://cttir.github.io/annotatR/reference/at_plot.md),
-[`at_plot_image()`](https://cttir.github.io/annotatR/reference/at_plot_image.md),
-[`at_plot_mask()`](https://cttir.github.io/annotatR/reference/at_plot_mask.md),
-[`at_plot_project()`](https://cttir.github.io/annotatR/reference/at_plot_project.md),
-[`at_plot_spectrum()`](https://cttir.github.io/annotatR/reference/at_plot_spectrum.md),
-[`at_plot_summary()`](https://cttir.github.io/annotatR/reference/at_plot_summary.md)
+[`at_plot()`](https://cttir.github.io/hyperannotatR/reference/at_plot.md),
+[`at_plot_image()`](https://cttir.github.io/hyperannotatR/reference/at_plot_image.md),
+[`at_plot_mask()`](https://cttir.github.io/hyperannotatR/reference/at_plot_mask.md),
+[`at_plot_project()`](https://cttir.github.io/hyperannotatR/reference/at_plot_project.md),
+[`at_plot_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_plot_spectrum.md),
+[`at_plot_summary()`](https://cttir.github.io/hyperannotatR/reference/at_plot_summary.md)
 
 ## Examples
 

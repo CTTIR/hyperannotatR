@@ -1,6 +1,6 @@
-# Plot generic for annotatR objects
+# Plot generic for hyperannotatR objects
 
-Plot generic for annotatR objects
+Plot generic for hyperannotatR objects
 
 ## Usage
 
@@ -13,8 +13,8 @@ at_plot(x, ...)
 - x:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
   or `annot_mask`.
 
 - ...:
@@ -29,12 +29,12 @@ object.
 ## See also
 
 Other plots:
-[`at_plot_image()`](https://cttir.github.io/annotatR/reference/at_plot_image.md),
-[`at_plot_mask()`](https://cttir.github.io/annotatR/reference/at_plot_mask.md),
-[`at_plot_overlay()`](https://cttir.github.io/annotatR/reference/at_plot_overlay.md),
-[`at_plot_project()`](https://cttir.github.io/annotatR/reference/at_plot_project.md),
-[`at_plot_spectrum()`](https://cttir.github.io/annotatR/reference/at_plot_spectrum.md),
-[`at_plot_summary()`](https://cttir.github.io/annotatR/reference/at_plot_summary.md)
+[`at_plot_image()`](https://cttir.github.io/hyperannotatR/reference/at_plot_image.md),
+[`at_plot_mask()`](https://cttir.github.io/hyperannotatR/reference/at_plot_mask.md),
+[`at_plot_overlay()`](https://cttir.github.io/hyperannotatR/reference/at_plot_overlay.md),
+[`at_plot_project()`](https://cttir.github.io/hyperannotatR/reference/at_plot_project.md),
+[`at_plot_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_plot_spectrum.md),
+[`at_plot_summary()`](https://cttir.github.io/hyperannotatR/reference/at_plot_summary.md)
 
 ## Examples
 

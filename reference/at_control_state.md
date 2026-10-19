@@ -27,11 +27,11 @@ The state snapshot (a list) with `state_revision`, `event_cursor`,
 ## See also
 
 Other control:
-[`at_control_capabilities()`](https://cttir.github.io/annotatR/reference/at_control_capabilities.md),
-[`at_control_close()`](https://cttir.github.io/annotatR/reference/at_control_close.md),
-[`at_control_command()`](https://cttir.github.io/annotatR/reference/at_control_command.md),
-[`at_control_connect()`](https://cttir.github.io/annotatR/reference/at_control_connect.md),
-[`at_control_events()`](https://cttir.github.io/annotatR/reference/at_control_events.md),
-[`at_control_request_status()`](https://cttir.github.io/annotatR/reference/at_control_request_status.md),
-[`at_control_start()`](https://cttir.github.io/annotatR/reference/at_control_start.md),
-[`at_control_stop()`](https://cttir.github.io/annotatR/reference/at_control_stop.md)
+[`at_control_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_control_capabilities.md),
+[`at_control_close()`](https://cttir.github.io/hyperannotatR/reference/at_control_close.md),
+[`at_control_command()`](https://cttir.github.io/hyperannotatR/reference/at_control_command.md),
+[`at_control_connect()`](https://cttir.github.io/hyperannotatR/reference/at_control_connect.md),
+[`at_control_events()`](https://cttir.github.io/hyperannotatR/reference/at_control_events.md),
+[`at_control_request_status()`](https://cttir.github.io/hyperannotatR/reference/at_control_request_status.md),
+[`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
+[`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md)

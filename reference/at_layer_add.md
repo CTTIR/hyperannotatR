@@ -13,12 +13,12 @@ at_layer_add(layer, roi, call = rlang::caller_env())
 - layer:
 
   An
-  [annot_layer](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - roi:
 
   An
-  [annot_roi](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - call:
 
@@ -27,7 +27,7 @@ at_layer_add(layer, roi, call = rlang::caller_env())
 ## Value
 
 A new
-[annot_layer](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+[annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 with the ROI appended. The label vocabulary and colour mapping are
 extended if the ROI introduces a new label. A colliding ROI identifier
 is re-minted to preserve uniqueness. The input is unchanged.
@@ -35,11 +35,11 @@ is re-minted to preserve uniqueness. The input is unchanged.
 ## See also
 
 Other layers:
-[`at_layer()`](https://cttir.github.io/annotatR/reference/at_layer.md),
-[`at_layer_n()`](https://cttir.github.io/annotatR/reference/at_layer_n.md),
-[`at_layer_remove()`](https://cttir.github.io/annotatR/reference/at_layer_remove.md),
-[`at_layer_rois()`](https://cttir.github.io/annotatR/reference/at_layer_rois.md),
-[`at_style()`](https://cttir.github.io/annotatR/reference/at_style.md)
+[`at_layer()`](https://cttir.github.io/hyperannotatR/reference/at_layer.md),
+[`at_layer_n()`](https://cttir.github.io/hyperannotatR/reference/at_layer_n.md),
+[`at_layer_remove()`](https://cttir.github.io/hyperannotatR/reference/at_layer_remove.md),
+[`at_layer_rois()`](https://cttir.github.io/hyperannotatR/reference/at_layer_rois.md),
+[`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)
 
 ## Examples
 

@@ -20,7 +20,7 @@ at_tile_source(
 - img:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - level_max:
 
@@ -38,7 +38,7 @@ at_tile_source(
 - view:
 
   Optional band view: a list with `operation` (see
-  [`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md)),
+  [`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md)),
   `bands` and `params`. `NULL` shows natural-colour RGB (nearest bands
   to 640/550/460 nm for spectral cubes). Display only.
 
@@ -55,15 +55,15 @@ A list describing the image for the widget: `width`, `height`,
 ## See also
 
 Other shiny:
-[`atCanvasOutput()`](https://cttir.github.io/annotatR/reference/atCanvasOutput.md),
-[`at_annotate()`](https://cttir.github.io/annotatR/reference/at_annotate.md),
-[`at_app()`](https://cttir.github.io/annotatR/reference/at_app.md),
-[`at_canvas()`](https://cttir.github.io/annotatR/reference/at_canvas.md),
-[`at_canvas_fit()`](https://cttir.github.io/annotatR/reference/at_canvas_fit.md),
-[`at_canvas_proxy()`](https://cttir.github.io/annotatR/reference/at_canvas_proxy.md),
-[`at_canvas_set_annotations()`](https://cttir.github.io/annotatR/reference/at_canvas_set_annotations.md),
-[`at_canvas_set_band()`](https://cttir.github.io/annotatR/reference/at_canvas_set_band.md),
-[`at_canvas_set_overlay()`](https://cttir.github.io/annotatR/reference/at_canvas_set_overlay.md),
-[`at_canvas_set_selection()`](https://cttir.github.io/annotatR/reference/at_canvas_set_selection.md),
-[`at_canvas_set_tool()`](https://cttir.github.io/annotatR/reference/at_canvas_set_tool.md),
-[`renderAtCanvas()`](https://cttir.github.io/annotatR/reference/renderAtCanvas.md)
+[`atCanvasOutput()`](https://cttir.github.io/hyperannotatR/reference/atCanvasOutput.md),
+[`at_annotate()`](https://cttir.github.io/hyperannotatR/reference/at_annotate.md),
+[`at_app()`](https://cttir.github.io/hyperannotatR/reference/at_app.md),
+[`at_canvas()`](https://cttir.github.io/hyperannotatR/reference/at_canvas.md),
+[`at_canvas_fit()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_fit.md),
+[`at_canvas_proxy()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_proxy.md),
+[`at_canvas_set_annotations()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_annotations.md),
+[`at_canvas_set_band()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_band.md),
+[`at_canvas_set_overlay()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_overlay.md),
+[`at_canvas_set_selection()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_selection.md),
+[`at_canvas_set_tool()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_tool.md),
+[`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)

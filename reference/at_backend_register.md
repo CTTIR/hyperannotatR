@@ -1,8 +1,9 @@
 # Register an image backend
 
-Backends are how annotatR reads image formats. Each supplies functions
-to read an image's metadata, fetch tiles, detect whether it can read a
-file, and report whether its optional dependencies are installed.
+Backends are how hyperannotatR reads image formats. Each supplies
+functions to read an image's metadata, fetch tiles, detect whether it
+can read a file, and report whether its optional dependencies are
+installed.
 
 ## Usage
 
@@ -28,7 +29,7 @@ at_backend_register(
 - read_fn:
 
   `function(path, ...)` returning an
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - tile_fn:
 
@@ -62,14 +63,14 @@ The registered `annot_backend`, invisibly.
 
 ## See also
 
-[`at_backend_list()`](https://cttir.github.io/annotatR/reference/at_backend_list.md),
-[`at_read_image()`](https://cttir.github.io/annotatR/reference/at_read_image.md)
+[`at_backend_list()`](https://cttir.github.io/hyperannotatR/reference/at_backend_list.md),
+[`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md)
 
 Other backends:
-[`at_backend_detect()`](https://cttir.github.io/annotatR/reference/at_backend_detect.md),
-[`at_backend_get()`](https://cttir.github.io/annotatR/reference/at_backend_get.md),
-[`at_backend_list()`](https://cttir.github.io/annotatR/reference/at_backend_list.md),
-[`at_cubert_export_envi()`](https://cttir.github.io/annotatR/reference/at_cubert_export_envi.md),
-[`at_read_image()`](https://cttir.github.io/annotatR/reference/at_read_image.md),
-[`at_tile()`](https://cttir.github.io/annotatR/reference/at_tile.md),
-[`at_tivita_profile()`](https://cttir.github.io/annotatR/reference/at_tivita_profile.md)
+[`at_backend_detect()`](https://cttir.github.io/hyperannotatR/reference/at_backend_detect.md),
+[`at_backend_get()`](https://cttir.github.io/hyperannotatR/reference/at_backend_get.md),
+[`at_backend_list()`](https://cttir.github.io/hyperannotatR/reference/at_backend_list.md),
+[`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
+[`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
+[`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)

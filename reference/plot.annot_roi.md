@@ -14,7 +14,7 @@ plot(x, ...)
 - x:
 
   An
-  [annot_roi](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - ...:
 

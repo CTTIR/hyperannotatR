@@ -1,7 +1,7 @@
 # Image dimensions at a pyramid level
 
 Return the pixel dimensions `c(width, height)` of an
-[annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+[annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 at a given pyramid level.
 
 ## Usage
@@ -15,7 +15,7 @@ at_dims(x, level = 0L, call = rlang::caller_env())
 - x:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - level:
 
@@ -32,23 +32,23 @@ An integer vector of length 2, `c(width, height)`.
 
 ## See also
 
-[`at_n_levels()`](https://cttir.github.io/annotatR/reference/at_n_levels.md),
-[`at_is_pyramidal()`](https://cttir.github.io/annotatR/reference/at_is_pyramidal.md)
+[`at_n_levels()`](https://cttir.github.io/hyperannotatR/reference/at_n_levels.md),
+[`at_is_pyramidal()`](https://cttir.github.io/hyperannotatR/reference/at_is_pyramidal.md)
 
 Other images:
-[`annotatR-classes`](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
-[`at_bands()`](https://cttir.github.io/annotatR/reference/at_bands.md),
-[`at_example_image()`](https://cttir.github.io/annotatR/reference/at_example_image.md),
-[`at_hsi_meta()`](https://cttir.github.io/annotatR/reference/at_hsi_meta.md),
-[`at_is_pyramidal()`](https://cttir.github.io/annotatR/reference/at_is_pyramidal.md),
-[`at_is_spectral()`](https://cttir.github.io/annotatR/reference/at_is_spectral.md),
-[`at_meta()`](https://cttir.github.io/annotatR/reference/at_meta.md),
-[`at_n_bands()`](https://cttir.github.io/annotatR/reference/at_n_bands.md),
-[`at_n_levels()`](https://cttir.github.io/annotatR/reference/at_n_levels.md),
-[`at_pixel_size()`](https://cttir.github.io/annotatR/reference/at_pixel_size.md),
-[`at_read_image()`](https://cttir.github.io/annotatR/reference/at_read_image.md),
-[`at_tile()`](https://cttir.github.io/annotatR/reference/at_tile.md),
-[`at_wavelengths()`](https://cttir.github.io/annotatR/reference/at_wavelengths.md)
+[`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md),
+[`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md),
+[`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_is_pyramidal()`](https://cttir.github.io/hyperannotatR/reference/at_is_pyramidal.md),
+[`at_is_spectral()`](https://cttir.github.io/hyperannotatR/reference/at_is_spectral.md),
+[`at_meta()`](https://cttir.github.io/hyperannotatR/reference/at_meta.md),
+[`at_n_bands()`](https://cttir.github.io/hyperannotatR/reference/at_n_bands.md),
+[`at_n_levels()`](https://cttir.github.io/hyperannotatR/reference/at_n_levels.md),
+[`at_pixel_size()`](https://cttir.github.io/hyperannotatR/reference/at_pixel_size.md),
+[`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
+[`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
+[`at_wavelengths()`](https://cttir.github.io/hyperannotatR/reference/at_wavelengths.md),
+[`hyperannotatR-classes`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 
 ## Examples
 

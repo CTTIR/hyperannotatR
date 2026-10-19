@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Multi-Layer Region-of-Interest Annotation for Images and Spectral Cubes • annotatR</title>
+<title>Region-of-Interest Annotation for Hyperspectral Data • hyperannotatR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -18,10 +18,10 @@
 <link href="deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Multi-Layer Region-of-Interest Annotation for Images and Spectral Cubes">
-<meta name="description" content="Annotate multiple layers of regions of interest across whole-slide microscopy images, hyperspectral data cubes, and conventional rasters. Annotations are stored as validated simple-feature geometries in image pixel coordinates with explicit pyramid-level transforms, and can be rasterised to binary, labelled, or multi-class integer masks for downstream segmentation and classification workflows. A batch annotation application built on shiny supports resumable sessions across image queues, live mask preview, and export to GeoJSON, QuPath, and TIFF formats. A versioned partner contract exchanges hash-inventoried handoff directories, deep-learning training datasets and typed commands over an optional local control service.">
-<meta property="og:description" content="Annotate multiple layers of regions of interest across whole-slide microscopy images, hyperspectral data cubes, and conventional rasters. Annotations are stored as validated simple-feature geometries in image pixel coordinates with explicit pyramid-level transforms, and can be rasterised to binary, labelled, or multi-class integer masks for downstream segmentation and classification workflows. A batch annotation application built on shiny supports resumable sessions across image queues, live mask preview, and export to GeoJSON, QuPath, and TIFF formats. A versioned partner contract exchanges hash-inventoried handoff directories, deep-learning training datasets and typed commands over an optional local control service.">
-<meta property="og:image" content="https://cttir.github.io/annotatR/logo.svg">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Region-of-Interest Annotation for Hyperspectral Data">
+<meta name="description" content="Annotate multiple layers of regions of interest in hyperspectral data cubes and their associated display rasters. Annotations are stored as validated simple-feature geometries in image pixel coordinates with explicit pyramid-level transforms, and can be rasterised to binary, labelled, or multi-class integer masks for downstream segmentation and classification workflows. A batch annotation application built on shiny supports resumable sessions across image queues, live mask preview, and export to GeoJSON, QuPath, and TIFF formats. A versioned partner contract exchanges hash-inventoried handoff directories, deep-learning training datasets and typed commands over an optional local control service.">
+<meta property="og:description" content="Annotate multiple layers of regions of interest in hyperspectral data cubes and their associated display rasters. Annotations are stored as validated simple-feature geometries in image pixel coordinates with explicit pyramid-level transforms, and can be rasterised to binary, labelled, or multi-class integer masks for downstream segmentation and classification workflows. A batch annotation application built on shiny supports resumable sessions across image queues, live mask preview, and export to GeoJSON, QuPath, and TIFF formats. A versioned partner contract exchanges hash-inventoried handoff directories, deep-learning training datasets and typed commands over an optional local control service.">
+<meta property="og:image" content="https://cttir.github.io/hyperannotatR/logo.svg">
 <meta name="theme-color" content="#1565c0">
 </head>
 <body>
@@ -30,7 +30,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="index.html"><img src="logo.svg" alt="" class="themakr-navbar-logo">annotatR</a>
+    <a class="navbar-brand me-2" href="index.html"><img src="logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
@@ -48,7 +48,7 @@
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/annotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/hyperannotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
@@ -66,24 +66,26 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.svg" class="logo" alt=""><h1 id="annotatr-">annotatR <a class="anchor" aria-label="anchor" href="#annotatr-"></a>
+<img src="logo.svg" class="logo" alt=""><h1 id="hyperannotatr-">hyperannotatR <a class="anchor" aria-label="anchor" href="#hyperannotatr-"></a>
 </h1>
 </div>
 <!-- badges: start -->
 
-<p><strong>annotatR</strong> provides multi-layer region-of-interest (ROI) annotation for whole-slide microscopy images, hyperspectral data cubes, and conventional rasters. Annotations are validated simple-feature geometries stored in image pixel coordinates with explicit pyramid-level transforms, and rasterise to binary, labelled, or multi-class integer <strong>masks</strong> for downstream segmentation and classification. A batch annotation application supports resumable sessions across image queues, live mask preview, and export to GeoJSON, QuPath, and TIFF.</p>
+<p><strong>hyperannotatR</strong> provides multi-layer region-of-interest annotation for hyperspectral imaging (HSI), including spectral cubes, band views, spectral extraction, and associated display rasters. ROI geometries, masks, resumable sessions and exports support HSI annotation and classification.</p>
+<p>Cell and nucleus annotation, segmentation, correction, training and review for microscopy belong to <strong>segmantR</strong>. Its independent drawing canvas and mask workflow do not require hyperannotatR. Generic raster and geometry APIs remain available for HSI previews and interchange compatibility.</p>
+<p>The R package was renamed from <code>annotatR</code> to <code>hyperannotatR</code>; load it with <code><a href="https://github.com/CTTIR/hyperannotatR" class="external-link">library(hyperannotatR)</a></code>. The <code>at_*</code> function names and saved object classes are retained. The hosted source repository is <code>CTTIR/hyperannotatR</code>.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CTTIR/annotatR"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CTTIR/hyperannotatR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CTTIR/annotatR" class="external-link">annotatR</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/CTTIR/hyperannotatR" class="external-link">hyperannotatR</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Read a bundled example image and build a project with one annotation layer.</span></span>
 <span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"tissue"</span><span class="op">)</span></span>
@@ -191,7 +193,7 @@
 <div class="section level2">
 <h2 id="working-with-qupflowr">Working with qupflowR<a class="anchor" aria-label="anchor" href="#working-with-qupflowr"></a>
 </h2>
-<p>annotatR exchanges annotations with the qupflowR package through a versioned, hash-inventoried contract. <code><a href="reference/at_interop_capabilities.html">at_interop_capabilities()</a></code> reports which profiles this installation supports; the file (I0) and R API (I1) profiles are supported, while direct app control (I2) and embedding (I3) stay <em>planned</em> until they are qualified against a real qupflowR client.</p>
+<p>hyperannotatR exchanges annotations with the qupflowR package through a versioned, hash-inventoried contract. <code><a href="reference/at_interop_capabilities.html">at_interop_capabilities()</a></code> reports which profiles this installation supports; the file (I0) and R API (I1) profiles are supported, while direct app control (I2) and embedding (I3) stay <em>planned</em> until they are qualified against a real qupflowR client.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"handoff"</span><span class="op">)</span></span>
 <span><span class="va">receipt</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/at_export_qupflowr.html">at_export_qupflowr</a></span><span class="op">(</span><span class="va">proj</span>, <span class="va">dest</span><span class="op">)</span>            <span class="co"># QuPath GeoJSON, masks, manifest, integrity</span></span>
@@ -203,26 +205,26 @@
 <div class="section level2">
 <h2 id="related-work">Related work<a class="anchor" aria-label="anchor" href="#related-work"></a>
 </h2>
-<p>Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious, annotatR is R-native and script-first, handles hyperspectral cubes alongside microscopy, and treats the batch <strong>mask</strong> export as a first-class, reproducible artifact.</p>
+<p>Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious, hyperannotatR is R-native and script-first, handles hyperspectral cubes alongside microscopy, and treats the batch <strong>mask</strong> export as a first-class, reproducible artifact.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
 </h2>
-<p>annotatR builds on <a href="https://shiny.posit.co/" class="external-link">Shiny</a>, the <a href="https://r-spatial.github.io/sf/" class="external-link"><code>sf</code></a> and <a href="https://r-spatial.github.io/stars/" class="external-link"><code>stars</code></a> packages.</p>
+<p>hyperannotatR builds on <a href="https://shiny.posit.co/" class="external-link">Shiny</a>, the <a href="https://r-spatial.github.io/sf/" class="external-link"><code>sf</code></a> and <a href="https://r-spatial.github.io/stars/" class="external-link"><code>stars</code></a> packages.</p>
 </div>
 <div class="section level2">
 <h2 id="use-of-llm-tools">Use of LLM tools<a class="anchor" aria-label="anchor" href="#use-of-llm-tools"></a>
 </h2>
 <p>Where applicable, LLM tools were used for narrowly defined, non-authorial tasks: copyediting, prose refinement, Markdown/LaTeX formatting, boilerplate scaffolding (such as CI configurations and build scripts), and code refactoring. Tools included <a href="https://kisski.gwdg.de/leistungen/2-02-llm-service/" class="external-link">Chat AI</a>, the KISSKI (GWDG) service, and self-hosted <strong>Mistral Small (24B, Apache-2.0)</strong> served through a local <strong>vLLM architecture</strong> on an Ubuntu Linux workstation with Intel processors and NVIDIA GPUs. The self-hosted model ran locally, with no data sent to third parties.</p>
 <p>All scientific claims, methodological choices, analyses, interpretations and conclusions remain the authors’ own. Where applicable, LLM-generated material must be reviewed and revised before inclusion, and references must be verified against their DOI, arXiv ID or ISBN.</p>
-<p>Workstation software snapshot (14 October 2026): local, OpenAI-compatible vLLM serving with <strong>vLLM 0.28.1rc1.dev534+g613ab20f7</strong>, <strong>Python 3.12.13</strong> and <strong>PyTorch 2.13.0</strong>; <strong>R 4.6.1</strong> and <strong>RStudio 2026.06.0+242</strong>. These are workstation versions, not per-project dependency or validation requirements.</p>
+<p>Local software setup: vLLM with Python/PyTorch, plus R and RStudio.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/CTTIR/annotatR/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/CTTIR/annotatR/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/CTTIR/hyperannotatR/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/CTTIR/hyperannotatR/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
@@ -238,7 +240,7 @@
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing annotatR</a></li>
+<li><a href="authors.html#citation">Citing hyperannotatR</a></li>
 </ul>
 </div>
 
@@ -265,7 +267,7 @@
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">
-  <p><span class="themakr-footer-pkg">annotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
+  <p><span class="themakr-footer-pkg">hyperannotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
 </div>
 
 <div class="pkgdown-footer-right">

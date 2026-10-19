@@ -20,7 +20,7 @@ at_plot_project(
 - project:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - layer, label:
 
@@ -46,12 +46,12 @@ object. Empty projects give a valid empty plot.
 ## See also
 
 Other plots:
-[`at_plot()`](https://cttir.github.io/annotatR/reference/at_plot.md),
-[`at_plot_image()`](https://cttir.github.io/annotatR/reference/at_plot_image.md),
-[`at_plot_mask()`](https://cttir.github.io/annotatR/reference/at_plot_mask.md),
-[`at_plot_overlay()`](https://cttir.github.io/annotatR/reference/at_plot_overlay.md),
-[`at_plot_spectrum()`](https://cttir.github.io/annotatR/reference/at_plot_spectrum.md),
-[`at_plot_summary()`](https://cttir.github.io/annotatR/reference/at_plot_summary.md)
+[`at_plot()`](https://cttir.github.io/hyperannotatR/reference/at_plot.md),
+[`at_plot_image()`](https://cttir.github.io/hyperannotatR/reference/at_plot_image.md),
+[`at_plot_mask()`](https://cttir.github.io/hyperannotatR/reference/at_plot_mask.md),
+[`at_plot_overlay()`](https://cttir.github.io/hyperannotatR/reference/at_plot_overlay.md),
+[`at_plot_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_plot_spectrum.md),
+[`at_plot_summary()`](https://cttir.github.io/hyperannotatR/reference/at_plot_summary.md)
 
 ## Examples
 

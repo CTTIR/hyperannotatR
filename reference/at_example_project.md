@@ -17,26 +17,26 @@ at_example_project(call = rlang::caller_env())
 ## Value
 
 An
-[annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+[annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 over the tissue example with one layer of three labelled regions.
 
 ## See also
 
 Other example data:
-[`at_example_image()`](https://cttir.github.io/annotatR/reference/at_example_image.md),
-[`at_example_path()`](https://cttir.github.io/annotatR/reference/at_example_path.md),
-[`at_example_session()`](https://cttir.github.io/annotatR/reference/at_example_session.md)
+[`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md),
+[`at_example_path()`](https://cttir.github.io/hyperannotatR/reference/at_example_path.md),
+[`at_example_session()`](https://cttir.github.io/hyperannotatR/reference/at_example_session.md)
 
 Other projects:
-[`at_add_layer()`](https://cttir.github.io/annotatR/reference/at_add_layer.md),
-[`at_add_roi()`](https://cttir.github.io/annotatR/reference/at_add_roi.md),
-[`at_layers()`](https://cttir.github.io/annotatR/reference/at_layers.md),
-[`at_project()`](https://cttir.github.io/annotatR/reference/at_project.md),
-[`at_remove_layer()`](https://cttir.github.io/annotatR/reference/at_remove_layer.md),
-[`at_remove_roi()`](https://cttir.github.io/annotatR/reference/at_remove_roi.md),
-[`at_rois()`](https://cttir.github.io/annotatR/reference/at_rois.md),
-[`at_summary()`](https://cttir.github.io/annotatR/reference/at_summary.md),
-[`at_validate()`](https://cttir.github.io/annotatR/reference/at_validate.md)
+[`at_add_layer()`](https://cttir.github.io/hyperannotatR/reference/at_add_layer.md),
+[`at_add_roi()`](https://cttir.github.io/hyperannotatR/reference/at_add_roi.md),
+[`at_layers()`](https://cttir.github.io/hyperannotatR/reference/at_layers.md),
+[`at_project()`](https://cttir.github.io/hyperannotatR/reference/at_project.md),
+[`at_remove_layer()`](https://cttir.github.io/hyperannotatR/reference/at_remove_layer.md),
+[`at_remove_roi()`](https://cttir.github.io/hyperannotatR/reference/at_remove_roi.md),
+[`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md),
+[`at_summary()`](https://cttir.github.io/hyperannotatR/reference/at_summary.md),
+[`at_validate()`](https://cttir.github.io/hyperannotatR/reference/at_validate.md)
 
 ## Examples
 

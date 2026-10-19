@@ -21,12 +21,12 @@ at_extract_pixels(
 - project:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - img:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md);
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md);
   defaults to the project's image.
 
 - layer:
@@ -59,5 +59,5 @@ A 0-row tibble with these columns when nothing matches.
 ## See also
 
 Other extraction:
-[`at_extract()`](https://cttir.github.io/annotatR/reference/at_extract.md),
-[`at_extract_spectrum()`](https://cttir.github.io/annotatR/reference/at_extract_spectrum.md)
+[`at_extract()`](https://cttir.github.io/hyperannotatR/reference/at_extract.md),
+[`at_extract_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_extract_spectrum.md)

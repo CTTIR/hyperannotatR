@@ -1,7 +1,7 @@
 # Declare a TIVITA SpecCube layout profile
 
 A profile states everything needed to decode a bare `*_SpecCube.dat`
-file; annotatR never infers these from a file name. The default
+file; hyperannotatR never infers these from a file name. The default
 arguments describe the documented 640 x 480 x 100-band layout (500-995
 nm), which is a profile like any other and can be replaced for a
 different device.
@@ -76,24 +76,24 @@ A list of class `at_tivita_profile`.
 
 ## See also
 
-[`at_read_image()`](https://cttir.github.io/annotatR/reference/at_read_image.md)
+[`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md)
 
 Other hsi:
-[`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md),
-[`at_band_view()`](https://cttir.github.io/annotatR/reference/at_band_view.md),
-[`at_convert_values()`](https://cttir.github.io/annotatR/reference/at_convert_values.md),
-[`at_cubert_export_envi()`](https://cttir.github.io/annotatR/reference/at_cubert_export_envi.md),
-[`at_hsi_meta()`](https://cttir.github.io/annotatR/reference/at_hsi_meta.md),
-[`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md)
+[`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md),
+[`at_band_view()`](https://cttir.github.io/hyperannotatR/reference/at_band_view.md),
+[`at_convert_values()`](https://cttir.github.io/hyperannotatR/reference/at_convert_values.md),
+[`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md)
 
 Other backends:
-[`at_backend_detect()`](https://cttir.github.io/annotatR/reference/at_backend_detect.md),
-[`at_backend_get()`](https://cttir.github.io/annotatR/reference/at_backend_get.md),
-[`at_backend_list()`](https://cttir.github.io/annotatR/reference/at_backend_list.md),
-[`at_backend_register()`](https://cttir.github.io/annotatR/reference/at_backend_register.md),
-[`at_cubert_export_envi()`](https://cttir.github.io/annotatR/reference/at_cubert_export_envi.md),
-[`at_read_image()`](https://cttir.github.io/annotatR/reference/at_read_image.md),
-[`at_tile()`](https://cttir.github.io/annotatR/reference/at_tile.md)
+[`at_backend_detect()`](https://cttir.github.io/hyperannotatR/reference/at_backend_detect.md),
+[`at_backend_get()`](https://cttir.github.io/hyperannotatR/reference/at_backend_get.md),
+[`at_backend_list()`](https://cttir.github.io/hyperannotatR/reference/at_backend_list.md),
+[`at_backend_register()`](https://cttir.github.io/hyperannotatR/reference/at_backend_register.md),
+[`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
+[`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md)
 
 ## Examples
 

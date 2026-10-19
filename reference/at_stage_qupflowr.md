@@ -1,7 +1,7 @@
-# Stage partner changes against an annotatR project
+# Stage partner changes against an hyperannotatR project
 
 Compute, without applying, the changes a partner patch would make to an
-annotatR project: ROIs are joined by id and classified as `create`,
+hyperannotatR project: ROIs are joined by id and classified as `create`,
 `update`, `unchanged`, `delete` (only with `delete_missing = TRUE`) or
 `conflict`. Reviewed or locked ROIs, and ROIs in locked layers, are
 never changed automatically; such changes become conflicts. When
@@ -25,22 +25,22 @@ at_stage_qupflowr(
 - x:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
   or the path of a saved project `.rds` (then the commit re-reads and
   re-checks that file).
 
 - patch:
 
   An import report from
-  [`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md),
+  [`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md),
   a handoff directory, or one or more
-  [annot_layer](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+  [annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   objects.
 
 - expected_revision:
 
   Optional revision of `x` the partner based its patch on (see
-  [`at_annotation_revision()`](https://cttir.github.io/annotatR/reference/at_annotation_revision.md)).
+  [`at_annotation_revision()`](https://cttir.github.io/hyperannotatR/reference/at_annotation_revision.md)).
 
 - delete_missing:
 
@@ -61,15 +61,15 @@ An `at_staged_patch`: a list with `patch_id`, `state = "staged"`,
 
 ## See also
 
-[`at_commit_qupflowr()`](https://cttir.github.io/annotatR/reference/at_commit_qupflowr.md)
+[`at_commit_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.md)
 
 Other interop:
-[`at_annotation_revision()`](https://cttir.github.io/annotatR/reference/at_annotation_revision.md),
-[`at_commit_qupflowr()`](https://cttir.github.io/annotatR/reference/at_commit_qupflowr.md),
-[`at_export_qupflowr()`](https://cttir.github.io/annotatR/reference/at_export_qupflowr.md),
-[`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md),
-[`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md),
-[`at_interop_manifest()`](https://cttir.github.io/annotatR/reference/at_interop_manifest.md)
+[`at_annotation_revision()`](https://cttir.github.io/hyperannotatR/reference/at_annotation_revision.md),
+[`at_commit_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.md),
+[`at_export_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_export_qupflowr.md),
+[`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md),
+[`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md),
+[`at_interop_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.md)
 
 ## Examples
 

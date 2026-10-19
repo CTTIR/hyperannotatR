@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Masks • annotatR</title>
+<title>Masks • hyperannotatR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -27,7 +27,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">annotatR</a>
+    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
@@ -45,7 +45,7 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/annotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/hyperannotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
@@ -69,20 +69,20 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Masks</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/CTTIR/annotatR/blob/main/vignettes/masks.Rmd" class="external-link"><code>vignettes/masks.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CTTIR/hyperannotatR/blob/main/vignettes/masks.Rmd" class="external-link"><code>vignettes/masks.Rmd</code></a></small>
       <div class="d-none name"><code>masks.Rmd</code></div>
     </div>
 
     
     
-<p><img src="../reference/figures/logo.png" class="r-plt" alt="annotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<p><img src="../reference/figures/logo.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
 <p>A <em>mask</em> is the artefact that turns hand-drawn regions into
 something a segmentation or classification pipeline can consume: an
 integer raster on the same pixel grid as the image, where each pixel
-carries the identity of the region it belongs to. In annotatR the mask
-is the core deliverable, and <code><a href="../reference/at_mask.html">at_mask()</a></code> is the function that
-produces it from an <code>annot_roi</code>, an <code>annot_layer</code>,
-or a whole <code>annot_project</code>.</p>
+carries the identity of the region it belongs to. In hyperannotatR the
+mask is the core deliverable, and <code><a href="../reference/at_mask.html">at_mask()</a></code> is the function
+that produces it from an <code>annot_roi</code>, an
+<code>annot_layer</code>, or a whole <code>annot_project</code>.</p>
 <div class="section level2">
 <h2 id="three-mask-types">Three mask types<a class="anchor" aria-label="anchor" href="#three-mask-types"></a>
 </h2>
@@ -116,8 +116,8 @@ value. Use it for semantic segmentation, where you care about the class
 <h2 id="the-pixel-coverage-contract">The pixel-coverage contract<a class="anchor" aria-label="anchor" href="#the-pixel-coverage-contract"></a>
 </h2>
 <p>Rasterisation is only reproducible if the pixel/geometry relationship
-is exact, so annotatR pins it down. Pixel <code>(i, j)</code> covers the
-half-open square <code>[j-1, j) x [i-1, i)</code>, with
+is exact, so hyperannotatR pins it down. Pixel <code>(i, j)</code>
+covers the half-open square <code>[j-1, j) x [i-1, i)</code>, with
 <code>(0, 0)</code> at the top-left corner of the top-left pixel; its
 centre is therefore <code>(j - 0.5, i - 0.5)</code>. With the default
 <code>touches = FALSE</code>, a pixel is in the mask when <em>its
@@ -287,7 +287,7 @@ it:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">".legend.json"</span><span class="op">)</span><span class="op">)</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;   "annotatR_version": "0.2.0",</span></span>
-<span><span class="co">#&gt;   "created": "2026-10-14T12:44:13+0000",</span></span>
+<span><span class="co">#&gt;   "created": "2026-10-19T05:51:45+0000",</span></span>
 <span><span class="co">#&gt;   "mask_type": "multiclass",</span></span>
 <span><span class="co">#&gt;   "level": 0,</span></span>
 <span><span class="co">#&gt;   "dims": [512, 512],</span></span>
@@ -345,9 +345,10 @@ runtime, no bespoke format:</p>
 <h2 id="reading-masks-back">Reading masks back<a class="anchor" aria-label="anchor" href="#reading-masks-back"></a>
 </h2>
 <p>Masks are not a dead end. <code><a href="../reference/at_read_mask.html">at_read_mask()</a></code> polygonises an
-existing mask — annotatR’s own output, or a Cellpose/StarDist/QuPath
-raster — back into an editable <code>annot_layer</code>, recovering
-labels from the sidecar when it is present:</p>
+existing mask — hyperannotatR’s own output, or a
+Cellpose/StarDist/QuPath raster — back into an editable
+<code>annot_layer</code>, recovering labels from the sidecar when it is
+present:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">back</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_read_mask.html">at_read_mask</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">back</span><span class="op">$</span><span class="va">rois</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="va">r</span><span class="op">$</span><span class="va">label</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
@@ -371,7 +372,7 @@ QuPath, and CSV exchange with other tools.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">
-  <p><span class="themakr-footer-pkg">annotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
+  <p><span class="themakr-footer-pkg">hyperannotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
 </div>
 
 <div class="pkgdown-footer-right">

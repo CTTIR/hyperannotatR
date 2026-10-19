@@ -1,17 +1,17 @@
 # Interoperability
 
-![annotatR logo](../reference/figures/logo.png)
+![hyperannotatR logo](../reference/figures/logo.png)
 
 Annotations are only useful if they can leave the tool that made them.
-annotatR stores every region of interest as a validated simple-feature
-geometry in image pixel coordinates, with an explicit pyramid level
-attached, which makes it straightforward to hand work off to a viewer
-such as QuPath, to a GIS-flavoured GeoJSON consumer, or to a Python
-segmentation pipeline, and to take the results back again. Because the
-geometry model is the same one used internally, an export followed by an
-import is a genuine round-trip rather than a lossy approximation, and
-this vignette shows a live one for each format so you can see that
-labels, identities, and coordinates survive intact.
+hyperannotatR stores every region of interest as a validated
+simple-feature geometry in image pixel coordinates, with an explicit
+pyramid level attached, which makes it straightforward to hand work off
+to a viewer such as QuPath, to a GIS-flavoured GeoJSON consumer, or to a
+Python segmentation pipeline, and to take the results back again.
+Because the geometry model is the same one used internally, an export
+followed by an import is a genuine round-trip rather than a lossy
+approximation, and this vignette shows a live one for each format so you
+can see that labels, identities, and coordinates survive intact.
 
 A guiding principle runs through all four formats below: the coordinate
 convention never changes silently. Coordinates are written in image
@@ -35,11 +35,11 @@ at_rois(proj)[, c("roi_id", "layer", "label", "geom_type", "area_px")]
 
 ## GeoJSON
 
-[`at_write_geojson()`](https://cttir.github.io/annotatR/reference/at_write_geojson.md)
+[`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md)
 serialises a project to a standard `FeatureCollection`. Each ROI becomes
 one `Feature` whose `geometry` is the pixel-coordinate polygon and whose
-`properties` carry the full annotatR schema: `roi_id`, `layer`, `label`,
-`level`, `author`, `created`, `modified`, `source`, the writing
+`properties` carry the full hyperannotatR schema: `roi_id`, `layer`,
+`label`, `level`, `author`, `created`, `modified`, `source`, the writing
 `annotatR_version`, and any free-form `attributes`. Keeping the schema
 explicit is what lets a file survive a return trip.
 
@@ -75,7 +75,7 @@ cat(readLines(gj)[1:22], sep = "\n")
 The `roi_id` is preserved verbatim, so an ROI keeps its identity across
 the boundary and you can join exported measurements back to the original
 annotation. Reading the file back with
-[`at_read_geojson()`](https://cttir.github.io/annotatR/reference/at_read_geojson.md)
+[`at_read_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_read_geojson.md)
 reconstructs one `annot_layer` per distinct `layer` property. We rebuild
 a project on the original image and check that the labels came through
 intact.
@@ -90,9 +90,9 @@ identical(sort(at_rois(proj)$label), sort(at_rois(imported)$label))
 
 ### The `flip_y` option
 
-annotatR’s convention is image orientation: the origin is top-left and
-*y* increases downward. Many GIS tools instead expect *y* to increase
-upward. Set `flip_y = TRUE` to write coordinates in that upward
+hyperannotatR’s convention is image orientation: the origin is top-left
+and *y* increases downward. Many GIS tools instead expect *y* to
+increase upward. Set `flip_y = TRUE` to write coordinates in that upward
 convention; the y-axis is mirrored about the image height. If you write
 flipped, you must read flipped, supplying the same `height` so the
 inversion is undone:
@@ -109,23 +109,23 @@ identical(sort(at_rois(at_project(proj$image, regained[["regions"]]))$centroid_y
 ```
 
 Leave `flip_y` at its default `FALSE` when exchanging with other
-image-coordinate tools (including QuPath and annotatR itself); reach for
-it only when a downstream consumer explicitly wants a cartesian,
-bottom-left origin.
+image-coordinate tools (including QuPath and hyperannotatR itself);
+reach for it only when a downstream consumer explicitly wants a
+cartesian, bottom-left origin.
 
 ## QuPath
 
 QuPath reads and writes its own GeoJSON dialect. By default
-[`at_write_qupath()`](https://cttir.github.io/annotatR/reference/at_write_qupath.md)
+[`at_write_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_write_qupath.md)
 writes the form QuPath 0.4 and later read natively, checked against a
 real QuPath 0.7.0 installation: `objectType` (`annotation`, or
 `detection` for mask-derived ROIs), a `classification` with its `name`
 (or the `names` of a derived class such as `"Tumor: Positive"`) and an
 `[r, g, b]` `color`, and `isLocked` for locked ROIs. QuPath silently
 replaces feature ids that are not UUIDs, so each ROI gets a
-deterministic UUID and annotatR’s own id, layer, source and level travel
-in `properties.metadata`.
-[`at_read_qupath()`](https://cttir.github.io/annotatR/reference/at_read_qupath.md)
+deterministic UUID and hyperannotatR’s own id, layer, source and level
+travel in `properties.metadata`.
+[`at_read_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_read_qupath.md)
 restores labels, colours and those ids, and keeps everything else QuPath
 carries under `attributes$qupath`: object type, measurements with
 explicit `NaN`/infinity states, image planes, cell nuclei, and a flag on
@@ -152,15 +152,16 @@ str(feature$properties[c("objectType", "classification", "metadata")], max.level
 
 ### The colour gotcha
 
-Older QuPath versions, and annotatR 0.1, stored a classification colour
-as a **signed** 32-bit `colorRGB` integer packed as `0xFFRRGGBB`. The
-`0xFF` alpha byte pushes most colours past `2^31`, so they wrap around
-to negative values: the grey `#999999` serialises as `-6710887`.
-annotatR still reads that form and writes it with `dialect = "legacy"`;
-the modular arithmetic is handled in both directions. QuPath keeps a
-single colour per classification name, so identical labels with
-different layer colours collapse to the first colour it sees. Reading
-the file back recovers the hex colours onto the layer style:
+Older QuPath versions, and hyperannotatR 0.1, stored a classification
+colour as a **signed** 32-bit `colorRGB` integer packed as `0xFFRRGGBB`.
+The `0xFF` alpha byte pushes most colours past `2^31`, so they wrap
+around to negative values: the grey `#999999` serialises as `-6710887`.
+hyperannotatR still reads that form and writes it with
+`dialect = "legacy"`; the modular arithmetic is handled in both
+directions. QuPath keeps a single colour per classification name, so
+identical labels with different layer colours collapse to the first
+colour it sees. Reading the file back recovers the hex colours onto the
+layer style:
 
 ``` r
 
@@ -174,7 +175,7 @@ lyr$style$colour
 
 For pixel-level pipelines the exchange currency is a raster mask, not a
 polygon.
-[`at_write_mask()`](https://cttir.github.io/annotatR/reference/at_write_mask.md)
+[`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md)
 writes an integer TIFF alongside a self-describing `<path>.legend.json`
 sidecar that records the mask type, level, dimensions, and one entry per
 class (`value`, `label`, `layer`, `roi_id`, `n_px`, `colour`). The
@@ -193,7 +194,7 @@ at_write_mask(m, mp)
 cat(readLines(paste0(mp, ".legend.json"))[1:14], sep = "\n")
 #> {
 #>   "annotatR_version": "0.2.0",
-#>   "created": "2026-10-14T12:44:10+0000",
+#>   "created": "2026-10-19T05:51:42+0000",
 #>   "mask_type": "labelled",
 #>   "level": 0,
 #>   "dims": [512, 512],
@@ -232,10 +233,10 @@ for value, label in labels.items():
 ## CSV and WKT
 
 For spreadsheet users and pipelines that would rather not parse JSON,
-[`at_write_rois_csv()`](https://cttir.github.io/annotatR/reference/at_write_rois_csv.md)
+[`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)
 produces one row per ROI with the geometry in a Well-Known Text
 `geometry` column, plus the metadata fields.
-[`at_read_rois_csv()`](https://cttir.github.io/annotatR/reference/at_read_rois_csv.md)
+[`at_read_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.md)
 parses any CSV with at least `label` and `geometry` columns back into a
 layer.
 

@@ -42,9 +42,9 @@ at_training_export(
 - x:
 
   An
-  [annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+  [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   (materialised entries) or
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - destination:
 
@@ -127,23 +127,23 @@ at_training_export(
 
 An `at_training_export` list: `destination`, `dataset_digest`,
 `manifest`, `files` and `checks` (from
-[`at_training_check()`](https://cttir.github.io/annotatR/reference/at_training_check.md)).
+[`at_training_check()`](https://cttir.github.io/hyperannotatR/reference/at_training_check.md)).
 
 ## Details
 
 `mask_type` uses training terminology: `"labelled"` is a semantic
-class-code mask (annotatR `"multiclass"`), `"instance"` has one id per
-ROI (annotatR `"labelled"`), `"binary"` marks foreground. The mapping is
-recorded in the manifest.
+class-code mask (hyperannotatR `"multiclass"`), `"instance"` has one id
+per ROI (hyperannotatR `"labelled"`), `"binary"` marks foreground. The
+mapping is recorded in the manifest.
 
 ## See also
 
-[`at_training_check()`](https://cttir.github.io/annotatR/reference/at_training_check.md),
-[`at_training_import()`](https://cttir.github.io/annotatR/reference/at_training_import.md)
+[`at_training_check()`](https://cttir.github.io/hyperannotatR/reference/at_training_check.md),
+[`at_training_import()`](https://cttir.github.io/hyperannotatR/reference/at_training_import.md)
 
 Other training:
-[`at_training_check()`](https://cttir.github.io/annotatR/reference/at_training_check.md),
-[`at_training_import()`](https://cttir.github.io/annotatR/reference/at_training_import.md)
+[`at_training_check()`](https://cttir.github.io/hyperannotatR/reference/at_training_check.md),
+[`at_training_import()`](https://cttir.github.io/hyperannotatR/reference/at_training_import.md)
 
 ## Examples
 

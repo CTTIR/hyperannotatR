@@ -1,7 +1,7 @@
 # Commit a staged partner patch
 
 Apply an
-[`at_stage_qupflowr()`](https://cttir.github.io/annotatR/reference/at_stage_qupflowr.md)
+[`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
 patch. Conflicting operations are never applied. The commit is
 idempotent: repeating it with the same `idempotency_key` and the same
 patch returns the original receipt without applying anything again,
@@ -56,15 +56,15 @@ An `at_commit_receipt`: a list with `state = "committed"`, `patch_id`,
 
 ## See also
 
-[`at_stage_qupflowr()`](https://cttir.github.io/annotatR/reference/at_stage_qupflowr.md)
+[`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
 
 Other interop:
-[`at_annotation_revision()`](https://cttir.github.io/annotatR/reference/at_annotation_revision.md),
-[`at_export_qupflowr()`](https://cttir.github.io/annotatR/reference/at_export_qupflowr.md),
-[`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md),
-[`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md),
-[`at_interop_manifest()`](https://cttir.github.io/annotatR/reference/at_interop_manifest.md),
-[`at_stage_qupflowr()`](https://cttir.github.io/annotatR/reference/at_stage_qupflowr.md)
+[`at_annotation_revision()`](https://cttir.github.io/hyperannotatR/reference/at_annotation_revision.md),
+[`at_export_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_export_qupflowr.md),
+[`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md),
+[`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md),
+[`at_interop_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.md),
+[`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
 
 ## Examples
 

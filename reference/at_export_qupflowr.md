@@ -5,9 +5,9 @@ as qupflowR. It contains only neutral, relative files: `image.json`,
 `annotations_qupath.geojson` (QuPath 0.4+ dialect), optionally
 `annotations.geojson`, one integer mask per layer under `masks/` with a
 `.legend.json` sidecar, optional `tables/rois.csv`, an optional
-annotatR-internal `objects/project.rds`, `hsi_manifest.json` for
+hyperannotatR-internal `objects/project.rds`, `hsi_manifest.json` for
 spectral images, `manifest.json`
-([`at_interop_manifest()`](https://cttir.github.io/annotatR/reference/at_interop_manifest.md))
+([`at_interop_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.md))
 and `integrity.json`, the SHA-256 inventory of every other file. The
 handoff digest is the SHA-256 of the canonical `integrity.json`.
 Absolute paths are never used as identity.
@@ -32,9 +32,9 @@ at_export_qupflowr(
 - x:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   or
-  [annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+  [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   (materialised entries are exported under `entries/entry-NNNN/`).
 
 - destination:
@@ -86,16 +86,16 @@ that looks valid. An existing destination is replaced only with
 
 ## See also
 
-[`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md),
-[`at_interop_manifest()`](https://cttir.github.io/annotatR/reference/at_interop_manifest.md)
+[`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md),
+[`at_interop_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.md)
 
 Other interop:
-[`at_annotation_revision()`](https://cttir.github.io/annotatR/reference/at_annotation_revision.md),
-[`at_commit_qupflowr()`](https://cttir.github.io/annotatR/reference/at_commit_qupflowr.md),
-[`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md),
-[`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md),
-[`at_interop_manifest()`](https://cttir.github.io/annotatR/reference/at_interop_manifest.md),
-[`at_stage_qupflowr()`](https://cttir.github.io/annotatR/reference/at_stage_qupflowr.md)
+[`at_annotation_revision()`](https://cttir.github.io/hyperannotatR/reference/at_annotation_revision.md),
+[`at_commit_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.md),
+[`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md),
+[`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md),
+[`at_interop_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.md),
+[`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
 
 ## Examples
 
@@ -106,7 +106,7 @@ rc <- at_export_qupflowr(at_example_project(), dest, overwrite = TRUE)
 #>   method                  from
 #>   st_interpolate_aw.stars sf  
 rc$handoff_digest
-#> [1] "d60fe53819cff3147432ee4622131d4b2261599b908a5694e3202f41ad4b662b"
+#> [1] "f4fe99fc7a20bacca4c827263df7924494ebe741f668a7c3ba579e0f49d5cee3"
 rc$files[, c("path", "format")]
 #> # A tibble: 5 × 2
 #>   path                                   format        

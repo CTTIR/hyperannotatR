@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>The annotation model • annotatR</title>
+<title>The annotation model • hyperannotatR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -27,7 +27,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">annotatR</a>
+    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
@@ -45,7 +45,7 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/annotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/hyperannotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
@@ -69,15 +69,15 @@
       <img src="../logo.svg" class="logo" alt=""><h1>The annotation model</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/CTTIR/annotatR/blob/main/vignettes/annotation-model.Rmd" class="external-link"><code>vignettes/annotation-model.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CTTIR/hyperannotatR/blob/main/vignettes/annotation-model.Rmd" class="external-link"><code>vignettes/annotation-model.Rmd</code></a></small>
       <div class="d-none name"><code>annotation-model.Rmd</code></div>
     </div>
 
     
     
-<p><img src="../reference/figures/logo.png" class="r-plt" alt="annotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
-<p>annotatR represents an annotation as a small hierarchy of plain R
-objects, each a validated layer built on the one below. This vignette
+<p><img src="../reference/figures/logo.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<p>hyperannotatR represents an annotation as a small hierarchy of plain
+R objects, each a validated layer built on the one below. This vignette
 describes that model: the pixel coordinate system every object shares,
 the four nested classes, how geometric validity is checked and repaired,
 and how coordinates move between pyramid levels. These few conventions
@@ -85,13 +85,14 @@ are enough to use the rest of the package with confidence.</p>
 <div class="section level2">
 <h2 id="the-coordinate-system">The coordinate system<a class="anchor" aria-label="anchor" href="#the-coordinate-system"></a>
 </h2>
-<p>Every coordinate in annotatR is an image pixel coordinate. The origin
-sits at the top-left corner of the image, <code>x</code> increases to
-the right, and <code>y</code> increases <em>downward</em> – the raster
-convention used by cameras, microscopes, and most image libraries. This
-is the mirror image of the GIS convention, in which <code>y</code>
-increases upward. When exchanging geometry with GIS-oriented tooling,
-flip at the boundary with <code><a href="../reference/at_flip_y.html">at_flip_y()</a></code>.</p>
+<p>Every coordinate in hyperannotatR is an image pixel coordinate. The
+origin sits at the top-left corner of the image, <code>x</code>
+increases to the right, and <code>y</code> increases <em>downward</em> –
+the raster convention used by cameras, microscopes, and most image
+libraries. This is the mirror image of the GIS convention, in which
+<code>y</code> increases upward. When exchanging geometry with
+GIS-oriented tooling, flip at the boundary with
+<code><a href="../reference/at_flip_y.html">at_flip_y()</a></code>.</p>
 <p>A pixel is a unit cell, not a point. Pixel <code>(i, j)</code> – row
 <code>i</code>, column <code>j</code>, both one-based – covers the
 half-open square <code>[j-1, j) x [i-1, i)</code>, so its centre lies at
@@ -190,7 +191,7 @@ the result is topologically invalid, <code><a href="https://r-spatial.github.io/
 applied with a warning. ROIs you build in R are therefore valid by
 construction. Geometry that arrives from elsewhere – imported GeoJSON, a
 QuPath project, a hand-edited file – carries no such guarantee, so
-annotatR offers an explicit audit.</p>
+hyperannotatR offers an explicit audit.</p>
 <p><code><a href="../reference/at_check_geometry.html">at_check_geometry()</a></code> reports one row per problem across
 the whole project: self-intersections, zero-area or degenerate rings,
 duplicate vertices, reversed hole winding, <code>NA</code> coordinates,
@@ -269,7 +270,7 @@ binary, labelled, and multi-class integer masks.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">
-  <p><span class="themakr-footer-pkg">annotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
+  <p><span class="themakr-footer-pkg">hyperannotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
 </div>
 
 <div class="pkgdown-footer-right">

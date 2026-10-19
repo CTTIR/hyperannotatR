@@ -3,7 +3,7 @@
 Read a NumPy integer array (e.g. a ground-truth annotation mask) into a
 lossless `annot_mask` – values are preserved exactly, including
 composite bitfield codes. Use this (not
-[`at_read_mask()`](https://cttir.github.io/annotatR/reference/at_read_mask.md),
+[`at_read_mask()`](https://cttir.github.io/hyperannotatR/reference/at_read_mask.md),
 which polygonises) when the raw integer matrix is what you need, for
 example to derive a training mask or compute agreement against another
 mask.
@@ -34,8 +34,8 @@ at_read_npy(
 
   Logical; transpose the array on read, for files stored in the native
   cube order `(width, height)` = `[x, y]` (e.g. TIVITA/HyperGui masks)
-  so the result lands in annotatR's `[y, x]` convention. Default `FALSE`
-  assumes the standard image convention `(height, width)`.
+  so the result lands in hyperannotatR's `[y, x]` convention. Default
+  `FALSE` assumes the standard image convention `(height, width)`.
 
 - legend:
 
@@ -52,22 +52,22 @@ An `annot_mask`.
 
 ## See also
 
-[`at_write_npy()`](https://cttir.github.io/annotatR/reference/at_write_npy.md),
-[`at_read_mask()`](https://cttir.github.io/annotatR/reference/at_read_mask.md)
+[`at_write_npy()`](https://cttir.github.io/hyperannotatR/reference/at_write_npy.md),
+[`at_read_mask()`](https://cttir.github.io/hyperannotatR/reference/at_read_mask.md)
 
 Other masks:
-[`at_mask()`](https://cttir.github.io/annotatR/reference/at_mask.md),
-[`at_mask_agreement()`](https://cttir.github.io/annotatR/reference/at_mask_agreement.md),
-[`at_mask_boundary()`](https://cttir.github.io/annotatR/reference/at_mask_boundary.md),
-[`at_mask_derive()`](https://cttir.github.io/annotatR/reference/at_mask_derive.md),
-[`at_mask_legend()`](https://cttir.github.io/annotatR/reference/at_mask_legend.md),
-[`at_mask_preview()`](https://cttir.github.io/annotatR/reference/at_mask_preview.md),
-[`at_mask_stack()`](https://cttir.github.io/annotatR/reference/at_mask_stack.md),
-[`at_mask_stats()`](https://cttir.github.io/annotatR/reference/at_mask_stats.md),
-[`at_read_mask()`](https://cttir.github.io/annotatR/reference/at_read_mask.md),
-[`at_write_mask()`](https://cttir.github.io/annotatR/reference/at_write_mask.md),
-[`at_write_masks()`](https://cttir.github.io/annotatR/reference/at_write_masks.md),
-[`at_write_npy()`](https://cttir.github.io/annotatR/reference/at_write_npy.md)
+[`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md),
+[`at_mask_agreement()`](https://cttir.github.io/hyperannotatR/reference/at_mask_agreement.md),
+[`at_mask_boundary()`](https://cttir.github.io/hyperannotatR/reference/at_mask_boundary.md),
+[`at_mask_derive()`](https://cttir.github.io/hyperannotatR/reference/at_mask_derive.md),
+[`at_mask_legend()`](https://cttir.github.io/hyperannotatR/reference/at_mask_legend.md),
+[`at_mask_preview()`](https://cttir.github.io/hyperannotatR/reference/at_mask_preview.md),
+[`at_mask_stack()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stack.md),
+[`at_mask_stats()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stats.md),
+[`at_read_mask()`](https://cttir.github.io/hyperannotatR/reference/at_read_mask.md),
+[`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md),
+[`at_write_masks()`](https://cttir.github.io/hyperannotatR/reference/at_write_masks.md),
+[`at_write_npy()`](https://cttir.github.io/hyperannotatR/reference/at_write_npy.md)
 
 ## Examples
 

@@ -13,7 +13,7 @@ at_mask_stack(project, layers = NULL, level = 0L, call = rlang::caller_env())
 - project:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - layers:
 
@@ -35,15 +35,15 @@ third dimension is named by layer.
 ## See also
 
 Other masks:
-[`at_mask()`](https://cttir.github.io/annotatR/reference/at_mask.md),
-[`at_mask_agreement()`](https://cttir.github.io/annotatR/reference/at_mask_agreement.md),
-[`at_mask_boundary()`](https://cttir.github.io/annotatR/reference/at_mask_boundary.md),
-[`at_mask_derive()`](https://cttir.github.io/annotatR/reference/at_mask_derive.md),
-[`at_mask_legend()`](https://cttir.github.io/annotatR/reference/at_mask_legend.md),
-[`at_mask_preview()`](https://cttir.github.io/annotatR/reference/at_mask_preview.md),
-[`at_mask_stats()`](https://cttir.github.io/annotatR/reference/at_mask_stats.md),
-[`at_read_mask()`](https://cttir.github.io/annotatR/reference/at_read_mask.md),
-[`at_read_npy()`](https://cttir.github.io/annotatR/reference/at_read_npy.md),
-[`at_write_mask()`](https://cttir.github.io/annotatR/reference/at_write_mask.md),
-[`at_write_masks()`](https://cttir.github.io/annotatR/reference/at_write_masks.md),
-[`at_write_npy()`](https://cttir.github.io/annotatR/reference/at_write_npy.md)
+[`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md),
+[`at_mask_agreement()`](https://cttir.github.io/hyperannotatR/reference/at_mask_agreement.md),
+[`at_mask_boundary()`](https://cttir.github.io/hyperannotatR/reference/at_mask_boundary.md),
+[`at_mask_derive()`](https://cttir.github.io/hyperannotatR/reference/at_mask_derive.md),
+[`at_mask_legend()`](https://cttir.github.io/hyperannotatR/reference/at_mask_legend.md),
+[`at_mask_preview()`](https://cttir.github.io/hyperannotatR/reference/at_mask_preview.md),
+[`at_mask_stats()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stats.md),
+[`at_read_mask()`](https://cttir.github.io/hyperannotatR/reference/at_read_mask.md),
+[`at_read_npy()`](https://cttir.github.io/hyperannotatR/reference/at_read_npy.md),
+[`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md),
+[`at_write_masks()`](https://cttir.github.io/hyperannotatR/reference/at_write_masks.md),
+[`at_write_npy()`](https://cttir.github.io/hyperannotatR/reference/at_write_npy.md)

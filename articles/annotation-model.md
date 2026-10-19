@@ -1,8 +1,8 @@
 # The annotation model
 
-![annotatR logo](../reference/figures/logo.png)
+![hyperannotatR logo](../reference/figures/logo.png)
 
-annotatR represents an annotation as a small hierarchy of plain R
+hyperannotatR represents an annotation as a small hierarchy of plain R
 objects, each a validated layer built on the one below. This vignette
 describes that model: the pixel coordinate system every object shares,
 the four nested classes, how geometric validity is checked and repaired,
@@ -11,13 +11,13 @@ are enough to use the rest of the package with confidence.
 
 ## The coordinate system
 
-Every coordinate in annotatR is an image pixel coordinate. The origin
-sits at the top-left corner of the image, `x` increases to the right,
-and `y` increases *downward* – the raster convention used by cameras,
-microscopes, and most image libraries. This is the mirror image of the
-GIS convention, in which `y` increases upward. When exchanging geometry
-with GIS-oriented tooling, flip at the boundary with
-[`at_flip_y()`](https://cttir.github.io/annotatR/reference/at_flip_y.md).
+Every coordinate in hyperannotatR is an image pixel coordinate. The
+origin sits at the top-left corner of the image, `x` increases to the
+right, and `y` increases *downward* – the raster convention used by
+cameras, microscopes, and most image libraries. This is the mirror image
+of the GIS convention, in which `y` increases upward. When exchanging
+geometry with GIS-oriented tooling, flip at the boundary with
+[`at_flip_y()`](https://cttir.github.io/hyperannotatR/reference/at_flip_y.md).
 
 A pixel is a unit cell, not a point. Pixel `(i, j)` – row `i`, column
 `j`, both one-based – covers the half-open square `[j-1, j) x [i-1, i)`,
@@ -90,7 +90,7 @@ regions
 An **`annot_project`** binds one image to a named set of layers and
 records provenance. It is the object you query, validate, rasterise, and
 export.
-[`at_rois()`](https://cttir.github.io/annotatR/reference/at_rois.md)
+[`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md)
 returns a tidy table in which coordinates, areas, and centroids are
 expressed at level 0, while the `level` column preserves where each ROI
 was originally defined.
@@ -136,9 +136,9 @@ result is topologically invalid,
 is applied with a warning. ROIs you build in R are therefore valid by
 construction. Geometry that arrives from elsewhere – imported GeoJSON, a
 QuPath project, a hand-edited file – carries no such guarantee, so
-annotatR offers an explicit audit.
+hyperannotatR offers an explicit audit.
 
-[`at_check_geometry()`](https://cttir.github.io/annotatR/reference/at_check_geometry.md)
+[`at_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_check_geometry.md)
 reports one row per problem across the whole project:
 self-intersections, zero-area or degenerate rings, duplicate vertices,
 reversed hole winding, `NA` coordinates, and vertices outside the image
@@ -162,11 +162,11 @@ at_check_geometry(proj)
 #> 2 roi_000000005 duplicate_vertices warning  TRUE
 ```
 
-[`at_fix_geometry()`](https://cttir.github.io/annotatR/reference/at_fix_geometry.md)
+[`at_fix_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_fix_geometry.md)
 repairs what it can – here the duplicate vertices – and reports the
 rest. Out-of-bounds vertices are a boundary advisory rather than a
 topological fault, so they are left untouched; clip them with
-[`at_clamp()`](https://cttir.github.io/annotatR/reference/at_clamp.md)
+[`at_clamp()`](https://cttir.github.io/hyperannotatR/reference/at_clamp.md)
 when you want the geometry confined to the image.
 
 ``` r
@@ -188,7 +188,7 @@ pixels. Keeping the declared level makes every coordinate unambiguous
 and every transform reversible.
 
 Two functions move coordinates between levels.
-[`at_roi_rescale()`](https://cttir.github.io/annotatR/reference/at_roi_rescale.md)
+[`at_roi_rescale()`](https://cttir.github.io/hyperannotatR/reference/at_roi_rescale.md)
 assumes an exact power-of-two pyramid and needs no image: going from
 level 0 to level 2 divides coordinates by four.
 
@@ -200,7 +200,7 @@ at_roi_bbox(r2)
 #> [1]  0  0 25 25
 ```
 
-[`at_transform()`](https://cttir.github.io/annotatR/reference/at_transform.md)
+[`at_transform()`](https://cttir.github.io/hyperannotatR/reference/at_transform.md)
 instead uses the real per-level dimensions of an image, so it is exact
 for pyramids with any downsampling ratio. For the bundled multiplex
 example, whose levels measure 512, 256, and 128 pixels, the two

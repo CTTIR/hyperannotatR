@@ -17,7 +17,7 @@ at_summary_table(
 - session:
 
   An
-  [annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - by:
 
@@ -36,6 +36,6 @@ with the grouping key plus `n_rois`, `total_area_px`, `mean_area`, and
 ## See also
 
 Other batch:
-[`at_batch_apply()`](https://cttir.github.io/annotatR/reference/at_batch_apply.md),
-[`at_batch_check_geometry()`](https://cttir.github.io/annotatR/reference/at_batch_check_geometry.md),
-[`at_export_all()`](https://cttir.github.io/annotatR/reference/at_export_all.md)
+[`at_batch_apply()`](https://cttir.github.io/hyperannotatR/reference/at_batch_apply.md),
+[`at_batch_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_batch_check_geometry.md),
+[`at_export_all()`](https://cttir.github.io/hyperannotatR/reference/at_export_all.md)

@@ -13,7 +13,7 @@ at_layer_remove(layer, id, call = rlang::caller_env())
 - layer:
 
   An
-  [annot_layer](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - id:
 
@@ -26,15 +26,15 @@ at_layer_remove(layer, id, call = rlang::caller_env())
 ## Value
 
 A new
-[annot_layer](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+[annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 without the identified ROI. Warns if the ROI is not present and returns
 the layer unchanged.
 
 ## See also
 
 Other layers:
-[`at_layer()`](https://cttir.github.io/annotatR/reference/at_layer.md),
-[`at_layer_add()`](https://cttir.github.io/annotatR/reference/at_layer_add.md),
-[`at_layer_n()`](https://cttir.github.io/annotatR/reference/at_layer_n.md),
-[`at_layer_rois()`](https://cttir.github.io/annotatR/reference/at_layer_rois.md),
-[`at_style()`](https://cttir.github.io/annotatR/reference/at_style.md)
+[`at_layer()`](https://cttir.github.io/hyperannotatR/reference/at_layer.md),
+[`at_layer_add()`](https://cttir.github.io/hyperannotatR/reference/at_layer_add.md),
+[`at_layer_n()`](https://cttir.github.io/hyperannotatR/reference/at_layer_n.md),
+[`at_layer_rois()`](https://cttir.github.io/hyperannotatR/reference/at_layer_rois.md),
+[`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)

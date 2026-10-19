@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Interoperability • annotatR</title>
+<title>Interoperability • hyperannotatR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -27,7 +27,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">annotatR</a>
+    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
@@ -45,7 +45,7 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/annotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/hyperannotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
@@ -69,15 +69,15 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Interoperability</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/CTTIR/annotatR/blob/main/vignettes/interop.Rmd" class="external-link"><code>vignettes/interop.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CTTIR/hyperannotatR/blob/main/vignettes/interop.Rmd" class="external-link"><code>vignettes/interop.Rmd</code></a></small>
       <div class="d-none name"><code>interop.Rmd</code></div>
     </div>
 
     
     
-<p><img src="../reference/figures/logo.png" class="r-plt" alt="annotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<p><img src="../reference/figures/logo.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
 <p>Annotations are only useful if they can leave the tool that made
-them. annotatR stores every region of interest as a validated
+them. hyperannotatR stores every region of interest as a validated
 simple-feature geometry in image pixel coordinates, with an explicit
 pyramid level attached, which makes it straightforward to hand work off
 to a viewer such as QuPath, to a GIS-flavoured GeoJSON consumer, or to a
@@ -107,7 +107,7 @@ rectangles on a small tissue raster.</p>
 <p><code><a href="../reference/at_write_geojson.html">at_write_geojson()</a></code> serialises a project to a standard
 <code>FeatureCollection</code>. Each ROI becomes one
 <code>Feature</code> whose <code>geometry</code> is the pixel-coordinate
-polygon and whose <code>properties</code> carry the full annotatR
+polygon and whose <code>properties</code> carry the full hyperannotatR
 schema: <code>roi_id</code>, <code>layer</code>, <code>label</code>,
 <code>level</code>, <code>author</code>, <code>created</code>,
 <code>modified</code>, <code>source</code>, the writing
@@ -154,12 +154,12 @@ original image and check that the labels came through intact.</p>
 <div class="section level3">
 <h3 id="the-flip_y-option">The <code>flip_y</code> option<a class="anchor" aria-label="anchor" href="#the-flip_y-option"></a>
 </h3>
-<p>annotatR’s convention is image orientation: the origin is top-left
-and <em>y</em> increases downward. Many GIS tools instead expect
-<em>y</em> to increase upward. Set <code>flip_y = TRUE</code> to write
-coordinates in that upward convention; the y-axis is mirrored about the
-image height. If you write flipped, you must read flipped, supplying the
-same <code>height</code> so the inversion is undone:</p>
+<p>hyperannotatR’s convention is image orientation: the origin is
+top-left and <em>y</em> increases downward. Many GIS tools instead
+expect <em>y</em> to increase upward. Set <code>flip_y = TRUE</code> to
+write coordinates in that upward convention; the y-axis is mirrored
+about the image height. If you write flipped, you must read flipped,
+supplying the same <code>height</code> so the inversion is undone:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">h</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_dims.html">at_dims</a></span><span class="op">(</span><span class="va">proj</span><span class="op">$</span><span class="va">image</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span>
 <span><span class="va">gj_flip</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".geojson"</span><span class="op">)</span></span>
@@ -170,7 +170,7 @@ same <code>height</code> so the inversion is undone:</p>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 <p>Leave <code>flip_y</code> at its default <code>FALSE</code> when
 exchanging with other image-coordinate tools (including QuPath and
-annotatR itself); reach for it only when a downstream consumer
+hyperannotatR itself); reach for it only when a downstream consumer
 explicitly wants a cartesian, bottom-left origin.</p>
 </div>
 </div>
@@ -187,14 +187,15 @@ natively, checked against a real QuPath 0.7.0 installation:
 <code>"Tumor: Positive"</code>) and an <code>[r, g, b]</code>
 <code>color</code>, and <code>isLocked</code> for locked ROIs. QuPath
 silently replaces feature ids that are not UUIDs, so each ROI gets a
-deterministic UUID and annotatR’s own id, layer, source and level travel
-in <code>properties.metadata</code>. <code><a href="../reference/at_read_qupath.html">at_read_qupath()</a></code>
-restores labels, colours and those ids, and keeps everything else QuPath
-carries under <code>attributes$qupath</code>: object type, measurements
-with explicit <code>NaN</code>/infinity states, image planes, cell
-nuclei, and a flag on ellipses that QuPath exported as polygons.
-Features without a classification are imported as
-<code>"unclassified"</code> rather than dropped.</p>
+deterministic UUID and hyperannotatR’s own id, layer, source and level
+travel in <code>properties.metadata</code>.
+<code><a href="../reference/at_read_qupath.html">at_read_qupath()</a></code> restores labels, colours and those ids,
+and keeps everything else QuPath carries under
+<code>attributes$qupath</code>: object type, measurements with explicit
+<code>NaN</code>/infinity states, image planes, cell nuclei, and a flag
+on ellipses that QuPath exported as polygons. Features without a
+classification are imported as <code>"unclassified"</code> rather than
+dropped.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">qp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".geojson"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/at_write_qupath.html">at_write_qupath</a></span><span class="op">(</span><span class="va">proj</span>, <span class="va">qp</span><span class="op">)</span></span>
@@ -213,17 +214,17 @@ Features without a classification are imported as
 <div class="section level3">
 <h3 id="the-colour-gotcha">The colour gotcha<a class="anchor" aria-label="anchor" href="#the-colour-gotcha"></a>
 </h3>
-<p>Older QuPath versions, and annotatR 0.1, stored a classification
+<p>Older QuPath versions, and hyperannotatR 0.1, stored a classification
 colour as a <strong>signed</strong> 32-bit <code>colorRGB</code> integer
 packed as <code>0xFFRRGGBB</code>. The <code>0xFF</code> alpha byte
 pushes most colours past <code>2^31</code>, so they wrap around to
 negative values: the grey <code>#999999</code> serialises as
-<code>-6710887</code>. annotatR still reads that form and writes it with
-<code>dialect = "legacy"</code>; the modular arithmetic is handled in
-both directions. QuPath keeps a single colour per classification name,
-so identical labels with different layer colours collapse to the first
-colour it sees. Reading the file back recovers the hex colours onto the
-layer style:</p>
+<code>-6710887</code>. hyperannotatR still reads that form and writes it
+with <code>dialect = "legacy"</code>; the modular arithmetic is handled
+in both directions. QuPath keeps a single colour per classification
+name, so identical labels with different layer colours collapse to the
+first colour it sees. Reading the file back recovers the hex colours
+onto the layer style:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">lyr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_read_qupath.html">at_read_qupath</a></span><span class="op">(</span><span class="va">qp</span><span class="op">)</span></span>
 <span><span class="va">lyr</span><span class="op">$</span><span class="va">style</span><span class="op">$</span><span class="va">colour</span></span>
@@ -253,7 +254,7 @@ class, and it travels with the raster so the mapping is never lost.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">mp</span>, <span class="st">".legend.json"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">14</span><span class="op">]</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; {</span></span>
 <span><span class="co">#&gt;   "annotatR_version": "0.2.0",</span></span>
-<span><span class="co">#&gt;   "created": "2026-10-14T12:44:10+0000",</span></span>
+<span><span class="co">#&gt;   "created": "2026-10-19T05:51:42+0000",</span></span>
 <span><span class="co">#&gt;   "mask_type": "labelled",</span></span>
 <span><span class="co">#&gt;   "level": 0,</span></span>
 <span><span class="co">#&gt;   "dims": [512, 512],</span></span>
@@ -321,7 +322,7 @@ index on the package website.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">
-  <p><span class="themakr-footer-pkg">annotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
+  <p><span class="themakr-footer-pkg">hyperannotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
 </div>
 
 <div class="pkgdown-footer-right">

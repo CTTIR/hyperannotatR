@@ -1,6 +1,6 @@
 # Control protocol capabilities
 
-Describe the `annotatr-control-v1` protocol this annotatR version
+Describe the `annotatr-control-v1` protocol this hyperannotatR version
 speaks, without starting anything: endpoints, typed operations, limits,
 security rules and the digests of the shipped JSON Schemas. A client
 compares this (or the `/v1/handshake` response) with its own
@@ -16,24 +16,24 @@ at_control_capabilities()
 
 A list with `protocol`, `protocol_version`, `annotatr_version`, `status`
 (see
-[`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md)),
+[`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md)),
 `endpoints`, `operations`, `limits`, `security`, `schemas` (file name
 -\> SHA-256) and `digest`.
 
 ## See also
 
-[`at_control_start()`](https://cttir.github.io/annotatR/reference/at_control_start.md),
-[`at_control_command()`](https://cttir.github.io/annotatR/reference/at_control_command.md)
+[`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
+[`at_control_command()`](https://cttir.github.io/hyperannotatR/reference/at_control_command.md)
 
 Other control:
-[`at_control_close()`](https://cttir.github.io/annotatR/reference/at_control_close.md),
-[`at_control_command()`](https://cttir.github.io/annotatR/reference/at_control_command.md),
-[`at_control_connect()`](https://cttir.github.io/annotatR/reference/at_control_connect.md),
-[`at_control_events()`](https://cttir.github.io/annotatR/reference/at_control_events.md),
-[`at_control_request_status()`](https://cttir.github.io/annotatR/reference/at_control_request_status.md),
-[`at_control_start()`](https://cttir.github.io/annotatR/reference/at_control_start.md),
-[`at_control_state()`](https://cttir.github.io/annotatR/reference/at_control_state.md),
-[`at_control_stop()`](https://cttir.github.io/annotatR/reference/at_control_stop.md)
+[`at_control_close()`](https://cttir.github.io/hyperannotatR/reference/at_control_close.md),
+[`at_control_command()`](https://cttir.github.io/hyperannotatR/reference/at_control_command.md),
+[`at_control_connect()`](https://cttir.github.io/hyperannotatR/reference/at_control_connect.md),
+[`at_control_events()`](https://cttir.github.io/hyperannotatR/reference/at_control_events.md),
+[`at_control_request_status()`](https://cttir.github.io/hyperannotatR/reference/at_control_request_status.md),
+[`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
+[`at_control_state()`](https://cttir.github.io/hyperannotatR/reference/at_control_state.md),
+[`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md)
 
 ## Examples
 

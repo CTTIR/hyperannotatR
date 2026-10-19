@@ -13,7 +13,7 @@ at_add_roi(project, layer, roi, call = rlang::caller_env())
 - project:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - layer:
 
@@ -22,7 +22,7 @@ at_add_roi(project, layer, roi, call = rlang::caller_env())
 - roi:
 
   An
-  [annot_roi](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - call:
 
@@ -31,19 +31,19 @@ at_add_roi(project, layer, roi, call = rlang::caller_env())
 ## Value
 
 A new
-[annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+[annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 with the ROI added to the layer. A colliding ROI identifier is re-minted
 to keep identifiers unique across the project. The input is unchanged.
 
 ## See also
 
 Other projects:
-[`at_add_layer()`](https://cttir.github.io/annotatR/reference/at_add_layer.md),
-[`at_example_project()`](https://cttir.github.io/annotatR/reference/at_example_project.md),
-[`at_layers()`](https://cttir.github.io/annotatR/reference/at_layers.md),
-[`at_project()`](https://cttir.github.io/annotatR/reference/at_project.md),
-[`at_remove_layer()`](https://cttir.github.io/annotatR/reference/at_remove_layer.md),
-[`at_remove_roi()`](https://cttir.github.io/annotatR/reference/at_remove_roi.md),
-[`at_rois()`](https://cttir.github.io/annotatR/reference/at_rois.md),
-[`at_summary()`](https://cttir.github.io/annotatR/reference/at_summary.md),
-[`at_validate()`](https://cttir.github.io/annotatR/reference/at_validate.md)
+[`at_add_layer()`](https://cttir.github.io/hyperannotatR/reference/at_add_layer.md),
+[`at_example_project()`](https://cttir.github.io/hyperannotatR/reference/at_example_project.md),
+[`at_layers()`](https://cttir.github.io/hyperannotatR/reference/at_layers.md),
+[`at_project()`](https://cttir.github.io/hyperannotatR/reference/at_project.md),
+[`at_remove_layer()`](https://cttir.github.io/hyperannotatR/reference/at_remove_layer.md),
+[`at_remove_roi()`](https://cttir.github.io/hyperannotatR/reference/at_remove_roi.md),
+[`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md),
+[`at_summary()`](https://cttir.github.io/hyperannotatR/reference/at_summary.md),
+[`at_validate()`](https://cttir.github.io/hyperannotatR/reference/at_validate.md)

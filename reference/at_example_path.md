@@ -28,13 +28,13 @@ A single string file path to the example asset.
 ## See also
 
 Other example data:
-[`at_example_image()`](https://cttir.github.io/annotatR/reference/at_example_image.md),
-[`at_example_project()`](https://cttir.github.io/annotatR/reference/at_example_project.md),
-[`at_example_session()`](https://cttir.github.io/annotatR/reference/at_example_session.md)
+[`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md),
+[`at_example_project()`](https://cttir.github.io/hyperannotatR/reference/at_example_project.md),
+[`at_example_session()`](https://cttir.github.io/hyperannotatR/reference/at_example_session.md)
 
 ## Examples
 
 ``` r
 at_example_path("tissue")
-#> [1] "/home/runner/work/_temp/Library/annotatR/extdata/example_tissue.png"
+#> [1] "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png"
 ```

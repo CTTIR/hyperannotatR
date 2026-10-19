@@ -1,27 +1,35 @@
-# annotatR
+# hyperannotatR
 
-**annotatR** provides multi-layer region-of-interest (ROI) annotation
-for whole-slide microscopy images, hyperspectral data cubes, and
-conventional rasters. Annotations are validated simple-feature
-geometries stored in image pixel coordinates with explicit pyramid-level
-transforms, and rasterise to binary, labelled, or multi-class integer
-**masks** for downstream segmentation and classification. A batch
-annotation application supports resumable sessions across image queues,
-live mask preview, and export to GeoJSON, QuPath, and TIFF.
+**hyperannotatR** provides multi-layer region-of-interest annotation for
+hyperspectral imaging (HSI), including spectral cubes, band views,
+spectral extraction, and associated display rasters. ROI geometries,
+masks, resumable sessions and exports support HSI annotation and
+classification.
+
+Cell and nucleus annotation, segmentation, correction, training and
+review for microscopy belong to **segmantR**. Its independent drawing
+canvas and mask workflow do not require hyperannotatR. Generic raster
+and geometry APIs remain available for HSI previews and interchange
+compatibility.
+
+The R package was renamed from `annotatR` to `hyperannotatR`; load it
+with [`library(hyperannotatR)`](https://github.com/CTTIR/hyperannotatR).
+The `at_*` function names and saved object classes are retained. The
+hosted source repository is `CTTIR/hyperannotatR`.
 
 ## Installation
 
 ``` r
 
 # install.packages("pak")
-pak::pak("CTTIR/annotatR")
+pak::pak("CTTIR/hyperannotatR")
 ```
 
 ## Quick start
 
 ``` r
 
-library(annotatR)
+library(hyperannotatR)
 
 # Read a bundled example image and build a project with one annotation layer.
 img <- at_example_image("tissue")
@@ -64,10 +72,10 @@ at_plot_overlay(proj)
 | Diaspective Vision TIVITA | `tivita` | base R, declared profile or sidecar | no | yes |
 
 A TIFF is treated as spectral only when wavelengths are declared.
-[`at_bands()`](https://cttir.github.io/annotatR/reference/at_bands.md),
-[`at_hsi_meta()`](https://cttir.github.io/annotatR/reference/at_hsi_meta.md)
+[`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md),
+[`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md)
 and
-[`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md)
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md)
 report band wavelengths and gaps, value units, calibration and transform
 digests, and the bytes actually read.
 
@@ -78,7 +86,7 @@ multi-class integer raster derived from your annotations, exportable at
 any pyramid level and self-describing via a sidecar JSON legend. Masks
 feed segmentation, classification, and spectral-extraction pipelines in
 Python, ImageJ, QuPath, or R. See
-[`vignette("masks")`](https://cttir.github.io/annotatR/articles/masks.md)
+[`vignette("masks")`](https://cttir.github.io/hyperannotatR/articles/masks.md)
 for the pixel-coverage contract and downstream consumption.
 
 ## The annotation app
@@ -92,14 +100,14 @@ at_annotate(at_example_session(5))
 Iterate through an image queue, draw multi-layer ROIs, watch the mask
 render live, and export everything in one pass — with resumable sessions
 and keyboard-first throughput.
-[`at_app()`](https://cttir.github.io/annotatR/reference/at_app.md)
+[`at_app()`](https://cttir.github.io/hyperannotatR/reference/at_app.md)
 returns the same app as a `shiny.appobj` for embedding and testing.
 
 ## Working with qupflowR
 
-annotatR exchanges annotations with the qupflowR package through a
+hyperannotatR exchanges annotations with the qupflowR package through a
 versioned, hash-inventoried contract.
-[`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md)
+[`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md)
 reports which profiles this installation supports; the file (I0) and R
 API (I1) profiles are supported, while direct app control (I2) and
 embedding (I3) stay *planned* until they are qualified against a real
@@ -114,27 +122,27 @@ patch <- at_stage_qupflowr(proj, report)              # diff; reviewed ROIs beco
 committed <- at_commit_qupflowr(patch, idempotency_key = "review-42")
 ```
 
-[`at_training_export()`](https://cttir.github.io/annotatR/reference/at_training_export.md)
+[`at_training_export()`](https://cttir.github.io/hyperannotatR/reference/at_training_export.md)
 writes leakage-free, grouped deep-learning datasets with integer masks
 and full provenance, and
-[`at_training_import()`](https://cttir.github.io/annotatR/reference/at_training_import.md)
+[`at_training_import()`](https://cttir.github.io/hyperannotatR/reference/at_training_import.md)
 stages model predictions for review. An optional loopback control
 service
-([`at_control_start()`](https://cttir.github.io/annotatR/reference/at_control_start.md),
+([`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
 protocol `annotatr-control-v1`) lets a partner process read state and
 events and send typed commands to a running app. See
-[`vignette("partner-interop")`](https://cttir.github.io/annotatR/articles/partner-interop.md).
+[`vignette("partner-interop")`](https://cttir.github.io/hyperannotatR/articles/partner-interop.md).
 
 ## Related work
 
-Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious, annotatR
-is R-native and script-first, handles hyperspectral cubes alongside
-microscopy, and treats the batch **mask** export as a first-class,
-reproducible artifact.
+Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious,
+hyperannotatR is R-native and script-first, handles hyperspectral cubes
+alongside microscopy, and treats the batch **mask** export as a
+first-class, reproducible artifact.
 
 ## Acknowledgements
 
-annotatR builds on [Shiny](https://shiny.posit.co/), the
+hyperannotatR builds on [Shiny](https://shiny.posit.co/), the
 [`sf`](https://r-spatial.github.io/sf/) and
 [`stars`](https://r-spatial.github.io/stars/) packages.
 
@@ -155,9 +163,4 @@ and conclusions remain the authors’ own. Where applicable, LLM-generated
 material must be reviewed and revised before inclusion, and references
 must be verified against their DOI, arXiv ID or ISBN.
 
-Workstation software snapshot (14 October 2026): local,
-OpenAI-compatible vLLM serving with **vLLM
-0.28.1rc1.dev534+g613ab20f7**, **Python 3.12.13** and **PyTorch
-2.13.0**; **R 4.6.1** and **RStudio 2026.06.0+242**. These are
-workstation versions, not per-project dependency or validation
-requirements.
+Local software setup: vLLM with Python/PyTorch, plus R and RStudio.

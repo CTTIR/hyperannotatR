@@ -23,12 +23,12 @@ at_extract(
 - project:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - img:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md);
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md);
   defaults to the project's image.
 
 - stat:
@@ -62,12 +62,12 @@ with columns `roi_id`, `layer`, `label`, `band` (integer), `band_name`,
 
 ## See also
 
-[`at_extract_spectrum()`](https://cttir.github.io/annotatR/reference/at_extract_spectrum.md),
-[`at_extract_pixels()`](https://cttir.github.io/annotatR/reference/at_extract_pixels.md)
+[`at_extract_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_extract_spectrum.md),
+[`at_extract_pixels()`](https://cttir.github.io/hyperannotatR/reference/at_extract_pixels.md)
 
 Other extraction:
-[`at_extract_pixels()`](https://cttir.github.io/annotatR/reference/at_extract_pixels.md),
-[`at_extract_spectrum()`](https://cttir.github.io/annotatR/reference/at_extract_spectrum.md)
+[`at_extract_pixels()`](https://cttir.github.io/hyperannotatR/reference/at_extract_pixels.md),
+[`at_extract_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_extract_spectrum.md)
 
 ## Examples
 

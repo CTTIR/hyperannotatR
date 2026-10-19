@@ -1,27 +1,35 @@
-# annotatR
+# hyperannotatR
 
-**annotatR** provides multi-layer region-of-interest (ROI) annotation
-for whole-slide microscopy images, hyperspectral data cubes, and
-conventional rasters. Annotations are validated simple-feature
-geometries stored in image pixel coordinates with explicit pyramid-level
-transforms, and rasterise to binary, labelled, or multi-class integer
-**masks** for downstream segmentation and classification. A batch
-annotation application supports resumable sessions across image queues,
-live mask preview, and export to GeoJSON, QuPath, and TIFF.
+**hyperannotatR** provides multi-layer region-of-interest annotation for
+hyperspectral imaging (HSI), including spectral cubes, band views,
+spectral extraction, and associated display rasters. ROI geometries,
+masks, resumable sessions and exports support HSI annotation and
+classification.
+
+Cell and nucleus annotation, segmentation, correction, training and
+review for microscopy belong to **segmantR**. Its independent drawing
+canvas and mask workflow do not require hyperannotatR. Generic raster
+and geometry APIs remain available for HSI previews and interchange
+compatibility.
+
+The R package was renamed from `annotatR` to `hyperannotatR`; load it
+with [`library(hyperannotatR)`](https://github.com/CTTIR/hyperannotatR).
+The `at_*` function names and saved object classes are retained. The
+hosted source repository is `CTTIR/hyperannotatR`.
 
 ## Installation
 
 ``` r
 
 # install.packages("pak")
-pak::pak("CTTIR/annotatR")
+pak::pak("CTTIR/hyperannotatR")
 ```
 
 ## Quick start
 
 ``` r
 
-library(annotatR)
+library(hyperannotatR)
 
 # Read a bundled example image and build a project with one annotation layer.
 img <- at_example_image("tissue")
@@ -64,10 +72,10 @@ at_plot_overlay(proj)
 | Diaspective Vision TIVITA | `tivita` | base R, declared profile or sidecar | no | yes |
 
 A TIFF is treated as spectral only when wavelengths are declared.
-[`at_bands()`](https://cttir.github.io/annotatR/reference/at_bands.md),
-[`at_hsi_meta()`](https://cttir.github.io/annotatR/reference/at_hsi_meta.md)
+[`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md),
+[`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md)
 and
-[`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md)
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md)
 report band wavelengths and gaps, value units, calibration and transform
 digests, and the bytes actually read.
 
@@ -78,7 +86,7 @@ multi-class integer raster derived from your annotations, exportable at
 any pyramid level and self-describing via a sidecar JSON legend. Masks
 feed segmentation, classification, and spectral-extraction pipelines in
 Python, ImageJ, QuPath, or R. See
-[`vignette("masks")`](https://cttir.github.io/annotatR/articles/masks.md)
+[`vignette("masks")`](https://cttir.github.io/hyperannotatR/articles/masks.md)
 for the pixel-coverage contract and downstream consumption.
 
 ## The annotation app
@@ -92,14 +100,14 @@ at_annotate(at_example_session(5))
 Iterate through an image queue, draw multi-layer ROIs, watch the mask
 render live, and export everything in one pass — with resumable sessions
 and keyboard-first throughput.
-[`at_app()`](https://cttir.github.io/annotatR/reference/at_app.md)
+[`at_app()`](https://cttir.github.io/hyperannotatR/reference/at_app.md)
 returns the same app as a `shiny.appobj` for embedding and testing.
 
 ## Working with qupflowR
 
-annotatR exchanges annotations with the qupflowR package through a
+hyperannotatR exchanges annotations with the qupflowR package through a
 versioned, hash-inventoried contract.
-[`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md)
+[`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md)
 reports which profiles this installation supports; the file (I0) and R
 API (I1) profiles are supported, while direct app control (I2) and
 embedding (I3) stay *planned* until they are qualified against a real
@@ -114,27 +122,27 @@ patch <- at_stage_qupflowr(proj, report)              # diff; reviewed ROIs beco
 committed <- at_commit_qupflowr(patch, idempotency_key = "review-42")
 ```
 
-[`at_training_export()`](https://cttir.github.io/annotatR/reference/at_training_export.md)
+[`at_training_export()`](https://cttir.github.io/hyperannotatR/reference/at_training_export.md)
 writes leakage-free, grouped deep-learning datasets with integer masks
 and full provenance, and
-[`at_training_import()`](https://cttir.github.io/annotatR/reference/at_training_import.md)
+[`at_training_import()`](https://cttir.github.io/hyperannotatR/reference/at_training_import.md)
 stages model predictions for review. An optional loopback control
 service
-([`at_control_start()`](https://cttir.github.io/annotatR/reference/at_control_start.md),
+([`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
 protocol `annotatr-control-v1`) lets a partner process read state and
 events and send typed commands to a running app. See
-[`vignette("partner-interop")`](https://cttir.github.io/annotatR/articles/partner-interop.md).
+[`vignette("partner-interop")`](https://cttir.github.io/hyperannotatR/articles/partner-interop.md).
 
 ## Related work
 
-Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious, annotatR
-is R-native and script-first, handles hyperspectral cubes alongside
-microscopy, and treats the batch **mask** export as a first-class,
-reproducible artifact.
+Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious,
+hyperannotatR is R-native and script-first, handles hyperspectral cubes
+alongside microscopy, and treats the batch **mask** export as a
+first-class, reproducible artifact.
 
 ## Acknowledgements
 
-annotatR builds on [Shiny](https://shiny.posit.co/), the
+hyperannotatR builds on [Shiny](https://shiny.posit.co/), the
 [`sf`](https://r-spatial.github.io/sf/) and
 [`stars`](https://r-spatial.github.io/stars/) packages.
 
@@ -155,12 +163,7 @@ and conclusions remain the authors’ own. Where applicable, LLM-generated
 material must be reviewed and revised before inclusion, and references
 must be verified against their DOI, arXiv ID or ISBN.
 
-Workstation software snapshot (14 October 2026): local,
-OpenAI-compatible vLLM serving with **vLLM
-0.28.1rc1.dev534+g613ab20f7**, **Python 3.12.13** and **PyTorch
-2.13.0**; **R 4.6.1** and **RStudio 2026.06.0+242**. These are
-workstation versions, not per-project dependency or validation
-requirements.
+Local software setup: vLLM with Python/PyTorch, plus R and RStudio.
 
 # Package index
 
@@ -168,39 +171,39 @@ requirements.
 
 Read images and register formats.
 
-- [`at_read_image()`](https://cttir.github.io/annotatR/reference/at_read_image.md)
+- [`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md)
   : Read an image
-- [`at_tile()`](https://cttir.github.io/annotatR/reference/at_tile.md) :
-  Read a tile from an image
-- [`at_dims()`](https://cttir.github.io/annotatR/reference/at_dims.md) :
-  Image dimensions at a pyramid level
-- [`at_n_levels()`](https://cttir.github.io/annotatR/reference/at_n_levels.md)
+- [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md)
+  : Read a tile from an image
+- [`at_dims()`](https://cttir.github.io/hyperannotatR/reference/at_dims.md)
+  : Image dimensions at a pyramid level
+- [`at_n_levels()`](https://cttir.github.io/hyperannotatR/reference/at_n_levels.md)
   : Number of pyramid levels
-- [`at_n_bands()`](https://cttir.github.io/annotatR/reference/at_n_bands.md)
+- [`at_n_bands()`](https://cttir.github.io/hyperannotatR/reference/at_n_bands.md)
   : Number of bands (channels)
-- [`at_bands()`](https://cttir.github.io/annotatR/reference/at_bands.md)
+- [`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md)
   : Band (channel) table
-- [`at_wavelengths()`](https://cttir.github.io/annotatR/reference/at_wavelengths.md)
+- [`at_wavelengths()`](https://cttir.github.io/hyperannotatR/reference/at_wavelengths.md)
   : Band centre wavelengths
-- [`at_is_spectral()`](https://cttir.github.io/annotatR/reference/at_is_spectral.md)
+- [`at_is_spectral()`](https://cttir.github.io/hyperannotatR/reference/at_is_spectral.md)
   : Is the image a spectral cube?
-- [`at_is_pyramidal()`](https://cttir.github.io/annotatR/reference/at_is_pyramidal.md)
+- [`at_is_pyramidal()`](https://cttir.github.io/hyperannotatR/reference/at_is_pyramidal.md)
   : Is the image pyramidal?
-- [`at_pixel_size()`](https://cttir.github.io/annotatR/reference/at_pixel_size.md)
+- [`at_pixel_size()`](https://cttir.github.io/hyperannotatR/reference/at_pixel_size.md)
   : Physical pixel size
-- [`at_meta()`](https://cttir.github.io/annotatR/reference/at_meta.md) :
-  Image metadata
-- [`at_backend_list()`](https://cttir.github.io/annotatR/reference/at_backend_list.md)
+- [`at_meta()`](https://cttir.github.io/hyperannotatR/reference/at_meta.md)
+  : Image metadata
+- [`at_backend_list()`](https://cttir.github.io/hyperannotatR/reference/at_backend_list.md)
   : List registered image backends
-- [`at_backend_get()`](https://cttir.github.io/annotatR/reference/at_backend_get.md)
+- [`at_backend_get()`](https://cttir.github.io/hyperannotatR/reference/at_backend_get.md)
   : Get a registered backend
-- [`at_backend_detect()`](https://cttir.github.io/annotatR/reference/at_backend_detect.md)
+- [`at_backend_detect()`](https://cttir.github.io/hyperannotatR/reference/at_backend_detect.md)
   : Detect the backend for a file
-- [`at_backend_register()`](https://cttir.github.io/annotatR/reference/at_backend_register.md)
+- [`at_backend_register()`](https://cttir.github.io/hyperannotatR/reference/at_backend_register.md)
   : Register an image backend
-- [`at_tivita_profile()`](https://cttir.github.io/annotatR/reference/at_tivita_profile.md)
+- [`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
   : Declare a TIVITA SpecCube layout profile
-- [`at_cubert_export_envi()`](https://cttir.github.io/annotatR/reference/at_cubert_export_envi.md)
+- [`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md)
   : Export a Cubert measurement to a portable ENVI cube
 
 ## Hyperspectral metadata
@@ -208,191 +211,191 @@ Read images and register formats.
 Band tables, value semantics, display band operations and read
 accounting.
 
-- [`at_hsi_meta()`](https://cttir.github.io/annotatR/reference/at_hsi_meta.md)
+- [`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md)
   : Hyperspectral and acquisition metadata of an image
-- [`at_convert_values()`](https://cttir.github.io/annotatR/reference/at_convert_values.md)
+- [`at_convert_values()`](https://cttir.github.io/hyperannotatR/reference/at_convert_values.md)
   : Convert spectral values between declared units
-- [`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md)
+- [`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md)
   : Registered band operations
-- [`at_band_view()`](https://cttir.github.io/annotatR/reference/at_band_view.md)
+- [`at_band_view()`](https://cttir.github.io/hyperannotatR/reference/at_band_view.md)
   : Compute a registered band view
-- [`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md)
+- [`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md)
   : Read accounting for an image
 
 ## Regions of interest
 
 Construct and measure individual ROIs.
 
-- [`at_roi_point()`](https://cttir.github.io/annotatR/reference/at_roi_point.md)
+- [`at_roi_point()`](https://cttir.github.io/hyperannotatR/reference/at_roi_point.md)
   : Create a point ROI
-- [`at_roi_rect()`](https://cttir.github.io/annotatR/reference/at_roi_rect.md)
+- [`at_roi_rect()`](https://cttir.github.io/hyperannotatR/reference/at_roi_rect.md)
   : Create a rectangular ROI
-- [`at_roi_circle()`](https://cttir.github.io/annotatR/reference/at_roi_circle.md)
+- [`at_roi_circle()`](https://cttir.github.io/hyperannotatR/reference/at_roi_circle.md)
   : Create a circular ROI
-- [`at_roi_ellipse()`](https://cttir.github.io/annotatR/reference/at_roi_ellipse.md)
+- [`at_roi_ellipse()`](https://cttir.github.io/hyperannotatR/reference/at_roi_ellipse.md)
   : Create an elliptical ROI
-- [`at_roi_polygon()`](https://cttir.github.io/annotatR/reference/at_roi_polygon.md)
+- [`at_roi_polygon()`](https://cttir.github.io/hyperannotatR/reference/at_roi_polygon.md)
   : Create a polygon ROI
-- [`at_roi_freehand()`](https://cttir.github.io/annotatR/reference/at_roi_freehand.md)
+- [`at_roi_freehand()`](https://cttir.github.io/hyperannotatR/reference/at_roi_freehand.md)
   : Create a freehand ROI
-- [`at_roi_from_sf()`](https://cttir.github.io/annotatR/reference/at_roi_from_sf.md)
+- [`at_roi_from_sf()`](https://cttir.github.io/hyperannotatR/reference/at_roi_from_sf.md)
   : Create an ROI from an existing sf geometry
-- [`at_roi_area()`](https://cttir.github.io/annotatR/reference/at_roi_area.md)
+- [`at_roi_area()`](https://cttir.github.io/hyperannotatR/reference/at_roi_area.md)
   : ROI area
-- [`at_roi_centroid()`](https://cttir.github.io/annotatR/reference/at_roi_centroid.md)
+- [`at_roi_centroid()`](https://cttir.github.io/hyperannotatR/reference/at_roi_centroid.md)
   : ROI centroid
-- [`at_roi_bbox()`](https://cttir.github.io/annotatR/reference/at_roi_bbox.md)
+- [`at_roi_bbox()`](https://cttir.github.io/hyperannotatR/reference/at_roi_bbox.md)
   : ROI bounding box
 
 ## Geometry
 
 Transforms, set operations, predicates, and validity.
 
-- [`at_transform()`](https://cttir.github.io/annotatR/reference/at_transform.md)
+- [`at_transform()`](https://cttir.github.io/hyperannotatR/reference/at_transform.md)
   : Transform an ROI between pyramid levels using real image dimensions
-- [`at_roi_rescale()`](https://cttir.github.io/annotatR/reference/at_roi_rescale.md)
+- [`at_roi_rescale()`](https://cttir.github.io/hyperannotatR/reference/at_roi_rescale.md)
   : Rescale an ROI between pyramid levels
-- [`at_roi_buffer()`](https://cttir.github.io/annotatR/reference/at_roi_buffer.md)
+- [`at_roi_buffer()`](https://cttir.github.io/hyperannotatR/reference/at_roi_buffer.md)
   : Buffer an ROI
-- [`at_roi_simplify()`](https://cttir.github.io/annotatR/reference/at_roi_simplify.md)
+- [`at_roi_simplify()`](https://cttir.github.io/hyperannotatR/reference/at_roi_simplify.md)
   : Simplify an ROI
-- [`at_flip_y()`](https://cttir.github.io/annotatR/reference/at_flip_y.md)
+- [`at_flip_y()`](https://cttir.github.io/hyperannotatR/reference/at_flip_y.md)
   : Flip an ROI's y-axis
-- [`at_snap()`](https://cttir.github.io/annotatR/reference/at_snap.md) :
-  Snap ROI vertices to a grid
-- [`at_clamp()`](https://cttir.github.io/annotatR/reference/at_clamp.md)
+- [`at_snap()`](https://cttir.github.io/hyperannotatR/reference/at_snap.md)
+  : Snap ROI vertices to a grid
+- [`at_clamp()`](https://cttir.github.io/hyperannotatR/reference/at_clamp.md)
   : Clip an ROI to image bounds
-- [`at_roi_union()`](https://cttir.github.io/annotatR/reference/at_roi_setops.md)
-  [`at_roi_intersect()`](https://cttir.github.io/annotatR/reference/at_roi_setops.md)
-  [`at_roi_difference()`](https://cttir.github.io/annotatR/reference/at_roi_setops.md)
-  [`at_roi_symdiff()`](https://cttir.github.io/annotatR/reference/at_roi_setops.md)
+- [`at_roi_union()`](https://cttir.github.io/hyperannotatR/reference/at_roi_setops.md)
+  [`at_roi_intersect()`](https://cttir.github.io/hyperannotatR/reference/at_roi_setops.md)
+  [`at_roi_difference()`](https://cttir.github.io/hyperannotatR/reference/at_roi_setops.md)
+  [`at_roi_symdiff()`](https://cttir.github.io/hyperannotatR/reference/at_roi_setops.md)
   : Set operations on ROIs
-- [`at_roi_ring()`](https://cttir.github.io/annotatR/reference/at_roi_ring.md)
+- [`at_roi_ring()`](https://cttir.github.io/hyperannotatR/reference/at_roi_ring.md)
   : Ring (annulus) along an ROI margin
-- [`at_roi_contains()`](https://cttir.github.io/annotatR/reference/at_roi_contains.md)
+- [`at_roi_contains()`](https://cttir.github.io/hyperannotatR/reference/at_roi_contains.md)
   : Test whether points fall inside an ROI
-- [`at_roi_overlaps()`](https://cttir.github.io/annotatR/reference/at_roi_overlaps.md)
+- [`at_roi_overlaps()`](https://cttir.github.io/hyperannotatR/reference/at_roi_overlaps.md)
   : Test whether two ROIs intersect
-- [`at_roi_distance()`](https://cttir.github.io/annotatR/reference/at_roi_distance.md)
+- [`at_roi_distance()`](https://cttir.github.io/hyperannotatR/reference/at_roi_distance.md)
   : Distance between two ROIs
-- [`at_rois_overlap()`](https://cttir.github.io/annotatR/reference/at_rois_overlap.md)
+- [`at_rois_overlap()`](https://cttir.github.io/hyperannotatR/reference/at_rois_overlap.md)
   : Pairwise ROI overlaps within a layer
-- [`at_check_geometry()`](https://cttir.github.io/annotatR/reference/at_check_geometry.md)
+- [`at_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_check_geometry.md)
   : Check the geometry of every ROI in a project
-- [`at_fix_geometry()`](https://cttir.github.io/annotatR/reference/at_fix_geometry.md)
+- [`at_fix_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_fix_geometry.md)
   : Repair the geometry of a project
-- [`at_check_containment()`](https://cttir.github.io/annotatR/reference/at_check_containment.md)
+- [`at_check_containment()`](https://cttir.github.io/hyperannotatR/reference/at_check_containment.md)
   : Check cross-layer containment
 
 ## Layers and projects
 
 Organise ROIs into layers and projects.
 
-- [`at_style()`](https://cttir.github.io/annotatR/reference/at_style.md)
+- [`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)
   : Layer style
-- [`at_layer()`](https://cttir.github.io/annotatR/reference/at_layer.md)
+- [`at_layer()`](https://cttir.github.io/hyperannotatR/reference/at_layer.md)
   : Create a layer
-- [`at_layer_add()`](https://cttir.github.io/annotatR/reference/at_layer_add.md)
+- [`at_layer_add()`](https://cttir.github.io/hyperannotatR/reference/at_layer_add.md)
   : Add an ROI to a layer
-- [`at_layer_remove()`](https://cttir.github.io/annotatR/reference/at_layer_remove.md)
+- [`at_layer_remove()`](https://cttir.github.io/hyperannotatR/reference/at_layer_remove.md)
   : Remove an ROI from a layer
-- [`at_layer_rois()`](https://cttir.github.io/annotatR/reference/at_layer_rois.md)
+- [`at_layer_rois()`](https://cttir.github.io/hyperannotatR/reference/at_layer_rois.md)
   : Layer ROI table
-- [`at_layer_n()`](https://cttir.github.io/annotatR/reference/at_layer_n.md)
+- [`at_layer_n()`](https://cttir.github.io/hyperannotatR/reference/at_layer_n.md)
   : Number of ROIs in a layer
-- [`at_project()`](https://cttir.github.io/annotatR/reference/at_project.md)
+- [`at_project()`](https://cttir.github.io/hyperannotatR/reference/at_project.md)
   : Create an annotation project
-- [`at_add_layer()`](https://cttir.github.io/annotatR/reference/at_add_layer.md)
+- [`at_add_layer()`](https://cttir.github.io/hyperannotatR/reference/at_add_layer.md)
   : Add a layer to a project
-- [`at_remove_layer()`](https://cttir.github.io/annotatR/reference/at_remove_layer.md)
+- [`at_remove_layer()`](https://cttir.github.io/hyperannotatR/reference/at_remove_layer.md)
   : Remove a layer from a project
-- [`at_add_roi()`](https://cttir.github.io/annotatR/reference/at_add_roi.md)
+- [`at_add_roi()`](https://cttir.github.io/hyperannotatR/reference/at_add_roi.md)
   : Add an ROI to a project layer
-- [`at_remove_roi()`](https://cttir.github.io/annotatR/reference/at_remove_roi.md)
+- [`at_remove_roi()`](https://cttir.github.io/hyperannotatR/reference/at_remove_roi.md)
   : Remove an ROI from a project
-- [`at_layers()`](https://cttir.github.io/annotatR/reference/at_layers.md)
+- [`at_layers()`](https://cttir.github.io/hyperannotatR/reference/at_layers.md)
   : Layer summary table
-- [`at_rois()`](https://cttir.github.io/annotatR/reference/at_rois.md) :
-  Query the ROIs of a project
-- [`at_validate()`](https://cttir.github.io/annotatR/reference/at_validate.md)
+- [`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md)
+  : Query the ROIs of a project
+- [`at_validate()`](https://cttir.github.io/hyperannotatR/reference/at_validate.md)
   : Validate a project's invariants
-- [`at_summary()`](https://cttir.github.io/annotatR/reference/at_summary.md)
+- [`at_summary()`](https://cttir.github.io/hyperannotatR/reference/at_summary.md)
   : Summarise a project
 
 ## Sessions and batch
 
 Resumable queues and whole-session operations.
 
-- [`at_session()`](https://cttir.github.io/annotatR/reference/at_session.md)
+- [`at_session()`](https://cttir.github.io/hyperannotatR/reference/at_session.md)
   : Create a batch annotation session
-- [`at_next()`](https://cttir.github.io/annotatR/reference/at_next.md) :
-  Advance to the next image
-- [`at_prev()`](https://cttir.github.io/annotatR/reference/at_prev.md) :
-  Step back to the previous image
-- [`at_goto()`](https://cttir.github.io/annotatR/reference/at_goto.md) :
-  Jump to a specific image
-- [`at_current()`](https://cttir.github.io/annotatR/reference/at_current.md)
+- [`at_next()`](https://cttir.github.io/hyperannotatR/reference/at_next.md)
+  : Advance to the next image
+- [`at_prev()`](https://cttir.github.io/hyperannotatR/reference/at_prev.md)
+  : Step back to the previous image
+- [`at_goto()`](https://cttir.github.io/hyperannotatR/reference/at_goto.md)
+  : Jump to a specific image
+- [`at_current()`](https://cttir.github.io/hyperannotatR/reference/at_current.md)
   : The current project
-- [`at_set_status()`](https://cttir.github.io/annotatR/reference/at_set_status.md)
+- [`at_set_status()`](https://cttir.github.io/hyperannotatR/reference/at_set_status.md)
   : Set the status of a queued image
-- [`at_session_status()`](https://cttir.github.io/annotatR/reference/at_session_status.md)
+- [`at_session_status()`](https://cttir.github.io/hyperannotatR/reference/at_session_status.md)
   : The session manifest
-- [`at_manifest()`](https://cttir.github.io/annotatR/reference/at_manifest.md)
+- [`at_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_manifest.md)
   : Session progress manifest with per-label counts
-- [`at_resume()`](https://cttir.github.io/annotatR/reference/at_resume.md)
+- [`at_resume()`](https://cttir.github.io/hyperannotatR/reference/at_resume.md)
   : Resume a saved session
-- [`at_export_all()`](https://cttir.github.io/annotatR/reference/at_export_all.md)
+- [`at_export_all()`](https://cttir.github.io/hyperannotatR/reference/at_export_all.md)
   : Export a whole session
-- [`at_summary_table()`](https://cttir.github.io/annotatR/reference/at_summary_table.md)
+- [`at_summary_table()`](https://cttir.github.io/hyperannotatR/reference/at_summary_table.md)
   : Session summary statistics
-- [`at_batch_apply()`](https://cttir.github.io/annotatR/reference/at_batch_apply.md)
+- [`at_batch_apply()`](https://cttir.github.io/hyperannotatR/reference/at_batch_apply.md)
   : Apply a function to every project in a session
-- [`at_batch_check_geometry()`](https://cttir.github.io/annotatR/reference/at_batch_check_geometry.md)
+- [`at_batch_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_batch_check_geometry.md)
   : Check geometry across a whole session
 
 ## Masks
 
 Rasterise annotations and round-trip masks.
 
-- [`at_mask()`](https://cttir.github.io/annotatR/reference/at_mask.md) :
-  Rasterise ROIs to a mask ("Schablone")
+- [`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md)
+  : Rasterise ROIs to a mask ("Schablone")
 
-- [`at_mask_legend()`](https://cttir.github.io/annotatR/reference/at_mask_legend.md)
+- [`at_mask_legend()`](https://cttir.github.io/hyperannotatR/reference/at_mask_legend.md)
   : Legend of a mask
 
-- [`at_mask_stats()`](https://cttir.github.io/annotatR/reference/at_mask_stats.md)
+- [`at_mask_stats()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stats.md)
   : Per-value statistics of a mask
 
-- [`at_mask_boundary()`](https://cttir.github.io/annotatR/reference/at_mask_boundary.md)
+- [`at_mask_boundary()`](https://cttir.github.io/hyperannotatR/reference/at_mask_boundary.md)
   : Object boundaries of a mask
 
-- [`at_mask_preview()`](https://cttir.github.io/annotatR/reference/at_mask_preview.md)
+- [`at_mask_preview()`](https://cttir.github.io/hyperannotatR/reference/at_mask_preview.md)
   : Downsampled preview of a mask
 
-- [`at_mask_stack()`](https://cttir.github.io/annotatR/reference/at_mask_stack.md)
+- [`at_mask_stack()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stack.md)
   : Stack per-layer masks into a 3D array
 
-- [`at_mask_derive()`](https://cttir.github.io/annotatR/reference/at_mask_derive.md)
+- [`at_mask_derive()`](https://cttir.github.io/hyperannotatR/reference/at_mask_derive.md)
   : Derive a training mask from layer masks
 
-- [`at_mask_agreement()`](https://cttir.github.io/annotatR/reference/at_mask_agreement.md)
+- [`at_mask_agreement()`](https://cttir.github.io/hyperannotatR/reference/at_mask_agreement.md)
   : Agreement between two masks
 
-- [`at_write_mask()`](https://cttir.github.io/annotatR/reference/at_write_mask.md)
+- [`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md)
   : Write a mask to disk
 
-- [`at_read_mask()`](https://cttir.github.io/annotatR/reference/at_read_mask.md)
+- [`at_read_mask()`](https://cttir.github.io/hyperannotatR/reference/at_read_mask.md)
   : Read a mask into editable ROIs
 
-- [`at_write_masks()`](https://cttir.github.io/annotatR/reference/at_write_masks.md)
+- [`at_write_masks()`](https://cttir.github.io/hyperannotatR/reference/at_write_masks.md)
   : Batch-write the masks of a project
 
-- [`at_write_npy()`](https://cttir.github.io/annotatR/reference/at_write_npy.md)
+- [`at_write_npy()`](https://cttir.github.io/hyperannotatR/reference/at_write_npy.md)
   :
 
   Write a mask to a NumPy `.npy` file
 
-- [`at_read_npy()`](https://cttir.github.io/annotatR/reference/at_read_npy.md)
+- [`at_read_npy()`](https://cttir.github.io/hyperannotatR/reference/at_read_npy.md)
   :
 
   Read a NumPy `.npy` integer mask
@@ -401,57 +404,57 @@ Rasterise annotations and round-trip masks.
 
 Summarise image and spectral values under ROIs.
 
-- [`at_extract()`](https://cttir.github.io/annotatR/reference/at_extract.md)
+- [`at_extract()`](https://cttir.github.io/hyperannotatR/reference/at_extract.md)
   : Extract summary statistics under ROIs
-- [`at_extract_spectrum()`](https://cttir.github.io/annotatR/reference/at_extract_spectrum.md)
+- [`at_extract_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_extract_spectrum.md)
   : Extract mean/median spectra for a spectral cube
-- [`at_extract_pixels()`](https://cttir.github.io/annotatR/reference/at_extract_pixels.md)
+- [`at_extract_pixels()`](https://cttir.github.io/hyperannotatR/reference/at_extract_pixels.md)
   : Extract per-pixel values under ROIs
 
 ## Visualisation
 
 ggplot2 plots.
 
-- [`at_plot()`](https://cttir.github.io/annotatR/reference/at_plot.md) :
-  Plot generic for annotatR objects
-- [`at_plot_image()`](https://cttir.github.io/annotatR/reference/at_plot_image.md)
+- [`at_plot()`](https://cttir.github.io/hyperannotatR/reference/at_plot.md)
+  : Plot generic for hyperannotatR objects
+- [`at_plot_image()`](https://cttir.github.io/hyperannotatR/reference/at_plot_image.md)
   : Plot an image
-- [`at_plot_project()`](https://cttir.github.io/annotatR/reference/at_plot_project.md)
+- [`at_plot_project()`](https://cttir.github.io/hyperannotatR/reference/at_plot_project.md)
   : Plot a project's ROIs
-- [`at_plot_overlay()`](https://cttir.github.io/annotatR/reference/at_plot_overlay.md)
+- [`at_plot_overlay()`](https://cttir.github.io/hyperannotatR/reference/at_plot_overlay.md)
   : Plot ROIs overlaid on the image
-- [`at_plot_mask()`](https://cttir.github.io/annotatR/reference/at_plot_mask.md)
+- [`at_plot_mask()`](https://cttir.github.io/hyperannotatR/reference/at_plot_mask.md)
   : Plot a mask
-- [`at_plot_spectrum()`](https://cttir.github.io/annotatR/reference/at_plot_spectrum.md)
+- [`at_plot_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_plot_spectrum.md)
   : Plot spectra
-- [`at_plot_summary()`](https://cttir.github.io/annotatR/reference/at_plot_summary.md)
+- [`at_plot_summary()`](https://cttir.github.io/hyperannotatR/reference/at_plot_summary.md)
   : Plot a project summary
 
 ## Import and export
 
 Interchange with GeoJSON, QuPath, CSV, and RDS.
 
-- [`at_write_geojson()`](https://cttir.github.io/annotatR/reference/at_write_geojson.md)
+- [`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md)
   : Write a project's ROIs to GeoJSON
-- [`at_read_geojson()`](https://cttir.github.io/annotatR/reference/at_read_geojson.md)
+- [`at_read_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_read_geojson.md)
   : Read ROIs from a GeoJSON file
-- [`at_roi_from_geojson()`](https://cttir.github.io/annotatR/reference/at_roi_from_geojson.md)
+- [`at_roi_from_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_roi_from_geojson.md)
   : Convert a GeoJSON feature to an ROI
-- [`at_write_qupath()`](https://cttir.github.io/annotatR/reference/at_write_qupath.md)
+- [`at_write_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_write_qupath.md)
   : Write a project's ROIs as QuPath GeoJSON
-- [`at_read_qupath()`](https://cttir.github.io/annotatR/reference/at_read_qupath.md)
+- [`at_read_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_read_qupath.md)
   : Read ROIs from a QuPath GeoJSON file
-- [`at_save_project()`](https://cttir.github.io/annotatR/reference/at_save_project.md)
+- [`at_save_project()`](https://cttir.github.io/hyperannotatR/reference/at_save_project.md)
   : Save a project
-- [`at_load_project()`](https://cttir.github.io/annotatR/reference/at_load_project.md)
+- [`at_load_project()`](https://cttir.github.io/hyperannotatR/reference/at_load_project.md)
   : Load a project
-- [`at_save_session()`](https://cttir.github.io/annotatR/reference/at_save_session.md)
+- [`at_save_session()`](https://cttir.github.io/hyperannotatR/reference/at_save_session.md)
   : Save a session
-- [`at_load_session()`](https://cttir.github.io/annotatR/reference/at_load_session.md)
+- [`at_load_session()`](https://cttir.github.io/hyperannotatR/reference/at_load_session.md)
   : Load a session
-- [`at_write_rois_csv()`](https://cttir.github.io/annotatR/reference/at_write_rois_csv.md)
+- [`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)
   : Write a project's ROIs to CSV
-- [`at_read_rois_csv()`](https://cttir.github.io/annotatR/reference/at_read_rois_csv.md)
+- [`at_read_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.md)
   : Read ROIs from a CSV with WKT geometry
 
 ## Partner interoperability
@@ -459,135 +462,134 @@ Interchange with GeoJSON, QuPath, CSV, and RDS.
 The versioned qupflowR contract - capabilities, manifests, handoffs,
 staging and commits.
 
-- [`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md)
+- [`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md)
   : Partner interoperability capabilities
-- [`at_interop_manifest()`](https://cttir.github.io/annotatR/reference/at_interop_manifest.md)
+- [`at_interop_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_interop_manifest.md)
   : Build a partner interop manifest
-- [`at_annotation_revision()`](https://cttir.github.io/annotatR/reference/at_annotation_revision.md)
+- [`at_annotation_revision()`](https://cttir.github.io/hyperannotatR/reference/at_annotation_revision.md)
   : Annotation revision token
-- [`at_export_qupflowr()`](https://cttir.github.io/annotatR/reference/at_export_qupflowr.md)
+- [`at_export_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_export_qupflowr.md)
   : Export annotations as a qupflowR handoff directory
-- [`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md)
+- [`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md)
   : Import a qupflowR handoff or neutral interchange file
-- [`at_stage_qupflowr()`](https://cttir.github.io/annotatR/reference/at_stage_qupflowr.md)
-  : Stage partner changes against an annotatR project
-- [`at_commit_qupflowr()`](https://cttir.github.io/annotatR/reference/at_commit_qupflowr.md)
+- [`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
+  : Stage partner changes against an hyperannotatR project
+- [`at_commit_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.md)
   : Commit a staged partner patch
 
 ## Training datasets
 
 Leakage-free deep-learning datasets and staged prediction import.
 
-- [`at_training_export()`](https://cttir.github.io/annotatR/reference/at_training_export.md)
+- [`at_training_export()`](https://cttir.github.io/hyperannotatR/reference/at_training_export.md)
   : Export a DNN training dataset
-- [`at_training_check()`](https://cttir.github.io/annotatR/reference/at_training_check.md)
+- [`at_training_check()`](https://cttir.github.io/hyperannotatR/reference/at_training_check.md)
   : Check a training dataset
-- [`at_training_import()`](https://cttir.github.io/annotatR/reference/at_training_import.md)
+- [`at_training_import()`](https://cttir.github.io/hyperannotatR/reference/at_training_import.md)
   : Import model predictions as staged annotations
 
 ## Control service
 
 The optional loopback annotatr-control-v1 service.
 
-- [`at_control_capabilities()`](https://cttir.github.io/annotatR/reference/at_control_capabilities.md)
+- [`at_control_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_control_capabilities.md)
   : Control protocol capabilities
-- [`at_control_start()`](https://cttir.github.io/annotatR/reference/at_control_start.md)
+- [`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md)
   : Start the local control service
-- [`at_control_stop()`](https://cttir.github.io/annotatR/reference/at_control_stop.md)
+- [`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md)
   : Stop a local control service
-- [`at_control_close()`](https://cttir.github.io/annotatR/reference/at_control_close.md)
+- [`at_control_close()`](https://cttir.github.io/hyperannotatR/reference/at_control_close.md)
   : Close a control service connection
-- [`at_control_connect()`](https://cttir.github.io/annotatR/reference/at_control_connect.md)
+- [`at_control_connect()`](https://cttir.github.io/hyperannotatR/reference/at_control_connect.md)
   : Connect to a running control service
-- [`at_control_state()`](https://cttir.github.io/annotatR/reference/at_control_state.md)
+- [`at_control_state()`](https://cttir.github.io/hyperannotatR/reference/at_control_state.md)
   : Read the state of a control service
-- [`at_control_events()`](https://cttir.github.io/annotatR/reference/at_control_events.md)
+- [`at_control_events()`](https://cttir.github.io/hyperannotatR/reference/at_control_events.md)
   : Read control events after a cursor
-- [`at_control_command()`](https://cttir.github.io/annotatR/reference/at_control_command.md)
+- [`at_control_command()`](https://cttir.github.io/hyperannotatR/reference/at_control_command.md)
   : Send a typed control command
-- [`at_control_request_status()`](https://cttir.github.io/annotatR/reference/at_control_request_status.md)
+- [`at_control_request_status()`](https://cttir.github.io/hyperannotatR/reference/at_control_request_status.md)
   : Resolve the outcome of a control request
 
 ## Shiny application
 
 The batch annotation app and canvas widget.
 
-- [`at_app()`](https://cttir.github.io/annotatR/reference/at_app.md) :
-  Build the annotation app as a Shiny app object
-- [`at_annotate()`](https://cttir.github.io/annotatR/reference/at_annotate.md)
+- [`at_app()`](https://cttir.github.io/hyperannotatR/reference/at_app.md)
+  : Build the annotation app as a Shiny app object
+- [`at_annotate()`](https://cttir.github.io/hyperannotatR/reference/at_annotate.md)
   : Launch the batch annotation application
-- [`at_canvas()`](https://cttir.github.io/annotatR/reference/at_canvas.md)
+- [`at_canvas()`](https://cttir.github.io/hyperannotatR/reference/at_canvas.md)
   : An annotation canvas widget
-- [`atCanvasOutput()`](https://cttir.github.io/annotatR/reference/atCanvasOutput.md)
+- [`atCanvasOutput()`](https://cttir.github.io/hyperannotatR/reference/atCanvasOutput.md)
   : Shiny output for the annotation canvas
-- [`renderAtCanvas()`](https://cttir.github.io/annotatR/reference/renderAtCanvas.md)
+- [`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)
   : Render an annotation canvas in Shiny
-- [`at_canvas_proxy()`](https://cttir.github.io/annotatR/reference/at_canvas_proxy.md)
+- [`at_canvas_proxy()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_proxy.md)
   : A proxy for an existing annotation canvas
-- [`at_canvas_set_annotations()`](https://cttir.github.io/annotatR/reference/at_canvas_set_annotations.md)
+- [`at_canvas_set_annotations()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_annotations.md)
   : Replace the annotations on a canvas
-- [`at_canvas_set_tool()`](https://cttir.github.io/annotatR/reference/at_canvas_set_tool.md)
+- [`at_canvas_set_tool()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_tool.md)
   : Set the active drawing tool
-- [`at_canvas_set_band()`](https://cttir.github.io/annotatR/reference/at_canvas_set_band.md)
+- [`at_canvas_set_band()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_band.md)
   : Set the displayed band or RGB triple
-- [`at_canvas_set_overlay()`](https://cttir.github.io/annotatR/reference/at_canvas_set_overlay.md)
+- [`at_canvas_set_overlay()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_overlay.md)
   : Overlay a mask on the canvas
-- [`at_canvas_fit()`](https://cttir.github.io/annotatR/reference/at_canvas_fit.md)
+- [`at_canvas_fit()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_fit.md)
   : Zoom the canvas to a bounding box
-- [`at_canvas_set_selection()`](https://cttir.github.io/annotatR/reference/at_canvas_set_selection.md)
+- [`at_canvas_set_selection()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_selection.md)
   : Highlight selected ROIs on a canvas
-- [`at_tile_source()`](https://cttir.github.io/annotatR/reference/at_tile_source.md)
+- [`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md)
   : Build a tile-source descriptor for the canvas
 
 ## Example data
 
 Bundled synthetic examples.
 
-- [`at_example_image()`](https://cttir.github.io/annotatR/reference/at_example_image.md)
+- [`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md)
   : Read a bundled example image
-- [`at_example_path()`](https://cttir.github.io/annotatR/reference/at_example_path.md)
+- [`at_example_path()`](https://cttir.github.io/hyperannotatR/reference/at_example_path.md)
   : Path to a bundled example file
-- [`at_example_project()`](https://cttir.github.io/annotatR/reference/at_example_project.md)
+- [`at_example_project()`](https://cttir.github.io/hyperannotatR/reference/at_example_project.md)
   : A populated example project
-- [`at_example_session()`](https://cttir.github.io/annotatR/reference/at_example_session.md)
+- [`at_example_session()`](https://cttir.github.io/hyperannotatR/reference/at_example_session.md)
   : An example batch session
 
 ## Concepts
 
-- [`annotatR-classes`](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
-  [`annot_image`](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
-  [`annot_roi`](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
-  [`annot_layer`](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
-  [`annot_project`](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
-  [`annot_session`](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
-  [`annot_mask`](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
-  [`annot_style`](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
-  [`annot_summary`](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
-  : annotatR S3 classes
-- [`annotatR`](https://cttir.github.io/annotatR/reference/annotatR-package.md)
-  [`annotatR-package`](https://cttir.github.io/annotatR/reference/annotatR-package.md)
-  : annotatR: Multi-Layer Region-of-Interest Annotation for Images and
-  Spectral Cubes
+- [`hyperannotatR-classes`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  [`annot_image`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  [`annot_roi`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  [`annot_layer`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  [`annot_project`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  [`annot_session`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  [`annot_mask`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  [`annot_style`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  [`annot_summary`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+  : hyperannotatR S3 classes
+- [`hyperannotatR`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-package.md)
+  [`hyperannotatR-package`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-package.md)
+  : hyperannotatR: Region-of-Interest Annotation for Hyperspectral Data
 
 # Articles
 
 ### Get started
 
 - [Get started with
-  annotatR](https://cttir.github.io/annotatR/articles/annotatR.md):
+  hyperannotatR](https://cttir.github.io/hyperannotatR/articles/hyperannotatR.md):
 
 ### Concepts
 
 - [Images and
-  backends](https://cttir.github.io/annotatR/articles/images-and-backends.md):
+  backends](https://cttir.github.io/hyperannotatR/articles/images-and-backends.md):
 - [The annotation
-  model](https://cttir.github.io/annotatR/articles/annotation-model.md):
-- [Masks](https://cttir.github.io/annotatR/articles/masks.md):
+  model](https://cttir.github.io/hyperannotatR/articles/annotation-model.md):
+- [Masks](https://cttir.github.io/hyperannotatR/articles/masks.md):
 
 ### Workflows
 
 - [The batch annotation
-  app](https://cttir.github.io/annotatR/articles/shiny-workflow.md):
-- [Interoperability](https://cttir.github.io/annotatR/articles/interop.md):
+  app](https://cttir.github.io/hyperannotatR/articles/shiny-workflow.md):
+- [Interoperability](https://cttir.github.io/hyperannotatR/articles/interop.md):
 - [Working with qupflowR: handoffs, control and training
-  data](https://cttir.github.io/annotatR/articles/partner-interop.md):
+  data](https://cttir.github.io/hyperannotatR/articles/partner-interop.md):

@@ -24,14 +24,14 @@ at_training_check(
 - dataset:
 
   Path of a dataset written by
-  [`at_training_export()`](https://cttir.github.io/annotatR/reference/at_training_export.md).
+  [`at_training_export()`](https://cttir.github.io/hyperannotatR/reference/at_training_export.md).
 
 - x:
 
   Optional source
-  [annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+  [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   or
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - max_roundtrip_tiles:
 
@@ -49,5 +49,5 @@ A tibble of class `at_training_check` with `check`, `status` (`"ok"`,
 ## See also
 
 Other training:
-[`at_training_export()`](https://cttir.github.io/annotatR/reference/at_training_export.md),
-[`at_training_import()`](https://cttir.github.io/annotatR/reference/at_training_import.md)
+[`at_training_export()`](https://cttir.github.io/hyperannotatR/reference/at_training_export.md),
+[`at_training_import()`](https://cttir.github.io/hyperannotatR/reference/at_training_import.md)

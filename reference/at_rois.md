@@ -13,7 +13,7 @@ at_rois(project, layer = NULL, label = NULL, call = rlang::caller_env())
 - project:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - layer:
 
@@ -90,19 +90,19 @@ the level at which each ROI was originally defined.
 
 ## See also
 
-[`at_layers()`](https://cttir.github.io/annotatR/reference/at_layers.md),
-[`at_mask()`](https://cttir.github.io/annotatR/reference/at_mask.md)
+[`at_layers()`](https://cttir.github.io/hyperannotatR/reference/at_layers.md),
+[`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md)
 
 Other projects:
-[`at_add_layer()`](https://cttir.github.io/annotatR/reference/at_add_layer.md),
-[`at_add_roi()`](https://cttir.github.io/annotatR/reference/at_add_roi.md),
-[`at_example_project()`](https://cttir.github.io/annotatR/reference/at_example_project.md),
-[`at_layers()`](https://cttir.github.io/annotatR/reference/at_layers.md),
-[`at_project()`](https://cttir.github.io/annotatR/reference/at_project.md),
-[`at_remove_layer()`](https://cttir.github.io/annotatR/reference/at_remove_layer.md),
-[`at_remove_roi()`](https://cttir.github.io/annotatR/reference/at_remove_roi.md),
-[`at_summary()`](https://cttir.github.io/annotatR/reference/at_summary.md),
-[`at_validate()`](https://cttir.github.io/annotatR/reference/at_validate.md)
+[`at_add_layer()`](https://cttir.github.io/hyperannotatR/reference/at_add_layer.md),
+[`at_add_roi()`](https://cttir.github.io/hyperannotatR/reference/at_add_roi.md),
+[`at_example_project()`](https://cttir.github.io/hyperannotatR/reference/at_example_project.md),
+[`at_layers()`](https://cttir.github.io/hyperannotatR/reference/at_layers.md),
+[`at_project()`](https://cttir.github.io/hyperannotatR/reference/at_project.md),
+[`at_remove_layer()`](https://cttir.github.io/hyperannotatR/reference/at_remove_layer.md),
+[`at_remove_roi()`](https://cttir.github.io/hyperannotatR/reference/at_remove_roi.md),
+[`at_summary()`](https://cttir.github.io/hyperannotatR/reference/at_summary.md),
+[`at_validate()`](https://cttir.github.io/hyperannotatR/reference/at_validate.md)
 
 ## Examples
 

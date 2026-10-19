@@ -16,7 +16,7 @@ at_read_stats(img, reset = FALSE, call = rlang::caller_env())
 - img:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - reset:
 
@@ -30,17 +30,17 @@ at_read_stats(img, reset = FALSE, call = rlang::caller_env())
 
 A list with `tiles` (integer), `file_bytes`, `decoded_bytes` and
 `max_tile_bytes` (doubles), plus `window_read` (logical) and the current
-`max_tile_bytes_limit` from option `annotatR.max_tile_bytes`.
+`max_tile_bytes_limit` from option `hyperannotatR.max_tile_bytes`.
 
 ## See also
 
 Other hsi:
-[`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md),
-[`at_band_view()`](https://cttir.github.io/annotatR/reference/at_band_view.md),
-[`at_convert_values()`](https://cttir.github.io/annotatR/reference/at_convert_values.md),
-[`at_cubert_export_envi()`](https://cttir.github.io/annotatR/reference/at_cubert_export_envi.md),
-[`at_hsi_meta()`](https://cttir.github.io/annotatR/reference/at_hsi_meta.md),
-[`at_tivita_profile()`](https://cttir.github.io/annotatR/reference/at_tivita_profile.md)
+[`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md),
+[`at_band_view()`](https://cttir.github.io/hyperannotatR/reference/at_band_view.md),
+[`at_convert_values()`](https://cttir.github.io/hyperannotatR/reference/at_convert_values.md),
+[`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
 
 ## Examples
 

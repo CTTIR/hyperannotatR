@@ -4,9 +4,10 @@ The default `dialect = "qupath"` writes what QuPath 0.4 and later read
 natively (verified with QuPath 0.7.0): `objectType`, `classification`
 with an `[r, g, b]` colour, `isLocked` for locked ROIs, a deterministic
 UUID per ROI as the feature id (QuPath replaces non-UUID ids), and
-annotatR's own ROI id, layer, source and level in `properties.metadata`.
-`dialect = "legacy"` writes the annotatR 0.1 form (`object_type`, signed
-`colorRGB`), which QuPath still reads with a deprecation warning.
+hyperannotatR's own ROI id, layer, source and level in
+`properties.metadata`. `dialect = "legacy"` writes the hyperannotatR 0.1
+form (`object_type`, signed `colorRGB`), which QuPath still reads with a
+deprecation warning.
 
 ## Usage
 
@@ -27,7 +28,7 @@ at_write_qupath(
 - project:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - path:
 
@@ -64,20 +65,20 @@ with different layer colours collapse to the first colour QuPath sees.
 
 ## See also
 
-[`at_read_qupath()`](https://cttir.github.io/annotatR/reference/at_read_qupath.md),
-[`at_write_geojson()`](https://cttir.github.io/annotatR/reference/at_write_geojson.md)
+[`at_read_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_read_qupath.md),
+[`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md)
 
 Other io:
-[`at_load_project()`](https://cttir.github.io/annotatR/reference/at_load_project.md),
-[`at_load_session()`](https://cttir.github.io/annotatR/reference/at_load_session.md),
-[`at_read_geojson()`](https://cttir.github.io/annotatR/reference/at_read_geojson.md),
-[`at_read_qupath()`](https://cttir.github.io/annotatR/reference/at_read_qupath.md),
-[`at_read_rois_csv()`](https://cttir.github.io/annotatR/reference/at_read_rois_csv.md),
-[`at_roi_from_geojson()`](https://cttir.github.io/annotatR/reference/at_roi_from_geojson.md),
-[`at_save_project()`](https://cttir.github.io/annotatR/reference/at_save_project.md),
-[`at_save_session()`](https://cttir.github.io/annotatR/reference/at_save_session.md),
-[`at_write_geojson()`](https://cttir.github.io/annotatR/reference/at_write_geojson.md),
-[`at_write_rois_csv()`](https://cttir.github.io/annotatR/reference/at_write_rois_csv.md)
+[`at_load_project()`](https://cttir.github.io/hyperannotatR/reference/at_load_project.md),
+[`at_load_session()`](https://cttir.github.io/hyperannotatR/reference/at_load_session.md),
+[`at_read_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_read_geojson.md),
+[`at_read_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_read_qupath.md),
+[`at_read_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.md),
+[`at_roi_from_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_roi_from_geojson.md),
+[`at_save_project()`](https://cttir.github.io/hyperannotatR/reference/at_save_project.md),
+[`at_save_session()`](https://cttir.github.io/hyperannotatR/reference/at_save_session.md),
+[`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md),
+[`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)
 
 ## Examples
 

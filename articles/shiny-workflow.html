@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>The batch annotation app • annotatR</title>
+<title>The batch annotation app • hyperannotatR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -27,7 +27,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">annotatR</a>
+    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
@@ -45,7 +45,7 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/annotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/hyperannotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
@@ -69,13 +69,13 @@
       <img src="../logo.svg" class="logo" alt=""><h1>The batch annotation app</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/CTTIR/annotatR/blob/main/vignettes/shiny-workflow.Rmd" class="external-link"><code>vignettes/shiny-workflow.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CTTIR/hyperannotatR/blob/main/vignettes/shiny-workflow.Rmd" class="external-link"><code>vignettes/shiny-workflow.Rmd</code></a></small>
       <div class="d-none name"><code>shiny-workflow.Rmd</code></div>
     </div>
 
     
     
-<p><img src="../reference/figures/logo.png" class="r-plt" alt="annotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<p><img src="../reference/figures/logo.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
 <p>Annotating one image is a job for <code><a href="../reference/at_project.html">at_project()</a></code> and the
 ROI constructors. Annotating a <em>queue</em> of images — a plate of
 serial sections, a batch of slides, a folder of cubes — is what the
@@ -98,7 +98,7 @@ into a temporary directory so the queue has real files to iterate.</p>
 <span><span class="va">sess</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_session&gt;</span></span></span>
 <span><span class="co">#&gt; images: 3  |  complete: 0  |  cursor: 1</span></span>
-<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/Rtmpaq6yKW/annotatR-example-session-3ac1ce9eaea</span>  |  autosave: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpiC7h3P/hyperannotatR-example-session-3aa97ce95d61</span>  |  autosave: TRUE</span></span></code></pre></div>
 <p>Every image starts with status <code>"pending"</code>, the cursor
 sits on the first image, and per-image projects are materialised lazily
 — nothing is read from disk until you visit it.</p>
@@ -308,7 +308,7 @@ exactly where you left off with <code><a href="../reference/at_resume.html">at_r
 <span><span class="va">recovered</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_session&gt;</span></span></span>
 <span><span class="co">#&gt; images: 3  |  complete: 1  |  cursor: 2</span></span>
-<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/Rtmpaq6yKW/annotatR-example-session-3ac1ce9eaea</span>  |  autosave: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpiC7h3P/hyperannotatR-example-session-3aa97ce95d61</span>  |  autosave: TRUE</span></span></code></pre></div>
 <p>The cursor, statuses, materialised projects, and templates all come
 back intact.</p>
 </div>
@@ -326,17 +326,17 @@ per label — with <code><a href="../reference/at_manifest.html">at_manifest()</
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 7</span></span></span>
 <span><span class="co">#&gt;     idx path                name  status project_path n_rois modified</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 /tmp/Rtmpaq6yKW/an… imag… compl… <span style="color: #BB0000;">NA</span>                0 <span style="color: #BB0000;">NA</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 /tmp/Rtmpaq6yKW/an… imag… pendi… <span style="color: #BB0000;">NA</span>                0 <span style="color: #BB0000;">NA</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 /tmp/Rtmpaq6yKW/an… imag… pendi… <span style="color: #BB0000;">NA</span>                0 <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 /tmp/RtmpiC7h3P/hy… imag… compl… <span style="color: #BB0000;">NA</span>                0 <span style="color: #BB0000;">NA</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 /tmp/RtmpiC7h3P/hy… imag… pendi… <span style="color: #BB0000;">NA</span>                0 <span style="color: #BB0000;">NA</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 /tmp/RtmpiC7h3P/hy… imag… pendi… <span style="color: #BB0000;">NA</span>                0 <span style="color: #BB0000;">NA</span></span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/at_manifest.html">at_manifest</a></span><span class="op">(</span><span class="va">sess</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 9</span></span></span>
 <span><span class="co">#&gt;     idx name     path              status n_layers n_rois tumour necrosis stroma</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 image_01 /tmp/Rtmpaq6yKW/… compl…        0      0      0        0      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 image_02 /tmp/Rtmpaq6yKW/… pendi…        0      0      0        0      0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 image_03 /tmp/Rtmpaq6yKW/… pendi…        0      0      0        0      0</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 image_01 /tmp/RtmpiC7h3P/… compl…        0      0      0        0      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 image_02 /tmp/RtmpiC7h3P/… pendi…        0      0      0        0      0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 image_03 /tmp/RtmpiC7h3P/… pendi…        0      0      0        0      0</span></span></code></pre></div>
 <p>Use these to seed a session programmatically, pre-fill statuses, or
 audit progress in a report — no Shiny required.</p>
 </div>
@@ -351,7 +351,7 @@ completed image, or the whole queue. Flagged and skipped images are
 excluded from batch exports unless you opt them back in, so a “export
 all complete” pass yields exactly the reviewed annotations and nothing
 half-finished.</p>
-<p>Those export formats — and how annotatR round-trips with QuPath,
+<p>Those export formats — and how hyperannotatR round-trips with QuPath,
 GeoJSON, and mask TIFFs — are the subject of the next vignette,
 “Interoperability”.</p>
 </div>
@@ -366,7 +366,7 @@ GeoJSON, and mask TIFFs — are the subject of the next vignette,
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">
-  <p><span class="themakr-footer-pkg">annotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
+  <p><span class="themakr-footer-pkg">hyperannotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
 </div>
 
 <div class="pkgdown-footer-right">

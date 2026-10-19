@@ -45,21 +45,21 @@ at_read_geojson(
 ## Value
 
 A named list of
-[annot_layer](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+[annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 objects (one per distinct `layer` property), or a single
-[annot_layer](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+[annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 when `layer_name` is supplied.
 
 ## See also
 
 Other io:
-[`at_load_project()`](https://cttir.github.io/annotatR/reference/at_load_project.md),
-[`at_load_session()`](https://cttir.github.io/annotatR/reference/at_load_session.md),
-[`at_read_qupath()`](https://cttir.github.io/annotatR/reference/at_read_qupath.md),
-[`at_read_rois_csv()`](https://cttir.github.io/annotatR/reference/at_read_rois_csv.md),
-[`at_roi_from_geojson()`](https://cttir.github.io/annotatR/reference/at_roi_from_geojson.md),
-[`at_save_project()`](https://cttir.github.io/annotatR/reference/at_save_project.md),
-[`at_save_session()`](https://cttir.github.io/annotatR/reference/at_save_session.md),
-[`at_write_geojson()`](https://cttir.github.io/annotatR/reference/at_write_geojson.md),
-[`at_write_qupath()`](https://cttir.github.io/annotatR/reference/at_write_qupath.md),
-[`at_write_rois_csv()`](https://cttir.github.io/annotatR/reference/at_write_rois_csv.md)
+[`at_load_project()`](https://cttir.github.io/hyperannotatR/reference/at_load_project.md),
+[`at_load_session()`](https://cttir.github.io/hyperannotatR/reference/at_load_session.md),
+[`at_read_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_read_qupath.md),
+[`at_read_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.md),
+[`at_roi_from_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_roi_from_geojson.md),
+[`at_save_project()`](https://cttir.github.io/hyperannotatR/reference/at_save_project.md),
+[`at_save_session()`](https://cttir.github.io/hyperannotatR/reference/at_save_session.md),
+[`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md),
+[`at_write_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_write_qupath.md),
+[`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)

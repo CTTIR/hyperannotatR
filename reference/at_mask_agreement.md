@@ -2,9 +2,9 @@
 
 Per-class Dice and Jaccard (IoU) plus an overall accuracy and Cohen's
 kappa, comparing a reference mask `a` against a second mask `b` (e.g. an
-annotatR mask against a `.npy` ground truth, or two annotators). Classes
-are matched by integer value, so both masks must use the same class
-codebook.
+hyperannotatR mask against a `.npy` ground truth, or two annotators).
+Classes are matched by integer value, so both masks must use the same
+class codebook.
 
 ## Usage
 
@@ -52,22 +52,22 @@ with one row per class: `value`, `label`, `n_true`, `n_pred`, `tp`,
 
 ## See also
 
-[`at_mask()`](https://cttir.github.io/annotatR/reference/at_mask.md),
-[`at_read_npy()`](https://cttir.github.io/annotatR/reference/at_read_npy.md)
+[`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md),
+[`at_read_npy()`](https://cttir.github.io/hyperannotatR/reference/at_read_npy.md)
 
 Other masks:
-[`at_mask()`](https://cttir.github.io/annotatR/reference/at_mask.md),
-[`at_mask_boundary()`](https://cttir.github.io/annotatR/reference/at_mask_boundary.md),
-[`at_mask_derive()`](https://cttir.github.io/annotatR/reference/at_mask_derive.md),
-[`at_mask_legend()`](https://cttir.github.io/annotatR/reference/at_mask_legend.md),
-[`at_mask_preview()`](https://cttir.github.io/annotatR/reference/at_mask_preview.md),
-[`at_mask_stack()`](https://cttir.github.io/annotatR/reference/at_mask_stack.md),
-[`at_mask_stats()`](https://cttir.github.io/annotatR/reference/at_mask_stats.md),
-[`at_read_mask()`](https://cttir.github.io/annotatR/reference/at_read_mask.md),
-[`at_read_npy()`](https://cttir.github.io/annotatR/reference/at_read_npy.md),
-[`at_write_mask()`](https://cttir.github.io/annotatR/reference/at_write_mask.md),
-[`at_write_masks()`](https://cttir.github.io/annotatR/reference/at_write_masks.md),
-[`at_write_npy()`](https://cttir.github.io/annotatR/reference/at_write_npy.md)
+[`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md),
+[`at_mask_boundary()`](https://cttir.github.io/hyperannotatR/reference/at_mask_boundary.md),
+[`at_mask_derive()`](https://cttir.github.io/hyperannotatR/reference/at_mask_derive.md),
+[`at_mask_legend()`](https://cttir.github.io/hyperannotatR/reference/at_mask_legend.md),
+[`at_mask_preview()`](https://cttir.github.io/hyperannotatR/reference/at_mask_preview.md),
+[`at_mask_stack()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stack.md),
+[`at_mask_stats()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stats.md),
+[`at_read_mask()`](https://cttir.github.io/hyperannotatR/reference/at_read_mask.md),
+[`at_read_npy()`](https://cttir.github.io/hyperannotatR/reference/at_read_npy.md),
+[`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md),
+[`at_write_masks()`](https://cttir.github.io/hyperannotatR/reference/at_write_masks.md),
+[`at_write_npy()`](https://cttir.github.io/hyperannotatR/reference/at_write_npy.md)
 
 ## Examples
 

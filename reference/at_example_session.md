@@ -22,25 +22,25 @@ at_example_session(n = 5L, call = rlang::caller_env())
 ## Value
 
 An
-[annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+[annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 ## See also
 
 Other example data:
-[`at_example_image()`](https://cttir.github.io/annotatR/reference/at_example_image.md),
-[`at_example_path()`](https://cttir.github.io/annotatR/reference/at_example_path.md),
-[`at_example_project()`](https://cttir.github.io/annotatR/reference/at_example_project.md)
+[`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md),
+[`at_example_path()`](https://cttir.github.io/hyperannotatR/reference/at_example_path.md),
+[`at_example_project()`](https://cttir.github.io/hyperannotatR/reference/at_example_project.md)
 
 Other sessions:
-[`at_current()`](https://cttir.github.io/annotatR/reference/at_current.md),
-[`at_goto()`](https://cttir.github.io/annotatR/reference/at_goto.md),
-[`at_manifest()`](https://cttir.github.io/annotatR/reference/at_manifest.md),
-[`at_next()`](https://cttir.github.io/annotatR/reference/at_next.md),
-[`at_prev()`](https://cttir.github.io/annotatR/reference/at_prev.md),
-[`at_resume()`](https://cttir.github.io/annotatR/reference/at_resume.md),
-[`at_session()`](https://cttir.github.io/annotatR/reference/at_session.md),
-[`at_session_status()`](https://cttir.github.io/annotatR/reference/at_session_status.md),
-[`at_set_status()`](https://cttir.github.io/annotatR/reference/at_set_status.md)
+[`at_current()`](https://cttir.github.io/hyperannotatR/reference/at_current.md),
+[`at_goto()`](https://cttir.github.io/hyperannotatR/reference/at_goto.md),
+[`at_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_manifest.md),
+[`at_next()`](https://cttir.github.io/hyperannotatR/reference/at_next.md),
+[`at_prev()`](https://cttir.github.io/hyperannotatR/reference/at_prev.md),
+[`at_resume()`](https://cttir.github.io/hyperannotatR/reference/at_resume.md),
+[`at_session()`](https://cttir.github.io/hyperannotatR/reference/at_session.md),
+[`at_session_status()`](https://cttir.github.io/hyperannotatR/reference/at_session_status.md),
+[`at_set_status()`](https://cttir.github.io/hyperannotatR/reference/at_set_status.md)
 
 ## Examples
 
@@ -50,7 +50,7 @@ at_session_status(sess)
 #> # A tibble: 3 × 7
 #>     idx path                name  status project_path n_rois modified
 #>   <int> <chr>               <chr> <chr>  <chr>         <int> <dttm>  
-#> 1     1 /tmp/RtmpyhZsMe/an… imag… pendi… NA                0 NA      
-#> 2     2 /tmp/RtmpyhZsMe/an… imag… pendi… NA                0 NA      
-#> 3     3 /tmp/RtmpyhZsMe/an… imag… pendi… NA                0 NA      
+#> 1     1 /tmp/RtmpW8To19/hy… imag… pendi… NA                0 NA      
+#> 2     2 /tmp/RtmpW8To19/hy… imag… pendi… NA                0 NA      
+#> 3     3 /tmp/RtmpW8To19/hy… imag… pendi… NA                0 NA      
 ```

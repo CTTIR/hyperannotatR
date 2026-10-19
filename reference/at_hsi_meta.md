@@ -1,11 +1,11 @@
 # Hyperspectral and acquisition metadata of an image
 
-Return the backend-agnostic metadata record annotatR keeps for an image:
-acquisition identity, storage layout, value semantics, geometry
+Return the backend-agnostic metadata record hyperannotatR keeps for an
+image: acquisition identity, storage layout, value semantics, geometry
 convention, plane selection, and calibration/transform digests. Fields a
 backend cannot establish are `NA` (never guessed), and
 `wavelength_status` in
-[`at_bands()`](https://cttir.github.io/annotatR/reference/at_bands.md)
+[`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md)
 flags missing or duplicated wavelengths instead of interpolating them.
 
 ## Usage
@@ -19,7 +19,7 @@ at_hsi_meta(x, call = rlang::caller_env())
 - x:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - call:
 
@@ -40,31 +40,31 @@ A named list with the elements `vendor`, `instrument`, `acquisition_id`,
 
 ## See also
 
-[`at_bands()`](https://cttir.github.io/annotatR/reference/at_bands.md),
-[`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md)
+[`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md),
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md)
 
 Other images:
-[`annotatR-classes`](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
-[`at_bands()`](https://cttir.github.io/annotatR/reference/at_bands.md),
-[`at_dims()`](https://cttir.github.io/annotatR/reference/at_dims.md),
-[`at_example_image()`](https://cttir.github.io/annotatR/reference/at_example_image.md),
-[`at_is_pyramidal()`](https://cttir.github.io/annotatR/reference/at_is_pyramidal.md),
-[`at_is_spectral()`](https://cttir.github.io/annotatR/reference/at_is_spectral.md),
-[`at_meta()`](https://cttir.github.io/annotatR/reference/at_meta.md),
-[`at_n_bands()`](https://cttir.github.io/annotatR/reference/at_n_bands.md),
-[`at_n_levels()`](https://cttir.github.io/annotatR/reference/at_n_levels.md),
-[`at_pixel_size()`](https://cttir.github.io/annotatR/reference/at_pixel_size.md),
-[`at_read_image()`](https://cttir.github.io/annotatR/reference/at_read_image.md),
-[`at_tile()`](https://cttir.github.io/annotatR/reference/at_tile.md),
-[`at_wavelengths()`](https://cttir.github.io/annotatR/reference/at_wavelengths.md)
+[`at_bands()`](https://cttir.github.io/hyperannotatR/reference/at_bands.md),
+[`at_dims()`](https://cttir.github.io/hyperannotatR/reference/at_dims.md),
+[`at_example_image()`](https://cttir.github.io/hyperannotatR/reference/at_example_image.md),
+[`at_is_pyramidal()`](https://cttir.github.io/hyperannotatR/reference/at_is_pyramidal.md),
+[`at_is_spectral()`](https://cttir.github.io/hyperannotatR/reference/at_is_spectral.md),
+[`at_meta()`](https://cttir.github.io/hyperannotatR/reference/at_meta.md),
+[`at_n_bands()`](https://cttir.github.io/hyperannotatR/reference/at_n_bands.md),
+[`at_n_levels()`](https://cttir.github.io/hyperannotatR/reference/at_n_levels.md),
+[`at_pixel_size()`](https://cttir.github.io/hyperannotatR/reference/at_pixel_size.md),
+[`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
+[`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
+[`at_wavelengths()`](https://cttir.github.io/hyperannotatR/reference/at_wavelengths.md),
+[`hyperannotatR-classes`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
 
 Other hsi:
-[`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md),
-[`at_band_view()`](https://cttir.github.io/annotatR/reference/at_band_view.md),
-[`at_convert_values()`](https://cttir.github.io/annotatR/reference/at_convert_values.md),
-[`at_cubert_export_envi()`](https://cttir.github.io/annotatR/reference/at_cubert_export_envi.md),
-[`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md),
-[`at_tivita_profile()`](https://cttir.github.io/annotatR/reference/at_tivita_profile.md)
+[`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md),
+[`at_band_view()`](https://cttir.github.io/hyperannotatR/reference/at_band_view.md),
+[`at_convert_values()`](https://cttir.github.io/hyperannotatR/reference/at_convert_values.md),
+[`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md),
+[`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
 
 ## Examples
 

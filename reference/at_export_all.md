@@ -24,7 +24,7 @@ at_export_all(
 - session:
 
   An
-  [annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - dir:
 
@@ -67,18 +67,18 @@ with columns `image`, `format`, `path`, `bytes`, `n_rois`, `status`, and
 
 ## See also
 
-[`at_write_masks()`](https://cttir.github.io/annotatR/reference/at_write_masks.md),
-[`at_manifest()`](https://cttir.github.io/annotatR/reference/at_manifest.md)
+[`at_write_masks()`](https://cttir.github.io/hyperannotatR/reference/at_write_masks.md),
+[`at_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_manifest.md)
 
 Other batch:
-[`at_batch_apply()`](https://cttir.github.io/annotatR/reference/at_batch_apply.md),
-[`at_batch_check_geometry()`](https://cttir.github.io/annotatR/reference/at_batch_check_geometry.md),
-[`at_summary_table()`](https://cttir.github.io/annotatR/reference/at_summary_table.md)
+[`at_batch_apply()`](https://cttir.github.io/hyperannotatR/reference/at_batch_apply.md),
+[`at_batch_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_batch_check_geometry.md),
+[`at_summary_table()`](https://cttir.github.io/hyperannotatR/reference/at_summary_table.md)
 
 ## Examples
 
 ``` r
 sess <- at_example_session(2)
-dir <- file.path(tempdir(), "annotatR-export")
+dir <- file.path(tempdir(), "hyperannotatR-export")
 at_export_all(sess, dir, formats = "geojson", scope = "all", progress = FALSE)
 ```

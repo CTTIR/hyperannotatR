@@ -1,11 +1,11 @@
 # Check geometry across a whole session
 
 Run
-[`at_check_geometry()`](https://cttir.github.io/annotatR/reference/at_check_geometry.md)
+[`at_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_check_geometry.md)
 on every materialised project in the session and stack the reports. Like
-[`at_check_geometry()`](https://cttir.github.io/annotatR/reference/at_check_geometry.md)
+[`at_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_check_geometry.md)
 (and unlike the assertion
-[`at_validate()`](https://cttir.github.io/annotatR/reference/at_validate.md)),
+[`at_validate()`](https://cttir.github.io/hyperannotatR/reference/at_validate.md)),
 this returns a report rather than throwing.
 
 ## Usage
@@ -19,7 +19,7 @@ at_batch_check_geometry(session, call = rlang::caller_env())
 - session:
 
   An
-  [annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - call:
 
@@ -33,9 +33,9 @@ when all geometry is valid.
 
 ## See also
 
-[`at_check_geometry()`](https://cttir.github.io/annotatR/reference/at_check_geometry.md)
+[`at_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_check_geometry.md)
 
 Other batch:
-[`at_batch_apply()`](https://cttir.github.io/annotatR/reference/at_batch_apply.md),
-[`at_export_all()`](https://cttir.github.io/annotatR/reference/at_export_all.md),
-[`at_summary_table()`](https://cttir.github.io/annotatR/reference/at_summary_table.md)
+[`at_batch_apply()`](https://cttir.github.io/hyperannotatR/reference/at_batch_apply.md),
+[`at_export_all()`](https://cttir.github.io/hyperannotatR/reference/at_export_all.md),
+[`at_summary_table()`](https://cttir.github.io/hyperannotatR/reference/at_summary_table.md)

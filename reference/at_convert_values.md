@@ -52,12 +52,12 @@ a zero white-minus-dark denominator gives `NA`.
 ## See also
 
 Other hsi:
-[`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md),
-[`at_band_view()`](https://cttir.github.io/annotatR/reference/at_band_view.md),
-[`at_cubert_export_envi()`](https://cttir.github.io/annotatR/reference/at_cubert_export_envi.md),
-[`at_hsi_meta()`](https://cttir.github.io/annotatR/reference/at_hsi_meta.md),
-[`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md),
-[`at_tivita_profile()`](https://cttir.github.io/annotatR/reference/at_tivita_profile.md)
+[`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md),
+[`at_band_view()`](https://cttir.github.io/hyperannotatR/reference/at_band_view.md),
+[`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md),
+[`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
 
 ## Examples
 

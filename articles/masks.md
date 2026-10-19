@@ -1,19 +1,19 @@
 # Masks
 
-![annotatR logo](../reference/figures/logo.png)
+![hyperannotatR logo](../reference/figures/logo.png)
 
 A *mask* is the artefact that turns hand-drawn regions into something a
 segmentation or classification pipeline can consume: an integer raster
 on the same pixel grid as the image, where each pixel carries the
-identity of the region it belongs to. In annotatR the mask is the core
-deliverable, and
-[`at_mask()`](https://cttir.github.io/annotatR/reference/at_mask.md) is
-the function that produces it from an `annot_roi`, an `annot_layer`, or
-a whole `annot_project`.
+identity of the region it belongs to. In hyperannotatR the mask is the
+core deliverable, and
+[`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md)
+is the function that produces it from an `annot_roi`, an `annot_layer`,
+or a whole `annot_project`.
 
 ## Three mask types
 
-[`at_mask()`](https://cttir.github.io/annotatR/reference/at_mask.md)
+[`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md)
 writes one of three rasters, chosen with `type`:
 
 - **`"binary"`** — a logical matrix: `TRUE` wherever *any* region covers
@@ -31,18 +31,18 @@ writes one of three rasters, chosen with `type`:
 Every mask is an `annot_mask`: a matrix with an attached `legend` tibble
 (`value`, `label`, `layer`, `roi_id`, `n_px`, `colour`) plus `level`,
 `dims`, and `mask_type` attributes. Read the legend back with
-[`at_mask_legend()`](https://cttir.github.io/annotatR/reference/at_mask_legend.md).
+[`at_mask_legend()`](https://cttir.github.io/hyperannotatR/reference/at_mask_legend.md).
 
 ## The pixel-coverage contract
 
 Rasterisation is only reproducible if the pixel/geometry relationship is
-exact, so annotatR pins it down. Pixel `(i, j)` covers the half-open
-square `[j-1, j) x [i-1, i)`, with `(0, 0)` at the top-left corner of
-the top-left pixel; its centre is therefore `(j - 0.5, i - 0.5)`. With
-the default `touches = FALSE`, a pixel is in the mask when *its centre*
-lies inside the polygon, using a half-open `[lower, upper)` tie rule: a
-centre on the lower edge counts as inside, one on the upper edge as
-outside.
+exact, so hyperannotatR pins it down. Pixel `(i, j)` covers the
+half-open square `[j-1, j) x [i-1, i)`, with `(0, 0)` at the top-left
+corner of the top-left pixel; its centre is therefore
+`(j - 0.5, i - 0.5)`. With the default `touches = FALSE`, a pixel is in
+the mask when *its centre* lies inside the polygon, using a half-open
+`[lower, upper)` tie rule: a centre on the lower edge counts as inside,
+one on the upper edge as outside.
 
 The cleanest way to trust this is to compute a small case by eye. Take a
 rectangle from `(2, 2)` to `(5, 5)` on a 10x10 grid:
@@ -184,7 +184,7 @@ table(as.integer(mc))
 #> 135640  19600  72704  34200
 ```
 
-[`at_mask_stats()`](https://cttir.github.io/annotatR/reference/at_mask_stats.md)
+[`at_mask_stats()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stats.md)
 summarises each value — pixel counts, area, fraction of the frame,
 bounding box and centroid — ready for a report table:
 
@@ -203,7 +203,7 @@ at_mask_stats(mc)
 
 ## Writing masks and the legend sidecar
 
-[`at_write_mask()`](https://cttir.github.io/annotatR/reference/at_write_mask.md)
+[`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md)
 writes an integer TIFF (16-bit by default), and — because a bare integer
 raster is meaningless without a key — a companion `<path>.legend.json`
 describing it:
@@ -218,7 +218,7 @@ list.files(dir)
 cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #> {
 #>   "annotatR_version": "0.2.0",
-#>   "created": "2026-10-14T12:44:13+0000",
+#>   "created": "2026-10-19T05:51:45+0000",
 #>   "mask_type": "multiclass",
 #>   "level": 0,
 #>   "dims": [512, 512],
@@ -278,8 +278,8 @@ tumour = mask == next(v for v, l in value_to_label.items() if l == "tumour")
 ## Reading masks back
 
 Masks are not a dead end.
-[`at_read_mask()`](https://cttir.github.io/annotatR/reference/at_read_mask.md)
-polygonises an existing mask — annotatR’s own output, or a
+[`at_read_mask()`](https://cttir.github.io/hyperannotatR/reference/at_read_mask.md)
+polygonises an existing mask — hyperannotatR’s own output, or a
 Cellpose/StarDist/QuPath raster — back into an editable `annot_layer`,
 recovering labels from the sidecar when it is present:
 
@@ -291,7 +291,7 @@ vapply(back$rois, function(r) r$label, character(1))
 ```
 
 Finally,
-[`at_plot_mask()`](https://cttir.github.io/annotatR/reference/at_plot_mask.md)
+[`at_plot_mask()`](https://cttir.github.io/hyperannotatR/reference/at_plot_mask.md)
 renders a mask with its legend for a quick visual check:
 
 ``` r

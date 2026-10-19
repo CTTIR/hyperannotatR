@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Images and backends • annotatR</title>
+<title>Images and backends • hyperannotatR</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -27,7 +27,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
-    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">annotatR</a>
+    <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
@@ -45,7 +45,7 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/annotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/CTTIR/hyperannotatR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-lightswitch" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true" aria-label="Light switch"><span class="fa fa-sun"></span></button>
   <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lightswitch">
@@ -69,19 +69,19 @@
       <img src="../logo.svg" class="logo" alt=""><h1>Images and backends</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/CTTIR/annotatR/blob/main/vignettes/images-and-backends.Rmd" class="external-link"><code>vignettes/images-and-backends.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/CTTIR/hyperannotatR/blob/main/vignettes/images-and-backends.Rmd" class="external-link"><code>vignettes/images-and-backends.Rmd</code></a></small>
       <div class="d-none name"><code>images-and-backends.Rmd</code></div>
     </div>
 
     
     
-<p><img src="../reference/figures/logo.png" class="r-plt" alt="annotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<p><img src="../reference/figures/logo.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
 <div class="section level2">
 <h2 id="a-handle-not-a-pixel-array">A handle, not a pixel array<a class="anchor" aria-label="anchor" href="#a-handle-not-a-pixel-array"></a>
 </h2>
 <p>Whole-slide microscopy and hyperspectral cubes are routinely
-gigabytes in size, so annotatR never loads them wholesale. Reading an
-image returns an <code>annot_image</code>: a lightweight,
+gigabytes in size, so hyperannotatR never loads them wholesale. Reading
+an image returns an <code>annot_image</code>: a lightweight,
 backend-agnostic <em>handle</em> that carries the metadata you need to
 annotate — dimensions, pyramid levels, bands, pixel size — together with
 a lazy accessor that fetches pixels only when asked.</p>
@@ -137,7 +137,7 @@ and navigate the whole image without reading full resolution. Second, an
 ROI drawn on a coarse level records the <code>level</code> it was
 created at, so its coordinates can be rescaled exactly to level 0 (see
 <code><a href="../reference/at_roi_rescale.html">at_roi_rescale()</a></code> and <code><a href="../reference/at_transform.html">at_transform()</a></code>). Every
-geometry in annotatR is anchored to a pyramid level; the coordinate
+geometry in hyperannotatR is anchored to a pyramid level; the coordinate
 convention is image pixels with the origin at the top-left and
 <code>y</code> increasing downward.</p>
 </div>
@@ -268,7 +268,7 @@ registry, is auto-detected from the file, and serves tiles through
 <span></span>
 <span><span class="va">cimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_read_image.html">at_read_image</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
 <span><span class="va">cimg</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file365a32c206b.const</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file363f4fd40962.const</span></span></span>
 <span><span class="co">#&gt; backend: <span style="color: #0000BB;">"const"</span>  |  dtype: <span style="color: #0000BB;">"double"</span></span></span>
 <span><span class="co">#&gt; size: 64 x 48 px  |  levels: 1  |  bands: 2</span></span>
 <span><span class="co">#&gt; pixel size: 1 x 1 px</span></span>
@@ -304,7 +304,7 @@ ROIs, layers and projects build on these image handles.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">
-  <p><span class="themakr-footer-pkg">annotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
+  <p><span class="themakr-footer-pkg">hyperannotatR</span> is part of the <a href="https://cttir.github.io/website/" class="external-link">CTTIR</a> suite · <a href="https://github.com/CTTIR" class="external-link">GitHub</a></p>
 </div>
 
 <div class="pkgdown-footer-right">

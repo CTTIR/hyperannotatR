@@ -1,10 +1,10 @@
 # Compute a registered band view
 
 Evaluate one of
-[`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md)
+[`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md)
 on a window of an image. The result is a display product: a `[y, x, k]`
 array (`k = 3` for `"rgb"`, otherwise 1) with provenance attributes,
-which annotatR never uses as analysis input.
+which hyperannotatR never uses as analysis input.
 
 ## Usage
 
@@ -26,7 +26,7 @@ at_band_view(
 - img:
 
   An
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md).
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md).
 
 - operation:
 
@@ -43,7 +43,7 @@ at_band_view(
 - level, xrange, yrange:
 
   Passed to
-  [`at_tile()`](https://cttir.github.io/annotatR/reference/at_tile.md).
+  [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md).
 
 - call:
 
@@ -58,12 +58,12 @@ A numeric array with attributes `operation`, `bands`, `wavelengths`,
 ## See also
 
 Other hsi:
-[`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md),
-[`at_convert_values()`](https://cttir.github.io/annotatR/reference/at_convert_values.md),
-[`at_cubert_export_envi()`](https://cttir.github.io/annotatR/reference/at_cubert_export_envi.md),
-[`at_hsi_meta()`](https://cttir.github.io/annotatR/reference/at_hsi_meta.md),
-[`at_read_stats()`](https://cttir.github.io/annotatR/reference/at_read_stats.md),
-[`at_tivita_profile()`](https://cttir.github.io/annotatR/reference/at_tivita_profile.md)
+[`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md),
+[`at_convert_values()`](https://cttir.github.io/hyperannotatR/reference/at_convert_values.md),
+[`at_cubert_export_envi()`](https://cttir.github.io/hyperannotatR/reference/at_cubert_export_envi.md),
+[`at_hsi_meta()`](https://cttir.github.io/hyperannotatR/reference/at_hsi_meta.md),
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md),
+[`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
 
 ## Examples
 

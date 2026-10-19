@@ -1,27 +1,27 @@
 # The batch annotation app
 
-![annotatR logo](../reference/figures/logo.png)
+![hyperannotatR logo](../reference/figures/logo.png)
 
 Annotating one image is a job for
-[`at_project()`](https://cttir.github.io/annotatR/reference/at_project.md)
+[`at_project()`](https://cttir.github.io/hyperannotatR/reference/at_project.md)
 and the ROI constructors. Annotating a *queue* of images — a plate of
 serial sections, a batch of slides, a folder of cubes — is what the
 annotation app is for. It wraps a Shiny canvas around a resumable
 **session**, so you can work through many images without losing your
 place, your labels, or your unsaved edits.
-[`at_app()`](https://cttir.github.io/annotatR/reference/at_app.md)
+[`at_app()`](https://cttir.github.io/hyperannotatR/reference/at_app.md)
 builds the app as an ordinary `shiny.appobj` from explicit arguments
 (for embedding or testing), and
-[`at_annotate()`](https://cttir.github.io/annotatR/reference/at_annotate.md)
+[`at_annotate()`](https://cttir.github.io/hyperannotatR/reference/at_annotate.md)
 launches it.
 
 ## Building a session
 
 A session is a queue of image paths plus a shared annotation template.
 Build one explicitly with
-[`at_session()`](https://cttir.github.io/annotatR/reference/at_session.md),
+[`at_session()`](https://cttir.github.io/hyperannotatR/reference/at_session.md),
 or grab a ready-made one for experimentation with
-[`at_example_session()`](https://cttir.github.io/annotatR/reference/at_example_session.md),
+[`at_example_session()`](https://cttir.github.io/hyperannotatR/reference/at_example_session.md),
 which copies the bundled tissue image into a temporary directory so the
 queue has real files to iterate.
 
@@ -31,7 +31,7 @@ sess <- at_example_session(3)
 sess
 #> <annot_session>
 #> images: 3  |  complete: 0  |  cursor: 1
-#> out_dir: /tmp/Rtmpaq6yKW/annotatR-example-session-3ac1ce9eaea  |  autosave: TRUE
+#> out_dir: /tmp/RtmpiC7h3P/hyperannotatR-example-session-3aa97ce95d61  |  autosave: TRUE
 ```
 
 Every image starts with status `"pending"`, the cursor sits on the first
@@ -43,10 +43,10 @@ from disk until you visit it.
 Two things are shared across the whole queue. The **label vocabulary**
 is the flat list of allowed labels, bound to the number keys `1`–`9`.
 The **layer template** is a list of
-[`at_layer()`](https://cttir.github.io/annotatR/reference/at_layer.md)
+[`at_layer()`](https://cttir.github.io/hyperannotatR/reference/at_layer.md)
 objects — with styles from
-[`at_style()`](https://cttir.github.io/annotatR/reference/at_style.md) —
-stamped onto every image the first time you open it, so each slide
+[`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)
+— stamped onto every image the first time you open it, so each slide
 starts with the same empty layers ready to receive ROIs.
 
 ``` r
@@ -80,7 +80,7 @@ blocks, so it is never run inside a vignette:
 at_annotate(templated)
 ```
 
-[`at_annotate()`](https://cttir.github.io/annotatR/reference/at_annotate.md)
+[`at_annotate()`](https://cttir.github.io/hyperannotatR/reference/at_annotate.md)
 is forgiving about its first argument: pass a session, a project, an
 image, a vector of paths, a directory, or `NULL` to open the bundled
 example.
@@ -100,7 +100,7 @@ class(app)
 For spectral cubes the **Display** panel switches the canvas between
 natural colour, a single band, a pseudo-RGB / false-colour triple and
 the registered band operations listed by
-[`at_band_operations()`](https://cttir.github.io/annotatR/reference/at_band_operations.md)
+[`at_band_operations()`](https://cttir.github.io/hyperannotatR/reference/at_band_operations.md)
 (ratio, normalised difference, band means). These are display products:
 masks, spectra and exports always use the original cube values. The
 **Cube** table shows the image kind, wavelength range and gaps, value
@@ -118,7 +118,7 @@ patch. The Annotate page lists its creates, updates and conflicts;
 reviewed or locked ROIs are never changed automatically. Commit or
 discard it explicitly. The badge next to the save controls always shows
 the state: *read-only*, *unsaved*, *staged*, *committed* or *saved*. See
-[`vignette("partner-interop")`](https://cttir.github.io/annotatR/articles/partner-interop.md)
+[`vignette("partner-interop")`](https://cttir.github.io/hyperannotatR/articles/partner-interop.md)
 for the contract behind this.
 
 ## Keyboard shortcuts
@@ -161,9 +161,9 @@ can be annotated in a few keystrokes each.
 By default a session autosaves to `_session.rds` in its `out_dir` on
 every commit, so a crashed browser or a closed laptop costs you nothing.
 Save on demand with
-[`at_save_session()`](https://cttir.github.io/annotatR/reference/at_save_session.md)
+[`at_save_session()`](https://cttir.github.io/hyperannotatR/reference/at_save_session.md)
 (bound to `s`), and pick up exactly where you left off with
-[`at_resume()`](https://cttir.github.io/annotatR/reference/at_resume.md).
+[`at_resume()`](https://cttir.github.io/hyperannotatR/reference/at_resume.md).
 
 ``` r
 
@@ -175,7 +175,7 @@ recovered <- at_resume(file.path(sess$out_dir, "_session.rds"))
 recovered
 #> <annot_session>
 #> images: 3  |  complete: 1  |  cursor: 2
-#> out_dir: /tmp/Rtmpaq6yKW/annotatR-example-session-3ac1ce9eaea  |  autosave: TRUE
+#> out_dir: /tmp/RtmpiC7h3P/hyperannotatR-example-session-3aa97ce95d61  |  autosave: TRUE
 ```
 
 The cursor, statuses, materialised projects, and templates all come back
@@ -186,13 +186,15 @@ intact.
 Everything the canvas does to a session is available as plain functions,
 which is what makes batches scriptable and testable. Inspect the queue
 with
-[`at_session_status()`](https://cttir.github.io/annotatR/reference/at_session_status.md),
+[`at_session_status()`](https://cttir.github.io/hyperannotatR/reference/at_session_status.md),
 walk it with
-[`at_next()`](https://cttir.github.io/annotatR/reference/at_next.md) /
-[`at_prev()`](https://cttir.github.io/annotatR/reference/at_prev.md) /
-[`at_goto()`](https://cttir.github.io/annotatR/reference/at_goto.md),
+[`at_next()`](https://cttir.github.io/hyperannotatR/reference/at_next.md)
+/
+[`at_prev()`](https://cttir.github.io/hyperannotatR/reference/at_prev.md)
+/
+[`at_goto()`](https://cttir.github.io/hyperannotatR/reference/at_goto.md),
 and read a richer progress report — one column per label — with
-[`at_manifest()`](https://cttir.github.io/annotatR/reference/at_manifest.md).
+[`at_manifest()`](https://cttir.github.io/hyperannotatR/reference/at_manifest.md).
 
 ``` r
 
@@ -200,17 +202,17 @@ at_session_status(sess)
 #> # A tibble: 3 × 7
 #>     idx path                name  status project_path n_rois modified
 #>   <int> <chr>               <chr> <chr>  <chr>         <int> <dttm>  
-#> 1     1 /tmp/Rtmpaq6yKW/an… imag… compl… NA                0 NA      
-#> 2     2 /tmp/Rtmpaq6yKW/an… imag… pendi… NA                0 NA      
-#> 3     3 /tmp/Rtmpaq6yKW/an… imag… pendi… NA                0 NA
+#> 1     1 /tmp/RtmpiC7h3P/hy… imag… compl… NA                0 NA      
+#> 2     2 /tmp/RtmpiC7h3P/hy… imag… pendi… NA                0 NA      
+#> 3     3 /tmp/RtmpiC7h3P/hy… imag… pendi… NA                0 NA
 
 at_manifest(sess)
 #> # A tibble: 3 × 9
 #>     idx name     path              status n_layers n_rois tumour necrosis stroma
 #>   <int> <chr>    <chr>             <chr>     <int>  <int>  <int>    <int>  <int>
-#> 1     1 image_01 /tmp/Rtmpaq6yKW/… compl…        0      0      0        0      0
-#> 2     2 image_02 /tmp/Rtmpaq6yKW/… pendi…        0      0      0        0      0
-#> 3     3 image_03 /tmp/Rtmpaq6yKW/… pendi…        0      0      0        0      0
+#> 1     1 image_01 /tmp/RtmpiC7h3P/… compl…        0      0      0        0      0
+#> 2     2 image_02 /tmp/RtmpiC7h3P/… pendi…        0      0      0        0      0
+#> 3     3 image_03 /tmp/RtmpiC7h3P/… pendi…        0      0      0        0      0
 ```
 
 Use these to seed a session programmatically, pre-fill statuses, or
@@ -225,6 +227,6 @@ the whole queue. Flagged and skipped images are excluded from batch
 exports unless you opt them back in, so a “export all complete” pass
 yields exactly the reviewed annotations and nothing half-finished.
 
-Those export formats — and how annotatR round-trips with QuPath,
+Those export formats — and how hyperannotatR round-trips with QuPath,
 GeoJSON, and mask TIFFs — are the subject of the next vignette,
 “Interoperability”.

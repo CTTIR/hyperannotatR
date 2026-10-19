@@ -2,7 +2,7 @@
 
 Send one `annotatr-control-v1` operation. The command is a list with
 `operation` (one of
-[`at_control_capabilities()`](https://cttir.github.io/annotatR/reference/at_control_capabilities.md)`$operations`),
+[`at_control_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_control_capabilities.md)`$operations`),
 `payload` (a list) and `expected_revision` (the `state_revision` the
 command is based on). `request_id` and `idempotency_key` are generated
 when absent and `content_sha256` is always computed from the canonical
@@ -39,17 +39,17 @@ The response `data` (a list) with the response envelope in
 
 ## See also
 
-[`at_control_request_status()`](https://cttir.github.io/annotatR/reference/at_control_request_status.md)
+[`at_control_request_status()`](https://cttir.github.io/hyperannotatR/reference/at_control_request_status.md)
 
 Other control:
-[`at_control_capabilities()`](https://cttir.github.io/annotatR/reference/at_control_capabilities.md),
-[`at_control_close()`](https://cttir.github.io/annotatR/reference/at_control_close.md),
-[`at_control_connect()`](https://cttir.github.io/annotatR/reference/at_control_connect.md),
-[`at_control_events()`](https://cttir.github.io/annotatR/reference/at_control_events.md),
-[`at_control_request_status()`](https://cttir.github.io/annotatR/reference/at_control_request_status.md),
-[`at_control_start()`](https://cttir.github.io/annotatR/reference/at_control_start.md),
-[`at_control_state()`](https://cttir.github.io/annotatR/reference/at_control_state.md),
-[`at_control_stop()`](https://cttir.github.io/annotatR/reference/at_control_stop.md)
+[`at_control_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_control_capabilities.md),
+[`at_control_close()`](https://cttir.github.io/hyperannotatR/reference/at_control_close.md),
+[`at_control_connect()`](https://cttir.github.io/hyperannotatR/reference/at_control_connect.md),
+[`at_control_events()`](https://cttir.github.io/hyperannotatR/reference/at_control_events.md),
+[`at_control_request_status()`](https://cttir.github.io/hyperannotatR/reference/at_control_request_status.md),
+[`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
+[`at_control_state()`](https://cttir.github.io/hyperannotatR/reference/at_control_state.md),
+[`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md)
 
 ## Examples
 
@@ -78,16 +78,16 @@ at_control_command(h, list(operation = "context.goto", payload = list(queue_inde
 #> [1] "1.0"
 #> 
 #> attr(,"response")$request_id
-#> [1] "request-11d86b2a-387c-4855-b3e5-356041309f5b"
+#> [1] "request-c836ca4b-3bd8-469f-966c-ae46f5a17c3b"
 #> 
 #> attr(,"response")$instance_id
-#> [1] "instance-0c463f11-2739-403a-8086-3e2625a75338"
+#> [1] "instance-7cb44c46-3926-4a30-9e38-fc94e70a1bd8"
 #> 
 #> attr(,"response")$state_revision
 #> [1] "1"
 #> 
 #> attr(,"response")$event_cursor
-#> [1] "instance-0c463f11-2739-403a-8086-3e2625a75338:2"
+#> [1] "instance-7cb44c46-3926-4a30-9e38-fc94e70a1bd8:2"
 #> 
 #> attr(,"response")$warnings
 #> list()

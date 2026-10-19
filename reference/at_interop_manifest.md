@@ -1,13 +1,13 @@
 # Build a partner interop manifest
 
-Describe annotatR objects for a partner such as qupflowR without
+Describe hyperannotatR objects for a partner such as qupflowR without
 exposing local paths: images are identified by content hash (`image_id`)
 and file basename; annotations by string ROI ids and an
-[`at_annotation_revision()`](https://cttir.github.io/annotatR/reference/at_annotation_revision.md);
+[`at_annotation_revision()`](https://cttir.github.io/hyperannotatR/reference/at_annotation_revision.md);
 masks by type, integer dtype, background, dimensions, level and legend.
 The coordinate convention, band/wavelength table, HSI value semantics,
 plane, calibration and transform digests are recorded explicitly. QuPath
-hierarchy and native ROI shapes, which annotatR does not model, are
+hierarchy and native ROI shapes, which hyperannotatR does not model, are
 reported as `"unknown"` or `"approximated"`, never invented.
 
 ## Usage
@@ -26,11 +26,11 @@ at_interop_manifest(
 - x:
 
   An
-  [annot_project](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
-  [annot_session](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
-  [annot_image](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
-  [annot_layer](https://cttir.github.io/annotatR/reference/annotatR-classes.md),
-  [annot_roi](https://cttir.github.io/annotatR/reference/annotatR-classes.md)
+  [annot_project](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
+  [annot_session](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
+  [annot_image](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
+  [annot_layer](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md),
+  [annot_roi](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
   or `annot_mask`.
 
 - destination:
@@ -55,16 +55,16 @@ The manifest (a list of class `at_interop_manifest`); invisibly when
 
 ## See also
 
-[`at_export_qupflowr()`](https://cttir.github.io/annotatR/reference/at_export_qupflowr.md),
-[`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md)
+[`at_export_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_export_qupflowr.md),
+[`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md)
 
 Other interop:
-[`at_annotation_revision()`](https://cttir.github.io/annotatR/reference/at_annotation_revision.md),
-[`at_commit_qupflowr()`](https://cttir.github.io/annotatR/reference/at_commit_qupflowr.md),
-[`at_export_qupflowr()`](https://cttir.github.io/annotatR/reference/at_export_qupflowr.md),
-[`at_import_qupflowr()`](https://cttir.github.io/annotatR/reference/at_import_qupflowr.md),
-[`at_interop_capabilities()`](https://cttir.github.io/annotatR/reference/at_interop_capabilities.md),
-[`at_stage_qupflowr()`](https://cttir.github.io/annotatR/reference/at_stage_qupflowr.md)
+[`at_annotation_revision()`](https://cttir.github.io/hyperannotatR/reference/at_annotation_revision.md),
+[`at_commit_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_commit_qupflowr.md),
+[`at_export_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_export_qupflowr.md),
+[`at_import_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_import_qupflowr.md),
+[`at_interop_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_interop_capabilities.md),
+[`at_stage_qupflowr()`](https://cttir.github.io/hyperannotatR/reference/at_stage_qupflowr.md)
 
 ## Examples
 
