@@ -1,7 +1,7 @@
-#' annotatR S3 classes
+#' hyperannotatR S3 classes
 #'
 #' @description
-#' annotatR represents annotations with a small set of S3 classes. This page
+#' hyperannotatR represents annotations with a small set of S3 classes. This page
 #' collects them so they can be cross-referenced from the documentation.
 #'
 #' \describe{
@@ -23,7 +23,7 @@
 #'     [at_summary()].}
 #' }
 #'
-#' @name annotatR-classes
+#' @name hyperannotatR-classes
 #' @aliases annot_image annot_roi annot_layer annot_project annot_session annot_mask annot_style annot_summary
 #' @family images
 #' @seealso [at_project()], [at_layer()]

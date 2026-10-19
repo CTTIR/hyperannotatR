@@ -55,7 +55,7 @@ Computed with `sha256sum` after the final runs.
 
 | file | role | sha256 |
 |---|---|---|
-| `annotatr_written_qupath.geojson` | input (annotatR-written, not produced here) | `51264a043e7512338d5837da83a0c1d9604314033f863b8ad52452a9905af494` |
+| `annotatr_written_qupath.geojson` | input (hyperannotatR-written, not produced here) | `51264a043e7512338d5837da83a0c1d9604314033f863b8ad52452a9905af494` |
 | `qupath_reads_annotatr.json` | read test output | `3714dc70b04abe4183c49c51bc4a654b74fd6ebf0ebb20f8f103dea58aad14a2` |
 | `qupath_written_objects.geojson` | write test, `FEATURE_COLLECTION` | `6f3aa8653b30f9baec7c29a9fc6a5d0ffb25bbf3e3c78d962c16947037155a3d` |
 | `qupath_written_objects_array.geojson` | write test, no options (bare JSON array) | `71357fc0b0b90931eff4861078f67aeedd4ac37df6c1aa51ecb1c0c5ed110aa8` |
@@ -131,7 +131,7 @@ ids of its own run, and they match the exported feature ids in order. The ids in
     exactly as passed, shell and hole both positive-shoelace. So QuPath does **not** enforce
     RFC 7946 winding.
 
-### Import (`PathIO.readObjects(File)` on the annotatR file)
+### Import (`PathIO.readObjects(File)` on the hyperannotatR file)
 * All 4 features were read, with no exceptions and one WARN (legacy `object_type`, see above).
 * `properties.object_type` is accepted as a legacy key: `"detection"` became a `PathDetectionObject`
   and `"annotation"` became a `PathAnnotationObject`.
@@ -157,7 +157,7 @@ ids of its own run, and they match the exported feature ids in order. The ids in
 
 ---
 
-## Follow-up (2026-09-15): annotatR QuPath dialect (`annotatr_020_qupath_dialect.geojson`)
+## Follow-up (2026-09-15): hyperannotatR QuPath dialect (`annotatr_020_qupath_dialect.geojson`)
 
 Same environment and invocation as above: system OpenJDK 25.0.4, QuPath 0.7.0 classpath, run from
 this directory.
@@ -176,7 +176,7 @@ this directory.
 
 | file | role | sha256 |
 |---|---|---|
-| `annotatr_020_qupath_dialect.geojson` | input (annotatR-written, not produced here) | `b3d6bdfb0c7719797d5f4601adc244f53efdf7018db524358d0310f202a1affd` |
+| `annotatr_020_qupath_dialect.geojson` | input (hyperannotatR-written, not produced here) | `b3d6bdfb0c7719797d5f4601adc244f53efdf7018db524358d0310f202a1affd` |
 | `qupath_reads_annotatr020.json` | read results + re-export comparison | `d6c36d6f5b9674eb589a540010075c1785e26b7ac9f9d0aeded21b8db19e0f10` |
 | `qupath_roundtrip_annotatr020.geojson` | QuPath re-export (`FEATURE_COLLECTION`) | `0f1afdff9378c7850665588bb6977c0ee57e6996a6154fceb5274a9e04fa60d5` |
 | `qupath_roundtrip_annotatr020.groovy` | script | `b67f26a4b9a6e2bdeb1964da7fe30df1e34d38694f74cf866d07ac4d0654041f` |
@@ -212,7 +212,7 @@ The outputs are deterministic: all ids come from the input, and both runs produc
   * `probe_metadata_export.groovy` shows the same duplication for objects created directly in QuPath
     with `getMetadata().put("k1","v1")`, on an annotation and on a detection. An object without
     metadata gets no `metadata` key. So the duplication comes from QuPath's writer and has nothing to
-    do with annotatR's input.
+    do with hyperannotatR's input.
   * Tree parsers that keep one value per name (Gson, Python `json`) see the metadata correctly. Any
     reader that errors on, or accumulates, duplicate names will be affected.
 * **Geometry in the re-export:**

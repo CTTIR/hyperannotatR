@@ -8,10 +8,10 @@
 # nuclei as a feature-level `nucleusGeometry`, and `measurements` as a flat
 # object whose non-finite values are strings such as "NaN". QuPath silently
 # replaces feature ids that are not UUIDs, so the QuPath dialect writes a
-# deterministic UUID per ROI and keeps annotatR's own id in
+# deterministic UUID per ROI and keeps hyperannotatR's own id in
 # `properties.metadata`.
 #
-# The legacy annotatR 0.1 dialect (`object_type`, signed 32-bit `colorRGB`) is
+# The legacy hyperannotatR 0.1 dialect (`object_type`, signed 32-bit `colorRGB`) is
 # still readable and can still be written with `dialect = "legacy"`. QuPath's
 # colorRGB packs 0xFFRRGGBB into a signed int, so the hex <-> int conversion
 # uses modular arithmetic to avoid integer overflow.
@@ -34,14 +34,14 @@
 
 .uuid_pattern <- "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
 
-# Deterministic UUID (version 8, RFC 9562 "custom") derived from an annotatR
+# Deterministic UUID (version 8, RFC 9562 "custom") derived from an hyperannotatR
 # ROI id, so repeated exports of the same ROI give QuPath the same object id.
 # An id that already is a UUID is kept unchanged.
 .roi_uuid <- function(id) {
   if (grepl(.uuid_pattern, id)) {
     return(tolower(id))
   }
-  h <- substr(.sha256_bytes(paste0("annotatR:roi:", id)), 1L, 32L)
+  h <- substr(.sha256_bytes(paste0("hyperannotatR:roi:", id)), 1L, 32L)
   chars <- strsplit(h, "")[[1]]
   chars[13] <- "8"
   chars[17] <- c("8", "9", "a", "b")[(strtoi(chars[17], 16L) %% 4L) + 1L]
@@ -107,9 +107,9 @@
 #' The default `dialect = "qupath"` writes what QuPath 0.4 and later read
 #' natively (verified with QuPath 0.7.0): `objectType`, `classification` with
 #' an `[r, g, b]` colour, `isLocked` for locked ROIs, a deterministic UUID per
-#' ROI as the feature id (QuPath replaces non-UUID ids), and annotatR's own ROI
+#' ROI as the feature id (QuPath replaces non-UUID ids), and hyperannotatR's own ROI
 #' id, layer, source and level in `properties.metadata`. `dialect = "legacy"`
-#' writes the annotatR 0.1 form (`object_type`, signed `colorRGB`), which QuPath
+#' writes the hyperannotatR 0.1 form (`object_type`, signed `colorRGB`), which QuPath
 #' still reads with a deprecation warning.
 #'
 #' QuPath keeps one colour per classification name, so identical labels with
@@ -218,7 +218,7 @@ at_write_qupath <- function(project, path, layer = NULL, level = 0L,
 #' Read ROIs from a QuPath GeoJSON file
 #'
 #' Reads QuPath 0.4+ exports (a FeatureCollection or a bare feature array) and
-#' the legacy annotatR 0.1 dialect. `classification.name` (or the joined
+#' the legacy hyperannotatR 0.1 dialect. `classification.name` (or the joined
 #' `names` of a derived class, e.g. `"Tumor: Positive"`) becomes the ROI label,
 #' the classification colour the layer style colour, and features without a
 #' classification are labelled `"unclassified"`. Everything else QuPath carries
@@ -226,7 +226,7 @@ at_write_qupath <- function(project, path, layer = NULL, level = 0L,
 #' id and type, name, measurements (with explicit `value_state`), the image
 #' plane (zero-based `c`, `z`, `t`; `c = NA` for all channels), metadata, a
 #' nucleus geometry, and `roi_native = "ellipse"` with
-#' `geometry_fidelity = "approximated"` for polygonised ellipses. An annotatR id
+#' `geometry_fidelity = "approximated"` for polygonised ellipses. An hyperannotatR id
 #' stored in `metadata.annotatr_roi_id` is restored as the ROI id.
 #'
 #' @param path Path to a QuPath GeoJSON file.

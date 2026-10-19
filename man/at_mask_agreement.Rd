@@ -34,7 +34,7 @@ attribute is a list of \code{accuracy}, \code{kappa}, \code{mean_dice}, \code{me
 }
 \description{
 Per-class Dice and Jaccard (IoU) plus an overall accuracy and Cohen's kappa,
-comparing a reference mask \code{a} against a second mask \code{b} (e.g. an annotatR
+comparing a reference mask \code{a} against a second mask \code{b} (e.g. an hyperannotatR
 mask against a \code{.npy} ground truth, or two annotators). Classes are matched by
 integer value, so both masks must use the same class codebook.
 }

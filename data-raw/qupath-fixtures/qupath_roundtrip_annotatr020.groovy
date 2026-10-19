@@ -1,7 +1,7 @@
 /**
- * READ + RE-EXPORT TEST for annotatR's QuPath dialect (annotatr_020_qupath_dialect.geojson).
+ * READ + RE-EXPORT TEST for hyperannotatR's QuPath dialect (annotatr_020_qupath_dialect.geojson).
  *
- * (1) PathIO.readObjects() the annotatR file and describe each object in file order.
+ * (1) PathIO.readObjects() the hyperannotatR file and describe each object in file order.
  * (2) Re-export the objects with PathIO.exportObjectsAsGeoJSON(FEATURE_COLLECTION) to
  *     qupath_roundtrip_annotatr020.geojson, then parse that export (plain Gson) and the
  *     input (plain Gson) to check whether feature ids and properties.metadata survived.

@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(annotatR)
+library(hyperannotatR)
 
-test_check("annotatR")
+test_check("hyperannotatR")

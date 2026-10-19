@@ -13,7 +13,7 @@ at_load_project(path, call = rlang::caller_env())
 }
 \value{
 The \link{annot_project}. Warns if the file was written by a newer
-annotatR.
+hyperannotatR.
 }
 \description{
 Load a project

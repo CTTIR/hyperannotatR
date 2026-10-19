@@ -1,6 +1,6 @@
 # Interchange with a real QuPath 0.7.0 installation. The fixtures were written
 # and read by QuPath itself (tests/testthat/fixtures/qupath-0.7.0/README.md);
-# expected values come from the QuPath script's inputs, not from annotatR.
+# expected values come from the QuPath script's inputs, not from hyperannotatR.
 
 fx <- function(...) test_path("fixtures", "qupath-0.7.0", ...)
 
@@ -8,7 +8,7 @@ expected_objects <- function() {
   jsonlite::read_json(fx("qupath_written_expected.json"))$objects
 }
 
-test_that("annotatR reads every object QuPath 0.7.0 wrote, with its identity and semantics", {
+test_that("hyperannotatR reads every object QuPath 0.7.0 wrote, with its identity and semantics", {
   exp <- expected_objects()
   lyr <- at_read_qupath(fx("qupath_written_objects.geojson"))
   expect_identical(length(lyr$rois), length(exp))
@@ -45,7 +45,7 @@ test_that("geometry, holes, lines, points and ellipses keep their declared fidel
   # (b) polygon with one hole: 80*80 - 30*30.
   expect_identical(length(by_key$b$geometry[[1]]), 2L)
   expect_equal(at_roi_area(by_key$b), 80 * 80 - 30 * 30)
-  # (c) QuPath polygonises the ellipse and flags it; annotatR keeps the flag.
+  # (c) QuPath polygonises the ellipse and flags it; hyperannotatR keeps the flag.
   expect_identical(by_key$c$attributes$qupath$roi_native, "ellipse")
   expect_identical(by_key$c$attributes$qupath$geometry_fidelity, "approximated")
   expect_identical(.geometry_fidelity(by_key$c), "approximated")
@@ -73,7 +73,7 @@ test_that("QuPath's bare-array export reads identically to the FeatureCollection
                    vapply(b$rois, function(r) .geometry_sha256(r$geometry), character(1)))
 })
 
-test_that("QuPath understood annotatR's legacy dialect but dropped non-UUID ids", {
+test_that("QuPath understood hyperannotatR's legacy dialect but dropped non-UUID ids", {
   q <- jsonlite::read_json(fx("qupath_reads_annotatr.json"))
   expect_identical(q$n_objects_read, 4L)
   expect_false(any(vapply(q$objects, `[[`, logical(1), "id_equals_input")))
@@ -83,7 +83,7 @@ test_that("QuPath understood annotatR's legacy dialect but dropped non-UUID ids"
   expect_identical(q$objects[[2]]$geometry$n_interior_rings, 1L)
 })
 
-test_that("the QuPath dialect writes what QuPath 0.7.0 reads natively and keeps annotatR ids", {
+test_that("the QuPath dialect writes what QuPath 0.7.0 reads natively and keeps hyperannotatR ids", {
   lyr <- at_layer("regions", labels = c("Tumor", "Tumor: Positive"),
                   style = at_style(colour = c(Tumor = "#C80000", `Tumor: Positive` = "#C83232")))
   lyr <- at_layer_add(lyr, at_roi_rect(10, 20, 60, 70, label = "Tumor", id = "roi-a", locked = TRUE))
@@ -107,7 +107,7 @@ test_that("the QuPath dialect writes what QuPath 0.7.0 reads natively and keeps 
   expect_identical(back$rois[[2]]$label, "Tumor: Positive")
 })
 
-test_that("QuPath 0.7.0 keeps annotatR 0.2 ids and metadata through its own read and re-export", {
+test_that("QuPath 0.7.0 keeps hyperannotatR 0.2 ids and metadata through its own read and re-export", {
   q <- jsonlite::read_json(fx("qupath_reads_annotatr020.json"))
   sent <- jsonlite::read_json(fx("annotatr_020_qupath_dialect.geojson"))$features
   expect_identical(vapply(q$objects, function(o) o$id, character(1)),

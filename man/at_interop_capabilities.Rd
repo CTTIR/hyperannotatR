@@ -22,7 +22,7 @@ A list of class \code{at_capabilities} with \code{schema}, \code{schema_version}
 without \code{digest} itself.
 }
 \description{
-Report what this annotatR installation can exchange with a partner package
+Report what this hyperannotatR installation can exchange with a partner package
 such as qupflowR, and how far each capability has been qualified. Profiles
 follow the partner contract: I0 file interchange, I1 public R API, I2 the
 local control service (\code{annotatr-control-v1}) and I3 the embeddable app

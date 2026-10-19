@@ -6,9 +6,9 @@
 
 .page_about <- function() {
   bslib::card(
-    bslib::card_header("About annotatR"),
+    bslib::card_header("About hyperannotatR"),
     .prose(shiny::markdown(
-      "**annotatR** is an R toolkit and Shiny application for annotating
+      "**hyperannotatR** is an R toolkit and Shiny application for annotating
 hyperspectral image cubes -- in particular TIVITA *SpecCube* data -- in several
 independent semantic layers, and exporting those annotations as label masks and
 vector geometry for downstream analysis and machine learning.
@@ -30,7 +30,7 @@ Every cube is shown as a natural-colour RGB rendered from its visible bands, and
 every region maps directly onto the cube grid -- so per-region **spectra are
 extracted from the original hyperspectral data**, not from the display image.
 
-*Package:* `CTTIR/annotatR` &nbsp;&bull;&nbsp; *Maintainer:* R. Heller"
+*Package:* `CTTIR/hyperannotatR` &nbsp;&bull;&nbsp; *Maintainer:* R. Heller"
     ))
   )
 }
@@ -91,7 +91,7 @@ imports."
     bslib::card_header("References"),
     .prose(shiny::markdown(
       "### Software
-- **annotatR** -- `CTTIR/annotatR`.
+- **hyperannotatR** -- `CTTIR/hyperannotatR`.
 - R Core Team. *R: A Language and Environment for Statistical Computing.*
   R Foundation for Statistical Computing.
 - Pebesma, E. (2018). *Simple Features for R: Standardized Support for Spatial

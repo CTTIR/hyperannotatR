@@ -1,4 +1,4 @@
-# Internal utilities shared across annotatR. None of these are exported.
+# Internal utilities shared across hyperannotatR. None of these are exported.
 
 # ---- Identifiers -----------------------------------------------------------
 
@@ -30,13 +30,13 @@
 # Current time as a length-1 POSIXct. Wrapped so the point of truth is single.
 .now <- function() Sys.time()
 
-# Installed annotatR version as a character scalar.
-.pkg_version <- function() as.character(utils::packageVersion("annotatR"))
+# Installed hyperannotatR version as a character scalar.
+.pkg_version <- function() as.character(utils::packageVersion("hyperannotatR"))
 
-# Default author for new annotations: the `annotatR.author` option if set,
+# Default author for new annotations: the `hyperannotatR.author` option if set,
 # otherwise the current system user, otherwise "unknown".
 .default_author <- function() {
-  opt <- getOption("annotatR.author", default = NULL)
+  opt <- getOption("hyperannotatR.author", default = NULL)
   if (.is_string(opt)) {
     return(opt)
   }

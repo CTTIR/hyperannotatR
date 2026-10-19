@@ -26,14 +26,13 @@ or unknown for that band. Never interpolated.}
 \code{"non_numeric"} (character).}
 }
 Always has \code{at_n_bands(x)} rows. The first four columns are unchanged
-from annotatR 0.1; the remaining columns were added in 0.2.0.
+from hyperannotatR 0.1; the remaining columns were added in 0.2.0.
 }
 \description{
 Band (channel) table
 }
 \seealso{
 Other images:
-\code{\link{annotatR-classes}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_example_image]{at_example_image()}},
 \code{\link[=at_hsi_meta]{at_hsi_meta()}},
@@ -45,6 +44,7 @@ Other images:
 \code{\link[=at_pixel_size]{at_pixel_size()}},
 \code{\link[=at_read_image]{at_read_image()}},
 \code{\link[=at_tile]{at_tile()}},
-\code{\link[=at_wavelengths]{at_wavelengths()}}
+\code{\link[=at_wavelengths]{at_wavelengths()}},
+\code{\link{hyperannotatR-classes}}
 }
 \concept{images}

@@ -152,7 +152,7 @@ test_that("at_annotate normalises inputs and rejects bad ones", {
 })
 
 test_that("the app contains no library()/require() calls", {
-  files <- c(list.files(system.file("shiny", "annotatR", package = "annotatR"),
+  files <- c(list.files(system.file("shiny", "hyperannotatR", package = "hyperannotatR"),
                         pattern = "\\.R$", recursive = TRUE, full.names = TRUE),
              list.files(test_path("..", "..", "R"), pattern = "^app-.*\\.R$", full.names = TRUE))
   hits <- unlist(lapply(files, function(f) grep("library\\(|require\\(", readLines(f), value = TRUE)))
@@ -160,7 +160,7 @@ test_that("the app contains no library()/require() calls", {
 })
 
 test_that("app www assets make no external requests", {
-  www <- list.files(system.file("shiny", "annotatR", "www", package = "annotatR"),
+  www <- list.files(system.file("shiny", "hyperannotatR", "www", package = "hyperannotatR"),
                     full.names = TRUE)
   hits <- unlist(lapply(www, function(f) {
     lines <- readLines(f)
@@ -174,7 +174,7 @@ test_that("app www assets make no external requests", {
 })
 
 test_that("the keyboard handler guards against text-field focus", {
-  js <- readLines(system.file("shiny", "annotatR", "www", "keys.js", package = "annotatR"))
+  js <- readLines(system.file("shiny", "hyperannotatR", "www", "keys.js", package = "hyperannotatR"))
   expect_true(any(grepl("inTextField", js)))
   expect_true(any(grepl("TEXTAREA", js)))
 })

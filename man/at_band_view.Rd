@@ -36,7 +36,7 @@ A numeric array with attributes \code{operation}, \code{bands},
 \description{
 Evaluate one of \code{\link[=at_band_operations]{at_band_operations()}} on a window of an image. The result
 is a display product: a \verb{[y, x, k]} array (\code{k = 3} for \code{"rgb"}, otherwise 1)
-with provenance attributes, which annotatR never uses as analysis input.
+with provenance attributes, which hyperannotatR never uses as analysis input.
 }
 \examples{
 cube <- at_example_image("cube")

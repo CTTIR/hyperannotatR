@@ -28,7 +28,7 @@ browser_app_dir <- function(session_rds, extra = "") {
   writeLines(c(
     sprintf("pkgload::load_all(%s, quiet = TRUE, export_all = FALSE)", deparse(pkg_root())),
     extra,
-    sprintf("annotatR::at_app(session = readRDS(%s))", deparse(session_rds))
+    sprintf("hyperannotatR::at_app(session = readRDS(%s))", deparse(session_rds))
   ), file.path(dir, "app.R"))
   dir
 }
@@ -180,10 +180,10 @@ test_that("a browser app attached to the control service follows commands and re
   dir <- withr::local_tempdir()
   writeLines(c(
     sprintf("pkgload::load_all(%s, quiet = TRUE, export_all = FALSE)", deparse(pkg_root())),
-    sprintf("h <- annotatR::at_control_start(readRDS(%s), root = %s, token_file = %s, ttl_seconds = 600L)",
+    sprintf("h <- hyperannotatR::at_control_start(readRDS(%s), root = %s, token_file = %s, ttl_seconds = 600L)",
             deparse(sess_rds), deparse(root), deparse(file.path(work, "token"))),
     sprintf("writeLines(h$manifest, %s)", deparse(file.path(work, "manifest.txt"))),
-    "annotatR::at_app(control = h)"
+    "hyperannotatR::at_app(control = h)"
   ), file.path(dir, "app.R"))
   app <- shinytest2::AppDriver$new(dir, name = "annotatr-control", load_timeout = 90000, timeout = 30000,
                                    width = 1400, height = 1000)

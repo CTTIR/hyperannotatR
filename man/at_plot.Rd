@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{at_plot}
 \alias{at_plot}
-\title{Plot generic for annotatR objects}
+\title{Plot generic for hyperannotatR objects}
 \usage{
 at_plot(x, ...)
 }
@@ -15,7 +15,7 @@ at_plot(x, ...)
 A \link[ggplot2:ggplot]{ggplot2::ggplot} object.
 }
 \description{
-Plot generic for annotatR objects
+Plot generic for hyperannotatR objects
 }
 \examples{
 at_plot(at_example_project())

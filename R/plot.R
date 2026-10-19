@@ -251,7 +251,7 @@ at_plot_summary <- function(project, call = rlang::caller_env()) {
   p
 }
 
-#' Plot generic for annotatR objects
+#' Plot generic for hyperannotatR objects
 #'
 #' @param x An [annot_image], [annot_project], or `annot_mask`.
 #' @param ... Passed to the specific plot function.

@@ -20,7 +20,7 @@ The files written into \code{dir} (character), invisibly.
 }
 \description{
 The portable fallback for Cubert data: the CUVIS SDK itself writes an ENVI
-export, which annotatR (and tools without the SDK) can then read through the
+export, which hyperannotatR (and tools without the SDK) can then read through the
 \code{envi} backend. Requires \code{cuvis.r} and a usable CUVIS SDK.
 }
 \examples{

@@ -7,13 +7,13 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="annotatR logo"}
+```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="hyperannotatR logo"}
 knitr::include_graphics("../man/figures/logo.png")
 ```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
-library(annotatR)
+library(hyperannotatR)
 ```
 
 Annotating one image is a job for `at_project()` and the ROI constructors. Annotating a *queue* of images — a plate of serial sections, a batch of slides, a folder of cubes — is what the annotation app is for. It wraps a Shiny canvas around a resumable **session**, so you can work through many images without losing your place, your labels, or your unsaved edits. `at_app()` builds the app as an ordinary `shiny.appobj` from explicit arguments (for embedding or testing), and `at_annotate()` launches it.
@@ -134,4 +134,4 @@ Use these to seed a session programmatically, pre-fill statuses, or audit progre
 
 Exports (`Ctrl`+`E`) are scoped deliberately. You choose the **layers** to include, the **format** (GeoJSON, QuPath, or a rasterised TIFF mask), and the **breadth** — the current image only, every completed image, or the whole queue. Flagged and skipped images are excluded from batch exports unless you opt them back in, so a "export all complete" pass yields exactly the reviewed annotations and nothing half-finished.
 
-Those export formats — and how annotatR round-trips with QuPath, GeoJSON, and mask TIFFs — are the subject of the next vignette, "Interoperability".
+Those export formats — and how hyperannotatR round-trips with QuPath, GeoJSON, and mask TIFFs — are the subject of the next vignette, "Interoperability".

@@ -50,7 +50,7 @@ qupflowR. It contains only neutral, relative files: \code{image.json},
 \code{annotations_qupath.geojson} (QuPath 0.4+ dialect), optionally
 \code{annotations.geojson}, one integer mask per layer under \verb{masks/} with a
 \code{.legend.json} sidecar, optional \code{tables/rois.csv}, an optional
-annotatR-internal \code{objects/project.rds}, \code{hsi_manifest.json} for spectral
+hyperannotatR-internal \code{objects/project.rds}, \code{hsi_manifest.json} for spectral
 images, \code{manifest.json} (\code{\link[=at_interop_manifest]{at_interop_manifest()}}) and \code{integrity.json}, the
 SHA-256 inventory of every other file. The handoff digest is the SHA-256 of
 the canonical \code{integrity.json}. Absolute paths are never used as identity.

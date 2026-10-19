@@ -84,10 +84,10 @@
   )
 }
 
-.app_www <- function() system.file("shiny", "annotatR", "www", package = "annotatR")
+.app_www <- function() system.file("shiny", "hyperannotatR", "www", package = "hyperannotatR")
 
 .app_ui <- function() {
-  shiny::addResourcePath("annotatR-www", .app_www())
+  shiny::addResourcePath("hyperannotatR-www", .app_www())
   annotate_page <- bslib::layout_columns(
     col_widths = c(3, 6, 3),
     bslib::card(
@@ -119,19 +119,19 @@
   )
   bslib::page_navbar(
     id = "nav",
-    window_title = "annotatR",
+    window_title = "hyperannotatR",
     theme = .app_theme(),
     fillable = FALSE,
     selected = "Annotate",
     title = shiny::span(
       class = "at-brand",
-      shiny::img(src = "annotatR-www/logo.svg", class = "at-logo", alt = "annotatR"),
-      shiny::span("annotatR", class = "at-brandname")
+      shiny::img(src = "hyperannotatR-www/logo.svg", class = "at-logo", alt = "hyperannotatR"),
+      shiny::span("hyperannotatR", class = "at-brandname")
     ),
     header = shiny::tagList(
       shinyjs::useShinyjs(),
-      shiny::tags$link(rel = "stylesheet", type = "text/css", href = "annotatR-www/custom.css"),
-      shiny::tags$script(src = "annotatR-www/keys.js")
+      shiny::tags$link(rel = "stylesheet", type = "text/css", href = "hyperannotatR-www/custom.css"),
+      shiny::tags$script(src = "hyperannotatR-www/keys.js")
     ),
     bslib::nav_panel("About", .page_about()),
     bslib::nav_panel("Workflow", .page_workflow()),
@@ -370,7 +370,7 @@ at_app <- function(input = NULL, session = NULL, control = "off", labels = chara
   shiny::shinyApp(
     ui = function(req) .app_ui(),
     server = .app_server(sess, read_only = read_only, view = view, hub = hub),
-    onStart = function() shiny::addResourcePath("annotatR-www", .app_www())
+    onStart = function() shiny::addResourcePath("hyperannotatR-www", .app_www())
   )
 }
 

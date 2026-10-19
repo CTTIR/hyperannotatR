@@ -1,6 +1,6 @@
 # Independent ENVI byte fixtures. Values follow value(y, x, b) = 100*b + 10*y + x
 # (1-based) and are written value by value in each interleave's documented
-# storage order with explicit loops, not with annotatR code or aperm().
+# storage order with explicit loops, not with hyperannotatR code or aperm().
 
 envi_value <- function(y, x, b) 100 * b + 10 * y + x
 
@@ -152,6 +152,6 @@ test_that("windowed reads touch only the requested bytes and never the whole cub
   expect_identical(st$tiles, 1L)
   expect_identical(st$file_bytes, 4 * 2 * 2 * 4)   # 4 columns, 2 rows, 2 bands, float32
   expect_lt(st$file_bytes, file.size(file.path(d, "cube.dat")))
-  withr::local_options(annotatR.max_tile_bytes = 100)
+  withr::local_options(hyperannotatR.max_tile_bytes = 100)
   expect_identical(tryCatch(at_tile(img), error = function(e) e$code), "TILE_TOO_LARGE")
 })

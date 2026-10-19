@@ -1,8 +1,8 @@
-url: https://cttir.github.io/annotatR/
+url: https://cttir.github.io/hyperannotatR/
 
 # Inherit the shared CTTIR house style (Hugo Coder palette, light/dark switch,
 # Inter/JetBrains Mono, navbar/footer/sidebar) from the themakR template. The
-# default blue accent matches the annotatR hex, so no per-package override is set.
+# default blue accent matches the hyperannotatR hex, so no per-package override is set.
 template:
   package: themakR
 
@@ -206,13 +206,13 @@ reference:
       - at_example_session
   - title: Concepts
     contents:
-      - annotatR-classes
-      - annotatR-package
+      - hyperannotatR-classes
+      - hyperannotatR-package
 
 articles:
   - title: Get started
     contents:
-      - annotatR
+      - hyperannotatR
   - title: Concepts
     contents:
       - images-and-backends

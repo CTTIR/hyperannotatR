@@ -18,7 +18,7 @@
 
 # Path of a shipped schema, e.g. .schema_path("annotatr-control-v1", "command").
 .schema_path <- function(family, name) {
-  system.file("schema", family, paste0(name, ".schema.json"), package = "annotatR",
+  system.file("schema", family, paste0(name, ".schema.json"), package = "hyperannotatR",
               mustWork = TRUE)
 }
 
@@ -194,7 +194,7 @@
   if (as.integer(sub("\\..*$", "", version)) != major) {
     .at_abort(
       c("Unsupported {what} major version {.val {version}}.",
-        "i" = "This annotatR understands major version {major}."),
+        "i" = "This hyperannotatR understands major version {major}."),
       class = "protocol", code = "PROTOCOL_MISMATCH",
       details = list(received = version, supported = paste0(major, ".x")), call = call
     )

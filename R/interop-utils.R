@@ -21,7 +21,7 @@
   )
 }
 
-# The code of a classified annotatR condition, or a generic fallback.
+# The code of a classified hyperannotatR condition, or a generic fallback.
 .condition_code <- function(cnd) {
   cnd$code %||% if (inherits(cnd, "at_error")) "VALIDATION_FAILED" else "INTERNAL_ERROR"
 }
@@ -146,7 +146,7 @@
   if (!dir.exists(dir)) {
     dir.create(dir, recursive = TRUE)
   }
-  tmp <- tempfile(pattern = ".annotatR-", tmpdir = dir, fileext = ".tmp")
+  tmp <- tempfile(pattern = ".hyperannotatR-", tmpdir = dir, fileext = ".tmp")
   con <- file(tmp, open = "wb")
   writeBin(charToRaw(enc2utf8(paste0(text, "\n"))), con)
   close(con)
@@ -351,7 +351,7 @@
 # Source revision of the installed package when recorded by the installer
 # (pak/remotes write RemoteSha); otherwise NA.
 .source_revision <- function() {
-  desc <- tryCatch(utils::packageDescription("annotatR"), error = function(e) NULL)
+  desc <- tryCatch(utils::packageDescription("hyperannotatR"), error = function(e) NULL)
   sha <- if (is.list(desc)) desc$RemoteSha else NULL
   if (.is_string(sha) && nzchar(sha)) sha else NA_character_
 }

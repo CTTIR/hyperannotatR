@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "annotatr-hsi-v1/tivita-profile.schema.json",
   "title": "TIVITA SpecCube layout sidecar",
-  "description": "Declares how a bare *_SpecCube.dat file is laid out. annotatR never infers these values.",
+  "description": "Declares how a bare *_SpecCube.dat file is laid out. hyperannotatR never infers these values.",
   "type": "object",
   "required": ["profile_version", "name", "width", "height", "bands", "header_values",
                "value_bytes", "endian", "axis_order", "value_unit"],

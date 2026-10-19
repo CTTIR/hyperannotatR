@@ -17,7 +17,7 @@
 }
 
 .tile_cache_limit <- function() {
-  getOption("annotatR.cache_size", default = 512 * 1024^2)
+  getOption("hyperannotatR.cache_size", default = 512 * 1024^2)
 }
 
 # A cache key for a tile request.

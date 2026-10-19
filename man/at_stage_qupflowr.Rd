@@ -2,7 +2,7 @@
 % Please edit documentation in R/interop-handoff.R
 \name{at_stage_qupflowr}
 \alias{at_stage_qupflowr}
-\title{Stage partner changes against an annotatR project}
+\title{Stage partner changes against an hyperannotatR project}
 \usage{
 at_stage_qupflowr(
   x,
@@ -36,7 +36,7 @@ An \code{at_staged_patch}: a list with \code{patch_id}, \code{state = "staged"},
 }
 \description{
 Compute, without applying, the changes a partner patch would make to an
-annotatR project: ROIs are joined by id and classified as \code{create},
+hyperannotatR project: ROIs are joined by id and classified as \code{create},
 \code{update}, \code{unchanged}, \code{delete} (only with \code{delete_missing = TRUE}) or
 \code{conflict}. Reviewed or locked ROIs, and ROIs in locked layers, are never
 changed automatically; such changes become conflicts. When

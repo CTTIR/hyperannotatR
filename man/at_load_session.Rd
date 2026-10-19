@@ -12,7 +12,7 @@ at_load_session(path, call = rlang::caller_env())
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-The \link{annot_session}. Warns if written by a newer annotatR.
+The \link{annot_session}. Warns if written by a newer hyperannotatR.
 }
 \description{
 Load a session

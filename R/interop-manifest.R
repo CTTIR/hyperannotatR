@@ -1,4 +1,4 @@
-# Partner manifest: a sanitised, versioned description of annotatR objects for
+# Partner manifest: a sanitised, versioned description of hyperannotatR objects for
 # the qupflowR contract. It records identities, dimensions, planes, coordinate
 # convention, band/wavelength metadata, digests and provenance. Local absolute
 # paths never appear: files are identified by basename, role and SHA-256.
@@ -322,13 +322,13 @@ at_annotation_revision <- function(x, call = rlang::caller_env()) {
 
 #' Build a partner interop manifest
 #'
-#' Describe annotatR objects for a partner such as qupflowR without exposing
+#' Describe hyperannotatR objects for a partner such as qupflowR without exposing
 #' local paths: images are identified by content hash (`image_id`) and file
 #' basename; annotations by string ROI ids and an [at_annotation_revision()];
 #' masks by type, integer dtype, background, dimensions, level and legend. The
 #' coordinate convention, band/wavelength table, HSI value semantics, plane,
 #' calibration and transform digests are recorded explicitly. QuPath hierarchy
-#' and native ROI shapes, which annotatR does not model, are reported as
+#' and native ROI shapes, which hyperannotatR does not model, are reported as
 #' `"unknown"` or `"approximated"`, never invented.
 #'
 #' @param x An [annot_project], [annot_session], [annot_image], [annot_layer],
@@ -420,11 +420,11 @@ at_interop_manifest <- function(x, destination = NULL, hash_sources = TRUE,
       masks = list(.mask_record(x, mask_id = "mask-0001")), projects = list(), session = NULL
     ))
   } else {
-    .at_abort("{.arg x} must be an annotatR project, session, image, layer, ROI or mask.",
+    .at_abort("{.arg x} must be an hyperannotatR project, session, image, layer, ROI or mask.",
               call = call)
   }
   out$provenance <- list(
-    generator = paste0("annotatR ", .pkg_version()),
+    generator = paste0("hyperannotatR ", .pkg_version()),
     local_paths = "excluded"
   )
   out$extensions <- .json_object()

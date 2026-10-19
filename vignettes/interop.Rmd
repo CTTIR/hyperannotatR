@@ -7,16 +7,16 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="annotatR logo"}
+```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="hyperannotatR logo"}
 knitr::include_graphics("../man/figures/logo.png")
 ```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
-library(annotatR)
+library(hyperannotatR)
 ```
 
-Annotations are only useful if they can leave the tool that made them. annotatR
+Annotations are only useful if they can leave the tool that made them. hyperannotatR
 stores every region of interest as a validated simple-feature geometry in image
 pixel coordinates, with an explicit pyramid level attached, which makes it
 straightforward to hand work off to a viewer such as QuPath, to a GIS-flavoured
@@ -43,7 +43,7 @@ at_rois(proj)[, c("roi_id", "layer", "label", "geom_type", "area_px")]
 
 `at_write_geojson()` serialises a project to a standard `FeatureCollection`.
 Each ROI becomes one `Feature` whose `geometry` is the pixel-coordinate polygon
-and whose `properties` carry the full annotatR schema: `roi_id`, `layer`,
+and whose `properties` carry the full hyperannotatR schema: `roi_id`, `layer`,
 `label`, `level`, `author`, `created`, `modified`, `source`, the writing
 `annotatR_version`, and any free-form `attributes`. Keeping the schema explicit
 is what lets a file survive a return trip.
@@ -68,7 +68,7 @@ identical(sort(at_rois(proj)$label), sort(at_rois(imported)$label))
 
 ### The `flip_y` option
 
-annotatR's convention is image orientation: the origin is top-left and *y*
+hyperannotatR's convention is image orientation: the origin is top-left and *y*
 increases downward. Many GIS tools instead expect *y* to increase upward. Set
 `flip_y = TRUE` to write coordinates in that upward convention; the y-axis is
 mirrored about the image height. If you write flipped, you must read flipped,
@@ -84,7 +84,7 @@ identical(sort(at_rois(at_project(proj$image, regained[["regions"]]))$centroid_y
 ```
 
 Leave `flip_y` at its default `FALSE` when exchanging with other
-image-coordinate tools (including QuPath and annotatR itself); reach for it only
+image-coordinate tools (including QuPath and hyperannotatR itself); reach for it only
 when a downstream consumer explicitly wants a cartesian, bottom-left origin.
 
 ## QuPath
@@ -95,7 +95,7 @@ QuPath 0.7.0 installation: `objectType` (`annotation`, or `detection` for
 mask-derived ROIs), a `classification` with its `name` (or the `names` of a
 derived class such as `"Tumor: Positive"`) and an `[r, g, b]` `color`, and
 `isLocked` for locked ROIs. QuPath silently replaces feature ids that are not
-UUIDs, so each ROI gets a deterministic UUID and annotatR's own id, layer,
+UUIDs, so each ROI gets a deterministic UUID and hyperannotatR's own id, layer,
 source and level travel in `properties.metadata`. `at_read_qupath()` restores
 labels, colours and those ids, and keeps everything else QuPath carries under
 `attributes$qupath`: object type, measurements with explicit `NaN`/infinity
@@ -112,10 +112,10 @@ str(feature$properties[c("objectType", "classification", "metadata")], max.level
 
 ### The colour gotcha
 
-Older QuPath versions, and annotatR 0.1, stored a classification colour as a
+Older QuPath versions, and hyperannotatR 0.1, stored a classification colour as a
 **signed** 32-bit `colorRGB` integer packed as `0xFFRRGGBB`. The `0xFF` alpha
 byte pushes most colours past `2^31`, so they wrap around to negative values:
-the grey `#999999` serialises as `-6710887`. annotatR still reads that form and
+the grey `#999999` serialises as `-6710887`. hyperannotatR still reads that form and
 writes it with `dialect = "legacy"`; the modular arithmetic is handled in both
 directions. QuPath keeps a single colour per classification name, so identical
 labels with different layer colours collapse to the first colour it sees.

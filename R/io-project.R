@@ -1,15 +1,15 @@
 # Project and session serialisation as full-fidelity RDS, with a version stamp
 # and a migration hook so future versions can upgrade older files.
 
-# Compare a stored annotatR version against the installed one, warn if the file
+# Compare a stored hyperannotatR version against the installed one, warn if the file
 # is from a newer version, and run the (currently trivial) migration chain.
 .migrate_object <- function(obj, stored_version, call = rlang::caller_env()) {
   inst <- .pkg_version()
   if (!is.null(stored_version) && !is.na(stored_version) &&
       utils::compareVersion(as.character(stored_version), inst) > 0) {
     cli::cli_warn(c(
-      "This file was written by a newer annotatR ({stored_version} > {inst}).",
-      "i" = "Some fields may not load correctly; upgrade annotatR to be safe."
+      "This file was written by a newer hyperannotatR ({stored_version} > {inst}).",
+      "i" = "Some fields may not load correctly; upgrade hyperannotatR to be safe."
     ))
   }
   # Future migrations keyed on stored_version go here. None needed for 0.0.1.
@@ -47,7 +47,7 @@ at_save_project <- function(project, path, overwrite = FALSE,
 #' @param path Path to a saved project `.rds`.
 #' @param call The calling environment, for error reporting.
 #' @return The [annot_project]. Warns if the file was written by a newer
-#'   annotatR.
+#'   hyperannotatR.
 #' @family io
 #' @export
 at_load_project <- function(path, call = rlang::caller_env()) {
@@ -83,7 +83,7 @@ at_save_session <- function(session, path = NULL, overwrite = FALSE,
 #'
 #' @param path Path to a saved session `.rds`.
 #' @param call The calling environment, for error reporting.
-#' @return The [annot_session]. Warns if written by a newer annotatR.
+#' @return The [annot_session]. Warns if written by a newer hyperannotatR.
 #' @family io
 #' @seealso [at_save_session()], [at_resume()]
 #' @export

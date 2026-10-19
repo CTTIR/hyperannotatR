@@ -19,7 +19,6 @@ Number of pyramid levels
 }
 \seealso{
 Other images:
-\code{\link{annotatR-classes}},
 \code{\link[=at_bands]{at_bands()}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_example_image]{at_example_image()}},
@@ -31,6 +30,7 @@ Other images:
 \code{\link[=at_pixel_size]{at_pixel_size()}},
 \code{\link[=at_read_image]{at_read_image()}},
 \code{\link[=at_tile]{at_tile()}},
-\code{\link[=at_wavelengths]{at_wavelengths()}}
+\code{\link[=at_wavelengths]{at_wavelengths()}},
+\code{\link{hyperannotatR-classes}}
 }
 \concept{images}

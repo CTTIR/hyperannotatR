@@ -2,7 +2,7 @@
 
 # prequel ----------------------------------------------------------------------
 skip_if_not_installed("shiny")
-.mod_dir <- system.file("shiny", "annotatR", "modules", package = "annotatR")
+.mod_dir <- system.file("shiny", "hyperannotatR", "modules", package = "hyperannotatR")
 for (.f in list.files(.mod_dir, pattern = "\\.R$", full.names = TRUE)) {
   source(.f, local = TRUE)
 }

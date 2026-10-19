@@ -74,7 +74,7 @@ test_that("drawn level-0 coordinates rasterise to the drawn pixels", {
 })
 
 test_that("the widget JavaScript makes no external requests", {
-  js <- readLines(system.file("htmlwidgets", "atcanvas.js", package = "annotatR"))
+  js <- readLines(system.file("htmlwidgets", "atcanvas.js", package = "hyperannotatR"))
   expect_false(any(grepl("https?://", js)))
 })
 

@@ -78,7 +78,7 @@
 #' handled by policy. Image bytes are excluded unless `include_images = TRUE`.
 #'
 #' `mask_type` uses training terminology: `"labelled"` is a semantic class-code
-#' mask (annotatR `"multiclass"`), `"instance"` has one id per ROI (annotatR
+#' mask (hyperannotatR `"multiclass"`), `"instance"` has one id per ROI (hyperannotatR
 #' `"labelled"`), `"binary"` marks foreground. The mapping is recorded in the
 #' manifest.
 #'

@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "annotatr-handoff-v1/manifest.schema.json",
-  "title": "annotatR partner manifest",
-  "description": "Sanitised description of annotatR objects for a partner package. No absolute paths. Unknown optional data belongs under 'extensions'.",
+  "title": "hyperannotatR partner manifest",
+  "description": "Sanitised description of hyperannotatR objects for a partner package. No absolute paths. Unknown optional data belongs under 'extensions'.",
   "type": "object",
   "required": ["schema", "schema_version", "document", "consumer", "object_kind", "annotatr_version",
                "r_version", "capability_digest", "created", "coordinate_convention", "images", "layers",

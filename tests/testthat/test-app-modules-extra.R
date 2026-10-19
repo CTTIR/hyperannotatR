@@ -29,7 +29,7 @@ test_that("the full UI tree renders every page, module and asset reference", {
                "export-handoff", "data-stage", "session-badge", "control-status", "help-show")) {
     expect_match(html, id, fixed = TRUE, label = id)
   }
-  expect_match(html, "annotatR-www/custom.css", fixed = TRUE)
+  expect_match(html, "hyperannotatR-www/custom.css", fixed = TRUE)
   expect_match(html, "Impressum", fixed = TRUE)
   expect_match(html, "\u00a7 5 DDG", fixed = TRUE)
 })

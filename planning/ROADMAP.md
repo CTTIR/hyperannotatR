@@ -1,4 +1,4 @@
-# annotatR improvement roadmap
+# hyperannotatR improvement roadmap
 
 Prepared 2026-09-10 against `f69bf201f651c845ab496f76e25638bc919d4b13` (package version 0.1.0).
 
@@ -158,7 +158,7 @@ Handle missing display dependencies and failed image decoding explicitly. Respec
 
 Create small synthetic images with analytically known pixels, wavelengths, physical pixel sizes, ROI memberships, and class mappings. Include overlaps, bitfields, absent classes, invalid samples, and anisotropic transforms. Add independently written interchange fixtures and a licensed optional-format sample inventory with provenance.
 
-**Acceptance:** expected results can be explained without invoking annotatR's own writer or rasterizer. Fixture generation is deterministic and documented. No private workbench data is required for mandatory CI.
+**Acceptance:** expected results can be explained without invoking hyperannotatR's own writer or rasterizer. Fixture generation is deterministic and documented. No private workbench data is required for mandatory CI.
 
 ### T13 — Specify and verify quantitative extraction and agreement
 

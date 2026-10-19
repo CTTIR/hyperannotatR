@@ -1,4 +1,4 @@
-# Mask agreement metrics: compare two integer label masks (an annotatR mask
+# Mask agreement metrics: compare two integer label masks (an hyperannotatR mask
 # against a ground-truth .npy, or two annotators) with per-class Dice / IoU and
 # an overall accuracy and Cohen's kappa. Masks are aligned by class *value*, so
 # both must share a label codebook -- supply matching `values` to at_mask(), or
@@ -20,7 +20,7 @@
 #' Agreement between two masks
 #'
 #' Per-class Dice and Jaccard (IoU) plus an overall accuracy and Cohen's kappa,
-#' comparing a reference mask `a` against a second mask `b` (e.g. an annotatR
+#' comparing a reference mask `a` against a second mask `b` (e.g. an hyperannotatR
 #' mask against a `.npy` ground truth, or two annotators). Classes are matched by
 #' integer value, so both masks must use the same class codebook.
 #'

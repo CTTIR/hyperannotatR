@@ -135,7 +135,7 @@ at_write_mask <- function(mask, path, format = c("tiff", "png", "rds"),
 #' Read a mask into editable ROIs
 #'
 #' Polygonise an existing mask file (e.g. Cellpose, StarDist, or QuPath output,
-#' or a prior annotatR export) into an editable [annot_layer]. A sidecar
+#' or a prior hyperannotatR export) into an editable [annot_layer]. A sidecar
 #' `<path>.legend.json` is used to recover labels when present.
 #'
 #' @param path Path to a mask file (TIFF, PNG, or RDS).

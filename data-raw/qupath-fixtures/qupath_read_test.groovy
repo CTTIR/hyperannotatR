@@ -1,5 +1,5 @@
 /**
- * READ TEST: let QuPath 0.7.0 read an annotatR-written QuPath-dialect GeoJSON
+ * READ TEST: let QuPath 0.7.0 read an hyperannotatR-written QuPath-dialect GeoJSON
  * and describe, per object in file order, what QuPath made of it.
  *
  * Run from the directory containing annotatr_written_qupath.geojson:

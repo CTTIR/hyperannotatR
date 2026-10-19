@@ -1,4 +1,4 @@
-# annotatR × qupflowR: interop, control, HSI and training — plan, contract record and handoff
+# hyperannotatR × qupflowR: interop, control, HSI and training — plan, contract record and handoff
 
 Status (2026-09-15): **implemented, checked and handed off locally; not committed.** Governing spec:
 the partner prompt `ANNOTATR_PARTNER_BUILD.md` (copy in
@@ -23,15 +23,15 @@ contract: `docs/22_ANNOTATR_INTEROP.md`, `docs/23_HSI_AND_NAMING.md`,
 | ID | Decision | Source |
 |---|---|---|
 | D1 | Consumer name **qupflowR**; handoff functions `at_export_qupflowr()`, `at_import_qupflowr()`, `at_stage_qupflowr()`, `at_commit_qupflowr()`; contract field `consumer: "qupflowR"` | user, 2026-09-14 |
-| D2 | Version 0.2.0 (the kit gates I2/I3 on annotatR >= 0.2); citation metadata untouched | user, 2026-09-14 |
+| D2 | Version 0.2.0 (the kit gates I2/I3 on hyperannotatR >= 0.2); citation metadata untouched | user, 2026-09-14 |
 | D3 | Classified conditions `at_*_error` (validation, capability, conflict, io, protocol, auth, limit) with parent `at_error` and a `code`; argument validators raise `at_validation_error` | CTTIR Q04 |
 | D4 | Handoff digest = SHA-256 of canonical `integrity.json` (sorted keys, no whitespace, integer sizes, no trailing newline) = qupflowR `bundle_digest` rule; checked against Python reference vectors | kit docs/14 |
 | D5 | SHA-256 via `tools::sha256sum()` (R >= 4.5.0) with `digest` fallback (Suggests) | R NEWS |
 | D6 | I0/I1 `supported` (I0 qualified with QuPath 0.7.0 fixtures); I2/I3 `planned` (implemented, locally tested) until a real qupflowR client run is recorded in `.qualified_clients`; `unavailable` without runtime packages | prompt |
-| D7 | All Shiny code in `R/app-*.R`; `at_app()` returns a `shiny.appobj`; `at_annotate()` delegates; `inst/shiny/annotatR/app.R` is a thin wrapper; `www/` served via `addResourcePath("annotatR-www")` | prompt B1, kit Q05 |
+| D7 | All Shiny code in `R/app-*.R`; `at_app()` returns a `shiny.appobj`; `at_annotate()` delegates; `inst/shiny/hyperannotatR/app.R` is a thin wrapper; `www/` served via `addResourcePath("hyperannotatR-www")` | prompt B1, kit Q05 |
 | D8 | Control service in-process on httpuv/later; one dispatcher for HTTP and in-process handles; tokens in a package-private registry, never in handles, manifests, logs or RDS | design |
 | D9 | `state_revision` increments on every accepted state change; `annotation_revision` (`sha256:`) follows annotation content only; mutations require `expected_revision == state_revision` | kit docs/22 |
-| D10 | QuPath GeoJSON writer defaults to the QuPath 0.4+ dialect with deterministic UUIDs and annotatR ids in `properties.metadata`; `dialect = "legacy"` keeps the 0.1 form | QuPath 0.7.0 evidence |
+| D10 | QuPath GeoJSON writer defaults to the QuPath 0.4+ dialect with deterministic UUIDs and hyperannotatR ids in `properties.metadata`; `dialect = "legacy"` keeps the 0.1 form | QuPath 0.7.0 evidence |
 | D11 | Browser lane opt-in via `ANNOTATR_BROWSER_TESTS=true`; hosts that block Chromium's user-namespace sandbox set `ANNOTATR_CHROME_NO_SANDBOX=true` (local test app only) | Ubuntu 26.04 AppArmor |
 | D12 | Build and check from a clean export (`git ls-files -co --exclude-standard`), never from the working directory: R copies git-ignored `hsi-workbench/` (54 GB) before applying `.Rbuildignore`, which exceeded the /tmp quota | observed 2026-09-15 |
 
@@ -96,7 +96,7 @@ path, including `/eval`, returns 404.
 - `at_bands()` has three appended columns; the first four are unchanged.
 - ENVI files with inconsistent headers now fail with a coded error instead of returning
   recycled or offset-shifted pixels; bare TIVITA cubes need a matching profile or sidecar.
-- Code that sourced `inst/shiny/annotatR/modules` or set `options(annotatR.session)` should
+- Code that sourced `inst/shiny/hyperannotatR/modules` or set `options(hyperannotatR.session)` should
   call `at_app()`; the compatibility `app.R` still honours the option.
 
 ## 7. Findings fixed on the way
@@ -112,7 +112,7 @@ path, including `/eval`, returns 404.
 - GeoJSON coordinates lost precision (15 significant digits) → 17.
 - An empty app export receipt crashed the download (`attr<-` on `NULL`) → empty data frame.
 - Non-ASCII glyphs in app strings (R CMD check WARNING after the move to `R/`) → `\u` escapes.
-- `R CMD build` would have shipped `inst/shiny/annotatR/hsi-workbench/` (data derived from
+- `R CMD build` would have shipped `inst/shiny/hyperannotatR/hsi-workbench/` (data derived from
   real SpecCubes) → build-ignored; the files themselves were not touched.
 
 ## 8. Evidence
@@ -125,9 +125,9 @@ Logs, commands and exit codes: `planning/evidence/2026-09-15/README.md`. Summary
 | Loopback HTTP lane (`test-control-http.R`, callr child) | exit 0 — 2 tests, 30 expectations (re-run after the child-loader fix, see below) |
 | Browser lane (shinytest2 + Chromium) | exit 0 — 3 journeys, 22 expectations |
 | Cubert SDK + TIVITA real-data lane | passed (CUVIS SDK 3.5.3, cuvis.r 0.1.0; data stay local, only digests recorded) |
-| QuPath 0.7.0 interchange | QuPath reads annotatR 0.2 output keeping UUIDs, classes, metadata and holes; annotatR reads QuPath-written objects (`data-raw/qupath-fixtures/provenance.md`) |
+| QuPath 0.7.0 interchange | QuPath reads hyperannotatR 0.2 output keeping UUIDs, classes, metadata and holes; hyperannotatR reads QuPath-written objects (`data-raw/qupath-fixtures/provenance.md`) |
 | Canonical JSON digests | equal to the Python reference vectors |
-| `R CMD check --as-cran` (clean export) | `Status: 1 ERROR` — only CRAN incoming *conflicting package names* (annotatR vs Bioconductor annotatr); tests (16 min) and vignettes OK; 0 WARNINGs, 0 NOTEs |
+| `R CMD check --as-cran` (clean export) | `Status: 1 ERROR` — only CRAN incoming *conflicting package names* (hyperannotatR vs Bioconductor annotatr); tests (16 min) and vignettes OK; 0 WARNINGs, 0 NOTEs |
 | Tests-only coverage (`covr`, `NOT_CRAN=true`) | exit 0 — **88.87 %** (HEAD baseline 87.12 %, when the Shiny modules in `inst/` were not counted); lowest: `R/zzz.R` 0 %, `R/backend-cuvis.R` 21.5 % (SDK lane needs `ANNOTATR_CUVIS_FIXTURE`), `R/backend-tiff.R` 48 % |
 | pkgdown site | exit 0 |
 | House lint | 3 findings, all the pre-existing `verbose` argument of `at_fix_geometry()`; 0 in new code |
@@ -148,7 +148,7 @@ tracked diff), plus new untracked files: 17 `R/` files, 12 schemas under `inst/s
 28 `man/` pages, 16 test files, fixtures under `tests/testthat/fixtures/{interop,qupath-0.7.0}/`,
 `data-raw/{interop,qupath}-fixtures/`, `vignettes/partner-interop.Rmd` and this `planning/`
 record. The user's pre-existing changes (`^planning$` in `.Rbuildignore`, `planning/`) are
-kept. `inst/shiny/annotatR/hsi-workbench/` (git-ignored, local) was not touched.
+kept. `inst/shiny/hyperannotatR/hsi-workbench/` (git-ignored, local) was not touched.
 
 **Commands and exit codes** (details in the evidence README):
 
@@ -159,13 +159,13 @@ kept. `inst/shiny/annotatR/hsi-workbench/` (git-ignored, local) was not touched.
 | browser lane (`ANNOTATR_BROWSER_TESTS=true ANNOTATR_CHROME_NO_SANDBOX=true`, `filter = "app-browser"`) | 0 |
 | `ANNOTATR_CUVIS_FIXTURE=<local .cu3s> ... filter = "cuvis-sdk\|backend-tivita"` | 0 |
 | `R CMD build --no-manual <clean export>` | 0 |
-| `_R_CHECK_FORCE_SUGGESTS_=false R CMD check --as-cran --no-manual annotatR_0.2.0.tar.gz` | 1 (the name-conflict ERROR only) |
+| `_R_CHECK_FORCE_SUGGESTS_=false R CMD check --as-cran --no-manual hyperannotatR_0.2.0.tar.gz` | 1 (the name-conflict ERROR only) |
 | `NOT_CRAN=true covr::package_coverage(<clean export>, type = "tests")` | 0 |
 | `pkgdown::build_site(<clean export>)` | 0 |
 | house lint (`lint-cttir.R`) | 0 |
 | `git diff --check` | 0 |
 
-**Artefacts.** `annotatR_0.2.0.tar.gz`, 3,692,862 bytes, SHA-256
+**Artefacts.** `hyperannotatR_0.2.0.tar.gz`, 3,692,862 bytes, SHA-256
 `7f79f194a960102504c1a8c422e84b56fb4d6c2d345849a71969807d2ea04543` (358 entries; no
 `hsi-workbench`, `planning` or `data-raw`). Built in a scratch directory that was removed
 afterwards; rebuild with the clean-export procedure (D12). `R CMD build` stamps the build

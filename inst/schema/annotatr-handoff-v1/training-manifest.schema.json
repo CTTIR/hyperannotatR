@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "annotatr-handoff-v1/training-manifest.schema.json",
-  "title": "annotatR DNN training dataset manifest",
+  "title": "hyperannotatR DNN training dataset manifest",
   "description": "Grouped, leakage-free tile dataset with integer masks and provenance. Schema family annotatr-training-v1.",
   "type": "object",
   "required": ["schema", "schema_version", "document", "consumer", "annotatr_version", "capability_digest",

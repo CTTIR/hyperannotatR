@@ -11,20 +11,20 @@ rect_feature <- function(x0, y0, x1, y1) {
 }
 
 test_that("at_app builds an app object from explicit arguments without global options", {
-  withr::local_options(annotatR.session = NULL)
+  withr::local_options(hyperannotatR.session = NULL)
   app <- at_app(session = at_example_session(2))
   expect_s3_class(app, "shiny.appobj")
   expect_s3_class(at_app(input = at_example_project()), "shiny.appobj")
   expect_error(at_app(input = at_example_project(), session = at_example_session(1)), "not both")
   expect_error(at_app(control = "loopback"), "must be")
   expect_error(at_app(session = at_example_session(1), unexpected = 1))
-  expect_null(getOption("annotatR.session"))
+  expect_null(getOption("hyperannotatR.session"))
 })
 
 test_that("the compatibility app directory builds through at_app", {
-  app_dir <- system.file("shiny", "annotatR", package = "annotatR")
+  app_dir <- system.file("shiny", "hyperannotatR", package = "hyperannotatR")
   expect_false(dir.exists(file.path(app_dir, "modules")))
-  withr::local_options(annotatR.session = at_example_session(1))
+  withr::local_options(hyperannotatR.session = at_example_session(1))
   appobj <- withr::with_dir(app_dir, source("app.R", local = new.env(parent = globalenv()))$value)
   expect_s3_class(appobj, "shiny.appobj")
 })
@@ -139,11 +139,11 @@ test_that("at_annotate builds through at_app and hands the app object to runApp"
     captured <<- list(app = appDir, launch.browser = launch.browser, port = port)
     invisible(NULL)
   }, .package = "shiny")
-  withr::local_options(annotatR.session = NULL)
+  withr::local_options(hyperannotatR.session = NULL)
   expect_null(at_annotate(at_example_session(1), launch.browser = FALSE, port = 5555L))
   expect_s3_class(captured$app, "shiny.appobj")
   expect_false(captured$launch.browser)
   expect_identical(captured$port, 5555L)
-  expect_null(getOption("annotatR.session"))
+  expect_null(getOption("hyperannotatR.session"))
   expect_error(.check_app_pkgs(), NA)
 })

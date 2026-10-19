@@ -1,5 +1,5 @@
 test_that("every shipped schema parses and uses only supported keywords", {
-  root <- system.file("schema", package = "annotatR")
+  root <- system.file("schema", package = "hyperannotatR")
   files <- list.files(root, pattern = "\\.schema\\.json$", recursive = TRUE)
   expect_gte(length(files), 12L)
   for (f in files) {
