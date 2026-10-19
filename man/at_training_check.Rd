@@ -26,12 +26,16 @@ A tibble of class \code{at_training_check} with \code{check}, \code{status}
 }
 \description{
 Run independent checks on an exported training dataset: the integrity
-inventory, split leakage (every group and image in exactly one split, every
-tile in its image's split), mask dimensions and orientation, integer label
-range against the class legend, the recorded overlap counts, and a
-mask -> ROI -> mask round trip on a sample of tiles. When the source \code{x} is
-supplied, each sampled tile is also re-rasterised from the annotations and
-compared exactly.
+inventory (schema, safe paths, symbolic links, sizes and SHA-256 hashes,
+missing and unlisted files), the manifest schema, split leakage (every
+group and image in exactly one split, every tile in its image's split),
+mask dimensions and orientation, integer label range against the class
+legend, the recorded overlap counts, and a mask -> ROI -> mask round trip
+on a sample of tiles. When the source \code{x} is supplied, each sampled tile is
+also re-rasterised from the annotations and compared exactly. Tile files
+outside the verified inventory are never opened. A check that cannot run
+on a malformed manifest is reported as \code{"fail"} rather than raising an
+error; only an unsupported major version aborts (\code{PROTOCOL_MISMATCH}).
 }
 \seealso{
 Other training:

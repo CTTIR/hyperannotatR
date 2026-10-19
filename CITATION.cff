@@ -1,9 +1,9 @@
 cff-version: 1.2.0
 message: If you use this software, please cite it as below.
 type: software
-title: 'hyperannotatR: Multi-layer region-of-interest annotation for images and spectral cubes'
-version: 0.1.0
-date-released: '2026-08-11'
+title: 'hyperannotatR: Region-of-Interest Annotation for Hyperspectral Data'
+version: 0.3.0
+date-released: '2026-10-19'
 doi: 10.5281/zenodo.21889921
 authors:
 - family-names: Heller

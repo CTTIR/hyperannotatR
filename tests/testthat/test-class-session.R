@@ -74,3 +74,34 @@ test_that("at_session accepts a layer template", {
   expect_length(sess$layer_spec, 1L)
   expect_error(at_session(p, layers = 42), "annot_layer")
 })
+
+# ---- Session defaults and manifest (audit C4, C12, C13) --------------------
+
+test_that("separate sessions never share a default out_dir", {
+  f <- withr::local_tempfile(fileext = ".png")
+  writeLines("x", f)
+  a <- at_session(f)
+  b <- at_session(f)
+  expect_false(identical(a$out_dir, b$out_dir))
+  expect_identical(normalizePath(dirname(a$out_dir)), normalizePath(tempdir()))
+})
+
+test_that("at_session rejects directories and de-duplicates labels", {
+  expect_error(at_session(tempdir()), class = "at_validation_error")
+  f <- withr::local_tempfile(fileext = ".png")
+  writeLines("x", f)
+  expect_identical(at_session(f, labels = c("a", "a", "b"))$labels, c("a", "b"))
+})
+
+test_that("at_manifest survives duplicate and clashing labels and counts live ROIs (C12)", {
+  sess <- demo_session(2, labels = c("a", "a", "status"))
+  m <- at_manifest(sess)
+  expect_identical(names(m), c("idx", "entry_id", "export_stem", "name", "path", "status",
+                               "n_layers", "n_rois", "a", "label_status"))
+  proj <- at_project(tiny_image(), at_layer_add(at_layer("l"), at_roi_rect(1, 1, 3, 3, label = "a")))
+  sess$projects[[1]] <- proj
+  m <- at_manifest(sess)
+  expect_identical(m$n_rois, c(1L, 0L))
+  expect_identical(m$a, c(1L, 0L))
+  expect_identical(m$status, c("pending", "pending"))
+})

@@ -31,7 +31,10 @@ at_example_path <- function(which = c("tissue", "multiplex", "cube"),
 #' @family example data
 #' @family images
 #' @export
-#' @examplesIf requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)
+#' @details The tissue example is a PNG and needs \pkg{magick}; the multiplex
+#'   example needs \pkg{magick} or \pkg{tiff}; the cube needs nothing beyond
+#'   hyperannotatR.
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' img <- at_example_image("tissue")
 #' at_dims(img)
 at_example_image <- function(which = c("tissue", "multiplex", "cube"),
@@ -52,7 +55,7 @@ at_example_image <- function(which = c("tissue", "multiplex", "cube"),
 #' @family example data
 #' @family projects
 #' @export
-#' @examplesIf requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' proj <- at_example_project()
 #' at_rois(proj)
 at_example_project <- function(call = rlang::caller_env()) {

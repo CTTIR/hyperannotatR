@@ -7,9 +7,12 @@
 at_plot(x, ...)
 }
 \arguments{
-\item{x}{An \link{annot_image}, \link{annot_project}, or \code{annot_mask}.}
+\item{x}{An \link{annot_image}, \link{annot_project}, \link{annot_layer}, or \code{annot_mask}.}
 
-\item{...}{Passed to the specific plot function.}
+\item{...}{Passed to the specific plot function. For layers, passed to
+\code{\link[=at_layer_rois]{at_layer_rois()}}: supply \code{image = img} for any nonzero stored ROI level.
+Layer plot geometry uses level-0 coordinates. The same image argument is
+supported by \code{ggplot2::autoplot(layer, image = img)}.}
 }
 \value{
 A \link[ggplot2:ggplot]{ggplot2::ggplot} object.
@@ -18,7 +21,9 @@ A \link[ggplot2:ggplot]{ggplot2::ggplot} object.
 Plot generic for hyperannotatR objects
 }
 \examples{
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_plot(at_example_project())
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other plots:

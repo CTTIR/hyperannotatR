@@ -4,17 +4,20 @@
 \alias{at_rois_overlap}
 \title{Pairwise ROI overlaps within a layer}
 \usage{
-at_rois_overlap(layer, call = rlang::caller_env())
+at_rois_overlap(layer, call = rlang::caller_env(), image = NULL)
 }
 \arguments{
 \item{layer}{An \link{annot_layer}.}
 
 \item{call}{The calling environment, for error reporting.}
+
+\item{image}{\link{annot_image} defining actual pyramid dimensions; required for
+any nonzero ROI level because measurements are reported at level 0.}
 }
 \value{
 A \link[tibble:tibble]{tibble::tibble} with columns \code{id_a}, \code{id_b} (character),
 \code{overlap_px} (double, level-0 pixels), and \code{jaccard} (double). A 0-row
-tibble with these columns when no ROIs overlap.
+tibble with these columns when no ROIs overlap with positive area.
 }
 \description{
 Pairwise ROI overlaps within a layer

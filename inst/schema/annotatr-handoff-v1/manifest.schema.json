@@ -35,7 +35,18 @@
     "masks": {"type": "array", "items": {"$ref": "#/definitions/mask"}},
     "projects": {"type": "array", "items": {"type": "object"}},
     "session": {"type": ["object", "null"]},
-    "files": {"type": "array", "items": {"type": "object"}},
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1, "maxLength": 1024,
+                   "pattern": "^(?![/\\\\])(?![A-Za-z]:)(?!.*(^|/)\\.\\.?(/|$))[^\\\\]+$"},
+          "entry_id": {"type": ["string", "null"]}
+        }
+      }
+    },
     "hsi_manifest": {"type": ["string", "null"]},
     "provenance": {"type": "object"},
     "extensions": {"type": "object"}
@@ -126,6 +137,7 @@
       "required": ["name", "labels", "z", "visible", "locked"],
       "properties": {
         "name": {"type": "string", "minLength": 1},
+        "entry_id": {"type": ["string", "null"]},
         "labels": {"type": "array", "items": {"type": "string"}},
         "colours": {"type": "object"},
         "z": {"type": "integer"},
@@ -140,6 +152,7 @@
       "properties": {
         "roi_id": {"type": "string", "minLength": 1},
         "image_id": {"type": ["string", "null"]},
+        "entry_id": {"type": ["string", "null"]},
         "layer": {"type": "string"},
         "label": {"type": "string"},
         "level": {"type": "integer", "minimum": 0},
@@ -159,8 +172,10 @@
       "required": ["mask_type", "dtype", "background", "width", "height", "level", "legend", "legend_sha256"],
       "properties": {
         "mask_id": {"type": ["string", "null"]},
-        "file": {"type": ["string", "null"]},
+        "file": {"type": ["string", "null"], "minLength": 1, "maxLength": 1024,
+                 "pattern": "^(?![/\\\\])(?![A-Za-z]:)(?!.*(^|/)\\.\\.?(/|$))[^\\\\]+$"},
         "mask_type": {"type": "string", "enum": ["binary", "labelled", "multiclass", "instance"]},
+        "encoding": {"type": "string", "enum": ["binary", "categorical", "instance", "bitfield"]},
         "dtype": {"type": "string", "enum": ["bool", "uint8", "uint16", "int16", "int32"]},
         "background": {"type": "integer"},
         "width": {"type": "integer", "minimum": 1},

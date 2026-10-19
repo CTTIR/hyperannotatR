@@ -21,7 +21,11 @@ at_write_geojson(
 
 \item{layer}{Optional layer filter.}
 
-\item{level}{Integer pyramid level for the coordinates. Default \code{0}.}
+\item{level}{Integer pyramid level for the coordinates and the exported
+\code{level} property. Default \code{0}. \code{source_level} separately records the
+stored ROI level, and \code{coordinate_schema} marks the file as recording the
+level of its coordinates, so \code{\link[=at_read_geojson]{at_read_geojson()}} restores ROIs at that
+level.}
 
 \item{flip_y}{Logical; invert the y-axis (for GIS-oriented consumers). Default
 \code{FALSE} (image orientation preserved). The consequence is documented in the
@@ -38,8 +42,8 @@ The output path, invisibly.
 Write a project's ROIs to GeoJSON
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-p <- withr::local_tempfile(fileext = ".geojson")
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+p <- tempfile(fileext = ".geojson")
 at_write_geojson(at_example_project(), p)
 \dontshow{\}) # examplesIf}
 }
@@ -47,11 +51,14 @@ at_write_geojson(at_example_project(), p)
 \code{\link[=at_read_geojson]{at_read_geojson()}}, \code{\link[=at_write_qupath]{at_write_qupath()}}
 
 Other io:
+\code{\link[=at_inspect_saved]{at_inspect_saved()}},
+\code{\link[=at_inspect_source]{at_inspect_source()}},
 \code{\link[=at_load_project]{at_load_project()}},
 \code{\link[=at_load_session]{at_load_session()}},
 \code{\link[=at_read_geojson]{at_read_geojson()}},
 \code{\link[=at_read_qupath]{at_read_qupath()}},
 \code{\link[=at_read_rois_csv]{at_read_rois_csv()}},
+\code{\link[=at_relink_source]{at_relink_source()}},
 \code{\link[=at_roi_from_geojson]{at_roi_from_geojson()}},
 \code{\link[=at_save_project]{at_save_project()}},
 \code{\link[=at_save_session]{at_save_session()}},

@@ -123,3 +123,12 @@ test_that("QuPath 0.7.0 keeps hyperannotatR 0.2 ids and metadata through its own
   expect_identical(back$rois[[5]]$attributes$qupath$object_type, "detection")
   expect_equal(at_roi_area(back$rois[[2]]), 80 * 80 - 30 * 30)
 })
+
+test_that("QuPath object ids of ROI ids keep the values annotatR 0.2.0 wrote", {
+  # The hash seed is a stored identifier: re-exports must give QuPath the same ids.
+  f <- jsonlite::read_json(test_path("fixtures", "qupath-0.7.0", "annotatr_020_qupath_dialect.geojson"))$features
+  ids <- vapply(f, function(x) x$properties$metadata$annotatr_roi_id, character(1))
+  expect_identical(vapply(ids, .roi_uuid, character(1), USE.NAMES = FALSE),
+                   vapply(f, function(x) x$id, character(1)))
+  expect_identical(.roi_uuid("roi-rect-1"), "c667a1d3-a629-8da6-803e-36fb40a3bd1d")
+})

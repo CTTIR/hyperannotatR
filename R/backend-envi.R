@@ -6,6 +6,12 @@
 # samples/lines/bands, interleave, data type, byte order, header offset and the
 # payload length. Reads are windowed: a tile request seeks to the rows it needs
 # and reads only those bytes, so opening or printing a cube never loads it.
+#
+# Tiles hold the stored values. `data ignore value`, `reflectance scale
+# factor` and `data gain/offset values` are recorded in the image metadata
+# (`nodata`, `scale_factor`, `data_gain_values`, `data_offset_values`) but are
+# never applied to pixels: nodata samples come back as their stored value and
+# scaling is left to the caller.
 
 # Map an ENVI "data type" code to readBin parameters.
 .envi_dtype <- function(code, call = rlang::caller_env()) {
@@ -17,7 +23,7 @@
     "4"  = list(what = "double",  size = 4L, signed = TRUE,  dtype = "float32"),
     "5"  = list(what = "double",  size = 8L, signed = TRUE,  dtype = "float64"),
     "12" = list(what = "integer", size = 2L, signed = FALSE, dtype = "uint16"),
-    "13" = list(what = "integer", size = 4L, signed = TRUE,  dtype = "uint32"),
+    "13" = list(what = "integer", size = 4L, signed = FALSE, dtype = "uint32"),
     .at_abort(
       c("Unsupported ENVI data type code {.val {code}}.",
         "i" = "Supported codes: 1 (uint8), 2 (int16), 3 (int32), 4 (float32), 5 (float64), 12 (uint16), 13 (uint32).",
@@ -92,9 +98,20 @@
   suppressWarnings(as.numeric(trimws(strsplit(v, ",")[[1]])))
 }
 
-# Parse and validate the ENVI header into a list.
+# Parse and validate the ENVI header into a list. The header is metadata, so
+# it is bounded (1 MiB) and read exactly once.
 .parse_envi_hdr <- function(hdr, call = rlang::caller_env()) {
-  lines_txt <- readLines(hdr, warn = FALSE)
+  size <- file.info(hdr)$size
+  if (!is.finite(size) || size > 1024^2) {
+    .at_abort("ENVI header {.file {basename(hdr)}} exceeds the 1 MiB metadata limit.",
+              class = "limit", code = "ENVI_HEADER_INVALID", call = call)
+  }
+  con <- file(hdr, "rb")
+  on.exit(close(con), add = TRUE)
+  raw <- .window_read_raw(con, size, call = call)
+  raw <- raw[raw != as.raw(0L)]
+  lines_txt <- strsplit(sub("\r?\n$", "", gsub("\r\n?", "\n", rawToChar(raw))), "\n",
+                        fixed = FALSE)[[1]]
   if (length(lines_txt) == 0L || !grepl("^\\s*ENVI\\s*$", lines_txt[1])) {
     .at_abort("{.file {basename(hdr)}} does not start with the {.val ENVI} magic line.",
               code = "ENVI_HEADER_INVALID", call = call)
@@ -105,8 +122,8 @@
   bands <- .envi_count(txt, "bands", hdr, call = call)
   header_offset <- .envi_count(txt, "header offset", hdr, required = FALSE, min = 0,
                                default = 0L, call = call)
-  data_type <- .envi_count(txt, "data type", hdr, required = FALSE, min = 1,
-                           default = 4L, call = call)
+  # ENVI requires `data type`; guessing a width would decode garbage.
+  data_type <- .envi_count(txt, "data type", hdr, call = call)
   byte_order <- .envi_count(txt, "byte order", hdr, required = FALSE, min = 0,
                             default = 0L, call = call)
   if (byte_order > 1L) {
@@ -167,27 +184,36 @@
   size - expected
 }
 
-# Read `n` values at byte `offset` from an open connection.
+# Read `n` values at byte `offset` from an open connection. Integers are
+# decoded exactly (int32 INT_MIN and uint32 values above 2^31 are valid
+# samples, not missing data); the result is always double.
 .envi_read_at <- function(con, offset, n, spec, endian) {
   seek(con, where = offset, origin = "start", rw = "read")
-  v <- readBin(con, what = spec$what, n = n, size = spec$size,
-               signed = spec$signed, endian = endian)
-  if (length(v) != n) {
-    .at_abort("The ENVI payload ended before the requested window.", code = "PAYLOAD_SHORT")
+  raw <- .window_read_raw(con, n * spec$size)
+  if (spec$what == "integer") {
+    return(.decode_integer_bytes(raw, spec$size, spec$signed, endian))
   }
-  if (spec$what == "integer" && !spec$signed && spec$size == 2L) {
-    v[v < 0L] <- v[v < 0L] + 65536L
-  }
-  if (identical(spec$dtype, "uint32")) {
-    v <- as.double(v)
-    v[v < 0] <- v[v < 0] + 4294967296
-  }
-  as.double(v)
+  readBin(raw, what = "double", n = n, size = spec$size, endian = endian)
 }
 
 # Windowed read of rows y1..y2, columns x1..x2 (1-based, inclusive) and the
-# given bands into a [y, x, band] double array.
-.envi_read_window <- function(dat, h, xrange, yrange, bands) {
+# given bands, in request order and possibly repeated, into a [y, x, band]
+# double array. Each distinct band is read once.
+.envi_read_window <- function(dat, h, xrange, yrange, bands, chunk_values = 2^24) {
+  .window_budget(xrange[2] - xrange[1] + 1, yrange[2] - yrange[1] + 1, length(bands))
+  distinct <- sort(unique(bands))
+  out <- .envi_read_distinct(dat, h, xrange, yrange, distinct, chunk_values)
+  fb <- attr(out, "file_bytes")
+  out <- out[, , match(bands, distinct), drop = FALSE]
+  attr(out, "file_bytes") <- fb
+  .read_telemetry_add(decoded_bytes = 8 * length(out))
+  out
+}
+
+# Read sorted distinct `bands`. A full-width window is read as contiguous
+# blocks (one per band for BSQ, chunks of rows for BIL/BIP); a partial width
+# seeks to each row.
+.envi_read_distinct <- function(dat, h, xrange, yrange, bands, chunk_values = 2^24) {
   spec <- .envi_dtype(h$data_type)
   sz <- spec$size
   nx <- xrange[2] - xrange[1] + 1L
@@ -199,8 +225,41 @@
   L <- as.double(h$lines)
   B <- as.double(h$bands)
   x0 <- xrange[1] - 1
+  y0 <- yrange[1] - 1
+  full <- nx == h$samples
+  if (full && h$interleave == "bsq") {
+    for (ib in seq_along(bands)) {
+      off <- h$header_offset + ((bands[ib] - 1) * L + y0) * S * sz
+      v <- .envi_read_at(con, off, ny * nx, spec, h$endian)
+      out[, , ib] <- matrix(v, nrow = ny, ncol = nx, byrow = TRUE)
+    }
+    attr(out, "file_bytes") <- ny * nx * length(bands) * sz
+    return(out)
+  }
+  if (full && (h$interleave == "bip" || 2 * length(bands) >= h$bands)) {
+    # BIL rows hold [band, x]; BIP rows hold [x, band]. Either way the window
+    # is ny consecutive rows of S * B values, read in chunks of rows so the
+    # transient buffer stays bounded.
+    per_row <- S * B
+    chunk <- max(1, floor(chunk_values / per_row))
+    done <- 0
+    while (done < ny) {
+      k <- min(chunk, ny - done)
+      v <- .envi_read_at(con, h$header_offset + (y0 + done) * per_row * sz,
+                         k * per_row, spec, h$endian)
+      a <- if (h$interleave == "bil") {
+        array(v, dim = c(nx, h$bands, k)) # [x, band, y]
+      } else {
+        aperm(array(v, dim = c(h$bands, nx, k)), c(2, 1, 3)) # -> [x, band, y]
+      }
+      out[done + seq_len(k), , ] <- aperm(a[, bands, , drop = FALSE], c(3, 1, 2))
+      done <- done + k
+    }
+    attr(out, "file_bytes") <- ny * nx * as.double(h$bands) * sz
+    return(out)
+  }
   for (iy in seq_len(ny)) {
-    y <- yrange[1] - 1 + iy - 1
+    y <- y0 + iy - 1
     if (h$interleave == "bip") {
       off <- h$header_offset + ((y * S + x0) * B) * sz
       v <- .envi_read_at(con, off, nx * h$bands, spec, h$endian)
@@ -245,12 +304,18 @@
     .at_abort("Could not find the ENVI header for {.path {path}}.", class = "io",
               code = "FILE_MISSING", call = call)
   }
+  files <- .persisted_source_files(c(header = p$hdr, payload = p$dat))
   h <- .parse_envi_hdr(p$hdr, call = call)
   spec <- .envi_dtype(h$data_type, call = call)
   trailing <- .envi_check_payload(p$dat, h, spec, call = call)
+  if (!identical(files, .persisted_source_files(c(header = p$hdr, payload = p$dat)))) {
+    .at_abort("Image source {.path {basename(path)}} changed during metadata open.",
+              class = "io", code = "SOURCE_CHANGED", call = call)
+  }
   bn <- h$band_names %||% NA_character_
   wl <- h$wavelengths
-  unit <- if (is.null(wl)) NULL else (h$wavelength_units %||% "nm")
+  # Undeclared wavelength units stay unknown; they are never assumed.
+  unit <- if (is.null(wl)) NULL else h$wavelength_units
   if (!is.null(unit) && tolower(unit) %in% c("nanometers", "nanometer", "nm")) unit <- "nm"
   if (!is.null(unit) && tolower(unit) %in% c("micrometers", "micrometer", "um", "microns")) {
     unit <- "um"
@@ -265,6 +330,8 @@
     offset = NA_real_, instrument = h$sensor_type %||% NA_character_,
     value_unit = value_unit %||% "unknown", header_issues = h$issues,
     window_read = TRUE,
+    reader_contract = list(axes = "yxb", samples = "raw-scalar-v1"),
+    capabilities = .window_capabilities("binary"),
     calibration = list(status = if (!is.null(h$reflectance_scale_factor) ||
                                     !is.null(h$data_gain_values)) "declared" else "missing")
   )
@@ -282,7 +349,7 @@
     n_bands = h$bands, band_names = bn,
     wavelengths = wl, wavelength_unit = unit,
     pixel_size = c(1, 1), pixel_unit = "px", dtype = spec$dtype,
-    handle = list(dat = normalizePath(p$dat), header = h),
+    handle = list(dat = normalizePath(p$dat), header = h, files = files),
     meta = meta
   )
 }

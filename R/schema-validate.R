@@ -3,9 +3,11 @@
 # control documents; this validator interprets exactly the keywords they use:
 # type, enum, const, required, properties, additionalProperties, items,
 # minItems, maxItems, minLength, maxLength, pattern, minimum, maximum,
-# anyOf, oneOf and local `$ref` ("#/definitions/..."). Unsupported keywords
-# are rejected when a schema is loaded, so a schema can never silently validate
-# less than it states. None of this is exported.
+# anyOf, oneOf and local `$ref` ("#/definitions/..."). Unsupported keywords,
+# and the tuple form of `items` (an array of schemas), are rejected when a
+# schema is loaded, so a schema can never silently validate less than it
+# states. Duplicate object keys are rejected when a document is read (see
+# .read_json_doc()). None of this is exported.
 
 .schema_keywords <- c(
   "$schema", "$id", "$comment", "title", "description", "default", "examples",
@@ -46,6 +48,9 @@
   for (k in intersect(names(node), c("properties", "definitions"))) {
     for (child in node[[k]]) .schema_check_keywords(child, where)
   }
+  if (is.list(node[["items"]]) && length(node[["items"]]) > 0L && is.null(names(node[["items"]]))) {
+    cli::cli_abort("Schema {.file {where}} uses the unsupported tuple form of {.field items}.")
+  }
   for (k in intersect(names(node), c("items", "additionalProperties"))) {
     if (is.list(node[[k]])) .schema_check_keywords(node[[k]], where)
   }
@@ -67,77 +72,79 @@
     if (!startsWith(ref, "#/definitions/")) {
       return(paste0(path, ": only local #/definitions references are supported"))
     }
-    target <- root$definitions[[sub("^#/definitions/", "", ref)]]
+    target <- root[["definitions"]][[sub("^#/definitions/", "", ref)]]
     if (is.null(target)) {
       return(paste0(path, ": unresolved reference ", ref))
     }
     return(.schema_validate(value, target, root, path))
   }
 
-  if (!is.null(schema$type)) {
-    types <- unlist(schema$type)
+  if (!is.null(schema[["type"]])) {
+    types <- unlist(schema[["type"]])
     if (!any(vapply(types, function(t) .json_is_type(value, t), logical(1)))) {
       add(paste0("expected type ", paste(types, collapse = "|"), ", got ", .json_type(value)))
       return(errors)
     }
   }
-  if (!is.null(schema$const) && !.json_equal(value, schema$const)) {
-    add(paste0("must equal ", .canonical_json(schema$const)))
+  # `[[` (not `$`) so a keyword never partially matches another name, and
+  # `"const": null` is honoured.
+  if ("const" %in% names(schema) && !.json_equal(value, schema[["const"]])) {
+    add(paste0("must equal ", .canonical_json(schema[["const"]])))
   }
-  if (!is.null(schema$enum) &&
-      !any(vapply(schema$enum, function(e) .json_equal(value, e), logical(1)))) {
-    add(paste0("must be one of ", .canonical_json(schema$enum)))
+  if (!is.null(schema[["enum"]]) &&
+      !any(vapply(schema[["enum"]], function(e) .json_equal(value, e), logical(1)))) {
+    add(paste0("must be one of ", .canonical_json(schema[["enum"]])))
   }
 
   if (.json_is_type(value, "string")) {
     n <- nchar(value, type = "chars")
-    if (!is.null(schema$minLength) && n < schema$minLength) add("string too short")
-    if (!is.null(schema$maxLength) && n > schema$maxLength) add("string too long")
-    if (!is.null(schema$pattern) && !grepl(schema$pattern, value, perl = TRUE)) {
-      add(paste0("does not match pattern ", schema$pattern))
+    if (!is.null(schema[["minLength"]]) && n < schema[["minLength"]]) add("string too short")
+    if (!is.null(schema[["maxLength"]]) && n > schema[["maxLength"]]) add("string too long")
+    if (!is.null(schema[["pattern"]]) && !grepl(schema[["pattern"]], value, perl = TRUE)) {
+      add(paste0("does not match pattern ", schema[["pattern"]]))
     }
   }
   if (.json_is_type(value, "number")) {
-    if (!is.null(schema$minimum) && value < schema$minimum) add(paste0("below minimum ", schema$minimum))
-    if (!is.null(schema$maximum) && value > schema$maximum) add(paste0("above maximum ", schema$maximum))
+    if (!is.null(schema[["minimum"]]) && value < schema[["minimum"]]) add(paste0("below minimum ", schema[["minimum"]]))
+    if (!is.null(schema[["maximum"]]) && value > schema[["maximum"]]) add(paste0("above maximum ", schema[["maximum"]]))
   }
 
   if (.json_is_type(value, "object")) {
-    for (req in unlist(schema$required)) {
+    for (req in unlist(schema[["required"]])) {
       if (!req %in% names(value)) add(paste0("missing required property '", req, "'"))
     }
-    props <- schema$properties %||% list()
+    props <- schema[["properties"]] %||% list()
     for (nm in names(value)) {
       child_path <- paste0(path, ".", nm)
       if (nm %in% names(props)) {
         errors <- c(errors, .schema_validate(value[[nm]], props[[nm]], root, child_path))
-      } else if (isFALSE(schema$additionalProperties)) {
+      } else if (isFALSE(schema[["additionalProperties"]])) {
         errors <- c(errors, paste0(child_path, ": unknown property (use 'extensions')"))
-      } else if (is.list(schema$additionalProperties)) {
-        errors <- c(errors, .schema_validate(value[[nm]], schema$additionalProperties,
+      } else if (is.list(schema[["additionalProperties"]])) {
+        errors <- c(errors, .schema_validate(value[[nm]], schema[["additionalProperties"]],
                                              root, child_path))
       }
     }
   }
 
   if (.json_is_type(value, "array")) {
-    if (!is.null(schema$minItems) && length(value) < schema$minItems) add("too few items")
-    if (!is.null(schema$maxItems) && length(value) > schema$maxItems) add("too many items")
-    if (is.list(schema$items)) {
+    if (!is.null(schema[["minItems"]]) && length(value) < schema[["minItems"]]) add("too few items")
+    if (!is.null(schema[["maxItems"]]) && length(value) > schema[["maxItems"]]) add("too many items")
+    if (is.list(schema[["items"]])) {
       for (i in seq_along(value)) {
-        errors <- c(errors, .schema_validate(value[[i]], schema$items, root,
+        errors <- c(errors, .schema_validate(value[[i]], schema[["items"]], root,
                                              paste0(path, "[", i - 1L, "]")))
       }
     }
   }
 
-  if (!is.null(schema$anyOf)) {
-    ok <- vapply(schema$anyOf, function(s) length(.schema_validate(value, s, root, path)) == 0L,
+  if (!is.null(schema[["anyOf"]])) {
+    ok <- vapply(schema[["anyOf"]], function(s) length(.schema_validate(value, s, root, path)) == 0L,
                  logical(1))
     if (!any(ok)) add("matches none of the allowed alternatives")
   }
-  if (!is.null(schema$oneOf)) {
-    ok <- vapply(schema$oneOf, function(s) length(.schema_validate(value, s, root, path)) == 0L,
+  if (!is.null(schema[["oneOf"]])) {
+    ok <- vapply(schema[["oneOf"]], function(s) length(.schema_validate(value, s, root, path)) == 0L,
                  logical(1))
     if (sum(ok) != 1L) add("must match exactly one alternative")
   }

@@ -161,3 +161,142 @@ test_that("predictions import as staged, provenance-tagged ROIs and never overwr
   expect_identical(rep$operations$op[rep$operations$roi_id == "human-1"], "conflict")
   expect_false(is.null(.find_roi(rep$proposed, "human-1")))
 })
+
+# ---- Regression tests from the 2026-10 audit ---------------------------------
+
+test_that("the training manifest is compact and checked before it replaces a dataset (X8)", {
+  sess <- train_session(1)
+  dest <- file.path(withr::local_tempdir(), "ds")
+  at_training_export(sess, dest, tile_size = 10, fractions = c(train = 1))
+  expect_length(readLines(file.path(dest, "training-manifest.json")), 1L)
+  expect_gt(.interop_limits()$training_max_json_bytes, .interop_limits()$handoff_max_json_bytes)
+  before <- unname(tools::md5sum(file.path(dest, "training-manifest.json")))
+  local_mocked_bindings(at_training_check = function(...) stop("check failed"))
+  expect_error(at_training_export(sess, dest, tile_size = 20, fractions = c(train = 1),
+                                  overwrite = TRUE), "check failed")
+  expect_identical(unname(tools::md5sum(file.path(dest, "training-manifest.json"))), before)
+  expect_identical(list.files(dirname(dest), all.files = TRUE, no.. = TRUE), "ds")
+})
+
+test_that("a failed dataset replacement restores the previous dataset (X9)", {
+  sess <- train_session(1)
+  dest <- file.path(withr::local_tempdir(), "ds")
+  at_training_export(sess, dest, tile_size = 10, fractions = c(train = 1))
+  before <- unname(tools::md5sum(file.path(dest, "training-manifest.json")))
+  real <- .rename_path
+  local_mocked_bindings(.rename_path = function(from, to) {
+    if (grepl("\\.partial-", basename(from))) FALSE else real(from, to)
+  })
+  err <- tryCatch(at_training_export(sess, dest, tile_size = 20, fractions = c(train = 1),
+                                     overwrite = TRUE), error = function(e) e)
+  expect_identical(err$code, "WRITE_FAILED")
+  expect_identical(unname(tools::md5sum(file.path(dest, "training-manifest.json"))), before)
+  expect_identical(list.files(dirname(dest), all.files = TRUE, no.. = TRUE), "ds")
+})
+
+test_that("malformed manifests become failing checks, and unsafe tile paths are never read (X13)", {
+  sess <- train_session(1)
+  dest <- file.path(withr::local_tempdir(), "ds")
+  at_training_export(sess, dest, tile_size = 10, fractions = c(train = 1))
+  man <- jsonlite::read_json(file.path(dest, "training-manifest.json"))
+  inc <- which(vapply(man$tiles, function(t) identical(t$status, "included"), logical(1)))
+  man$tiles[[inc[1]]]$entry_id <- "entry-9999"
+  man$tiles[[inc[2]]]$mask_file <- "../outside.tif"
+  jsonlite::write_json(man, file.path(dest, "training-manifest.json"), auto_unbox = TRUE,
+                       null = "null", digits = NA)
+  chk <- at_training_check(dest)
+  expect_s3_class(chk, "at_training_check")
+  expect_identical(chk$status[chk$check == "split_leakage"], "fail")
+  expect_identical(chk$status[chk$check == "mask_dimensions"], "fail")
+  expect_match(chk$detail[chk$check == "mask_dimensions"], "1 with unsafe paths")
+  inv <- jsonlite::read_json(file.path(dest, "integrity.json"))
+  inv$files[[1]]$path <- "../escape"
+  jsonlite::write_json(inv, file.path(dest, "integrity.json"), auto_unbox = TRUE)
+  chk2 <- at_training_check(dest)
+  expect_match(chk2$detail[chk2$check == "integrity"], "unsafe path")
+})
+
+test_that("split names are safe directory names; explicit splits accept entry ids (X14)", {
+  sess <- train_session(2)
+  base <- withr::local_tempdir()
+  err <- tryCatch(at_training_export(sess, file.path(base, "ds"), tile_size = 10,
+                                     fractions = c("../../escaped" = 1)), error = function(e) e)
+  expect_identical(err$code, "SPLIT_NAME_INVALID")
+  expect_length(list.files(base, all.files = TRUE, no.. = TRUE), 0L)
+  ds <- at_training_export(sess, file.path(base, "ds"), tile_size = 10,
+                           split = list(train = "entry-0001", test = "entry-0002"))
+  expect_identical(vapply(ds$manifest$images, `[[`, character(1), "split"), c("train", "test"))
+  err <- tryCatch(at_training_export(sess, file.path(base, "ds2"), tile_size = 10,
+                                     split = list(train = c("entry-0001", "entry-0002"),
+                                                  test = "entry-0002")),
+                  error = function(e) e)
+  expect_identical(err$code, "SPLIT_LEAKAGE")
+})
+
+test_that("instance tiles are written at the declared 16-bit dtype (X17)", {
+  sess <- train_session(1)
+  dest <- file.path(withr::local_tempdir(), "ds")
+  ds <- at_training_export(sess, dest, tile_size = 10, mask_type = "instance", fractions = c(train = 1))
+  expect_identical(ds$manifest$mask_encoding$dtype, "uint16")
+  t1 <- Filter(function(t) t$status == "included", ds$manifest$tiles)[[1]]
+  m <- tiff::readTIFF(file.path(dest, t1$mask_file), info = TRUE, as.is = TRUE)
+  expect_identical(as.integer(attr(m, "bits.per.sample")), 16L)
+})
+
+test_that("only overlaps of different classes are ambiguous in semantic masks (X17)", {
+  sess <- train_session(1)
+  p <- sess$projects[[1]]
+  # A second tumour ROI overlapping the first: same class, not ambiguous.
+  p <- at_add_roi(p, "tissue", at_roi_rect(4, 4, 8, 8, label = "tumour", id = "t-extra"))
+  sess$projects[[1]] <- p
+  ds <- at_training_export(sess, file.path(withr::local_tempdir(), "ds"), tile_size = 10,
+                           fractions = c(train = 1))
+  expect_identical(ds$manifest$counts$flagged$ambiguous, 0L)
+  inst <- at_training_export(sess, file.path(withr::local_tempdir(), "di"), tile_size = 10,
+                             mask_type = "instance", fractions = c(train = 1))
+  expect_gt(inst$manifest$counts$flagged$ambiguous, 0L)
+})
+
+test_that("bands are validated and image tiles need one shared band table (X17)", {
+  sess <- train_session(2)
+  err <- tryCatch(at_training_export(sess, file.path(withr::local_tempdir(), "ds"), tile_size = 10,
+                                     bands = 4L, fractions = c(train = 1)), error = function(e) e)
+  expect_identical(err$code, "BAND_OUT_OF_RANGE")
+  img <- sess$projects[[2]]$image
+  img$n_bands <- 1L
+  img$handle$data <- img$handle$data[, , 1, drop = FALSE]
+  sess$projects[[2]]$image <- img
+  err <- tryCatch(at_training_export(sess, file.path(withr::local_tempdir(), "ds"), tile_size = 10,
+                                     include_images = TRUE, fractions = c(train = 1)),
+                  error = function(e) e)
+  expect_identical(err$code, "BAND_MISMATCH")
+})
+
+test_that("a single group of an even split goes to the first split (X20)", {
+  expect_identical(unname(.assign_splits("g", c(train = 0.5, test = 0.5), 1L)), "train")
+  expect_identical(unname(.assign_splits(c("a", "b"), c(train = 0.5, test = 0.5), 1L)),
+                   c("train", "test"))
+})
+
+test_that("min_confidence without a confidence matrix is refused (X20)", {
+  proj <- train_session(1)$projects[[1]]
+  pred <- matrix(0L, 30, 40)
+  pred[5:10, 5:15] <- 1L
+  expect_error(at_training_import(proj, pred, c(tumour = 1L), min_confidence = 0.5),
+               "confidence")
+})
+
+test_that("tile files below a symbolic link are never opened (X13)", {
+  skip_on_os("windows")
+  sess <- train_session(1)
+  dest <- file.path(withr::local_tempdir(), "ds")
+  ds <- at_training_export(sess, dest, tile_size = 10, fractions = c(train = 1))
+  outside <- withr::local_tempdir()
+  file.rename(file.path(dest, "masks"), file.path(outside, "masks"))
+  file.symlink(file.path(outside, "masks"), file.path(dest, "masks"))
+  chk <- at_training_check(dest)
+  expect_identical(chk$status[chk$check == "integrity"], "fail")
+  expect_match(chk$detail[chk$check == "integrity"], "symbolic link")
+  expect_identical(chk$status[chk$check == "mask_dimensions"], "fail")
+  expect_match(chk$detail[chk$check == "mask_dimensions"], "with unsafe paths")
+})

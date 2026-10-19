@@ -36,7 +36,8 @@ background).}
 
 \item{confidence}{Optional numeric matrix of per-pixel confidence.}
 
-\item{min_confidence}{Optional threshold applied to \code{confidence}.}
+\item{min_confidence}{Optional threshold applied to \code{confidence} (which is
+then required).}
 
 \item{layer}{Target layer name. Default \code{"predictions"}.}
 

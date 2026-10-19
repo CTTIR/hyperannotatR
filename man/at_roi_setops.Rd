@@ -8,18 +8,22 @@
 \alias{at_roi_symdiff}
 \title{Set operations on ROIs}
 \usage{
-at_roi_union(..., call = rlang::caller_env())
+at_roi_union(..., call = rlang::caller_env(), image = NULL)
 
-at_roi_intersect(..., call = rlang::caller_env())
+at_roi_intersect(..., call = rlang::caller_env(), image = NULL)
 
-at_roi_difference(..., call = rlang::caller_env())
+at_roi_difference(..., call = rlang::caller_env(), image = NULL)
 
-at_roi_symdiff(..., call = rlang::caller_env())
+at_roi_symdiff(..., call = rlang::caller_env(), image = NULL)
 }
 \arguments{
 \item{...}{Two or more \link{annot_roi}, or a single \link{annot_layer}.}
 
 \item{call}{The calling environment, for error reporting.}
+
+\item{image}{Optional \link{annot_image} defining actual pyramid dimensions.
+Required for mixed levels. With it, results use level 0; without it, all
+operands must share a level and the result retains that level.}
 }
 \value{
 A single \link{annot_roi} with \code{source = "derived"}.
@@ -28,6 +32,15 @@ A single \link{annot_roi} with \code{source = "derived"}.
 Combine ROIs geometrically. Each accepts several \link{annot_roi} via \code{...}, or a
 single \link{annot_layer}. Multi-part results are returned as one ROI with
 \code{MULTIPOLYGON} geometry (the return type is always a single \link{annot_roi}).
+When every input is a polygon the result is a \code{POLYGON} or \code{MULTIPOLYGON};
+parts of lower dimension (edges or corners that ROIs only touch along) are
+dropped, and an empty result is an empty polygon, with a warning.
+}
+\details{
+Bare ROIs at different pyramid levels are an error with code
+\code{MIXED_LEVELS}; pass \code{image} to combine them at level 0. The result takes
+the label and author of the first ROI, but not its lock, review status,
+QuPath object identity or shape attributes.
 }
 \examples{
 a <- at_roi_rect(0, 0, 6, 6, label = "x")

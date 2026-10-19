@@ -19,7 +19,9 @@ per-label ROI counts, and total area per label.
 Summarise a project
 }
 \examples{
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_summary(at_example_project())
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other projects:

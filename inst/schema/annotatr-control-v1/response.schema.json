@@ -15,6 +15,7 @@
     "data": {"type": ["object", "array"]},
     "error": {"$ref": "#/definitions/error"},
     "replayed": {"type": "boolean"},
+    "response_truncated": {"type": "boolean", "description": "Set on a replayed response whose stored record was compacted (large data fields dropped)."},
     "warnings": {"type": "array"}
   },
   "oneOf": [
@@ -30,7 +31,9 @@
         "message_key": {"type": "string"},
         "message": {"type": "string"},
         "details": {"type": "object"},
-        "retryable": {"type": "boolean"}
+        "retryable": {"type": "boolean"},
+        "class": {"type": "string", "enum": ["validation", "capability", "conflict", "io", "protocol", "auth", "limit"],
+                  "description": "hyperannotatR condition class; a client raises at_<class>_error."}
       }
     }
   }

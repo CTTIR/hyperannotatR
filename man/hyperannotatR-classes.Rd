@@ -16,8 +16,11 @@ hyperannotatR represents annotations with a small set of S3 classes. This page
 collects them so they can be cross-referenced from the documentation.
 
 \describe{
-\item{\code{annot_image}}{A backend-agnostic image handle holding metadata and a
-lazy tile accessor. Created by \code{at_read_image()} or \code{at_example_image()}.}
+\item{\code{annot_image}}{A backend-agnostic image handle holding metadata and
+the backend's pixel handle, read through \code{\link[=at_tile]{at_tile()}}. Windowed backends
+(ENVI, TIVITA) read only the requested window; the raster and TIFF
+backends decode the whole image when it is read. Created by
+\code{at_read_image()} or \code{at_example_image()}.}
 \item{\code{annot_roi}}{A single region of interest: an \code{sf} geometry in image
 pixel coordinates at a declared pyramid level. Created by the
 \verb{at_roi_*()} constructors.}
@@ -27,8 +30,9 @@ and a visual style. Created by \code{\link[=at_layer]{at_layer()}}.}
 Created by \code{\link[=at_project]{at_project()}}.}
 \item{\code{annot_session}}{A resumable batch-annotation session over a queue of
 images. Created by \code{\link[=at_session]{at_session()}}.}
-\item{\code{annot_mask}}{A rasterised mask: a labelled or binary integer matrix
-with a legend. Created by \code{at_mask()}.}
+\item{\code{annot_mask}}{A rasterised mask: an integer matrix (binary,
+labelled, multiclass, or bitfield-encoded) with a legend. Created by
+\code{at_mask()}.}
 \item{\code{annot_style}}{A layer style specification. Created by \code{\link[=at_style]{at_style()}}.}
 \item{\code{annot_summary}}{A compact per-label project summary. Created by
 \code{\link[=at_summary]{at_summary()}}.}
@@ -39,9 +43,11 @@ with a legend. Created by \code{at_mask()}.}
 
 Other images:
 \code{\link[=at_bands]{at_bands()}},
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_example_image]{at_example_image()}},
 \code{\link[=at_hsi_meta]{at_hsi_meta()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_is_pyramidal]{at_is_pyramidal()}},
 \code{\link[=at_is_spectral]{at_is_spectral()}},
 \code{\link[=at_meta]{at_meta()}},

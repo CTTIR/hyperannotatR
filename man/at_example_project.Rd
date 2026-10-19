@@ -17,7 +17,7 @@ labelled regions.
 A populated example project
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 proj <- at_example_project()
 at_rois(proj)
 \dontshow{\}) # examplesIf}

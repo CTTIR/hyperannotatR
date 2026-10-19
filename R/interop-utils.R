@@ -21,6 +21,13 @@
   )
 }
 
+# .at_abort() for a literal message pasted together from its arguments: the
+# text is never read as a cli template, so paths containing braces are safe.
+.at_fail <- function(..., class = "validation", code = "VALIDATION_FAILED") {
+  msg <- paste0(...)
+  .at_abort("{msg}", class = class, code = code, call = NULL)
+}
+
 # The code of a classified hyperannotatR condition, or a generic fallback.
 .condition_code <- function(cnd) {
   cnd$code %||% if (inherits(cnd, "at_error")) "VALIDATION_FAILED" else "INTERNAL_ERROR"
@@ -36,7 +43,12 @@
 # newline. The mapping from R matches jsonlite with `auto_unbox = TRUE`: a named
 # list is an object, an unnamed list an array, a length-1 atomic a scalar, any
 # other atomic an array, and `NULL`/`NA` are `null`. This is the byte string the
-# handoff and control digests are computed over.
+# handoff and control digests are computed over. For documents of strings,
+# booleans, null and integers up to 2^53 - 1 in magnitude it is byte-identical
+# to qupflowR's canonical JSON (tests/testthat/fixtures/interop/
+# qupflowr-canonical); qupflowR rejects fractional numbers, which hyperannotatR
+# writes as the shortest of 15-17 significant digits, so digests over
+# fractional values are hyperannotatR-specific.
 .canonical_json <- function(x) {
   if (is.null(x)) {
     return("null")
@@ -95,6 +107,9 @@
     if (!is.finite(v)) {
       .at_abort("Non-finite numbers cannot be written as JSON.", code = "INVALID_JSON")
     }
+    if (v == 0) {
+      return("0") # negative zero is written as 0, as qupflowR does
+    }
     if (v == round(v) && abs(v) < 2^53) {
       return(formatC(v, format = "f", digits = 0, big.mark = ""))
     }
@@ -147,14 +162,64 @@
     dir.create(dir, recursive = TRUE)
   }
   tmp <- tempfile(pattern = ".hyperannotatR-", tmpdir = dir, fileext = ".tmp")
+  done <- FALSE
+  on.exit(if (!done) unlink(tmp), add = TRUE)
   con <- file(tmp, open = "wb")
-  writeBin(charToRaw(enc2utf8(paste0(text, "\n"))), con)
-  close(con)
-  if (!file.rename(tmp, path)) {
-    unlink(tmp)
+  tryCatch(
+    writeBin(charToRaw(enc2utf8(paste0(text, "\n"))), con),
+    finally = close(con)
+  )
+  if (!.rename_path(tmp, path)) {
     .at_abort("Could not write {.path {basename(path)}}.", class = "io", code = "WRITE_FAILED")
   }
+  done <- TRUE
   invisible(path)
+}
+
+# file.rename() behind a package function, so tests can simulate a failed move.
+.rename_path <- function(from, to) file.rename(from, to)
+
+# Move a complete staging directory to `dest`. An existing `dest` is moved
+# aside first and restored if the new directory cannot be put in place, so a
+# failed replacement never loses the previous copy; the old copy is deleted
+# only after the new one is in place.
+.replace_dir <- function(stage, dest, what = "directory", call = rlang::caller_env()) {
+  if (file.exists(dest)) {
+    backup <- file.path(dirname(dest), paste0(".", basename(dest), ".previous-",
+                                              .random_hex(6L, secure = FALSE)))
+    if (!.rename_path(dest, backup)) {
+      .at_abort("Could not move the previous {what} aside.", class = "io", code = "WRITE_FAILED",
+                call = call)
+    }
+    if (!.rename_path(stage, dest)) {
+      if (!.rename_path(backup, dest)) {
+        .at_abort(c("Could not move the new {what} into place or restore the previous one.",
+                    "i" = "The previous copy is kept at {.path {backup}}."),
+                  class = "io", code = "WRITE_FAILED", call = call)
+      }
+      .at_abort("Could not move the new {what} into place; the previous one was restored.",
+                class = "io", code = "WRITE_FAILED", call = call)
+    }
+    unlink(backup, recursive = TRUE)
+  } else if (!.rename_path(stage, dest)) {
+    .at_abort("Could not move the new {what} into place.", class = "io", code = "WRITE_FAILED",
+              call = call)
+  }
+  invisible(dest)
+}
+
+# Exact nested lookup in parsed JSON, e.g. .jget(man, "provenance", "export",
+# "level"). R's `$` partially matches list names, so a partner key such as
+# "levels" would be read for "level" when "level" is absent; `[[` matches
+# exactly. NULL when any step is missing or not an object.
+.jget <- function(x, ...) {
+  for (k in c(...)) {
+    if (!is.list(x) || !k %in% names(x)) {
+      return(NULL)
+    }
+    x <- x[[k]]
+  }
+  x
 }
 
 # Read a JSON document as nested lists (objects are named lists).
@@ -168,13 +233,40 @@
     .at_abort("{.path {basename(path)}} is larger than the {max_bytes}-byte JSON limit.",
               class = "limit", code = "PAYLOAD_TOO_LARGE", call = call)
   }
-  tryCatch(
+  doc <- tryCatch(
     jsonlite::fromJSON(path, simplifyVector = FALSE),
     error = function(e) {
       .at_abort("{.path {basename(path)}} is not valid JSON.", code = "INVALID_JSON",
                 details = list(file = basename(path)), call = call)
     }
   )
+  # jsonlite keeps every member of an object with repeated keys; the schema
+  # validator and the readers would silently use the first one.
+  dup <- .json_duplicate_key(doc)
+  if (!is.null(dup)) {
+    .at_abort("{.path {basename(path)}} repeats the object key {.val {dup}}.", code = "INVALID_JSON",
+              details = list(file = basename(path), reason = "duplicate_key"), call = call)
+  }
+  doc
+}
+
+# The first object key that occurs twice in one object of a parsed JSON value,
+# or NULL.
+.json_duplicate_key <- function(x) {
+  if (!is.list(x)) {
+    return(NULL)
+  }
+  nms <- names(x)
+  if (!is.null(nms) && anyDuplicated(nms)) {
+    return(nms[duplicated(nms)][1])
+  }
+  for (el in x) {
+    hit <- .json_duplicate_key(el)
+    if (!is.null(hit)) {
+      return(hit)
+    }
+  }
+  NULL
 }
 
 # ---- Digests ---------------------------------------------------------------
@@ -217,13 +309,29 @@
 
 # ---- Identifiers and tokens ------------------------------------------------
 
-# `n` cryptographically random bytes. Uses the operating-system source where
-# available and never disturbs the caller's R random-number stream.
-.random_bytes <- function(n) {
-  if (file.exists("/dev/urandom")) {
+# `n` random bytes, never disturbing the caller's R random-number stream.
+# With `secure = TRUE` (bearer tokens) the bytes come from the operating
+# system (/dev/urandom) or the optional openssl package, and generation is
+# refused when neither exists (Windows without openssl). Only identifiers that
+# need to be unique but not secret (`secure = FALSE`: staging directory
+# names, UUIDs for patches and requests) fall back to R's generator seeded
+# from the clock and process id.
+.random_bytes <- function(n, secure = TRUE) {
+  if (.urandom_available()) {
     con <- file("/dev/urandom", "rb", raw = TRUE)
     on.exit(close(con), add = TRUE)
     return(readBin(con, "raw", n = n))
+  }
+  if (.openssl_available()) {
+    return(getExportedValue("openssl", "rand_bytes")(n))
+  }
+  if (secure) {
+    .at_abort(
+      c("No cryptographically secure random source is available.",
+        "x" = "There is no {.file /dev/urandom} and the {.pkg openssl} package is not installed.",
+        "i" = "Install it with {.code install.packages(\"openssl\")}."),
+      class = "capability", code = "CAPABILITY_UNAVAILABLE"
+    )
   }
   had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
   old <- if (had_seed) get(".Random.seed", envir = globalenv()) else NULL
@@ -238,13 +346,18 @@
   as.raw(sample.int(256L, n, replace = TRUE) - 1L)
 }
 
-.random_hex <- function(n_bytes = 16L) {
-  paste(sprintf("%02x", as.integer(.random_bytes(n_bytes))), collapse = "")
+.urandom_available <- function() file.exists("/dev/urandom")
+
+.openssl_available <- function() requireNamespace("openssl", quietly = TRUE)
+
+.random_hex <- function(n_bytes = 16L, secure = TRUE) {
+  paste(sprintf("%02x", as.integer(.random_bytes(n_bytes, secure = secure))), collapse = "")
 }
 
-# A random RFC 4122 version-4 UUID string.
-.uuid <- function() {
-  b <- as.integer(.random_bytes(16L))
+# A random RFC 4122 version-4 UUID string. UUIDs identify, they do not
+# authenticate, so they work without a secure random source.
+.uuid <- function(secure = FALSE) {
+  b <- as.integer(.random_bytes(16L, secure = secure))
   b[7] <- bitwOr(bitwAnd(b[7], 0x0f), 0x40)
   b[9] <- bitwOr(bitwAnd(b[9], 0x3f), 0x80)
   h <- sprintf("%02x", b)
@@ -320,9 +433,16 @@
     }
     real <- normalizePath(full, winslash = "/", mustWork = TRUE)
   } else {
-    parent <- dirname(full)
-    real_parent <- if (dir.exists(parent)) normalizePath(parent, winslash = "/") else parent
-    real <- file.path(real_parent, basename(full))
+    # Resolve the deepest existing ancestor, so a symlinked intermediate
+    # directory cannot carry a not-yet-existing path outside the root.
+    tail <- character()
+    anc <- full
+    while (!file.exists(anc) && !identical(dirname(anc), anc)) {
+      tail <- c(basename(anc), tail)
+      anc <- dirname(anc)
+    }
+    real <- normalizePath(anc, winslash = "/", mustWork = TRUE)
+    if (length(tail)) real <- do.call(file.path, as.list(c(real, tail)))
   }
   if (!identical(real, root_n) && !startsWith(real, paste0(root_n, "/"))) {
     .at_abort("The referenced path resolves outside the negotiated root.",

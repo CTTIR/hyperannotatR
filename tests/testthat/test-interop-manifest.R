@@ -1,4 +1,4 @@
-skip_if_not(requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE))
+skip_if_not_installed("magick")
 
 test_that("the project manifest describes identity, convention and annotations without local paths", {
   proj <- at_example_project()
@@ -59,7 +59,8 @@ test_that("session, image, layer, ROI and mask manifests are schema-valid", {
   ms <- at_interop_manifest(sess)
   expect_identical(ms$object_kind, "session")
   q <- ms$session$queue
-  expect_identical(vapply(q, `[[`, character(1), "entry_id"), c("entry-0001", "entry-0002"))
+  expect_identical(vapply(q, `[[`, character(1), "entry_id"),
+                   c(.session_entry_id(sess, 1), .session_entry_id(sess, 2)))
   expect_identical(vapply(q, `[[`, logical(1), "materialised"), c(FALSE, TRUE))
   schema <- .schema_load("annotatr-handoff-v1", "manifest")
   for (obj in list(sess, at_example_image("cube"), at_example_project()$layers$regions,
@@ -82,4 +83,88 @@ test_that("writing a manifest never overwrites", {
   expect_s3_class(err, "at_io_error")
   expect_identical(err$code, "DESTINATION_EXISTS")
   expect_error(at_interop_manifest(42), class = "at_validation_error")
+})
+
+test_that("dates, durations, raw and complex attributes do not break digests (X7)", {
+  base <- at_example_project()
+  add <- function(...) at_add_roi(base, "regions", at_roi_rect(1, 1, 5, 5, label = "tumour", ...))
+  for (p in list(add(scanned = as.Date("2026-01-01")),
+                 add(exposure = as.difftime(3, units = "secs")),
+                 add(seen = as.POSIXct(c("2026-01-01 10:00:00", "2026-01-02 11:00:00"), tz = "UTC")),
+                 add(blob = as.raw(c(1, 255))),
+                 add(z = complex(real = 1, imaginary = 2)))) {
+    expect_match(at_annotation_revision(p), "^sha256:[0-9a-f]{64}$")
+    expect_s3_class(at_interop_manifest(p, hash_sources = FALSE), "at_interop_manifest")
+  }
+  expect_identical(.json_safe(as.Date("2026-01-01")), "2026-01-01")
+  expect_identical(.json_safe(as.raw(c(1, 255))), "01ff")
+  expect_identical(.json_safe(as.POSIXct(c("2026-01-01 10:00:00", NA), tz = "UTC")),
+                   list("2026-01-01T10:00:00Z", NA_character_))
+})
+
+test_that("an unknown review status is refused with a clear code (X7)", {
+  p <- at_add_roi(at_example_project(), "regions",
+                  at_roi_rect(1, 1, 5, 5, label = "tumour", id = "odd", review_status = "approved"))
+  err <- tryCatch(at_interop_manifest(p), error = function(e) e)
+  expect_identical(err$code, "REVIEW_STATUS_INVALID")
+  expect_match(conditionMessage(err), "odd")
+})
+
+test_that("session manifests key ROIs and layers by queue entry (X4)", {
+  sess <- at_example_session(2)
+  sess$projects[[1]] <- at_example_project()
+  sess$projects[[2]] <- at_example_project()
+  m <- at_interop_manifest(sess, hash_sources = FALSE)
+  eids <- c(.session_entry_id(sess, 1), .session_entry_id(sess, 2))
+  entries <- vapply(m$annotations$rois, `[[`, character(1), "entry_id")
+  expect_identical(unique(entries), eids)
+  expect_identical(vapply(m$layers, `[[`, character(1), "entry_id"), eids)
+  expect_identical(vapply(m$session$queue, `[[`, character(1), "entry_id"), eids)
+  expect_identical(vapply(m$session$queue, `[[`, integer(1), "queue_index"), 1:2)
+  # Project manifests keep their layer records (and revisions) unchanged.
+  expect_null(at_interop_manifest(at_example_project())$layers[[1]]$entry_id)
+})
+
+test_that("the image id distinguishes series, planes and measurements of one file (X4)", {
+  img <- at_example_project()$image
+  files <- .source_files(img)
+  base <- .image_id(img, files)
+  s1 <- img
+  s1$meta$series_id <- 1L
+  z1 <- img
+  z1$meta$plane <- list(c = NA_integer_, z = 1L, t = 0L)
+  m2 <- img
+  m2$meta$measurement_index <- 2L
+  ids <- c(base, .image_id(s1, files), .image_id(z1, files), .image_id(m2, files))
+  expect_false(anyDuplicated(ids) > 0L)
+  # Reader options that only change interpretation keep the content id.
+  r <- img
+  r$reader <- list(backend = "raster", args = list(value_unit = "reflectance"))
+  expect_identical(.image_id(r, files), base)
+})
+
+test_that("stable session entry ids are used when present, positional ids otherwise (X4)", {
+  sess <- at_example_session(2)
+  sess$manifest$entry_id <- c("entry_ns_000000007", "bad id/../x")
+  expect_identical(.session_entry_id(sess, 1), "entry_ns_000000007")
+  expect_identical(.session_entry_id(sess, 2), "entry-0002")
+  sess$manifest$entry_id <- NULL
+  sess$projects[[1]] <- at_example_project()
+  sess$projects[[1]]$meta$entry_id <- "entry_ns_000000003"
+  expect_identical(.session_entry_id(sess, 1), "entry_ns_000000003")
+  expect_identical(.session_entry_id(sess, 2), "entry-0002")
+})
+
+test_that("partner keys are looked up exactly, never by prefix (A33)", {
+  r <- at_roi_rect(1, 1, 5, 5, label = "a")
+  r$attributes <- list(review_status_note = "approved by X", locked_by = "someone",
+                       shape_hint = "circle", plane_note = "z1")
+  rec <- .roi_record(r, "l")
+  expect_identical(rec$review_status, "unreviewed")
+  expect_false(rec$locked)
+  expect_identical(rec$geometry_fidelity, "exact")
+  expect_identical(rec$plane, list(c = NA_integer_, z = 0L, t = 0L))
+  expect_null(.jget(list(levels = 2L), "level"))
+  expect_identical(.jget(list(a = list(b = 1L)), "a", "b"), 1L)
+  expect_null(.jget(list(a = "x"), "a", "b"))
 })

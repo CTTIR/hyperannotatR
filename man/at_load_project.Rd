@@ -12,18 +12,24 @@ at_load_project(path, call = rlang::caller_env())
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-The \link{annot_project}. Warns if the file was written by a newer
-hyperannotatR.
+The \link{annot_project}. Its image is reopened from the saved source
+descriptor; when the source is missing, changed or ambiguous the
+annotations still load, pixel access fails with a pointer to
+\code{\link[=at_relink_source]{at_relink_source()}}, and \code{\link[=at_inspect_source]{at_inspect_source()}} reports why. Warns if the
+file was written by a newer hyperannotatR.
 }
 \description{
 Load a project
 }
 \seealso{
 Other io:
+\code{\link[=at_inspect_saved]{at_inspect_saved()}},
+\code{\link[=at_inspect_source]{at_inspect_source()}},
 \code{\link[=at_load_session]{at_load_session()}},
 \code{\link[=at_read_geojson]{at_read_geojson()}},
 \code{\link[=at_read_qupath]{at_read_qupath()}},
 \code{\link[=at_read_rois_csv]{at_read_rois_csv()}},
+\code{\link[=at_relink_source]{at_relink_source()}},
 \code{\link[=at_roi_from_geojson]{at_roi_from_geojson()}},
 \code{\link[=at_save_project]{at_save_project()}},
 \code{\link[=at_save_session]{at_save_session()}},

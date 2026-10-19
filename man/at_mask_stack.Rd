@@ -9,7 +9,8 @@ at_mask_stack(project, layers = NULL, level = 0L, call = rlang::caller_env())
 \arguments{
 \item{project}{An \link{annot_project}.}
 
-\item{layers}{Optional layer name(s) to include; all by default.}
+\item{layers}{Optional layer name(s) to include; all by default. Unknown
+names are an error.}
 
 \item{level}{Integer pyramid level. Default \code{0}.}
 
@@ -17,7 +18,9 @@ at_mask_stack(project, layers = NULL, level = 0L, call = rlang::caller_env())
 }
 \value{
 A 3D integer array \verb{[y, x, layer]}, one multi-class plane per layer;
-the third dimension is named by layer.
+the third dimension is named by layer. Codes are local to each layer; the
+\code{legends} attribute is a named list of the per-layer legends (see
+\code{\link[=at_mask_legend]{at_mask_legend()}}) that maps them back to labels.
 }
 \description{
 Stack per-layer masks into a 3D array

@@ -3,6 +3,7 @@
 
 skip_if_not_installed("shiny")
 skip_if_not_installed("bslib")
+skip_if_not_installed("htmlwidgets")
 skip_if_not_installed("shinyjs")
 
 test_that("the full app builds a shiny.appobj", {

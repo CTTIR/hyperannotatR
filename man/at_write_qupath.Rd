@@ -21,7 +21,9 @@ at_write_qupath(
 
 \item{layer}{Optional layer filter.}
 
-\item{level}{Integer pyramid level. Default \code{0}.}
+\item{level}{Integer pyramid level for the coordinates and the \code{level}
+property. Default \code{0}, as QuPath expects; other levels are for consumers
+that explicitly support them.}
 
 \item{overwrite}{Logical; overwrite an existing file. Default \code{FALSE}.}
 
@@ -36,18 +38,27 @@ The output path, invisibly.
 The default \code{dialect = "qupath"} writes what QuPath 0.4 and later read
 natively (verified with QuPath 0.7.0): \code{objectType}, \code{classification} with
 an \verb{[r, g, b]} colour, \code{isLocked} for locked ROIs, a deterministic UUID per
-ROI as the feature id (QuPath replaces non-UUID ids), and hyperannotatR's own ROI
-id, layer, source and level in \code{properties.metadata}. \code{dialect = "legacy"}
-writes the hyperannotatR 0.1 form (\code{object_type}, signed \code{colorRGB}), which QuPath
-still reads with a deprecation warning.
+ROI as the feature id (QuPath replaces non-UUID ids; existing UUIDs are
+kept), and hyperannotatR's own ROI id, layer, source and stored level in
+\code{properties.metadata}. \code{dialect = "legacy"} writes the hyperannotatR 0.1 form
+(\code{object_type}, signed \code{colorRGB}), which QuPath still reads with a
+deprecation warning. Publication uses a staged replacement.
 }
 \details{
-QuPath keeps one colour per classification name, so identical labels with
-different layer colours collapse to the first colour QuPath sees.
+Every feature records the pyramid level of its written coordinates as the
+\code{level} property, the ROI's stored level as \code{source_level}, and the marker
+\code{coordinate_schema = "annotatR-pixel-level-v1"}. QuPath keeps only
+\code{metadata} through its own import and export, so the QuPath dialect repeats
+the declaration there as \code{annotatr_coordinate_schema} and
+\code{annotatr_coordinate_level}; \code{\link[=at_read_qupath]{at_read_qupath()}} restores ROIs at that level.
+
+QuPath keeps one colour per classification name, so a label that has
+different colours in different layers is written with the first colour
+found for it.
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-p <- withr::local_tempfile(fileext = ".geojson")
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+p <- tempfile(fileext = ".geojson")
 at_write_qupath(at_example_project(), p)
 \dontshow{\}) # examplesIf}
 }
@@ -55,11 +66,14 @@ at_write_qupath(at_example_project(), p)
 \code{\link[=at_read_qupath]{at_read_qupath()}}, \code{\link[=at_write_geojson]{at_write_geojson()}}
 
 Other io:
+\code{\link[=at_inspect_saved]{at_inspect_saved()}},
+\code{\link[=at_inspect_source]{at_inspect_source()}},
 \code{\link[=at_load_project]{at_load_project()}},
 \code{\link[=at_load_session]{at_load_session()}},
 \code{\link[=at_read_geojson]{at_read_geojson()}},
 \code{\link[=at_read_qupath]{at_read_qupath()}},
 \code{\link[=at_read_rois_csv]{at_read_rois_csv()}},
+\code{\link[=at_relink_source]{at_relink_source()}},
 \code{\link[=at_roi_from_geojson]{at_roi_from_geojson()}},
 \code{\link[=at_save_project]{at_save_project()}},
 \code{\link[=at_save_session]{at_save_session()}},

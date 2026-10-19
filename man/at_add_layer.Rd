@@ -14,7 +14,10 @@ at_add_layer(project, layer, call = rlang::caller_env())
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-A new \link{annot_project} with the layer added. The input is unchanged.
+A new \link{annot_project} with the layer added. ROIs in \code{layer} whose
+identifiers are missing, already used in the project, or repeated within
+the layer are re-minted; the first occurrence of each valid id is kept.
+The input is unchanged.
 }
 \description{
 Add a layer to a project

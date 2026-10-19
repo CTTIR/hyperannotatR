@@ -1,4 +1,4 @@
-skip_if_not(requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE))
+skip_if_not_installed("magick")
 skip_if_not_installed("tiff")
 
 handoff_fixture <- function(formats = c("qupath_geojson", "geojson", "mask_tiff", "mask_npy")) {
@@ -230,12 +230,13 @@ test_that("overwrite replaces only an existing handoff directory", {
 test_that("session handoffs export materialised entries and record skipped ones", {
   sess <- at_example_session(3)
   sess$projects[[2]] <- at_example_project()
+  eids <- vapply(1:3, function(i) .session_entry_id(sess, i), character(1))
   dest <- file.path(withr::local_tempdir(), "s")
   rc <- at_export_qupflowr(sess, dest)
-  expect_identical(rc$skipped, c("entry-0001", "entry-0003"))
-  expect_true(file.exists(file.path(dest, "entries/entry-0002/annotations_qupath.geojson")))
+  expect_identical(rc$skipped, eids[c(1, 3)])
+  expect_true(file.exists(file.path(dest, "entries", eids[2], "annotations_qupath.geojson")))
   rep <- at_import_qupflowr(dest)
-  expect_identical(names(rep$objects$layers), "entry-0002")
+  expect_identical(names(rep$objects$layers), eids[2])
 })
 
 stage_fixture <- function() {
@@ -314,4 +315,280 @@ test_that("committing to a file re-checks its revision and needs explicit overwr
   rm(list = ls(.commit_registry), envir = .commit_registry)
   replay <- at_commit_qupflowr(st, idempotency_key = "file-3", overwrite = TRUE)
   expect_true(replay$replayed)
+})
+
+# ---- Regression tests from the 2026-10 audit ---------------------------------
+
+write_features <- function(path, features) {
+  jsonlite::write_json(list(type = "FeatureCollection", features = features), path,
+                       auto_unbox = TRUE, digits = NA)
+  path
+}
+
+square_feature <- function(x0, label = "partner", id = NULL, qupath = FALSE) {
+  ring <- list(c(x0, x0), c(x0 + 5, x0), c(x0 + 5, x0 + 5), c(x0, x0 + 5), c(x0, x0))
+  props <- if (qupath) list(objectType = "annotation", classification = list(name = label)) else list(label = label)
+  f <- list(type = "Feature", geometry = list(type = "Polygon", coordinates = list(ring)),
+            properties = props)
+  if (!is.null(id)) f$id <- id
+  f
+}
+
+test_that("features without ids stage as new ROIs, never as updates of existing ones (X1)", {
+  # A saved project from an earlier session holds ids roi_000000001..3; a
+  # fresh R session restarts the id counter, so minted ids repeat them.
+  .reset_id_counter()
+  proj <- at_example_project()
+  ids <- at_rois(proj)$roi_id
+  f <- write_features(withr::local_tempfile(fileext = ".geojson"),
+                      list(square_feature(0), square_feature(20)))
+  .reset_id_counter()
+  rep <- at_import_qupflowr(f, format = "geojson")
+  expect_true(any(rep$checks$check == "ids" & rep$checks$status == "warn"))
+  minted <- unlist(lapply(rep$objects$layers, function(L) vapply(L$rois, `[[`, character(1), "id")))
+  expect_true(any(minted %in% ids))
+  st <- at_stage_qupflowr(proj, rep)
+  expect_identical(st$operations$op, c("create", "create"))
+  expect_false(any(st$operations$roi_id %in% ids))
+  expect_identical(at_rois(st$proposed)$roi_id[seq_along(ids)], ids)
+  expect_identical(nrow(at_rois(st$proposed)), length(ids) + 2L)
+  expect_false(anyDuplicated(at_rois(st$proposed)$roi_id) > 0L)
+  q <- write_features(withr::local_tempfile(fileext = ".geojson"),
+                      list(square_feature(0, qupath = TRUE), square_feature(9, qupath = TRUE)))
+  .reset_id_counter()
+  stq <- at_stage_qupflowr(proj, at_import_qupflowr(q, format = "qupath_geojson"))
+  expect_identical(stq$summary$create, 2L)
+  expect_identical(stq$summary$update, 0L)
+})
+
+test_that("repeated source ids in one file are refused, not re-minted (X1)", {
+  f <- write_features(withr::local_tempfile(fileext = ".geojson"),
+                      list(square_feature(0, id = "dup"), square_feature(9, id = "dup")))
+  expect_import_code(f, "DUPLICATE_ID")
+})
+
+test_that("manifest references must stay inside the handoff (X2)", {
+  base <- withr::local_tempdir()
+  at_write_qupath(at_example_project(), file.path(base, "outside.geojson"))
+  d <- file.path(base, "h")
+  at_export_qupflowr(at_example_project(), d, formats = "qupath_geojson")
+  m <- jsonlite::read_json(file.path(d, "manifest.json"))
+  for (i in seq_along(m$files)) {
+    if (m$files[[i]]$format == "qupath_geojson") m$files[[i]]$path <- "../outside.geojson"
+  }
+  jsonlite::write_json(m, file.path(d, "manifest.json"), auto_unbox = TRUE, null = "null", digits = NA)
+  rewrite_integrity(d)
+  expect_import_code(d, "SCHEMA_INVALID")
+  # The verifier refuses it even without the schema pattern.
+  local_mocked_bindings(.schema_assert = function(...) invisible(NULL))
+  expect_import_code(d, "PATH_OUTSIDE_ROOT")
+})
+
+test_that("a manifest file missing from the inventory is refused (X2)", {
+  f <- handoff_fixture(c("qupath_geojson", "geojson"))
+  m <- jsonlite::read_json(file.path(f$dest, "manifest.json"))
+  for (i in seq_along(m$files)) if (m$files[[i]]$format == "geojson") m$files[[i]]$path <- "ghost.geojson"
+  jsonlite::write_json(m, file.path(f$dest, "manifest.json"), auto_unbox = TRUE, null = "null", digits = NA)
+  rewrite_integrity(f$dest)
+  expect_import_code(f$dest, "INTEGRITY_MISSING")
+})
+
+pyramid_project <- function(level = 0L) {
+  img <- new_annot_image(source = "pyr.tif", backend = "raster", dims = c(64L, 64L), n_levels = 2L,
+                         level_dims = list(c(64L, 64L), c(32L, 32L)), n_bands = 1L,
+                         handle = list(data = array(0, c(64, 64, 1))))
+  at_project(img, at_layer_add(at_layer("t"), at_roi_rect(10, 10, 30, 30, label = "a", id = "r1",
+                                                          level = level)))
+}
+
+test_that("handoff coordinates are read at the recorded export level (X3)", {
+  p <- pyramid_project(0L)
+  d <- file.path(withr::local_tempdir(), "h")
+  at_export_qupflowr(p, d, formats = "qupath_geojson", level = 1L)
+  rep <- at_import_qupflowr(d)
+  r <- rep$objects$layers$t$rois[[1]]
+  expect_identical(r$level, 1L)
+  expect_equal(as.numeric(sf::st_bbox(r$geometry)), c(5, 5, 15, 15))
+  expect_identical(rep$conversion$geometry_match, "exact")
+  st <- at_stage_qupflowr(p, rep)
+  expect_identical(st$operations$op, "unchanged")
+  # An ROI stored at level 1 and exported at level 0 is unchanged too.
+  p1 <- pyramid_project(1L)
+  d1 <- file.path(withr::local_tempdir(), "h1")
+  at_export_qupflowr(p1, d1, formats = c("qupath_geojson", "geojson"), level = 0L)
+  rep1 <- at_import_qupflowr(d1)
+  expect_identical(rep1$conversion$geometry_match, "exact")
+  expect_identical(at_stage_qupflowr(p1, rep1)$operations$op, "unchanged")
+})
+
+test_that("an imported edit at another level updates the ROI at its stored level (X3)", {
+  p1 <- pyramid_project(1L)
+  edit <- at_layer_add(at_layer("t"), at_roi_rect(0, 0, 40, 40, label = "a", id = "r1", level = 0L))
+  st <- at_stage_qupflowr(p1, edit)
+  expect_identical(st$operations$op, "update")
+  r <- .find_roi(st$proposed, "r1")$roi
+  expect_identical(r$level, 1L)
+  expect_equal(as.numeric(sf::st_bbox(r$geometry)), c(0, 0, 20, 20))
+})
+
+test_that("entries that share an image export and import separately (X4)", {
+  sess <- at_example_session(2)
+  sess$projects[[1]] <- at_example_project()
+  sess$projects[[2]] <- at_example_project()
+  d <- file.path(withr::local_tempdir(), "s")
+  at_export_qupflowr(sess, d, formats = "qupath_geojson")
+  rep <- at_import_qupflowr(d)
+  expect_identical(names(rep$objects$layers),
+                   c(.session_entry_id(sess, 1), .session_entry_id(sess, 2)))
+  expect_identical(vapply(rep$objects$layers[[2]]$regions$rois, `[[`, character(1), "id"),
+                   at_rois(sess$projects[[2]])$roi_id)
+})
+
+test_that("nothing is created in or moved into a locked layer (X5)", {
+  p <- at_example_project()
+  p$layers$regions$style$locked <- TRUE
+  st <- at_stage_qupflowr(p, at_layer_add(at_layer("regions"),
+                                          at_roi_rect(1, 1, 5, 5, label = "tumour", id = "p1")))
+  expect_identical(st$operations$op, "conflict")
+  expect_match(st$operations$reason, "locked")
+  expect_null(.find_roi(st$proposed, "p1"))
+  q <- at_add_layer(at_example_project(), at_layer("locked", style = at_style(locked = TRUE)))
+  moved <- q$layers$regions$rois[[1]]
+  st2 <- at_stage_qupflowr(q, at_layer_add(at_layer("locked"), moved))
+  expect_identical(st2$operations$op, "conflict")
+  expect_identical(.find_roi(st2$proposed, moved$id)$layer, "regions")
+})
+
+test_that("a patch repeating an ROI id is refused (X6)", {
+  L <- at_layer("n")
+  L$rois <- list(at_roi_rect(1, 1, 5, 5, label = "a", id = "dup"),
+                 at_roi_rect(6, 6, 9, 9, label = "a", id = "dup"))
+  err <- tryCatch(at_stage_qupflowr(at_example_project(), L), error = function(e) e)
+  expect_identical(err$code, "DUPLICATE_ID")
+})
+
+test_that("symbolic links to directories inside a handoff are rejected (X12)", {
+  skip_on_os("windows")
+  f <- handoff_fixture("qupath_geojson")
+  ext <- withr::local_tempdir()
+  writeLines("x", file.path(ext, "a.txt"))
+  file.symlink(ext, file.path(f$dest, "linked"))
+  rewrite_integrity(f$dest)
+  expect_import_code(f$dest, "INTEGRITY_SYMLINK")
+})
+
+test_that("project mask ids are named after the project, not NA (X15)", {
+  f <- handoff_fixture(c("qupath_geojson", "mask_tiff"))
+  ids <- vapply(f$rc$manifest$masks, `[[`, character(1), "mask_id")
+  expect_identical(ids, "project:regions")
+})
+
+test_that("only GeoJSON features are imported as GeoJSON (X16)", {
+  f <- withr::local_tempfile(fileext = ".json")
+  writeLines('{"hello": 1}', f)
+  expect_import_code(f, "FORMAT_UNRECOGNISED")
+  writeLines('{"broken": ', f)
+  expect_import_code(f, "INVALID_JSON")
+  g <- handoff_fixture(c("qupath_geojson", "mask_tiff"))
+  tif <- file.path(g$dest, "masks/regions_labelled.tif")
+  bare <- file.path(withr::local_tempdir(), "bare.tif")
+  file.copy(tif, bare)
+  rep <- at_import_qupflowr(bare)
+  expect_identical(rep$checks$status[rep$checks$check == "legend"], "warn")
+})
+
+test_that("a future integrity major version is a protocol mismatch (X18)", {
+  f <- handoff_fixture("qupath_geojson")
+  inv <- jsonlite::read_json(file.path(f$dest, "integrity.json"))
+  inv$format_version <- "2.0"
+  jsonlite::write_json(inv, file.path(f$dest, "integrity.json"), auto_unbox = TRUE)
+  err <- tryCatch(at_import_qupflowr(f$dest), error = function(e) e)
+  expect_s3_class(err, "at_protocol_error")
+  expect_identical(err$code, "PROTOCOL_MISMATCH")
+})
+
+test_that("unlisted OS metadata files are ignored with a warning", {
+  f <- handoff_fixture("qupath_geojson")
+  writeBin(as.raw(0:3), file.path(f$dest, ".DS_Store"))
+  rep <- at_import_qupflowr(f$dest)
+  expect_identical(rep$status, "valid_with_warnings")
+  expect_identical(rep$checks$status[rep$checks$check == "os_metadata"], "warn")
+  writeLines("x", file.path(f$dest, "notes.txt"))
+  expect_import_code(f$dest, "INTEGRITY_EXTRA")
+})
+
+test_that("no handoff file carries a local path (RDS, sidecars, tables)", {
+  proj <- at_example_project()
+  proj$image$meta$source_error <- paste("Image source is missing:", proj$image$source)
+  d <- file.path(withr::local_tempdir(), "h")
+  at_export_qupflowr(proj, d, formats = c("qupath_geojson", "geojson", "mask_tiff", "mask_npy",
+                                          "csv", "rds"))
+  local <- dirname(normalizePath(at_example_path("tissue"), winslash = "/"))
+  for (f in list.files(d, recursive = TRUE, full.names = TRUE)) {
+    bytes <- if (grepl("\\.rds$", f)) serialize(readRDS(f), NULL) else readBin(f, "raw", file.size(f))
+    expect_length(grepRaw(charToRaw(local), bytes, fixed = TRUE), 0L)
+  }
+  obj <- readRDS(file.path(d, "objects", "project.rds"))
+  expect_identical(obj$image$source, basename(proj$image$source))
+  expect_null(obj$image$handle)
+  expect_null(obj$image$meta$source_error)
+  if (!is.null(obj$image$source_descriptor)) {
+    expect_identical(obj$image$source_descriptor$path, basename(proj$image$source))
+  }
+  # The RDS loads with its annotations; the source is reported as not found.
+  loaded <- at_load_project(file.path(d, "objects", "project.rds"))
+  expect_identical(at_rois(loaded)$roi_id, at_rois(proj)$roi_id)
+})
+
+test_that("a mask that violates its manifest record fails with a stable code", {
+  f <- handoff_fixture(c("qupath_geojson", "mask_npy"))
+  man <- jsonlite::read_json(file.path(f$dest, "manifest.json"))
+  # Declare the labelled mask binary: its codes 2 and 3 are not binary values.
+  man$masks[[1]]$encoding <- "binary"
+  jsonlite::write_json(man, file.path(f$dest, "manifest.json"), auto_unbox = TRUE, null = "null",
+                       digits = NA)
+  rewrite_integrity(f$dest)
+  expect_import_code(f$dest, "MASK_INVALID")
+})
+
+test_that("a single mask with an incomplete sidecar legend is refused with its code", {
+  g <- handoff_fixture(c("qupath_geojson", "mask_tiff"))
+  tif <- file.path(g$dest, "masks/regions_labelled.tif")
+  d <- withr::local_tempdir()
+  file.copy(c(tif, paste0(tif, ".legend.json")), d)
+  side <- file.path(d, "regions_labelled.tif.legend.json")
+  j <- jsonlite::read_json(side)
+  j$legend <- j$legend[1]
+  if (!is.null(j$mask_metadata$codebook)) j$mask_metadata$codebook <- j$mask_metadata$codebook[1]
+  jsonlite::write_json(j, side, auto_unbox = TRUE, null = "null", digits = NA)
+  expect_import_code(file.path(d, "regions_labelled.tif"), "LEGEND_INCOMPLETE")
+})
+
+test_that("a failed handoff replacement keeps the previous handoff", {
+  proj <- at_example_project()
+  d <- file.path(withr::local_tempdir(), "h")
+  first <- at_export_qupflowr(proj, d, formats = "qupath_geojson")
+  real <- .rename_path
+  local_mocked_bindings(.rename_path = function(from, to) {
+    if (grepl("\\.partial-", basename(from))) FALSE else real(from, to)
+  })
+  err <- tryCatch(at_export_qupflowr(proj, d, formats = c("qupath_geojson", "geojson"), overwrite = TRUE),
+                  error = function(e) e)
+  expect_identical(err$code, "WRITE_FAILED")
+  expect_identical(at_import_qupflowr(d)$handoff_digest, first$handoff_digest)
+  expect_identical(sort(list.files(dirname(d), all.files = TRUE, no.. = TRUE)), "h")
+})
+
+test_that("near-prefix keys in a partner manifest are not mistaken for contract fields (A33)", {
+  p <- pyramid_project(0L)
+  d <- file.path(withr::local_tempdir(), "h")
+  at_export_qupflowr(p, d, formats = "qupath_geojson", level = 0L)
+  m <- jsonlite::read_json(file.path(d, "manifest.json"))
+  # Replace provenance.export.level by a near-prefix key.
+  m$provenance$export$level <- NULL
+  m$provenance$export$levels <- 1L
+  jsonlite::write_json(m, file.path(d, "manifest.json"), auto_unbox = TRUE, null = "null", digits = NA)
+  rewrite_integrity(d)
+  rep <- at_import_qupflowr(d)
+  expect_identical(rep$objects$layers$t$rois[[1]]$level, 0L)
 })

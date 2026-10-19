@@ -20,7 +20,9 @@ A \link[ggplot2:ggplot]{ggplot2::ggplot} object.
 Plot a mask
 }
 \examples{
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_plot_mask(at_mask(at_example_project(), "labelled"))
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other plots:

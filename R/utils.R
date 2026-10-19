@@ -18,11 +18,75 @@
 #
 # Uses a monotonic counter rather than the random-number generator, so it never
 # disturbs the caller's RNG stream and is fully deterministic within a session.
-# Uniqueness within a project is additionally guaranteed on insertion, where a
-# colliding identifier (e.g. from a loaded project) is re-minted.
+# The counter restarts in every R process, so insertion re-mints until an id is
+# unused in the whole project, and loading advances the counter past the loaded
+# ids (.bump_id_counter()).
 .new_id <- function(prefix = "roi") {
   .id_state$n <- .id_state$n + 1L
   sprintf("%s_%09d", prefix, .id_state$n)
+}
+
+# Advance the counter past every numeric suffix in `ids` that uses `prefix`, so
+# ids minted afterwards in this process cannot repeat them (e.g. ROIs imported
+# without identifiers into a session holding a loaded project).
+.bump_id_counter <- function(ids, prefix = "roi") {
+  ids <- as.character(unlist(ids, use.names = FALSE))
+  pat <- sprintf("^%s_([0-9]+)$", prefix)
+  hit <- ids[!is.na(ids) & grepl(pat, ids)]
+  if (length(hit) == 0L) {
+    return(invisible(NULL))
+  }
+  top <- max(as.numeric(sub(pat, "\\1", hit)))
+  if (is.finite(top) && top > .id_state$n && top < .Machine$integer.max) {
+    .id_state$n <- as.integer(top)
+  }
+  invisible(NULL)
+}
+
+# Mint an identifier that is not in `existing`, however the counter got there.
+.unique_id <- function(existing = character(), prefix = "roi") {
+  existing <- as.character(unlist(existing, use.names = FALSE))
+  .bump_id_counter(existing, prefix)
+  repeat {
+    id <- .new_id(prefix)
+    if (!id %in% existing) {
+      return(id)
+    }
+  }
+}
+
+# Runtime and queue identities have a process-specific namespace and their own
+# counters so independent R processes cannot repeat persisted IDs, and creating
+# sessions or reading images cannot change the established ROI identifier
+# sequence. Like .new_id(), this generator never touches R's random-number
+# generator.
+.identity_state <- new.env(parent = emptyenv())
+
+.initialize_identity_state <- function() {
+  rm(list = ls(envir = .identity_state, all.names = TRUE),
+     envir = .identity_state)
+  .identity_state$namespace <- gsub(
+    "[^A-Za-z0-9._-]", "_", basename(tempfile(pattern = "at_"))
+  )
+  invisible(NULL)
+}
+
+.new_identity_id <- function(kind) {
+  if (is.null(.identity_state$namespace)) {
+    .initialize_identity_state()
+  }
+  n <- .identity_state[[kind]] %||% 0L
+  n <- n + 1L
+  .identity_state[[kind]] <- n
+  sprintf("%s_%s_%09d", kind, .identity_state$namespace, n)
+}
+
+# A deterministic representation of a serializable object. Reader options are
+# fingerprinted once at image-open time, rather than expanded into every tile
+# cache key.
+.identity_fingerprint <- function(x) {
+  raw <- serialize(x, NULL, version = 2L)
+  paste(sprintf("%02x", as.integer(raw)), collapse = "")
 }
 
 # ---- Time and version ------------------------------------------------------
@@ -57,6 +121,7 @@
     label      = character(0),
     geom_type  = character(0),
     level      = integer(0),
+    source_level = integer(0),
     area_px    = double(0),
     centroid_x = double(0),
     centroid_y = double(0),
@@ -76,81 +141,100 @@
 
 # ---- Level transforms for the query contract -------------------------------
 
-# Transform an sfc from `level` to level 0. Uses the real pyramid ratio from an
-# annot_image when one is supplied (accurate for non-power-of-two pyramids),
-# otherwise assumes a power-of-two pyramid.
-.to_level0 <- function(geom, level, image = NULL) {
-  if (level == 0L) {
-    return(geom)
+# One transform boundary: coordinates are scaled independently on each axis.
+# Identity operations need no image; a change of level always requires metadata.
+.transform_geom <- function(geom, from_level, to_level, image = NULL,
+                            call = rlang::caller_env()) {
+  from_level <- .check_count(from_level, call = call)
+  to_level <- .check_count(to_level, call = call)
+  if (!is.null(image)) {
+    .check_image(image, call = call)
+    df <- at_dims(image, from_level, call = call)
+    dt <- at_dims(image, to_level, call = call)
+    valid_dims <- function(d) is.numeric(d) && length(d) == 2L &&
+      all(is.finite(d)) && all(d > 0)
+    if (!valid_dims(df) || !valid_dims(dt)) {
+      .at_abort("Image pyramid levels require finite positive dimensions.", call = call)
+    }
   }
-  if (inherits(image, "annot_image") && length(image$level_dims) > level) {
-    d0 <- image$level_dims[[1L]]
-    dl <- image$level_dims[[level + 1L]]
-    fx <- d0[1] / dl[1]
-    fy <- d0[2] / dl[2]
-    out <- lapply(geom, .apply_coords,
-                  fun = function(m) cbind(m[, 1] * fx, m[, 2] * fy))
-    return(sf::st_sfc(out, crs = sf::st_crs(geom)))
+  if (from_level == to_level) return(geom)
+  if (is.null(image)) {
+    .at_abort(
+      c("Changing coordinate levels requires image pyramid dimensions.",
+        "i" = "Supply an image, or explicitly use at_roi_rescale() for a power-of-two pyramid."),
+      code = "PYRAMID_REQUIRED", call = call
+    )
   }
-  factor <- 2^(level - 0L)
-  out <- lapply(geom, .apply_coords, fun = function(m) m * factor)
+  scale <- dt / df
+  out <- lapply(geom, .apply_coords,
+                fun = function(m) cbind(m[, 1] * scale[1], m[, 2] * scale[2]))
   sf::st_sfc(out, crs = sf::st_crs(geom))
 }
 
-# Transform an sfc from level 0 to `level`, using the real image pyramid ratio
-# when an annot_image is supplied (correct for non-power-of-two pyramids),
-# otherwise assuming a power-of-two pyramid. Inverse direction of .to_level0().
+.to_level0 <- function(geom, level, image = NULL) {
+  .transform_geom(geom, level, 0L, image)
+}
+
 .geom_to_level <- function(geom, level, image = NULL) {
-  if (level == 0L) {
-    return(geom)
+  .transform_geom(geom, 0L, level, image)
+}
+
+# Schema marker distinguishes corrected interchange from ambiguous old exports.
+# Readers resolve the coordinate level of imported geometry with
+# .import_coordinate_level(): an explicit `coordinate_level` wins, a recorded
+# nonzero level is trusted only with this schema (or `legacy_levels =
+# "recorded"`), and anything else is the reader's fallback.
+.coordinate_schema <- "annotatR-pixel-level-v1"
+
+.import_coordinate_level <- function(recorded = NULL, fallback = 0L, schema = NULL,
+                                     coordinate_level = NULL, legacy_levels = "error",
+                                     call = rlang::caller_env()) {
+  if (!is.null(recorded)) recorded <- .check_count(recorded, call = call)
+  fallback <- .check_count(fallback, call = call)
+  if (!is.null(coordinate_level)) return(coordinate_level)
+  if (!is.null(recorded) && recorded != 0L &&
+      !identical(schema, .coordinate_schema) && legacy_levels != "recorded") {
+    .at_abort(
+      c("Ambiguous legacy coordinate level: nonzero level without a coordinate schema.",
+        "i" = "Set coordinate_level to the known coordinate level (0L for old normalized exports), or legacy_levels = 'recorded' to explicitly trust recorded levels."),
+      code = "AMBIGUOUS_LEVEL", call = call
+    )
   }
-  if (inherits(image, "annot_image") && length(image$level_dims) > level) {
-    d0 <- image$level_dims[[1L]]
-    dl <- image$level_dims[[level + 1L]]
-    fx <- dl[1] / d0[1]
-    fy <- dl[2] / d0[2]
-    out <- lapply(geom, .apply_coords,
-                  fun = function(m) cbind(m[, 1] * fx, m[, 2] * fy))
-    return(sf::st_sfc(out, crs = sf::st_crs(geom)))
-  }
-  .rescale_geom(geom, 0L, level)
+  recorded %||% fallback
 }
 
 # Build the ROI query-contract tibble from a list of annot_roi and a matching
 # vector of layer names. Coordinates, area, and centroid are expressed at level
-# 0; the `level` column records each ROI's original reference level. Returns the
-# canonical 0-row tibble when `rois` is empty.
+# 0; `level` is 0 and `source_level` records the stored reference level. Returns
+# the canonical 0-row tibble when `rois` is empty. Empty geometries (e.g. an
+# empty set-operation result) get zero area, an `NA` centroid and no vertices.
 .rois_to_tbl <- function(rois, layers, image = NULL) {
   if (length(rois) == 0L) {
     return(.empty_roi_tbl())
   }
   n <- length(rois)
-  geoms <- lapply(rois, function(r) .to_level0(r$geometry, r$level, image))
-  geometry <- do.call(c, geoms)
-  gtype <- vapply(
-    geoms, function(g) as.character(sf::st_geometry_type(g)), character(1)
-  )
+  geometry <- do.call(c, lapply(rois, function(r) .to_level0(r$geometry, r$level, image)))
+  gtype <- as.character(sf::st_geometry_type(geometry))
   areal <- gtype %in% c("POLYGON", "MULTIPOLYGON")
-  area <- vapply(
-    seq_len(n),
-    function(i) if (areal[i]) as.numeric(sf::st_area(geoms[[i]])) else NA_real_,
-    numeric(1)
-  )
-  cen <- t(vapply(
-    geoms,
-    function(g) {
-      co <- sf::st_coordinates(suppressWarnings(sf::st_centroid(g)))
-      c(co[1, "X"], co[1, "Y"])
-    },
-    numeric(2)
-  ))
-  nv <- vapply(geoms, function(g) nrow(sf::st_coordinates(g)), integer(1))
+  area <- rep(NA_real_, n)
+  if (any(areal)) area[areal] <- as.numeric(sf::st_area(geometry[areal]))
+  empty <- sf::st_is_empty(geometry)
+  cen <- matrix(NA_real_, n, 2L)
+  if (any(!empty)) {
+    cg <- suppressWarnings(sf::st_centroid(geometry[!empty]))
+    cen[!empty, ] <- t(vapply(cg, function(p) as.numeric(unclass(p))[1:2], numeric(2)))
+  }
+  nv <- vapply(geometry, function(g) {
+    if (inherits(g, "POINT")) return(if (anyNA(unclass(g))) 0L else 1L)
+    as.integer(length(unlist(unclass(g), use.names = FALSE)) %/% 2L)
+  }, integer(1))
   tibble::tibble(
     roi_id     = vapply(rois, `[[`, character(1), "id"),
     layer      = as.character(layers),
     label      = vapply(rois, `[[`, character(1), "label"),
     geom_type  = gtype,
-    level      = vapply(rois, function(r) as.integer(r$level), integer(1)),
+    level      = rep.int(0L, n),
+    source_level = vapply(rois, function(r) as.integer(r$level), integer(1)),
     area_px    = area,
     centroid_x = cen[, 1],
     centroid_y = cen[, 2],
@@ -253,9 +337,3 @@
 
 # Vector-safe test for a single non-missing string.
 .is_string <- function(x) is.character(x) && length(x) == 1L && !is.na(x)
-
-# Coerce to integer, erroring on loss. Internal convenience.
-.as_count <- function(x) {
-  xi <- suppressWarnings(as.integer(round(x)))
-  xi
-}

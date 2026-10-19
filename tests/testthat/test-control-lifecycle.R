@@ -46,3 +46,22 @@ test_that("a serving listener still expires automatically", {
     expect_true(later::loop_empty())
   })
 })
+
+test_that("(S7) a request after the TTL shuts the listener down before the timer runs", {
+  later::with_temp_loop({
+    h <- control_loop_fixture()
+    hub <- .control_hub(h)
+    local_mocked_bindings(.control_now = function() Sys.time() + 3600)
+    err <- tryCatch(at_control_state(h), error = function(e) e)
+    expect_identical(err$code, "TOKEN_EXPIRED")
+    later::run_now(0)
+    expect_identical(hub$status, "stopped")
+    expect_null(hub$server)
+    expect_null(.control_registry[[h$instance_id]])
+    expect_null(.control_tokens[[h$instance_id]])
+    manifest <- jsonlite::read_json(h$manifest)
+    expect_identical(manifest$state, "expired")
+    expect_identical(manifest$stop_reason, "ttl expired")
+    expect_true(later::loop_empty())
+  })
+})

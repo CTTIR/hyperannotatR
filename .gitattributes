@@ -1,0 +1,4 @@
+# Byte-pinned test fixtures (MD5/SHA-256 checked, some with deliberate CRLF):
+# never convert line endings on checkout.
+tests/testthat/fixtures/** -text
+tests/fixtures/** -text

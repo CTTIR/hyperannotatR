@@ -1,15 +1,19 @@
-# The atcanvas htmlwidget: a deep-zoom viewer with ROI drawing.
+# The atcanvas htmlwidget: an annotation canvas with pan/zoom and ROI drawing.
 #
-# For v0.0.1 the JavaScript is a self-contained HTML5 canvas (pan/zoom plus
-# rectangle/polygon/point/freehand drawing) with no external libraries, so the
-# widget works fully offline. The R interface is designed to be identical to
-# what an OpenSeadragon + Annotorious implementation needs, so that engine can
-# be swapped in later as a JS-only change (see STATE.md).
+# The JavaScript (inst/htmlwidgets/atcanvas.js) is a self-contained HTML5 canvas
+# with no external libraries, so the widget works fully offline. It displays one
+# embedded, downsampled base image per render (a PNG data URI built here); it
+# does not stream pyramid tiles. Band and view changes therefore re-render the
+# widget from R with a new `view`.
 #
 # COORDINATE DISCIPLINE: all coordinates that cross the JS -> R boundary are
 # level-0 image pixels. The JS converts from canvas/screen coordinates to
 # level-0 image pixels before emitting any event; the conversion is the single
 # function `toImageCoords()` in atcanvas.js.
+#
+# EVENT PROTOCOL: browser inputs are {entry_id, revision, payload}, stamped with
+# the identity a render or annotation update carried (see .canvas_identity()
+# and the "Shiny inputs" section of ?at_canvas). The app rejects stale stamps.
 
 .canvas_tool_names <- c("pan", "rect", "polygon", "freehand", "circle", "point", "edit",
                         "erase", "probe", "select")
@@ -84,15 +88,28 @@
 }
 
 # Render a display array for a band view: "rgb" and "single" use raw bands,
-# registered operations are computed on the decimated bands.
+# registered operations are computed on the decimated bands. `NULL` is the
+# default natural-colour view (the first band for fewer than three bands).
 .view_display_array <- function(img, view = NULL, max_dim = 2048L) {
   nb <- img$n_bands
-  view <- view %||% list(operation = "rgb")
+  # The default view of an 8-bit image keeps its stored values (see
+  # .display_native()); chosen views and deeper data are stretched.
+  natural <- is.null(view)
+  view <- view %||% if (nb < 3L) list(operation = "single", bands = 1L) else list(operation = "rgb")
   spec <- .check_band_view(img, view$operation %||% "rgb", view$bands, view$params %||% list())
   vals <- .preview_bands(img, spec$bands, max_dim)
+  native <- natural && .display_native(img, vals)
   arr <- array(0, dim = c(dim(vals)[1], dim(vals)[2], 3L))
+  native01 <- function(m) {
+    out <- .native01(m)
+    out[is.na(out)] <- 0
+    out
+  }
   if (spec$operation == "rgb") {
-    for (k in 1:3) arr[, , k] <- .stretch01(vals[, , k])
+    for (k in 1:3) arr[, , k] <- if (native) native01(vals[, , k]) else .stretch01(vals[, , k])
+  } else if (native) {
+    g <- native01(vals[, , 1])
+    for (k in 1:3) arr[, , k] <- g
   } else {
     a <- function(k) vals[, , k]
     den_na <- function(num, den) {
@@ -114,21 +131,49 @@
   arr
 }
 
-# Downsampled base image as a PNG data URI, or NULL if it cannot be encoded.
-.image_data_uri <- function(img, max_dim = 2048L, view = NULL) {
+# Downsampled base image as a PNG data URI. Returns a list with `uri` (NULL on
+# failure), `error` (why no image could be encoded, or NULL) and `view_error`
+# (why the requested view could not be applied, in which case the default
+# natural-colour view was encoded instead).
+.image_data_uri_result <- function(img, max_dim = 2048L, view = NULL) {
   if (!requireNamespace("magick", quietly = TRUE)) {
-    return(NULL)
+    return(list(uri = NULL, error = "package magick is not installed", view_error = NULL))
   }
-  tryCatch({
-    if (is.null(view) && img$n_bands < 3L) {
-      view <- list(operation = "single", bands = 1L)
-    }
-    arr <- .view_display_array(img, view, max_dim)
+  encode <- function(v) {
+    arr <- .view_display_array(img, v, max_dim)
     attr(arr, "view") <- NULL
     im <- magick::image_read(arr)
     raw <- magick::image_write(im, format = "png")
     paste0("data:image/png;base64,", gsub("[\r\n]", "", jsonlite::base64_enc(raw)))
-  }, error = function(e) NULL)
+  }
+  why <- function(e) cli::ansi_strip(conditionMessage(e))
+  uri <- tryCatch(encode(view), error = function(e) e)
+  if (!inherits(uri, "error")) {
+    return(list(uri = uri, error = NULL, view_error = NULL))
+  }
+  if (is.null(view)) {
+    return(list(uri = NULL, error = why(uri), view_error = NULL))
+  }
+  # A view chosen for another image (e.g. bands beyond this image's count)
+  # must not blank the canvas: fall back to the default view and say so.
+  fallback <- tryCatch(encode(NULL), error = function(e) e)
+  if (inherits(fallback, "error")) {
+    return(list(uri = NULL, error = why(fallback), view_error = why(uri)))
+  }
+  list(uri = fallback, error = NULL, view_error = why(uri))
+}
+
+# Why the last .image_data_uri() call produced no image (or did not apply the
+# requested view). A side channel, so .image_data_uri() keeps its URI-or-NULL
+# contract and stays the single seam that tests and fixtures replace.
+.image_display <- new.env(parent = emptyenv())
+
+# Downsampled base image as a PNG data URI, or NULL if it cannot be encoded.
+.image_data_uri <- function(img, max_dim = 2048L, view = NULL) {
+  res <- .image_data_uri_result(img, max_dim = max_dim, view = view)
+  .image_display$error <- res$error
+  .image_display$view_error <- res$view_error
+  res$uri
 }
 
 #' Build a tile-source descriptor for the canvas
@@ -141,10 +186,18 @@
 #'   self-contained canvas). Default `TRUE`.
 #' @param view Optional band view: a list with `operation` (see
 #'   [at_band_operations()]), `bands` and `params`. `NULL` shows natural-colour
-#'   RGB (nearest bands to 640/550/460 nm for spectral cubes). Display only.
+#'   RGB (nearest bands to 640/550/460 nm for spectral cubes). Display only. A
+#'   view that does not apply to `img` (for example bands it does not have)
+#'   falls back to the default view and is reported in `viewError`.
 #' @param call The calling environment, for error reporting.
-#' @return A list describing the image for the widget: `width`, `height`,
-#'   `tileSize`, `minLevel`, `maxLevel`, `nBands`, and (when `embed`) `dataUri`.
+#' @return A list describing the image for the widget: `width`, `height`
+#'   (level-0 pixels), `nBands`, and the pyramid description `tileSize`,
+#'   `minLevel` and `maxLevel` (informational: the built-in canvas displays a
+#'   single embedded image rather than streaming tiles). When `embed` is
+#'   `TRUE` it also has `dataUri` (a PNG data URI); when no image could be
+#'   encoded, `dataUri` is absent and `displayError` says why, and the canvas
+#'   shows that message instead of an image. `viewError` says why `view` was
+#'   not applied, when it was not.
 #' @family shiny
 #' @export
 at_tile_source <- function(img, level_max = NULL, tile_size = 512L, embed = TRUE,
@@ -158,12 +211,102 @@ at_tile_source <- function(img, level_max = NULL, tile_size = 512L, embed = TRUE
     minLevel = 0L, maxLevel = maxl, nBands = img$n_bands
   )
   if (embed) {
+    .image_display$error <- NULL
+    .image_display$view_error <- NULL
     src$dataUri <- .image_data_uri(img, view = view)
+    if (is.null(src$dataUri)) src$displayError <- if (!requireNamespace("magick", quietly = TRUE))
+      "Canvas display requires package magick. Install it with install.packages(\"magick\") and reopen the app."
+    else .encode_failure_text(.image_display$error)
+    src$viewError <- .image_display$view_error
   }
   src
 }
 
+.encode_failure_text <- function(reason = NULL) {
+  if (!.is_string(reason) || !nzchar(reason)) {
+    return("Could not encode the image for display. Check the image reader and choose another image.")
+  }
+  paste0("Could not encode the image for display (", sub("[.]$", "", reason),
+         "). Check the image reader and choose another image.")
+}
+
+# Display projection only: analytical masks and exports retain hidden layers.
+# Each feature carries the style the canvas draws with (label colour as
+# "#RRGGBB", fill opacity, stroke width, lock state); layers are ordered by
+# `z`, so a higher layer is drawn on top and hit first.
+.canvas_features <- function(project, layer = NULL) {
+  names <- names(project$layers)
+  if (!is.null(layer)) names <- intersect(names, layer)
+  names <- names[!vapply(project$layers[names], function(x) identical(x$style$visible, FALSE), logical(1))]
+  names <- names[order(vapply(project$layers[names], function(x) as.numeric(x$style$z %||% 1), numeric(1)))]
+  fc <- .project_to_features(project, names, 0L, FALSE, at_dims(project$image, 0)[2], FALSE)
+  fc$features <- lapply(fc$features, function(f) {
+    style <- project$layers[[f$properties$layer]]$style
+    label <- f$properties$label
+    cols <- style$colour
+    f$properties$colour <- .canvas_hex(
+      if (!is.null(cols) && .is_string(label) && label %in% names(cols)) unname(cols[[label]]) else "#5E2C8E")
+    f$properties$fill_alpha <- style$fill_alpha
+    f$properties$stroke_width <- style$stroke_width
+    f$properties$locked <- isTRUE(style$locked) || isTRUE(f$properties$attributes$locked)
+    f$properties$visible <- TRUE
+    f
+  })
+  # .project_to_features retains project ordering; impose the display z order.
+  fc$features <- fc$features[order(vapply(fc$features, function(f) match(f$properties$layer, names), integer(1)))]
+  fc
+}
+
+# Any R colour as "#RRGGBB": canvas styles understand CSS colours, not R names
+# such as "grey50".
+.canvas_hex <- function(colour) {
+  rgb <- tryCatch(grDevices::col2rgb(colour), error = function(e) NULL)
+  if (is.null(rgb)) {
+    return("#5E2C8E")
+  }
+  grDevices::rgb(rgb[1, 1], rgb[2, 1], rgb[3, 1], maxColorValue = 255)
+}
+
+# The rendered entry and annotation revision, stamped onto every browser event
+# so a late event from another image or an older revision is rejected.
+.canvas_identity <- function(project) {
+  if (is.null(project) || is.null(project$meta$entry_id)) {
+    return(NULL)
+  }
+  list(entry_id = project$meta$entry_id, revision = project$meta$annotation_revision %||% 0)
+}
+
 #' An annotation canvas widget
+#'
+#' The canvas shows one embedded, downsampled image with the project's ROIs
+#' drawn in their label colours (hidden layers are left out; locked layers
+#' cannot be erased or moved on the canvas). It pans with a drag and zooms
+#' with the mouse wheel or a two-finger pinch. When no image can be shown, it
+#' says why instead of keeping a previous image.
+#'
+#' @section Shiny inputs:
+#' In Shiny, the canvas with output id `id` sends these inputs. Each value is a
+#' list `entry_id`, `revision`, `payload`: the identity rendered when the
+#' gesture began (the project's `meta$entry_id` and `meta$annotation_revision`,
+#' or the element id and `0` for a project without them) and the event data.
+#' A render or [at_canvas_set_annotations()] with a different identity cancels
+#' unfinished gestures, and stale events are never sent.
+#' \describe{
+#'   \item{`<id>_created`}{A drawn GeoJSON feature in level-0 pixels; `target`
+#'     holds `options$creationTarget` (`layer`, `label`) as it was when the
+#'     drawing began. A click with the rectangle or circle tool is not a shape.}
+#'   \item{`<id>_edited`}{`roi_id`, `layer`, `label` and the moved `geometry`
+#'     (sent only after an actual drag).}
+#'   \item{`<id>_erased`}{The erased ROI id.}
+#'   \item{`<id>_selected`}{The ids of the selected ROIs (possibly none).}
+#'   \item{`<id>_probed`}{`x`, `y`: the probed level-0 pixel position.}
+#'   \item{`<id>_viewport`}{`zoom`, `center_x`, `center_y` and `bounds`
+#'     (`xmin`, `ymin`, `xmax`, `ymax` in level-0 pixels) after a pan or zoom.}
+#'   \item{`<id>_ready`}{`ready` and `error`: whether the image is displayed.}
+#' }
+#' A drawn or moved shape is shown dashed until new annotations arrive, and
+#' disappears after a few seconds if none do, so the canvas does not keep
+#' showing an ROI the app did not accept.
 #'
 #' @param img An [annot_image] to display.
 #' @param project Optional [annot_project] whose ROIs are shown initially.
@@ -172,7 +315,9 @@ at_tile_source <- function(img, level_max = NULL, tile_size = 512L, embed = TRUE
 #'   position for spectra) or `"select"` (emit the clicked ROI id).
 #' @param width,height Widget dimensions.
 #' @param elementId Optional element id.
-#' @param options A list of extra options passed to the widget.
+#' @param options A list of extra options passed to the widget:
+#'   `creationTarget` (a list with `layer`, `label` and `locked`; drawing is
+#'   refused on a locked target) and `selection` (ROI ids to highlight).
 #' @param view Optional band view passed to [at_tile_source()].
 #' @param call The calling environment, for error reporting.
 #'
@@ -180,7 +325,7 @@ at_tile_source <- function(img, level_max = NULL, tile_size = 512L, embed = TRUE
 #' @family shiny
 #' @seealso [at_canvas_proxy()], [at_tile_source()]
 #' @export
-#' @examplesIf requireNamespace("htmlwidgets", quietly = TRUE) && (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE))
+#' @examplesIf requireNamespace("htmlwidgets", quietly = TRUE) && requireNamespace("magick", quietly = TRUE)
 #' at_canvas(at_example_image("tissue"))
 at_canvas <- function(img, project = NULL, tool = "pan", width = NULL,
                       height = NULL, elementId = NULL, options = list(),
@@ -190,13 +335,14 @@ at_canvas <- function(img, project = NULL, tool = "pan", width = NULL,
   tool <- .check_choice(tool, .canvas_tool_names, call = call)
   annotations <- if (!is.null(project)) {
     .check_project(project, call = call)
-    .project_to_features(project, NULL, 0L, FALSE, at_dims(img, 0)[2], qupath = FALSE)
+    .canvas_features(project)
   } else {
     list(type = "FeatureCollection", features = list())
   }
   x <- list(
     tileSource = at_tile_source(img, view = view, call = call),
     annotations = annotations,
+    identity = .canvas_identity(project),
     tool = tool,
     options = options
   )
@@ -237,7 +383,9 @@ renderAtCanvas <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' A proxy for an existing annotation canvas
 #'
 #' Mirrors the `leafletProxy()` pattern: update a live canvas without
-#' re-rendering the whole widget.
+#' re-rendering the whole widget. Inside a Shiny module, pass the module's
+#' (un-namespaced) output id; it is namespaced with the module session, as
+#' `leaflet::leafletProxy()` does.
 #'
 #' @param id The canvas output id.
 #' @param session The Shiny session.
@@ -245,7 +393,24 @@ renderAtCanvas <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @family shiny
 #' @export
 at_canvas_proxy <- function(id, session = shiny::getDefaultReactiveDomain()) {
+  .check_string(id)
+  id <- .proxy_ns_id(id, session)
   structure(list(id = id, session = session), class = "atcanvas_proxy")
+}
+
+# Namespace a module-local output id, so proxy messages reach the element the
+# module rendered ("mod-canvas" rather than "canvas"). Already-namespaced ids
+# and plain sessions are left alone.
+.proxy_ns_id <- function(id, session) {
+  ns <- tryCatch(session$ns, error = function(e) NULL)
+  if (!is.function(ns)) {
+    return(id)
+  }
+  prefix <- tryCatch(ns(""), error = function(e) "")
+  if (!.is_string(prefix) || !nzchar(prefix) || startsWith(id, prefix)) {
+    return(id)
+  }
+  ns(id)
 }
 
 .canvas_msg <- function(proxy, method, payload, call = rlang::caller_env()) {
@@ -266,9 +431,9 @@ at_canvas_proxy <- function(id, session = shiny::getDefaultReactiveDomain()) {
 at_canvas_set_annotations <- function(proxy, project, layer = NULL,
                                       call = rlang::caller_env()) {
   .check_project(project, call = call)
-  h <- at_dims(project$image, 0)[2]
-  fc <- .project_to_features(project, layer, 0L, FALSE, h, qupath = FALSE)
-  .canvas_msg(proxy, "set_annotations", list(annotations = fc), call = call)
+  fc <- .canvas_features(project, layer)
+  .canvas_msg(proxy, "set_annotations", list(annotations = fc, identity = .canvas_identity(project)),
+              call = call)
 }
 
 #' Set the active drawing tool
@@ -296,6 +461,13 @@ at_canvas_set_selection <- function(proxy, roi_ids = character(), call = rlang::
 }
 
 #' Set the displayed band or RGB triple
+#'
+#' Retained for API compatibility; it has no visible effect on the built-in
+#' canvas. The canvas shows one embedded image rendered in R, and cannot
+#' recompute bands in the browser. To change the displayed bands, re-render the
+#' widget with a `view` (see [at_canvas()] and [at_band_view()]), as the
+#' annotation app does.
+#'
 #' @inheritParams at_canvas_set_annotations
 #' @param band A band index or a length-3 vector of band indices.
 #' @family shiny
@@ -320,19 +492,23 @@ at_canvas_set_overlay <- function(proxy, mask, alpha = 0.5,
   .canvas_msg(proxy, "set_overlay", list(overlay = uri, alpha = alpha), call = call)
 }
 
-# Encode a mask preview to a coloured PNG data URI.
+# Encode a mask preview to a coloured PNG data URI. Colours follow the
+# membership-aware display legend: a bitfield pixel carrying several classes
+# gets the mean of their colours instead of staying transparent, and
+# background pixels stay transparent.
 .mask_data_uri <- function(mask, max_dim = 1024L) {
   if (!requireNamespace("magick", quietly = TRUE)) {
     return(NULL)
   }
   pv <- at_mask_preview(mask, max_dim = max_dim)
   m <- as.matrix(pv)
-  lg <- attr(pv, "legend")
+  lg <- .mask_display(pv)
   arr <- array(0, dim = c(nrow(m), ncol(m), 4L))
-  if (nrow(lg) > 0L) {
-    for (k in seq_len(nrow(lg))) {
+  if (length(lg$value) > 0L) {
+    for (k in seq_along(lg$value)) {
       col <- grDevices::col2rgb(lg$colour[k]) / 255
       sel <- m == lg$value[k]
+      sel[is.na(sel)] <- FALSE
       arr[, , 1][sel] <- col[1]
       arr[, , 2][sel] <- col[2]
       arr[, , 3][sel] <- col[3]

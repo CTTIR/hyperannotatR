@@ -1,7 +1,7 @@
 # The qupflowR handoff: a new, self-contained directory with neutral files
 # (QuPath GeoJSON, GeoJSON, integer masks with legends, optional NPY/CSV/RDS),
 # a manifest and a SHA-256 inventory, plus the local stage -> commit flow that
-# applies a partner's changes to an hyperannotatR project only after an explicit,
+# applies a partner's changes to a hyperannotatR project only after an explicit,
 # revision-checked, idempotent commit.
 
 .handoff_formats <- c("qupath_geojson", "geojson", "mask_tiff", "mask_npy", "csv", "rds", "manifest")
@@ -15,6 +15,22 @@
                       include.dirs = FALSE)
   files <- gsub("\\\\", "/", files)
   files[files != "integrity.json"]
+}
+
+# Every entry below `dir`, directories included, so a symbolic link to a
+# directory is seen even when listing does not descend into it.
+.list_payload_entries <- function(dir) {
+  entries <- list.files(dir, recursive = TRUE, all.files = TRUE, no.. = TRUE,
+                        include.dirs = TRUE)
+  gsub("\\\\", "/", entries)
+}
+
+# Operating-system metadata files a file manager may drop into any directory
+# it shows (Finder's .DS_Store and AppleDouble ._* files, Windows Explorer's
+# Thumbs.db and desktop.ini). They are never read by hyperannotatR.
+.is_os_metadata <- function(path) {
+  base <- basename(path)
+  base %in% c(".DS_Store", "Thumbs.db", "desktop.ini") | startsWith(base, "._")
 }
 
 .build_integrity <- function(dir) {
@@ -44,19 +60,21 @@
     files[[length(files) + 1L]] <<- list(path = rel(path), format = format, role = role,
                                          entry_id = entry_id)
   }
-  lite <- project
-  lite$image$handle <- NULL
+  # The image record hashes the real source; every written file comes from a
+  # copy without local paths, so no absolute path reaches the handoff (mask
+  # legend sidecars, for example, record the image's source descriptor).
   img_rec <- .image_record(project$image)
+  safe <- .strip_local_paths(project)
   .write_json_atomic(img_rec, file.path(dir, "image.json"))
   add_file(file.path(dir, "image.json"), "image_json", "image")
   if ("qupath_geojson" %in% formats) {
     p <- file.path(dir, "annotations_qupath.geojson")
-    at_write_qupath(project, p, level = level, dialect = "qupath")
+    at_write_qupath(safe, p, level = level, dialect = "qupath")
     add_file(p, "qupath_geojson", "annotations")
   }
   if ("geojson" %in% formats) {
     p <- file.path(dir, "annotations.geojson")
-    at_write_geojson(project, p, level = level)
+    at_write_geojson(safe, p, level = level)
     add_file(p, "geojson", "annotations")
   }
   if (any(c("mask_tiff", "mask_npy") %in% formats) && length(project$layers) > 0L) {
@@ -65,9 +83,8 @@
     stems <- .unique_components(.safe_component(names(project$layers)))
     for (k in seq_along(project$layers)) {
       nm <- names(project$layers)[k]
-      m <- at_mask(project, type = mask_type, layer = nm, level = level)
-      attr(m, "background") <- 0L
-      mid <- paste0(entry_id %||% "project", ":", nm)
+      m <- at_mask(safe, type = mask_type, layer = nm, level = level)
+      mid <- paste0(if (is.na(entry_id)) "project" else entry_id, ":", nm)
       if ("mask_tiff" %in% formats) {
         maxv <- max(as.integer(as.matrix(m)), 0L)
         if (maxv > 65535L) {
@@ -99,14 +116,13 @@
   if ("csv" %in% formats) {
     p <- file.path(dir, "tables", "rois.csv")
     dir.create(dirname(p), showWarnings = FALSE)
-    at_write_rois_csv(project, p)
+    at_write_rois_csv(safe, p)
     add_file(p, "csv", "roi_table")
   }
   if ("rds" %in% formats) {
     p <- file.path(dir, "objects", "project.rds")
     dir.create(dirname(p), showWarnings = FALSE)
-    lite$image$source <- basename(lite$image$source)
-    at_save_project(lite, p)
+    at_save_project(safe, p)
     add_file(p, "rds", "annotatr_internal")
   }
   if (at_is_spectral(project$image)) {
@@ -115,6 +131,57 @@
     add_file(p, "hsi_manifest", "hsi")
   }
   list(files = files, masks = masks)
+}
+
+# A project copy safe to hand to a partner: no pixel handle or runtime read
+# identity, and every absolute path in the image record (source, source
+# descriptor and its companion files, reader options, metadata messages)
+# reduced to its file name. A loaded copy keeps its annotations and reports
+# the source as missing until relinked.
+.strip_local_paths <- function(project) {
+  img <- project$image
+  d <- img$source_descriptor
+  paths <- c(img$source, if (is.list(d)) d[["path"]],
+             if (is.list(d) && is.list(d[["files"]])) vapply(d[["files"]], function(f) .json_chr(f[["path"]]), character(1)))
+  paths <- paths[!is.na(paths) & .is_absolute_path(paths)]
+  dirs <- unique(dirname(paths))
+  img$handle <- NULL
+  img$read_key <- NULL
+  img$reader <- NULL
+  img$read_generation <- NULL
+  img$source <- basename(img$source)
+  if (is.list(d)) img$source_descriptor <- .scrub_paths(d, dirs)
+  if (is.list(img$meta)) {
+    img$meta$source_error <- NULL
+    img$meta <- .scrub_paths(img$meta, dirs)
+  }
+  project$image <- img
+  project
+}
+
+.is_absolute_path <- function(x) grepl("^(/|~|[A-Za-z]:[/\\\\]|\\\\\\\\)", x)
+
+# Replace absolute paths in the character values of a nested list by their
+# file names, and remove the given directories from other strings. List
+# structure and attributes are kept.
+.scrub_paths <- function(x, dirs = character()) {
+  if (is.character(x)) {
+    keep <- attributes(x)
+    hit <- !is.na(x) & .is_absolute_path(x)
+    x[hit] <- basename(x[hit])
+    for (d in dirs[nzchar(dirs) & dirs != "/" & dirs != "."]) {
+      x <- gsub(paste0(d, "/"), "", x, fixed = TRUE)
+      x <- gsub(d, "", x, fixed = TRUE)
+    }
+    attributes(x) <- keep
+    return(x)
+  }
+  if (is.list(x)) {
+    for (i in seq_along(x)) {
+      if (!is.null(x[[i]])) x[[i]] <- .scrub_paths(x[[i]], dirs)
+    }
+  }
+  x
 }
 
 .hsi_manifest <- function(img, img_rec = .image_record(img)) {
@@ -155,10 +222,15 @@
 #' Files are written into a hidden sibling staging directory and moved into
 #' place only when complete, so a failed export never leaves a directory that
 #' looks valid. An existing destination is replaced only with
-#' `overwrite = TRUE`, and only when it is itself a handoff directory.
+#' `overwrite = TRUE`, and only when it is itself a handoff directory; if the
+#' new directory cannot be moved into place the previous one is restored. The
+#' optional `objects/project.rds` holds no pixels, read identity or local path
+#' (the image source is reduced to its file name).
 #'
 #' @param x An [annot_project] or [annot_session] (materialised entries are
-#'   exported under `entries/entry-NNNN/`).
+#'   exported under `entries/<entry_id>/`, where `entry_id` is the session's
+#'   stable entry id, or `entry-NNNN` by queue position for sessions without
+#'   stable ids).
 #' @param destination Path of the handoff directory to create.
 #' @param formats Any of `"qupath_geojson"`, `"geojson"`, `"mask_tiff"`,
 #'   `"mask_npy"`, `"csv"`, `"rds"`, `"manifest"`. `manifest.json` and
@@ -179,7 +251,7 @@
 #' @family interop
 #' @seealso [at_import_qupflowr()], [at_interop_manifest()]
 #' @export
-#' @examplesIf requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' dest <- file.path(tempdir(), "handoff-example")
 #' rc <- at_export_qupflowr(at_example_project(), dest, overwrite = TRUE)
 #' rc$handoff_digest
@@ -196,6 +268,10 @@ at_export_qupflowr <- function(x, destination,
   .check_string(destination, call = call)
   .check_flag(overwrite, call = call)
   level <- .check_count(level, call = call)
+  # Resolve omitted choice arguments to their first value here, so the
+  # validator only ever sees what the caller actually passed.
+  if (missing(mask_type)) mask_type <- mask_type[[1]]
+  if (missing(scope)) scope <- scope[[1]]
   mask_type <- .check_choice(mask_type, c("labelled", "multiclass", "binary"), call = call)
   scope <- .check_choice(scope, c("all", "current", "complete"), call = call)
   if (!is.character(formats) || length(formats) == 0L || !all(formats %in% .handoff_formats)) {
@@ -210,14 +286,14 @@ at_export_qupflowr <- function(x, destination,
                 class = "io", code = "DESTINATION_EXISTS", call = call)
     }
     if (!dir.exists(dest) || !file.exists(file.path(dest, "integrity.json"))) {
-      .at_abort(c("{.path {destination}} is not an hyperannotatR handoff directory.",
+      .at_abort(c("{.path {destination}} is not a hyperannotatR handoff directory.",
                   "x" = "Refusing to replace a directory or file without {.file integrity.json}."),
                 class = "io", code = "DESTINATION_NOT_HANDOFF", call = call)
     }
   }
   parent <- dirname(dest)
   dir.create(parent, recursive = TRUE, showWarnings = FALSE)
-  stage <- file.path(parent, paste0(".", basename(dest), ".partial-", .random_hex(6L)))
+  stage <- file.path(parent, paste0(".", basename(dest), ".partial-", .random_hex(6L, secure = FALSE)))
   dir.create(stage)
   ok <- FALSE
   on.exit(if (!ok) unlink(stage, recursive = TRUE), add = TRUE)
@@ -234,7 +310,7 @@ at_export_qupflowr <- function(x, destination,
     idx <- switch(scope, all = seq_len(nrow(m)), current = x$cursor,
                   complete = which(m$status == "complete"))
     for (i in idx) {
-      eid <- sprintf("entry-%04d", i)
+      eid <- .session_entry_id(x, i)
       p <- x$projects[[i]]
       if (is.null(p)) {
         skipped <- c(skipped, eid)
@@ -259,22 +335,7 @@ at_export_qupflowr <- function(x, destination,
   .write_json_atomic(integrity, file.path(stage, "integrity.json"))
   digest <- .handoff_digest(integrity)
 
-  if (existed) {
-    backup <- file.path(parent, paste0(".", basename(dest), ".previous-", .random_hex(6L)))
-    if (!file.rename(dest, backup)) {
-      .at_abort("Could not move the previous handoff aside.", class = "io", code = "WRITE_FAILED",
-                call = call)
-    }
-    if (!file.rename(stage, dest)) {
-      file.rename(backup, dest)
-      .at_abort("Could not move the new handoff into place.", class = "io", code = "WRITE_FAILED",
-                call = call)
-    }
-    unlink(backup, recursive = TRUE)
-  } else if (!file.rename(stage, dest)) {
-    .at_abort("Could not move the new handoff into place.", class = "io", code = "WRITE_FAILED",
-              call = call)
-  }
+  .replace_dir(stage, dest, what = "handoff", call = call)
   ok <- TRUE
   fmt <- vapply(integrity$files, function(f) {
     hit <- Filter(function(r) identical(r$path, f$path), files)
@@ -311,8 +372,12 @@ print.at_handoff_receipt <- function(x, ...) {
 }
 
 # Verify a handoff directory: inventory, hashes, extra/missing/duplicate files,
-# symlinks, manifest schema and major version. Aborts on any integrity or
-# schema failure; returns the parsed documents and a checks table.
+# symlinks (files and directories), manifest major version and schema, and
+# that every file the manifest references is a clean relative path listed in
+# the verified inventory. Unlisted operating-system metadata files
+# (.DS_Store, ._*, Thumbs.db, desktop.ini) are ignored with a warning; any
+# other integrity, version or schema failure aborts with a classified
+# `at_error`. Returns the parsed documents and a checks table.
 .verify_handoff <- function(dir, call = rlang::caller_env()) {
   dir <- normalizePath(dir, winslash = "/", mustWork = TRUE)
   checks <- list()
@@ -324,9 +389,15 @@ print.at_handoff_receipt <- function(x, ...) {
     fail("The handoff has no {.file integrity.json}.", "INTEGRITY_MISSING")
   }
   integrity <- .read_json_doc(ipath, max_bytes = .interop_limits()$handoff_max_json_bytes, call = call)
+  # A well-formed but unsupported major version is a protocol mismatch, not
+  # a schema violation, so check it before the 1.x schema.
+  fv <- integrity[["format_version"]]
+  if (.is_string(fv) && grepl("^[0-9]+\\.[0-9]+$", fv)) {
+    .check_major_version(fv, 1L, "integrity", call = call)
+  }
   .schema_assert(integrity, .contract$handoff, "integrity", what = "integrity", call = call)
-  .check_major_version(integrity$format_version, 1L, "integrity", call = call)
-  listed <- vapply(integrity$files, `[[`, character(1), "path")
+  .check_major_version(integrity[["format_version"]], 1L, "integrity", call = call)
+  listed <- vapply(integrity[["files"]], `[[`, character(1), "path")
   if (length(listed) > .interop_limits()$handoff_max_files) {
     .at_abort("The handoff lists more files than the limit.", class = "limit",
               code = "PAYLOAD_TOO_LARGE", call = call)
@@ -342,12 +413,15 @@ print.at_handoff_receipt <- function(x, ...) {
   if (length(bad)) {
     fail("The inventory contains paths outside the handoff.", "PATH_OUTSIDE_ROOT")
   }
-  actual <- .list_payload_files(dir)
-  links <- actual[.is_symlink(file.path(dir, actual))]
+  entries <- .list_payload_entries(dir)
+  links <- entries[.is_symlink(file.path(dir, entries))]
   if (length(links)) {
     fail("The handoff contains symbolic links: {.val {links}}.", "INTEGRITY_SYMLINK")
   }
+  actual <- .list_payload_files(dir)
   extra <- setdiff(actual, listed)
+  ignored <- extra[.is_os_metadata(extra)]
+  extra <- setdiff(extra, ignored)
   missing <- setdiff(listed, actual)
   if (length(missing)) {
     fail("Files listed in the inventory are missing: {.val {missing}}.", "INTEGRITY_MISSING",
@@ -357,37 +431,107 @@ print.at_handoff_receipt <- function(x, ...) {
     fail("Files not listed in the inventory are present: {.val {extra}}.", "INTEGRITY_EXTRA",
          list(extra = as.list(extra)))
   }
-  for (f in integrity$files) {
-    full <- file.path(dir, f$path)
+  for (f in integrity[["files"]]) {
+    full <- file.path(dir, f[["path"]])
     size <- file.info(full)$size
-    if (!isTRUE(size == f$size_bytes)) {
-      fail("{.file {f$path}} has {size} bytes; the inventory says {f$size_bytes}.",
-           "INTEGRITY_MISMATCH", list(path = f$path))
+    if (!isTRUE(size == f[["size_bytes"]])) {
+      fail("{.file {f[['path']]}} has {size} bytes; the inventory says {f[['size_bytes']]}.",
+           "INTEGRITY_MISMATCH", list(path = f[["path"]]))
     }
-    if (!identical(.sha256_file(full), f$sha256)) {
-      fail("{.file {f$path}} does not match its SHA-256 in the inventory.", "INTEGRITY_MISMATCH",
-           list(path = f$path))
+    if (!identical(.sha256_file(full), f[["sha256"]])) {
+      fail("{.file {f[['path']]}} does not match its SHA-256 in the inventory.", "INTEGRITY_MISMATCH",
+           list(path = f[["path"]]))
     }
   }
   checks[[length(checks) + 1L]] <- .check_row("integrity", "ok",
                                               sprintf("%d files verified", length(listed)))
+  if (length(ignored)) {
+    checks[[length(checks) + 1L]] <- .check_row(
+      "os_metadata", "warn",
+      sprintf("ignored %d unlisted operating-system metadata file(s): %s", length(ignored),
+              paste(ignored, collapse = ", "))
+    )
+  }
   if (!"manifest.json" %in% listed) {
     fail("The handoff has no {.file manifest.json}.", "MANIFEST_MISSING")
   }
   manifest <- .read_json_doc(file.path(dir, "manifest.json"),
                              max_bytes = .interop_limits()$handoff_max_json_bytes, call = call)
-  if (!identical(manifest$schema, .contract$handoff)) {
+  if (!identical(manifest[["schema"]], .contract$handoff)) {
     .at_abort("{.file manifest.json} is not an {.val {(.contract$handoff)}} document.",
               class = "protocol", code = "PROTOCOL_MISMATCH", call = call)
   }
-  .check_major_version(manifest$schema_version, 1L, "manifest", call = call)
+  .check_major_version(manifest[["schema_version"]], 1L, "manifest", call = call)
   .schema_assert(manifest, .contract$handoff, "manifest", what = "manifest", call = call)
-  checks[[length(checks) + 1L]] <- .check_row("manifest_schema", "ok", manifest$schema_version)
+  refs <- c(
+    vapply(manifest[["files"]] %||% list(), function(f) .json_chr(f[["path"]]), character(1)),
+    vapply(manifest[["masks"]] %||% list(), function(m) .json_chr(m[["file"]]), character(1))
+  )
+  refs <- unique(refs[!is.na(refs)])
+  outside <- refs[!vapply(refs, .is_clean_relative, logical(1))]
+  if (length(outside)) {
+    fail("The manifest references paths outside the handoff: {.val {outside}}.", "PATH_OUTSIDE_ROOT",
+         list(paths = as.list(outside)))
+  }
+  unlisted <- setdiff(refs, listed)
+  if (length(unlisted)) {
+    fail("The manifest references files missing from the verified inventory: {.val {unlisted}}.",
+         "INTEGRITY_MISSING", list(missing = as.list(unlisted)))
+  }
+  checks[[length(checks) + 1L]] <- .check_row("manifest_schema", "ok", manifest[["schema_version"]])
   list(dir = dir, integrity = integrity, manifest = manifest,
        digest = .handoff_digest(integrity), checks = do.call(rbind, checks))
 }
 
 # ---- Import ---------------------------------------------------------------------
+
+# A JSON value as a single string; `default` for null/missing.
+.json_chr <- function(v, default = NA_character_) {
+  if (is.null(v) || length(v) != 1L || is.na(v)) default else as.character(v)
+}
+
+# Is a parsed JSON document GeoJSON features: a Feature, a FeatureCollection
+# or a (possibly empty) bare array of Features?
+.is_geojson_doc <- function(doc) {
+  if (!is.list(doc)) {
+    return(FALSE)
+  }
+  if (!is.null(names(doc))) {
+    return(identical(doc[["type"]], "FeatureCollection") || identical(doc[["type"]], "Feature"))
+  }
+  all(vapply(doc, function(f) is.list(f) && identical(f[["type"]], "Feature"), logical(1)))
+}
+
+# The id each feature of a GeoJSON document carries itself (NA when it has
+# none): the hyperannotatR id in QuPath metadata or the GeoJSON roi_id property,
+# then the feature id. Features without one get ids minted by the reader;
+# those must never be joined to existing ROIs.
+.feature_source_ids <- function(doc, qupath) {
+  feats <- tryCatch(.qupath_features(doc), error = function(e) list())
+  vapply(feats, function(ft) {
+    props <- .jget(ft, "properties") %||% list()
+    id <- if (qupath) {
+      .jget(props, "metadata", "annotatr_roi_id") %||% .jget(props, "metadata", "annotatR_roi_id") %||%
+        .jget(ft, "id")
+    } else {
+      .jget(props, "roi_id") %||% .jget(ft, "id")
+    }
+    .json_chr(id)
+  }, character(1))
+}
+
+# Read the source ids of a GeoJSON file and refuse repeated ones instead of
+# letting the reader silently re-mint them.
+.checked_source_ids <- function(path, qupath, call) {
+  doc <- tryCatch(jsonlite::read_json(path, simplifyVector = FALSE), error = function(e) NULL)
+  src <- .feature_source_ids(doc, qupath)
+  given <- src[!is.na(src)]
+  if (anyDuplicated(given)) {
+    .at_abort("{.file {basename(path)}} gives several features the id {.val {unique(given[duplicated(given)])}}.",
+              code = "DUPLICATE_ID", call = call)
+  }
+  src
+}
 
 .detect_import_format <- function(file) {
   if (dir.exists(file)) {
@@ -399,11 +543,18 @@ print.at_handoff_receipt <- function(x, ...) {
   }
   ext <- tolower(tools::file_ext(file))
   if (ext %in% c("geojson", "json")) {
-    doc <- tryCatch(jsonlite::read_json(file, simplifyVector = FALSE), error = function(e) NULL)
+    doc <- tryCatch(jsonlite::read_json(file, simplifyVector = FALSE),
+                    error = function(e) structure(list(), class = "at_json_parse_failure"))
+    if (inherits(doc, "at_json_parse_failure")) {
+      return("invalid_json")
+    }
+    if (!.is_geojson_doc(doc)) {
+      return("unknown")
+    }
     feats <- tryCatch(.qupath_features(doc), error = function(e) list())
-    props <- if (length(feats)) feats[[1]]$properties else NULL
-    if (!is.null(props$objectType) || !is.null(props$object_type) ||
-        !is.null(props$classification)) {
+    props <- if (length(feats)) .jget(feats[[1]], "properties") else NULL
+    if (!is.null(props[["objectType"]]) || !is.null(props[["object_type"]]) ||
+        !is.null(props[["classification"]])) {
       return("qupath_geojson")
     }
     return("geojson")
@@ -417,19 +568,20 @@ print.at_handoff_receipt <- function(x, ...) {
 # Group a QuPath layer's ROIs into hyperannotatR layers using the manifest (by ROI
 # id) or the hyperannotatR metadata written into the QuPath dialect.
 .split_qupath_layers <- function(qlayer, manifest_layers = list(), manifest_rois = list()) {
-  roi_layer <- stats::setNames(vapply(manifest_rois, function(r) r$layer, character(1)),
-                               vapply(manifest_rois, function(r) r$roi_id, character(1)))
+  roi_layer <- stats::setNames(vapply(manifest_rois, function(r) .json_chr(r[["layer"]]), character(1)),
+                               vapply(manifest_rois, function(r) .json_chr(r[["roi_id"]]), character(1)))
   out <- list()
   for (L in manifest_layers) {
-    st <- at_style(visible = isTRUE(L$visible), locked = isTRUE(L$locked),
-                   z = as.integer(L$z %||% 1L),
-                   colour = if (length(L$colours)) unlist(L$colours) else NULL)
-    out[[L$name]] <- at_layer(L$name, labels = unlist(L$labels) %||% character(), style = st)
+    st <- at_style(visible = isTRUE(L[["visible"]]), locked = isTRUE(L[["locked"]]),
+                   z = as.integer(L[["z"]] %||% 1L),
+                   colour = if (length(L[["colours"]])) unlist(L[["colours"]]) else NULL)
+    out[[L[["name"]]]] <- at_layer(L[["name"]], labels = unlist(L[["labels"]]) %||% character(), style = st)
   }
   for (r in qlayer$rois) {
     ln <- roi_layer[r$id]
     if (is.na(ln)) {
-      ln <- r$attributes$qupath$metadata$annotatr_layer %||% qlayer$name
+      meta <- .jget(r$attributes, "qupath", "metadata")
+      ln <- .json_chr(.jget(meta, "annotatr_layer") %||% .jget(meta, "annotatR_layer") %||% qlayer$name)
     }
     if (is.null(out[[ln]])) {
       out[[ln]] <- at_layer(ln)
@@ -443,32 +595,68 @@ print.at_handoff_receipt <- function(x, ...) {
   out
 }
 
+# Mask encoding declared by a manifest record, or inferred from its type for
+# records written before hyperannotatR recorded encodings.
+.record_encoding <- function(rec) {
+  enc <- .json_chr(rec[["encoding"]])
+  if (!is.na(enc)) {
+    return(enc)
+  }
+  switch(.json_chr(rec[["mask_type"]], "labelled"),
+         binary = "binary",
+         multiclass = if (identical(.json_chr(rec[["overlap"]]), "bitor")) "bitfield" else "categorical",
+         "instance")
+}
+
+# Values of `m` (other than `background`) that the legend codes do not
+# explain: absent codes, or for bitfields bits outside every code.
+.unexplained_values <- function(m, codes, background, encoding) {
+  present <- setdiff(sort(unique(as.integer(m))), as.integer(background))
+  if (identical(encoding, "bitfield")) {
+    allowed <- Reduce(bitwOr, as.integer(codes), init = 0L)
+    return(present[present < 0L | bitwAnd(present, bitwNot(allowed)) != 0L])
+  }
+  setdiff(present, as.integer(codes))
+}
+
 .read_mask_file <- function(dir, rec, call) {
-  path <- file.path(dir, rec$file)
+  path <- file.path(dir, rec[["file"]])
   ext <- tolower(tools::file_ext(path))
   m <- if (ext == "npy") .npy_read_matrix(path, call = call) else .read_mask_matrix(path, call)$m
   storage.mode(m) <- "integer"
-  if (nrow(m) != rec$height || ncol(m) != rec$width) {
-    .at_abort("Mask {.file {rec$file}} is {ncol(m)} x {nrow(m)} px; the manifest says {rec$width} x {rec$height}.",
+  if (nrow(m) != rec[["height"]] || ncol(m) != rec[["width"]]) {
+    .at_abort("Mask {.file {rec[['file']]}} is {ncol(m)} x {nrow(m)} px; the manifest says {rec[['width']]} x {rec[['height']]}.",
               code = "MASK_DIMENSIONS", call = call)
   }
-  legend_vals <- vapply(rec$legend, function(l) as.integer(l$value), integer(1))
-  present <- setdiff(sort(unique(as.integer(m))), as.integer(rec$background))
-  if (length(setdiff(present, legend_vals))) {
-    .at_abort("Mask {.file {rec$file}} contains values {.val {setdiff(present, legend_vals)}} missing from its legend.",
+  encoding <- .record_encoding(rec)
+  background <- as.integer(rec[["background"]] %||% 0L)
+  legend_vals <- vapply(rec[["legend"]], function(l) as.integer(l[["value"]]), integer(1))
+  missing <- .unexplained_values(m, legend_vals, background, encoding)
+  if (length(missing)) {
+    .at_abort("Mask {.file {rec[['file']]}} contains values {.val {missing}} missing from its legend.",
               code = "LEGEND_INCOMPLETE", call = call)
   }
   lg <- tibble::tibble(
     value = legend_vals,
-    label = vapply(rec$legend, function(l) as.character(l$label), character(1)),
-    layer = vapply(rec$legend, function(l) as.character(l$layer %||% NA_character_), character(1)),
-    roi_id = vapply(rec$legend, function(l) as.character(l$roi_id %||% NA_character_), character(1)),
-    n_px = vapply(legend_vals, function(v) as.integer(sum(m == v)), integer(1)),
-    colour = vapply(rec$legend, function(l) as.character(l$colour %||% "#5E2C8E"), character(1))
+    label = vapply(rec[["legend"]], function(l) as.character(l[["label"]]), character(1)),
+    layer = vapply(rec[["legend"]], function(l) .json_chr(l[["layer"]]), character(1)),
+    roi_id = vapply(rec[["legend"]], function(l) .json_chr(l[["roi_id"]]), character(1)),
+    n_px = integer(length(legend_vals)),
+    colour = vapply(rec[["legend"]], function(l) .json_chr(l[["colour"]], "#5E2C8E"), character(1))
   )
-  mk <- .new_annot_mask(m, lg, rec$level, c(rec$width, rec$height), rec$mask_type)
-  attr(mk, "background") <- as.integer(rec$background)
-  mk
+  overlap <- .json_chr(rec[["overlap"]], "last")
+  # The mask constructor enforces the semantic contract (codebook, background
+  # collisions, binary values, bitfield codes); report a violation with a
+  # stable code instead of the constructor's generic error.
+  tryCatch(
+    .new_annot_mask(m, lg, rec[["level"]], c(rec[["width"]], rec[["height"]]), rec[["mask_type"]],
+                    encoding = encoding, background = background, overlap = overlap),
+    error = function(e) {
+      .at_abort(c("Mask {.file {rec[['file']]}} does not satisfy its manifest record.",
+                  "x" = conditionMessage(e)),
+                code = "MASK_INVALID", call = call)
+    }
+  )
 }
 
 #' Import a qupflowR handoff or neutral interchange file
@@ -478,12 +666,22 @@ print.at_handoff_receipt <- function(x, ...) {
 #' the SHA-256 inventory (missing, extra, duplicate, resized, altered or
 #' symlinked files), the manifest schema and major version, ROI id uniqueness
 #' and the id join between manifest and GeoJSON, layers, planes, mask
-#' dimensions, integer values and legend completeness are all checked; any
-#' integrity or schema failure aborts with an `at_validation_error`. Nothing
-#' is written, no analysis is started, and foreign objects are never returned as
-#' if they were hyperannotatR objects: imported ROIs carry `source = "imported"` and
-#' partner fields under `attributes$qupflowr`. An RDS file is refused, because
-#' deserialising it is not a neutral read.
+#' dimensions, integer values and legend completeness are all checked. Every
+#' file the manifest references must be a clean relative path listed in the
+#' verified inventory; unlisted operating-system metadata files (`.DS_Store`,
+#' `._*`, `Thumbs.db`, `desktop.ini`) are ignored with a warning. Any failure
+#' aborts with a classified `at_error`: `at_validation_error` for integrity,
+#' schema and join failures, `at_protocol_error` for an unsupported major
+#' version, `at_limit_error` for oversized inventories and `at_io_error` for
+#' missing files. Nothing is written, no analysis is started, and foreign
+#' objects are never returned as if they were hyperannotatR objects: imported ROIs
+#' carry `source = "imported"` and partner fields under
+#' `attributes$qupflowr`. Features of a single GeoJSON file that carry no id
+#' get a minted one and are flagged (`attributes$qupflowr$id_minted`), so
+#' [at_stage_qupflowr()] creates them instead of joining them to an existing
+#' ROI; two features with the same id are refused (`DUPLICATE_ID`). Handoff
+#' coordinates are read at the export level recorded in the manifest. An RDS
+#' file is refused, because deserialising it is not a neutral read.
 #'
 #' @param file A handoff directory (or its `manifest.json`/`integrity.json`), a
 #'   QuPath GeoJSON, a GeoJSON, a mask TIFF/PNG with legend sidecar, or a
@@ -500,12 +698,14 @@ print.at_handoff_receipt <- function(x, ...) {
 #'   `status`, `detail`), `objects` (`layers`: named list of [annot_layer];
 #'   `masks`: named list of `annot_mask`; `images`: image records), `conversion`
 #'   (tibble with one row per ROI: `roi_id`, `layer`, `label`,
-#'   `source_object_id`, `object_type`, `geometry_fidelity`, `geometry_match`,
-#'   `notes`) and `annotation_revision` of the imported layers.
+#'   `source_object_id`, `object_type`, `geometry_fidelity`, `geometry_match`
+#'   (`"exact"` bytes, `"equivalent"` within 1e-9 after level normalisation,
+#'   `"changed"`, or `NA` without a manifest record), `notes`) and
+#'   `annotation_revision` of the imported layers.
 #' @family interop
 #' @seealso [at_export_qupflowr()], [at_stage_qupflowr()]
 #' @export
-#' @examplesIf requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' dest <- file.path(tempdir(), "handoff-import-example")
 #' at_export_qupflowr(at_example_project(), dest, overwrite = TRUE)
 #' rep <- at_import_qupflowr(dest)
@@ -517,6 +717,7 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
   if (!file.exists(file)) {
     .at_abort("{.path {file}} does not exist.", class = "io", code = "FILE_MISSING", call = call)
   }
+  if (missing(format)) format <- format[[1]]
   format <- .check_choice(format, c("auto", "handoff", "qupath_geojson", "geojson", "mask", "npy"),
                           call = call)
   if (!is.null(expected_revision)) .check_string(expected_revision, call = call)
@@ -527,6 +728,9 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
     .at_abort(c("RDS files are not part of the neutral contract.",
                 "i" = "Load a trusted hyperannotatR project with {.fn at_load_project} instead."),
               code = "FORMAT_NOT_NEUTRAL", call = call)
+  }
+  if (format == "invalid_json") {
+    .at_abort("{.path {basename(file)}} is not valid JSON.", code = "INVALID_JSON", call = call)
   }
   if (format == "unknown") {
     .at_abort("Cannot determine the interchange format of {.path {basename(file)}}.",
@@ -542,7 +746,7 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
   )
   report$format <- format
   if (!is.null(expected_revision)) {
-    have <- report$manifest$annotations$annotation_revision %||% report$annotation_revision
+    have <- .jget(report$manifest, "annotations", "annotation_revision") %||% report$annotation_revision
     if (!identical(have, expected_revision)) {
       .at_abort(
         c("The handoff carries a different annotation revision than expected.",
@@ -558,20 +762,74 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
   structure(report, class = "at_import_report")
 }
 
-.conversion_rows <- function(layers, manifest_rois = list()) {
-  by_id <- stats::setNames(manifest_rois, vapply(manifest_rois, function(r) r$roi_id, character(1)))
+# Scale an sfc from one level grid to another (`from`, `to` are c(width, height)).
+.scale_sfc <- function(geom, from, to) {
+  fx <- to[1] / from[1]
+  fy <- to[2] / from[2]
+  sf::st_sfc(lapply(geom, .apply_coords, fun = function(m) cbind(m[, 1] * fx, m[, 2] * fy)),
+             crs = sf::NA_crs_)
+}
+
+# Level dimensions c(width, height) recorded for `image_id` in a manifest.
+.manifest_level_dims <- function(images, image_id, level) {
+  for (im in images %||% list()) {
+    if (identical(im[["image_id"]], image_id) && length(im[["level_dims"]]) > level) {
+      d <- im[["level_dims"]][[level + 1L]]
+      return(c(as.numeric(d[["width"]]), as.numeric(d[["height"]])))
+    }
+  }
+  NULL
+}
+
+# Match of an imported ROI against its manifest record. Imported handoff
+# coordinates are at the export level; they are scaled to the record's level
+# (with the manifest's level dimensions) before the WKB digest is compared.
+# A non-power-of-two rescale can differ from the original in the last bits:
+# then the result is "equivalent" when the bounding box agrees with the record
+# within 1e-9 (relative), otherwise "changed".
+.geometry_match <- function(r, rec, images = list()) {
+  if (is.null(rec)) {
+    return(NA_character_)
+  }
+  g <- r$geometry
+  lv <- as.integer(rec[["level"]] %||% r$level)
+  rescaled <- !identical(as.integer(r$level), lv)
+  if (rescaled) {
+    from <- .manifest_level_dims(images, rec[["image_id"]], as.integer(r$level))
+    to <- .manifest_level_dims(images, rec[["image_id"]], lv)
+    if (is.null(from) || is.null(to)) {
+      return("changed")
+    }
+    g <- .scale_sfc(g, from, to)
+  }
+  if (identical(.geometry_sha256(g), rec[["geometry_sha256"]])) {
+    return("exact")
+  }
+  if (rescaled && is.list(rec[["bbox"]])) {
+    bb <- as.numeric(sf::st_bbox(g))
+    want <- as.numeric(unlist(rec[["bbox"]][c("xmin", "ymin", "xmax", "ymax")]))
+    if (length(want) == 4L && all(abs(bb - want) <= 1e-9 * max(1, abs(want)))) {
+      return("equivalent")
+    }
+  }
+  "changed"
+}
+
+.conversion_rows <- function(layers, manifest_rois = list(), images = list()) {
+  by_id <- stats::setNames(manifest_rois, vapply(manifest_rois, function(r) .json_chr(r[["roi_id"]]), character(1)))
   rows <- list()
   for (L in layers) {
     for (r in L$rois) {
       rec <- by_id[[r$id]]
-      match <- if (is.null(rec)) NA_character_ else if (identical(.geometry_sha256(r$geometry), rec$geometry_sha256)) "exact" else "changed"
+      match <- .geometry_match(r, rec, images)
       notes <- character()
-      if (identical(r$attributes$qupath$roi_native, "ellipse")) notes <- c(notes, "ellipse polygonised by QuPath")
+      qp <- .jget(r$attributes, "qupath")
+      if (identical(.jget(qp, "roi_native"), "ellipse")) notes <- c(notes, "ellipse polygonised by QuPath")
       if (identical(match, "changed")) notes <- c(notes, "geometry bytes differ from the manifest record")
       rows[[length(rows) + 1L]] <- tibble::tibble(
         roi_id = r$id, layer = L$name, label = r$label,
-        source_object_id = r$attributes$qupath$object_id %||% NA_character_,
-        object_type = r$attributes$qupath$object_type %||% NA_character_,
+        source_object_id = .json_chr(.jget(qp, "object_id")),
+        object_type = .json_chr(.jget(qp, "object_type")),
         geometry_fidelity = .geometry_fidelity(r),
         geometry_match = match,
         notes = paste(notes, collapse = "; ")
@@ -587,22 +845,61 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
   do.call(rbind, rows)
 }
 
-.tag_imported <- function(layers, digest, manifest_rois = list()) {
-  by_id <- stats::setNames(manifest_rois, vapply(manifest_rois, function(r) r$roi_id, character(1)))
+# Tag imported ROIs with their provenance. `source_ids` (the ids features
+# carry themselves, see .feature_source_ids()) marks ROIs whose id was minted
+# by the reader: `attributes$qupflowr$id_minted = TRUE`.
+.tag_imported <- function(layers, digest, manifest_rois = list(), source_ids = NULL) {
+  by_id <- stats::setNames(manifest_rois, vapply(manifest_rois, function(r) .json_chr(r[["roi_id"]]), character(1)))
   lapply(layers, function(L) {
     L$rois <- lapply(L$rois, function(r) {
       rec <- by_id[[r$id]]
       r$source <- "imported"
       r$attributes$qupflowr <- list(handoff_digest = digest,
                                     source_record = if (is.null(rec)) NULL else rec)
+      if (!is.null(source_ids) && !r$id %in% source_ids) {
+        r$attributes$qupflowr$id_minted <- TRUE
+      }
       if (!is.null(rec)) {
-        r$attributes$review_status <- rec$review_status
-        if (isTRUE(rec$locked)) r$attributes$locked <- TRUE
-        if (!is.null(rec$plane)) {
-          r$attributes$plane <- list(c = rec$plane$c %||% NA_integer_, z = rec$plane$z %||% 0L,
-                                     t = rec$plane$t %||% 0L)
+        r$attributes$review_status <- rec[["review_status"]]
+        if (isTRUE(rec[["locked"]])) r$attributes$locked <- TRUE
+        pl <- .jget(rec, "plane")
+        if (is.list(pl)) {
+          r$attributes$plane <- list(c = .jget(pl, "c") %||% NA_integer_, z = .jget(pl, "z") %||% 0L,
+                                     t = .jget(pl, "t") %||% 0L)
         }
       }
+      r
+    })
+    L
+  })
+}
+
+# Read a handoff annotation file whose coordinates are all at `level` (a
+# handoff is written at one export level whatever level the ROIs were stored
+# at). Readers that take `coordinate_level` record it without rescaling and
+# without the ambiguity check meant for loose legacy files; the level is then
+# set on every ROI in any case. QuPath files return one layer, GeoJSON files a
+# named list of layers.
+.read_annotations_at <- function(path, qupath, level, call) {
+  reader <- if (qupath) at_read_qupath else at_read_geojson
+  args <- list(path, call = call)
+  if ("coordinate_level" %in% names(formals(reader))) args$coordinate_level <- as.integer(level)
+  out <- do.call(reader, args)
+  if (qupath) {
+    out$rois <- lapply(out$rois, function(r) {
+      r$level <- as.integer(level)
+      r
+    })
+    return(out)
+  }
+  .set_roi_level(out, level)
+}
+
+# Record that ROI coordinates are at `level`.
+.set_roi_level <- function(layers, level) {
+  lapply(layers, function(L) {
+    L$rois <- lapply(L$rois, function(r) {
+      r$level <- as.integer(level)
       r
     })
     L
@@ -613,63 +910,78 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
   v <- .verify_handoff(dir, call = call)
   man <- v$manifest
   checks <- v$checks
-  files <- man$files %||% list()
-  entries <- unique(vapply(files, function(f) f$entry_id %||% NA_character_, character(1)))
+  files <- man[["files"]] %||% list()
+  entries <- unique(vapply(files, function(f) f[["entry_id"]] %||% NA_character_, character(1)))
   if (length(entries) == 0L) entries <- NA_character_
+  export_level <- as.integer(.jget(man, "provenance", "export", "level") %||% 0L)
   layers_out <- list()
   masks_out <- list()
   conv <- list()
-  m_rois <- man$annotations$rois %||% list()
-  ids <- vapply(m_rois, function(r) r$roi_id, character(1))
-  if (anyDuplicated(ids) && is.null(man$session)) {
-    .at_abort("The manifest lists duplicate ROI ids {.val {unique(ids[duplicated(ids)])}}.",
+  m_rois <- .jget(man, "annotations", "rois") %||% list()
+  # hyperannotatR >= 0.3.0 records the queue entry of every ROI and layer; older
+  # session manifests are joined by image id.
+  by_entry <- any(vapply(m_rois, function(r) "entry_id" %in% names(r), logical(1)))
+  layers_by_entry <- any(vapply(man[["layers"]] %||% list(), function(l) "entry_id" %in% names(l), logical(1)))
+  keys <- vapply(m_rois, function(r) paste(.json_chr(r[["entry_id"]]), r[["roi_id"]], sep = "\r"), character(1))
+  if (anyDuplicated(keys) && (by_entry || is.null(man[["session"]]))) {
+    ids <- vapply(m_rois, function(r) r[["roi_id"]], character(1))
+    .at_abort("The manifest lists duplicate ROI ids {.val {unique(ids[duplicated(keys)])}}.",
               code = "DUPLICATE_ID", call = call)
   }
   for (eid in entries) {
-    ef <- Filter(function(f) identical(f$entry_id %||% NA_character_, eid), files)
-    ann <- Filter(function(f) f$format %in% c("qupath_geojson", "geojson"), ef)
-    ann <- ann[order(vapply(ann, function(f) f$format != "qupath_geojson", logical(1)))]
+    ef <- Filter(function(f) identical(f[["entry_id"]] %||% NA_character_, eid), files)
+    ann <- Filter(function(f) f[["format"]] %in% c("qupath_geojson", "geojson"), ef)
+    ann <- ann[order(vapply(ann, function(f) f[["format"]] != "qupath_geojson", logical(1)))]
     key <- if (is.na(eid)) "project" else eid
-    proj_rec <- Filter(function(p) identical(p$entry_id %||% NA_character_, eid), man$projects %||% list())
-    img_id <- if (length(man$images)) {
-      idx <- if (is.na(eid)) 1L else which(vapply(man$session$queue %||% list(), function(q) q$entry_id, character(1)) == eid)
-      q <- if (!is.na(eid) && length(idx)) man$session$queue[[idx]] else NULL
-      q$image_id %||% man$images[[1]]$image_id
-    } else NA_character_
-    e_rois <- Filter(function(r) identical(r$image_id %||% NA_character_, img_id) || is.na(img_id), m_rois)
+    e_rois <- if (by_entry) {
+      Filter(function(r) identical(.json_chr(r[["entry_id"]]), eid), m_rois)
+    } else {
+      img_id <- if (length(man[["images"]])) {
+        queue <- .jget(man, "session", "queue") %||% list()
+        idx <- if (is.na(eid)) 1L else which(vapply(queue, function(q) .json_chr(q[["entry_id"]]), character(1)) == eid)
+        q <- if (!is.na(eid) && length(idx)) queue[[idx[1]]] else NULL
+        .jget(q, "image_id") %||% .jget(man[["images"]][[1]], "image_id")
+      } else NA_character_
+      Filter(function(r) identical(r[["image_id"]] %||% NA_character_, img_id) || is.na(img_id), m_rois)
+    }
+    e_layers <- if (layers_by_entry) {
+      Filter(function(l) identical(.json_chr(l[["entry_id"]]), eid), man[["layers"]])
+    } else {
+      man[["layers"]] %||% list()
+    }
     if (length(ann)) {
       f <- ann[[1]]
-      path <- file.path(v$dir, f$path)
-      layers <- if (f$format == "qupath_geojson") {
-        .split_qupath_layers(at_read_qupath(path, call = call), man$layers, e_rois)
-      } else {
-        at_read_geojson(path, call = call)
-      }
+      path <- file.path(v$dir, f[["path"]])
+      qupath <- f[["format"]] == "qupath_geojson"
+      src_ids <- .checked_source_ids(path, qupath, call)
+      layers <- .read_annotations_at(path, qupath, export_level, call)
+      if (qupath) layers <- .split_qupath_layers(layers, e_layers, e_rois)
       got <- unlist(lapply(layers, function(L) vapply(L$rois, `[[`, character(1), "id")))
       if (anyDuplicated(got)) {
-        .at_abort("{.file {f$path}} contains duplicate ROI ids.", code = "DUPLICATE_ID", call = call)
+        .at_abort("{.file {f[['path']]}} contains duplicate ROI ids.", code = "DUPLICATE_ID", call = call)
       }
-      want <- vapply(e_rois, function(r) r$roi_id, character(1))
+      want <- vapply(e_rois, function(r) r[["roi_id"]], character(1))
       if (length(setdiff(want, got)) || length(setdiff(got, want))) {
         .at_abort(
-          c("ROI ids in {.file {f$path}} do not match the manifest.",
+          c("ROI ids in {.file {f[['path']]}} do not match the manifest.",
             "x" = "Missing from the file: {.val {setdiff(want, got)}}.",
             "x" = "Not in the manifest: {.val {setdiff(got, want)}}."),
           code = "ID_JOIN_MISMATCH", call = call
         )
       }
       for (r in e_rois) {
-        hit <- unlist(lapply(layers, function(L) Filter(function(x) identical(x$id, r$roi_id), L$rois)),
+        hit <- unlist(lapply(layers, function(L) Filter(function(x) identical(x$id, r[["roi_id"]]), L$rois)),
                       recursive = FALSE)
-        if (length(hit) && !identical(hit[[1]]$label, r$label)) {
-          .at_abort("ROI {.val {r$roi_id}} is labelled {.val {hit[[1]]$label}} but the manifest says {.val {r$label}}.",
+        if (length(hit) && !identical(hit[[1]]$label, r[["label"]])) {
+          .at_abort("ROI {.val {r[['roi_id']]}} is labelled {.val {hit[[1]]$label}} but the manifest says {.val {r[['label']]}}.",
                     code = "LABEL_MISMATCH", call = call)
         }
       }
-      layers <- .tag_imported(layers, v$digest, e_rois)
+      layers <- .tag_imported(layers, v$digest, e_rois, source_ids = src_ids)
       checks <- rbind(checks, .check_row(paste0("annotations:", key), "ok",
-                                         sprintf("%d ROIs joined by id", length(got))))
-      cv <- .conversion_rows(layers, e_rois)
+                                         sprintf("%d ROIs joined by id at level %d", length(got),
+                                                 export_level)))
+      cv <- .conversion_rows(layers, e_rois, man[["images"]])
       if (any(cv$geometry_match == "changed", na.rm = TRUE)) {
         checks <- rbind(checks, .check_row(paste0("geometry:", key), "warn",
                                            "some geometries differ from their manifest digests"))
@@ -677,10 +989,10 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
       conv[[length(conv) + 1L]] <- cv
       layers_out[[key]] <- layers
     }
-    for (rec in Filter(function(m) !is.null(m$file) && !is.na(m$file), man$masks %||% list())) {
-      in_entry <- if (is.na(eid)) !grepl("^entries/", rec$file) else startsWith(rec$file, paste0("entries/", eid, "/"))
+    for (rec in Filter(function(m) !is.null(m[["file"]]) && !is.na(m[["file"]]), man[["masks"]] %||% list())) {
+      in_entry <- if (is.na(eid)) !grepl("^entries/", rec[["file"]]) else startsWith(rec[["file"]], paste0("entries/", eid, "/"))
       if (!in_entry) next
-      masks_out[[rec$mask_id %||% rec$file]] <- .read_mask_file(v$dir, rec, call)
+      masks_out[[rec[["mask_id"]] %||% rec[["file"]]]] <- .read_mask_file(v$dir, rec, call)
     }
   }
   if (length(masks_out)) {
@@ -693,7 +1005,7 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
     handoff_digest = v$digest,
     manifest = man,
     checks = checks,
-    objects = list(layers = flat_layers, masks = masks_out, images = man$images),
+    objects = list(layers = flat_layers, masks = masks_out, images = man[["images"]]),
     conversion = if (length(conv)) do.call(rbind, conv) else .conversion_rows(list()),
     annotation_revision = if (length(layers_out) == 1L && identical(names(layers_out), "project")) {
       at_annotation_revision(structure(list(layers = layers_out$project), class = "annot_project"))
@@ -702,6 +1014,7 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
 }
 
 .import_single_geojson <- function(file, qupath, call) {
+  src_ids <- .checked_source_ids(file, qupath, call)
   layers <- if (qupath) {
     .split_qupath_layers(at_read_qupath(file, call = call))
   } else {
@@ -712,7 +1025,14 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
   if (anyDuplicated(ids)) {
     .at_abort("{.file {basename(file)}} contains duplicate ROI ids.", code = "DUPLICATE_ID", call = call)
   }
-  layers <- .tag_imported(layers, .sha256_file(file))
+  n_minted <- sum(!ids %in% src_ids)
+  if (n_minted > 0L) {
+    checks <- rbind(checks, .check_row(
+      "ids", "warn",
+      sprintf("%d feature(s) without an id; ids were minted and they stage as new ROIs", n_minted)
+    ))
+  }
+  layers <- .tag_imported(layers, .sha256_file(file), source_ids = src_ids)
   list(
     source_name = basename(file), handoff_digest = NA_character_, manifest = NULL,
     checks = rbind(checks, .check_row("integrity", "warn", "single file: no inventory to verify")),
@@ -723,38 +1043,45 @@ at_import_qupflowr <- function(file, format = c("auto", "handoff", "qupath_geojs
 }
 
 .import_single_mask <- function(file, npy, call) {
-  mk <- if (npy) {
-    at_read_npy(file, call = call)
-  } else {
-    side <- paste0(file, ".legend.json")
-    m <- .read_mask_matrix(file, call)$m
-    storage.mode(m) <- "integer"
-    lg <- if (file.exists(side)) {
-      j <- .read_json_doc(side, call = call)
-      tibble::as_tibble(jsonlite::fromJSON(jsonlite::toJSON(j$legend, auto_unbox = TRUE)))
+  invalid <- function(e) {
+    .at_abort(c("{.file {basename(file)}} is not a valid mask.", "x" = conditionMessage(e)),
+              code = "MASK_INVALID", call = call)
+  }
+  side <- tryCatch(.mask_read_sidecar(file), error = invalid)
+  synthesised <- is.null(side[["legend"]]) || length(side[["legend"]]) == 0L
+  if (!synthesised) {
+    # A sidecar legend must explain every value; check before the mask
+    # constructor so the failure carries its own code.
+    raw <- if (npy) .npy_read_matrix(file, call = call) else .read_mask_matrix(file, call)$m
+    md <- side[["mask_metadata"]]
+    missing <- .unexplained_values(raw, as.integer(side[["legend"]][["value"]]),
+                                   md[["background"]] %||% 0L, md[["encoding"]] %||% "instance")
+    if (length(missing)) {
+      .at_abort("Mask values {.val {missing}} are missing from the legend.", code = "LEGEND_INCOMPLETE",
+                call = call)
+    }
+  }
+  mk <- tryCatch(
+    if (npy) {
+      at_read_npy(file, call = call)
     } else {
-      NULL
-    }
-    if (is.null(lg) || nrow(lg) == 0L) {
-      vals <- sort(unique(as.integer(m[m != 0L])))
-      lg <- tibble::tibble(value = vals, label = as.character(vals), layer = NA_character_,
-                           roi_id = NA_character_, n_px = integer(length(vals)),
-                           colour = rep("#5E2C8E", length(vals)))
-    }
-    .new_annot_mask(m, lg, 0L, c(ncol(m), nrow(m)), "labelled")
-  }
-  m <- as.matrix(mk)
-  lg <- attr(mk, "legend")
-  present <- setdiff(sort(unique(as.integer(m))), 0L)
-  missing <- setdiff(present, as.integer(lg$value))
-  checks <- .check_row("parse", "ok", sprintf("%d x %d px", ncol(m), nrow(m)))
-  if (length(missing)) {
-    .at_abort("Mask values {.val {missing}} are missing from the legend.", code = "LEGEND_INCOMPLETE",
-              call = call)
-  }
+      rd <- .read_mask_matrix(file, call)
+      .mask_recover(rd$m, rd$mask, side)
+    },
+    error = invalid
+  )
+  info <- .mask_info(mk)
+  m <- info$m
+  checks <- .check_row("parse", "ok", sprintf("%d x %d px; %s encoding, background %d", ncol(m), nrow(m),
+                                              info$metadata$encoding, info$metadata$background))
+  checks <- rbind(checks, if (synthesised) {
+    .check_row("legend", "warn", "no legend sidecar: labels are the mask values")
+  } else {
+    .check_row("legend", "ok", "all values labelled")
+  })
   list(
     source_name = basename(file), handoff_digest = NA_character_, manifest = NULL,
-    checks = rbind(checks, .check_row("legend", "ok", "all values labelled")),
+    checks = checks,
     objects = list(layers = list(), masks = list(mask = mk), images = list()),
     conversion = .conversion_rows(list()),
     annotation_revision = NA_character_
@@ -810,15 +1137,71 @@ print.at_import_report <- function(x, ...) {
   .digest_json(rec[c("layer", "label", "level", "geometry_sha256", "locked", "plane")])
 }
 
-#' Stage partner changes against an hyperannotatR project
+# Refuse a patch that names one ROI id twice: the second ROI would otherwise
+# be silently re-minted and the receipt would name an ROI that does not exist.
+.check_incoming_ids <- function(incoming, call) {
+  ids <- unlist(lapply(incoming, function(L) vapply(L$rois, function(r) as.character(r$id), character(1))))
+  if (anyDuplicated(ids)) {
+    .at_abort("The patch contains ROI id{?s} {.val {unique(ids[duplicated(ids)])}} more than once.",
+              code = "DUPLICATE_ID", call = call)
+  }
+  invisible(ids)
+}
+
+# An incoming ROI expressed at `level` of the target image, so ROIs exported
+# at another pyramid level compare and update consistently. Unchanged when the
+# image does not declare both levels.
+.roi_at_level <- function(r, level, image) {
+  from <- as.integer(r$level)
+  to <- as.integer(level)
+  if (identical(from, to) || is.null(image) || max(from, to) > image$n_levels - 1L) {
+    return(r)
+  }
+  out <- at_transform(r, from_level = from, to_level = to, img = image)
+  out$modified <- r$modified
+  out
+}
+
+# Same annotation content? Exact signatures, or equal up to floating-point
+# noise from a level transform.
+.same_roi_content <- function(a, layer_a, b, layer_b) {
+  if (identical(.roi_signature(a, layer_a), .roi_signature(b, layer_b))) {
+    return(TRUE)
+  }
+  ra <- .roi_record(a, layer_a)
+  rb <- .roi_record(b, layer_b)
+  fields <- c("layer", "label", "level", "locked", "plane")
+  identical(.digest_json(ra[fields]), .digest_json(rb[fields])) &&
+    .geom_equivalent(a$geometry, b$geometry)
+}
+
+# Are two geometries the same up to relative noise `tol`?
+.geom_equivalent <- function(a, b, tol = 1e-9) {
+  if (!identical(as.character(sf::st_geometry_type(a)), as.character(sf::st_geometry_type(b)))) {
+    return(FALSE)
+  }
+  ca <- sf::st_coordinates(a)
+  cb <- sf::st_coordinates(b)
+  if (!identical(dim(ca), dim(cb))) {
+    return(FALSE)
+  }
+  all(abs(ca - cb) <= tol * max(1, abs(ca[, 1:2])))
+}
+
+#' Stage partner changes against a hyperannotatR project
 #'
 #' Compute, without applying, the changes a partner patch would make to an
 #' hyperannotatR project: ROIs are joined by id and classified as `create`,
 #' `update`, `unchanged`, `delete` (only with `delete_missing = TRUE`) or
 #' `conflict`. Reviewed or locked ROIs, and ROIs in locked layers, are never
-#' changed automatically; such changes become conflicts. When
-#' `expected_revision` is given and the project has moved on, staging aborts
-#' with an `at_conflict_error` (`REVISION_CONFLICT`).
+#' changed automatically, and nothing is created in or moved into a locked
+#' layer; such changes become conflicts. Incoming ROIs whose id was minted on
+#' import (features without an id) are always created, with an id unique in
+#' the project. Incoming ROIs at another pyramid level are compared, and
+#' updates stored, at the level of the existing ROI. A patch that repeats an
+#' ROI id aborts (`DUPLICATE_ID`). When `expected_revision` is given and the
+#' project has moved on, staging aborts with an `at_conflict_error`
+#' (`REVISION_CONFLICT`).
 #'
 #' @param x An [annot_project], or the path of a saved project `.rds` (then the
 #'   commit re-reads and re-checks that file).
@@ -838,7 +1221,7 @@ print.at_import_report <- function(x, ...) {
 #' @family interop
 #' @seealso [at_commit_qupflowr()]
 #' @export
-#' @examplesIf requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' proj <- at_example_project()
 #' partner <- at_layer_add(at_layer("regions"), at_roi_rect(10, 10, 40, 40, label = "tumour",
 #'                                                          id = "partner-1"))
@@ -865,6 +1248,9 @@ at_stage_qupflowr <- function(x, patch, expected_revision = NULL, delete_missing
     )
   }
   incoming <- .incoming_layers(patch, call)
+  incoming_ids <- .check_incoming_ids(incoming, call)
+  taken <- c(unlist(lapply(x$layers, function(L) vapply(L$rois, function(r) as.character(r$id), character(1)))),
+             incoming_ids)
   proposed <- x
   ops <- list()
   add_op <- function(op, id, layer, label, reason = "") {
@@ -872,34 +1258,50 @@ at_stage_qupflowr <- function(x, patch, expected_revision = NULL, delete_missing
                                                 reason = reason)
   }
   protected <- function(r, layer) {
-    if (identical(r$attributes$review_status, "reviewed")) return("existing ROI is reviewed")
-    if (isTRUE(r$attributes$locked)) return("existing ROI is locked")
+    if (identical(r$attributes[["review_status"]], "reviewed")) return("existing ROI is reviewed")
+    if (isTRUE(r$attributes[["locked"]])) return("existing ROI is locked")
     if (isTRUE(x$layers[[layer]]$style$locked)) return("existing layer is locked")
     ""
   }
   seen <- character()
   for (L in incoming) {
+    target_locked <- isTRUE(x$layers[[L$name]]$style$locked)
     if (is.null(proposed$layers[[L$name]])) {
       proposed <- at_add_layer(proposed, at_layer(L$name, labels = L$labels, style = L$style))
     }
     for (r in L$rois) {
+      if (isTRUE(.jget(r$attributes, "qupflowr", "id_minted"))) {
+        # A reader-minted id says nothing about identity: never join it.
+        r$id <- .unique_id(taken)
+        taken <- c(taken, r$id)
+        hit <- NULL
+      } else {
+        hit <- .find_roi(x, r$id)
+      }
       seen <- c(seen, r$id)
-      hit <- .find_roi(x, r$id)
       if (is.null(hit)) {
+        if (target_locked) {
+          add_op("conflict", r$id, L$name, r$label, "target layer is locked")
+          next
+        }
         proposed <- at_add_roi(proposed, L$name, r)
         add_op("create", r$id, L$name, r$label)
-      } else if (identical(.roi_signature(hit$roi, hit$layer), .roi_signature(r, L$name))) {
+        next
+      }
+      r <- .roi_at_level(r, hit$roi$level, x$image)
+      if (.same_roi_content(hit$roi, hit$layer, r, L$name)) {
         add_op("unchanged", r$id, L$name, r$label)
+        next
+      }
+      why <- protected(hit$roi, hit$layer)
+      if (!nzchar(why) && target_locked) why <- "target layer is locked"
+      if (nzchar(why)) {
+        add_op("conflict", r$id, L$name, r$label, why)
       } else {
-        why <- protected(hit$roi, hit$layer)
-        if (nzchar(why)) {
-          add_op("conflict", r$id, L$name, r$label, why)
-        } else {
-          proposed <- suppressWarnings(at_remove_roi(proposed, r$id))
-          r$modified <- .now()
-          proposed <- at_add_roi(proposed, L$name, r)
-          add_op("update", r$id, L$name, r$label)
-        }
+        proposed <- suppressWarnings(at_remove_roi(proposed, r$id))
+        r$modified <- .now()
+        proposed <- at_add_roi(proposed, L$name, r)
+        add_op("update", r$id, L$name, r$label)
       }
     }
   }
@@ -985,7 +1387,7 @@ print.at_staged_patch <- function(x, ...) {
 #' @family interop
 #' @seealso [at_stage_qupflowr()]
 #' @export
-#' @examplesIf requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' proj <- at_example_project()
 #' partner <- at_layer_add(at_layer("regions"), at_roi_rect(10, 10, 40, 40, label = "tumour",
 #'                                                          id = "partner-1"))
@@ -1017,19 +1419,19 @@ at_commit_qupflowr <- function(x, idempotency_key = NULL, destination = NULL, ov
     side <- paste0(target, ".commit.json")
     if (file.exists(side)) {
       rec <- tryCatch(.read_json_doc(side, call = call), error = function(e) NULL)
-      if (identical(rec$idempotency_key, key)) {
-        if (!identical(rec$patch_digest, x$patch_digest)) {
+      if (identical(rec[["idempotency_key"]], key)) {
+        if (!identical(rec[["patch_digest"]], x$patch_digest)) {
           .at_abort("The idempotency key {.val {key}} was already used for a different patch.",
                     class = "conflict", code = "IDEMPOTENCY_CONFLICT", call = call)
         }
         proj <- at_load_project(target, call = call)
         return(structure(list(
-          state = "committed", patch_id = rec$patch_id, idempotency_key = key,
-          previous_revision = rec$previous_revision, new_revision = rec$new_revision,
+          state = "committed", patch_id = rec[["patch_id"]], idempotency_key = key,
+          previous_revision = rec[["previous_revision"]], new_revision = rec[["new_revision"]],
           applied = x$operations[x$operations$op %in% c("create", "update", "delete"), ],
           conflicts = x$operations[x$operations$op == "conflict", ],
           project = proj, written = normalizePath(target, winslash = "/"),
-          committed_at = rec$committed_at, replayed = TRUE
+          committed_at = rec[["committed_at"]], replayed = TRUE
         ), class = "at_commit_receipt"))
       }
     }
@@ -1055,11 +1457,14 @@ at_commit_qupflowr <- function(x, idempotency_key = NULL, destination = NULL, ov
   committed_at <- .utc_stamp()
   new_rev <- at_annotation_revision(project)
   if (!is.null(target)) {
+    # The target is the user's own project file: keep its image source (and
+    # reader) so the image can be reopened; drop the pixels and read identity.
     lite <- project
     lite$image$handle <- NULL
+    lite$image$read_key <- NULL
     tmp <- tempfile(pattern = ".hyperannotatR-commit-", tmpdir = dirname(target), fileext = ".rds")
     at_save_project(lite, tmp, call = call)
-    if (!file.rename(tmp, target)) {
+    if (!.rename_path(tmp, target)) {
       unlink(tmp)
       .at_abort("Could not replace {.path {basename(target)}}.", class = "io",
                 code = "WRITE_FAILED", call = call)

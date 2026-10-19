@@ -4,18 +4,28 @@
 \alias{at_roi_rescale}
 \title{Rescale an ROI between pyramid levels}
 \usage{
-at_roi_rescale(roi, from_level, to_level, call = rlang::caller_env())
+at_roi_rescale(
+  roi,
+  from_level = roi$level,
+  to_level,
+  call = rlang::caller_env()
+)
 }
 \arguments{
 \item{roi}{An \link{annot_roi}.}
 
-\item{from_level, to_level}{Integer source and target pyramid levels.}
+\item{from_level}{Integer source pyramid level. Defaults to the ROI's own
+\code{level}; any other value is an error, because the coordinates are stored
+at that level.}
+
+\item{to_level}{Integer target pyramid level.}
 
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
 An \link{annot_roi} with coordinates at \code{to_level} and its \code{level} field
-set to \code{to_level}. The transform is exactly invertible.
+set to \code{to_level}. Power-of-two scaling is exact in floating point, so the
+transform is exactly invertible.
 }
 \description{
 Transform an ROI's coordinates from one pyramid level to another, assuming a

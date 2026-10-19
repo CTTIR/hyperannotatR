@@ -22,7 +22,12 @@ file is never overwritten.}
 \item{hash_sources}{Logical; hash image source files (needed for a
 content-derived \code{image_id}). Default \code{TRUE}.}
 
-\item{call}{The calling environment, for error reporting.}
+\item{call}{The calling environment, for error reporting.
+
+In a session manifest every ROI and layer record carries the \code{entry_id} of
+its queue entry, so entries that share an image stay separate. An ROI whose
+\code{review_status} attribute is not one of \code{"unreviewed"}, \code{"reviewed"},
+\code{"rejected"} or \code{"staged"} is refused (\code{REVIEW_STATUS_INVALID}).}
 }
 \value{
 The manifest (a list of class \code{at_interop_manifest}); invisibly when
@@ -39,7 +44,7 @@ and native ROI shapes, which hyperannotatR does not model, are reported as
 \code{"unknown"} or \code{"approximated"}, never invented.
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 m <- at_interop_manifest(at_example_project())
 m$annotations$annotation_revision
 m$images[[1]]$image_id

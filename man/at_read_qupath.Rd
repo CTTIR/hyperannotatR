@@ -8,7 +8,9 @@ at_read_qupath(
   path,
   layer_name = "qupath",
   level = 0L,
-  call = rlang::caller_env()
+  call = rlang::caller_env(),
+  coordinate_level = NULL,
+  legacy_levels = c("error", "recorded")
 )
 }
 \arguments{
@@ -16,32 +18,57 @@ at_read_qupath(
 
 \item{layer_name}{Layer name for the imported ROIs. Default \code{"qupath"}.}
 
-\item{level}{Integer level to record on the ROIs. Default \code{0}.}
+\item{level}{Integer fallback level for features without level metadata.
+Default \code{0} (standard full-resolution QuPath coordinates).}
 
 \item{call}{The calling environment, for error reporting.}
+
+\item{coordinate_level}{Optional integer overriding every recorded \code{level}
+without scaling coordinates. Use only when the actual coordinate level is
+known, for example \code{0L} for legacy hyperannotatR exports that wrote level-0
+coordinates beside a nonzero source level. \code{NULL} (default) uses the
+schema and \code{legacy_levels} policy. Coordinates are never automatically
+repaired.}
+
+\item{legacy_levels}{How to interpret files without the coordinate schema
+marker: \code{"error"} (default) rejects ambiguous nonzero recorded levels;
+\code{"recorded"} explicitly trusts those levels. Level-0 files remain
+unambiguous.}
 }
 \value{
 An \link{annot_layer}.
 }
 \description{
-Reads QuPath 0.4+ exports (a FeatureCollection or a bare feature array) and
-the legacy hyperannotatR 0.1 dialect. \code{classification.name} (or the joined
-\code{names} of a derived class, e.g. \code{"Tumor: Positive"}) becomes the ROI label,
-the classification colour the layer style colour, and features without a
-classification are labelled \code{"unclassified"}. Everything else QuPath carries
-is kept, never invented, under each ROI's \code{attributes$qupath}: the object
-id and type, name, measurements (with explicit \code{value_state}), the image
-plane (zero-based \code{c}, \code{z}, \code{t}; \code{c = NA} for all channels), metadata, a
-nucleus geometry, and \code{roi_native = "ellipse"} with
-\code{geometry_fidelity = "approximated"} for polygonised ellipses. An hyperannotatR id
-stored in \code{metadata.annotatr_roi_id} is restored as the ROI id.
+Reads QuPath 0.4+ exports (a native feature array, a FeatureCollection or a
+single Feature) and the legacy hyperannotatR 0.1 dialect.
+\code{classification.name} (or the joined \code{names} of a derived class, e.g.
+\code{"Tumor: Positive"}) becomes the ROI label, the classification colour (a
+current \code{color} RGB array or a legacy \code{colorRGB} integer) the layer style
+colour, and features without a classification are labelled
+\code{"unclassified"}. Everything else QuPath carries is kept, never invented,
+under each ROI's \code{attributes$qupath}: the object id and type, name,
+measurements (with explicit \code{value_state}), the image plane (zero-based
+\code{c}, \code{z}, \code{t}; \code{c = NA} for all channels), metadata, a nucleus geometry, and
+\code{roi_native = "ellipse"} with \code{geometry_fidelity = "approximated"} for
+polygonised ellipses. A hyperannotatR id stored in \code{metadata.annotatr_roi_id}
+is restored as the ROI id; ordinary external ids are kept unchanged.
+}
+\details{
+Input is validated strictly and keys are matched exactly: malformed
+structure, contradictory duplicate fields (identical duplicates, which
+QuPath 0.7.0 emits, are accepted), conflicting colours or object types for
+a feature, conflicting colours for one label, and repeated ROI ids are
+refused with an \code{at_validation_error} of code \code{INVALID_GEOJSON}.
 }
 \seealso{
 Other io:
+\code{\link[=at_inspect_saved]{at_inspect_saved()}},
+\code{\link[=at_inspect_source]{at_inspect_source()}},
 \code{\link[=at_load_project]{at_load_project()}},
 \code{\link[=at_load_session]{at_load_session()}},
 \code{\link[=at_read_geojson]{at_read_geojson()}},
 \code{\link[=at_read_rois_csv]{at_read_rois_csv()}},
+\code{\link[=at_relink_source]{at_relink_source()}},
 \code{\link[=at_roi_from_geojson]{at_roi_from_geojson()}},
 \code{\link[=at_save_project]{at_save_project()}},
 \code{\link[=at_save_session]{at_save_session()}},

@@ -17,7 +17,11 @@ at_canvas_set_band(proxy, band, call = rlang::caller_env())
 The proxy, invisibly.
 }
 \description{
-Set the displayed band or RGB triple
+Retained for API compatibility; it has no visible effect on the built-in
+canvas. The canvas shows one embedded image rendered in R, and cannot
+recompute bands in the browser. To change the displayed bands, re-render the
+widget with a \code{view} (see \code{\link[=at_canvas]{at_canvas()}} and \code{\link[=at_band_view]{at_band_view()}}), as the
+annotation app does.
 }
 \seealso{
 Other shiny:

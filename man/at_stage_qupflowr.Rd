@@ -2,7 +2,7 @@
 % Please edit documentation in R/interop-handoff.R
 \name{at_stage_qupflowr}
 \alias{at_stage_qupflowr}
-\title{Stage partner changes against an hyperannotatR project}
+\title{Stage partner changes against a hyperannotatR project}
 \usage{
 at_stage_qupflowr(
   x,
@@ -39,12 +39,17 @@ Compute, without applying, the changes a partner patch would make to an
 hyperannotatR project: ROIs are joined by id and classified as \code{create},
 \code{update}, \code{unchanged}, \code{delete} (only with \code{delete_missing = TRUE}) or
 \code{conflict}. Reviewed or locked ROIs, and ROIs in locked layers, are never
-changed automatically; such changes become conflicts. When
-\code{expected_revision} is given and the project has moved on, staging aborts
-with an \code{at_conflict_error} (\code{REVISION_CONFLICT}).
+changed automatically, and nothing is created in or moved into a locked
+layer; such changes become conflicts. Incoming ROIs whose id was minted on
+import (features without an id) are always created, with an id unique in
+the project. Incoming ROIs at another pyramid level are compared, and
+updates stored, at the level of the existing ROI. A patch that repeats an
+ROI id aborts (\code{DUPLICATE_ID}). When \code{expected_revision} is given and the
+project has moved on, staging aborts with an \code{at_conflict_error}
+(\code{REVISION_CONFLICT}).
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 proj <- at_example_project()
 partner <- at_layer_add(at_layer("regions"), at_roi_rect(10, 10, 40, 40, label = "tumour",
                                                          id = "partner-1"))

@@ -17,7 +17,8 @@
       "context.selection", "annotations.stage", "annotations.commit", "mask.preview", "export",
       "training.export", "close"]},
     "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "payload": {"type": "object"},
+    "payload": {"type": "object",
+      "description": "Operation-specific fields. session.load: images (paths relative to the root), labels, handoff, discard_unsaved (boolean; required to replace a session with unsaved or staged changes, otherwise UNSAVED_CHANGES). mask.preview: mask_type, overlap, level (default: the finest level within the preview pixel budget), max_dim, include_png. close is not checked against expected_revision."},
     "payload_ref": {"type": "string"},
     "extensions": {"type": "object"}
   }

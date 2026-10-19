@@ -24,15 +24,20 @@
   invisible(path)
 }
 
+.split_algorithm <- paste("groups ranked by sha256('<seed>:<group_id>'), cut by cumulative",
+                          "fractions rounded half up")
+
 # Deterministic grouped split: rank groups by SHA-256 of "seed:group" and cut by
-# cumulative fractions. Independent of the R random-number generator.
+# cumulative fractions, rounded half up (R's round() rounds half to even, which
+# sent the only group of a 50/50 split to the second split). Independent of
+# the R random-number generator.
 .assign_splits <- function(groups, fractions, seed) {
   groups <- unique(as.character(groups))
   keys <- vapply(groups, function(g) .sha256_bytes(paste0(seed, ":", g)), character(1))
   ord <- groups[order(keys, method = "radix")]
   n <- length(ord)
   fr <- fractions / sum(fractions)
-  cuts <- round(cumsum(fr) * n)
+  cuts <- floor(cumsum(fr) * n + 0.5 + 1e-9)
   cuts[length(cuts)] <- n
   split <- character(n)
   start <- 1L
@@ -44,10 +49,37 @@
   stats::setNames(split, ord)
 }
 
+# Split names become directory names: require short, safe, unique names.
+.check_split_names <- function(nms, arg, call) {
+  ok <- !is.null(nms) && length(nms) > 0L && !anyNA(nms) &&
+    all(grepl("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$", nms)) && !anyDuplicated(nms)
+  if (!ok) {
+    .at_abort(
+      c("{.arg {arg}} must have unique split names made of letters, digits, '.', '_' or '-'.",
+        "i" = "For example {.val {c('train', 'validation', 'test')}}."),
+      code = "SPLIT_NAME_INVALID", call = call
+    )
+  }
+  invisible(nms)
+}
+
+# Digest of the band table an image contributes (name, wavelength, unit).
+.band_table_digest <- function(img, bsel) {
+  bt <- at_bands(img)[bsel, , drop = FALSE]
+  .digest_json(lapply(seq_len(nrow(bt)), function(i) {
+    list(name = bt$name[i], wavelength = bt$wavelength[i], unit = bt$unit[i])
+  }))
+}
+
+# Entries to export: `entry_id` is the session's stable entry id (see
+# .session_entry_id()); `position` is the queue-position id "entry-NNNN",
+# accepted in `groups` and `split` as an alias.
 .training_entries <- function(x, call) {
   if (inherits(x, "annot_project")) {
-    return(list(list(entry_id = "entry-0001", name = x$meta$name %||% basename(x$image$source),
-                     project = x)))
+    eid <- .json_chr(x$meta[["entry_id"]])
+    if (is.na(eid) || !grepl("^[A-Za-z0-9._-]{1,128}$", eid)) eid <- "entry-0001"
+    return(list(list(entry_id = eid, position = "entry-0001",
+                     name = x$meta$name %||% basename(x$image$source), project = x)))
   }
   if (!inherits(x, "annot_session")) {
     .at_abort("{.arg x} must be an {.cls annot_project} or {.cls annot_session}.", call = call)
@@ -56,8 +88,9 @@
   for (i in seq_len(nrow(x$manifest))) {
     p <- x$projects[[i]]
     if (is.null(p)) next
-    out[[length(out) + 1L]] <- list(entry_id = sprintf("entry-%04d", i), name = x$manifest$name[i],
-                                    project = p)
+    out[[length(out) + 1L]] <- list(entry_id = .session_entry_id(x, i),
+                                    position = sprintf("entry-%04d", i),
+                                    name = x$manifest$name[i], project = p)
   }
   if (!length(out)) {
     .at_abort("The session has no materialised projects to export.", call = call)
@@ -85,20 +118,27 @@
 #' @param x An [annot_session] (materialised entries) or [annot_project].
 #' @param destination New dataset directory.
 #' @param split Optional explicit assignment: a named list
-#'   (`train`, `validation`, `test`) of group ids. `NULL` assigns groups by
-#'   `fractions` and `seed`.
+#'   (`train`, `validation`, `test`) of group ids. With `group_by =
+#'   "image_id"` entry ids (`"entry-0001"`) or entry names are accepted too
+#'   and mapped to their image's group. `NULL` assigns groups by `fractions`
+#'   and `seed`.
 #' @param tile_size Tile edge length in pixels at `level`.
 #' @param overlap Tile overlap in pixels (`0 <= overlap < tile_size`).
 #' @param level Pyramid level.
 #' @param mask_type `"labelled"`, `"instance"` or `"binary"`.
-#' @param bands Band indices recorded (and written with `include_images`).
+#' @param bands Band indices recorded (and written with `include_images`);
+#'   every entry must have them. With `include_images = TRUE` all entries must
+#'   share the same band table (`BAND_MISMATCH` otherwise).
 #' @param include_images Logical; also write float32 NPY image tiles.
 #' @param seed Split seed (recorded).
 #' @param group_by Group column used for splitting: `"image_id"` (default),
 #'   `"sample_id"` or `"subject_id"`.
-#' @param groups Optional data frame with `entry_id` (or `name`) plus
-#'   `subject_id` and/or `sample_id` columns (character).
-#' @param fractions Named split fractions.
+#' @param groups Optional data frame with `entry_id` (the session's entry id,
+#'   or the queue-position id `"entry-NNNN"`; else `name`) plus `subject_id`
+#'   and/or `sample_id` columns (character).
+#' @param fractions Named split fractions. Split names (here and in `split`)
+#'   are used as directory names and must consist of letters, digits, `.`,
+#'   `_` or `-`.
 #' @param label_map Optional named integer class codes (`label = code`, codes
 #'   `>= 1`); defaults to first-seen label order.
 #' @param empty_tiles `"keep"` (default) or `"exclude"` tiles without
@@ -114,12 +154,15 @@
 #' @family training
 #' @seealso [at_training_check()], [at_training_import()]
 #' @export
-#' @examplesIf requireNamespace("tiff", quietly = TRUE)
-#' sess <- at_example_session(3)
-#' for (i in 1:3) sess$projects[[i]] <- at_example_project()
-#' ds <- at_training_export(sess, file.path(tempdir(), "train-example"), tile_size = 128,
+#' @examplesIf requireNamespace("tiff", quietly = TRUE) && requireNamespace("magick", quietly = TRUE)
+#' sess <- at_example_session(2)
+#' for (i in 1:2) sess$projects[[i]] <- at_example_project()
+#' ds <- at_training_export(sess, file.path(tempdir(), "train-example"), tile_size = 256,
 #'                          overwrite = TRUE)
 #' ds$manifest$counts$tiles
+#' # Both example entries show the same picture, so they form one image
+#' # group and land in one split: tiles of one image never leak across splits.
+#' ds$manifest$counts$images_by_split
 at_training_export <- function(x, destination, split = NULL, tile_size = 256L, overlap = 0L,
                                level = 0L, mask_type = c("labelled", "instance", "binary"),
                                bands = NULL, include_images = FALSE, seed = 1L,
@@ -135,6 +178,11 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
     .at_abort("{.arg overlap} must be smaller than {.arg tile_size}.", call = call)
   }
   level <- .check_count(level, call = call)
+  # Omitted choice arguments resolve to their first value before validation.
+  if (missing(mask_type)) mask_type <- mask_type[[1]]
+  if (missing(group_by)) group_by <- group_by[[1]]
+  if (missing(empty_tiles)) empty_tiles <- empty_tiles[[1]]
+  if (missing(mask_format)) mask_format <- mask_format[[1]]
   mask_type <- .check_choice(mask_type, .training_mask_types, call = call)
   group_by <- .check_choice(group_by, c("image_id", "sample_id", "subject_id"), call = call)
   empty_tiles <- .check_choice(empty_tiles, c("keep", "exclude"), call = call)
@@ -142,10 +190,39 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
   seed <- .check_count(seed, call = call)
   .check_flag(include_images, call = call)
   .check_flag(overwrite, call = call)
-  if (!is.numeric(fractions) || is.null(names(fractions)) || any(fractions < 0) || sum(fractions) <= 0) {
+  if (!is.numeric(fractions) || is.null(names(fractions)) || anyNA(fractions) ||
+      any(fractions < 0) || sum(fractions) <= 0) {
     .at_abort("{.arg fractions} must be non-negative named numbers.", call = call)
   }
+  .check_split_names(names(fractions), "fractions", call)
+  if (!is.null(split)) {
+    if (!is.list(split)) .at_abort("{.arg split} must be a named list of group ids.", call = call)
+    .check_split_names(names(split), "split", call)
+  }
   entries <- .training_entries(x, call)
+  if (!is.null(bands)) {
+    if (!is.numeric(bands) || length(bands) == 0L || anyNA(bands) || any(bands != round(bands))) {
+      .at_abort("{.arg bands} must be integer band indices.", code = "BAND_OUT_OF_RANGE", call = call)
+    }
+    bands <- as.integer(bands)
+    for (e in entries) {
+      nb <- e$project$image$n_bands
+      if (any(bands < 1L | bands > nb)) {
+        .at_abort("{.arg bands} must be within 1..{nb} for {.val {e$entry_id}}.",
+                  code = "BAND_OUT_OF_RANGE", call = call)
+      }
+    }
+  }
+  band_digests <- vapply(entries, function(e) {
+    .band_table_digest(e$project$image, bands %||% seq_len(e$project$image$n_bands))
+  }, character(1))
+  if (include_images && length(unique(band_digests)) > 1L) {
+    .at_abort(
+      c("The entries do not share one band table, so image tiles would not stack.",
+        "i" = "Select common {.arg bands} or export the entries separately."),
+      code = "BAND_MISMATCH", call = call
+    )
+  }
 
   # Group ids per entry.
   ginfo <- lapply(entries, function(e) {
@@ -153,7 +230,11 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
     row <- NULL
     if (!is.null(groups)) {
       groups <- as.data.frame(groups, stringsAsFactors = FALSE)
-      key <- if ("entry_id" %in% names(groups)) groups$entry_id == e$entry_id else groups$name == e$name
+      key <- if ("entry_id" %in% names(groups)) {
+        groups[["entry_id"]] %in% c(e$entry_id, e$position)
+      } else {
+        groups[["name"]] %in% e$name
+      }
       row <- groups[which(key)[1], , drop = FALSE]
     }
     get <- function(col) {
@@ -173,11 +254,26 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
   split_of <- if (is.null(split)) {
     .assign_splits(group_ids, fractions, seed)
   } else {
-    s <- unlist(lapply(names(split), function(nm) stats::setNames(rep(nm, length(split[[nm]])),
-                                                                   as.character(split[[nm]]))))
-    if (anyDuplicated(names(s))) {
+    # Image groups are internal content ids; accept entry ids and names too.
+    alias <- c(stats::setNames(group_ids, vapply(entries, `[[`, character(1), "entry_id")),
+               stats::setNames(group_ids, vapply(entries, `[[`, character(1), "position")),
+               stats::setNames(group_ids, vapply(entries, function(e) as.character(e$name), character(1))))
+    to_group <- function(ids) {
+      ids <- as.character(ids)
+      hit <- !ids %in% group_ids & ids %in% names(alias)
+      ids[hit] <- unname(alias[ids[hit]])
+      ids
+    }
+    s <- unlist(lapply(names(split), function(nm) {
+      g <- to_group(split[[nm]])
+      stats::setNames(rep(nm, length(g)), g)
+    }))
+    leaked <- unique(names(s)[duplicated(names(s))])
+    leaked <- leaked[vapply(leaked, function(g) length(unique(s[names(s) == g])) > 1L, logical(1))]
+    if (length(leaked)) {
       .at_abort("A group appears in more than one split.", code = "SPLIT_LEAKAGE", call = call)
     }
+    s <- s[!duplicated(names(s))]
     missing <- setdiff(unique(group_ids), names(s))
     if (length(missing)) {
       .at_abort("Groups {.val {missing}} are not assigned to a split.", code = "SPLIT_INCOMPLETE",
@@ -209,7 +305,7 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
                 call = call)
     }
   }
-  stage <- file.path(dirname(dest), paste0(".", basename(dest), ".partial-", .random_hex(6L)))
+  stage <- file.path(dirname(dest), paste0(".", basename(dest), ".partial-", .random_hex(6L, secure = FALSE)))
   dir.create(stage, recursive = TRUE)
   ok <- FALSE
   on.exit(if (!ok) unlink(stage, recursive = TRUE), add = TRUE)
@@ -218,6 +314,7 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
   images <- list()
   class_px <- list()
   step <- tile_size - overlap
+  code_dtype <- if (mask_format == "npy") "int32" else if (max(c(label_map, 0L)) > 255L || mask_type == "instance") "uint16" else "uint8"
   for (k in seq_along(entries)) {
     e <- entries[[k]]
     proj <- e$project
@@ -230,14 +327,27 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
       instance = at_mask(proj, type = "labelled", level = level),
       binary = at_mask(proj, type = "binary", level = level)
     )
-    m <- as.matrix(full)
+    full_info <- .mask_info(full)
+    m <- full_info$m
     storage.mode(m) <- "integer"
+    full_legend <- full_info$legend
+    # Ambiguous pixels: covered by ROIs of different classes (semantic masks)
+    # or by more than one ROI (instance masks). Binary masks are never
+    # ambiguous.
     covers <- matrix(0L, d[2], d[1])
-    for (en in .collect_mask_rois(proj, level = level)) {
-      covers <- covers + .cover(en$geom, d)
+    ents <- .collect_mask_rois(proj, level = level)
+    if (mask_type == "instance") {
+      for (en in ents) covers <- covers + .cover(en$geom, d)
+    } else if (mask_type == "labelled") {
+      by_label <- list()
+      for (en in ents) {
+        cur <- by_label[[en$label]] %||% matrix(FALSE, d[2], d[1])
+        by_label[[en$label]] <- cur | .cover(en$geom, d)
+      }
+      for (cm in by_label) covers <- covers + cm
     }
     inst_legend <- if (mask_type == "instance") {
-      lg <- attr(full, "legend")
+      lg <- full_legend
       lapply(seq_len(nrow(lg)), function(i) list(instance_id = lg$value[i], roi_id = lg$roi_id[i],
                                                  label = lg$label[i], class_code = unname(label_map[lg$label[i]]),
                                                  layer = lg$layer[i]))
@@ -254,6 +364,7 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
       review_status_counts = as.list(table(factor(rstatus, levels = c("unreviewed", "reviewed", "rejected", "staged")))),
       calibration_digest = at_hsi_meta(img)$calibration_digest,
       transform_digest = .transform_digest(img),
+      band_table_sha256 = band_digests[[k]],
       instance_legend = inst_legend
     )
     ys <- seq(0L, d[2] - 1L, by = step)
@@ -291,12 +402,15 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
         mdir <- file.path(stage, "masks", sp)
         dir.create(mdir, recursive = TRUE, showWarnings = FALSE)
         if (mask_format == "tiff") {
-          mk <- .new_annot_mask(tm, tibble::tibble(value = integer(), label = character(),
-                                                   layer = character(), roi_id = character(),
-                                                   n_px = integer(), colour = character()),
-                                level, c(tile_size, tile_size), mask_type)
-          bits <- if (max(tm, 0L) > 255L) 16L else 8L
-          if (max(tm, 0L) > 65535L) {
+          # A tile keeps the image mask's encoding and the legend rows of the
+          # codes it contains.
+          mk <- .new_annot_mask(tm, full_legend[full_legend$value %in% vals, , drop = FALSE],
+                                level, c(tile_size, tile_size), attr(full, "mask_type"),
+                                encoding = full_info$metadata$encoding,
+                                background = full_info$metadata$background)
+          # Write at the declared dtype, even when this tile's values fit 8 bits.
+          bits <- if (code_dtype == "uint16") 16L else 8L
+          if (max(tm, 0L) > 65535L || (bits == 8L && max(tm, 0L) > 255L)) {
             .at_abort("Mask values exceed 16 bits; use {.code mask_format = \"npy\"}.",
                       class = "limit", code = "MASK_RANGE", call = call)
           }
@@ -345,7 +459,6 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
       stats::setNames(lapply(keys, function(k) class_px[[k]]), sub("^.*\\|", "", keys))
     })
   )
-  code_dtype <- if (mask_format == "npy") "int32" else if (max(c(label_map, 0L)) > 255L || mask_type == "instance") "uint16" else "uint8"
   manifest <- list(
     schema = .contract$training,
     schema_version = .contract$version,
@@ -358,14 +471,15 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
     created = .utc_stamp(),
     seed = seed,
     split_policy = list(group_by = group_by, fractions = as.list(fractions), explicit = !is.null(split),
-                        algorithm = "groups ranked by sha256('<seed>:<group_id>'), cut by cumulative fractions"),
+                        algorithm = .split_algorithm),
     groups = lapply(unique(group_ids), function(g) list(group_id = g, split = split_of[[g]],
                                                          entry_ids = as.list(vapply(entries[group_ids == g], `[[`, character(1), "entry_id")))),
     tile_policy = list(tile_size = tile_size, overlap = overlap, stride = step, level = level,
                        partial_tiles = "excluded", empty_tiles = empty_tiles,
                        pixel_origin = "top_left", axis_order = "[y, x] masks; images (height, width, bands)",
                        coverage_rule = "pixel centre inside geometry; half-open [lower, upper) ties",
-                       overlap_rule = "later z-order wins; ambiguous pixels counted per tile"),
+                       overlap_rule = paste("later z-order wins; ambiguous pixels (different classes,",
+                                            "or several instances) counted per tile")),
     mask_encoding = list(mask_type = mask_type,
                          annotatr_mask_type = switch(mask_type, labelled = "multiclass",
                                                      instance = "labelled", binary = "binary"),
@@ -387,19 +501,15 @@ at_training_export <- function(x, destination, split = NULL, tile_size = 256L, o
   )
   .schema_assert(.as_json_value(manifest), .contract$handoff, "training-manifest",
                  what = "training manifest", call = call)
-  .write_json_atomic(manifest, file.path(stage, "training-manifest.json"))
+  # Compact JSON: tile records dominate the size of large datasets.
+  .write_json_atomic(manifest, file.path(stage, "training-manifest.json"), pretty = FALSE)
   integrity <- .build_integrity(stage)
   .write_json_atomic(integrity, file.path(stage, "integrity.json"))
-  if (file.exists(dest)) {
-    backup <- paste0(dest, ".previous-", .random_hex(4L))
-    file.rename(dest, backup)
-    on.exit(unlink(backup, recursive = TRUE), add = TRUE)
-  }
-  if (!file.rename(stage, dest)) {
-    .at_abort("Could not move the dataset into place.", class = "io", code = "WRITE_FAILED", call = call)
-  }
+  # Check the staged dataset before it replaces anything, so a failing check
+  # never leaves the previous dataset deleted.
+  checks <- at_training_check(stage, call = call)
+  .replace_dir(stage, dest, what = "training dataset", call = call)
   ok <- TRUE
-  checks <- at_training_check(dest, call = call)
   structure(list(destination = dest, dataset_digest = .handoff_digest(integrity), manifest = manifest,
                  files = vapply(integrity$files, `[[`, character(1), "path"), checks = checks),
             class = "at_training_export")
@@ -427,12 +537,16 @@ print.at_training_export <- function(x, ...) {
 #' Check a training dataset
 #'
 #' Run independent checks on an exported training dataset: the integrity
-#' inventory, split leakage (every group and image in exactly one split, every
-#' tile in its image's split), mask dimensions and orientation, integer label
-#' range against the class legend, the recorded overlap counts, and a
-#' mask -> ROI -> mask round trip on a sample of tiles. When the source `x` is
-#' supplied, each sampled tile is also re-rasterised from the annotations and
-#' compared exactly.
+#' inventory (schema, safe paths, symbolic links, sizes and SHA-256 hashes,
+#' missing and unlisted files), the manifest schema, split leakage (every
+#' group and image in exactly one split, every tile in its image's split),
+#' mask dimensions and orientation, integer label range against the class
+#' legend, the recorded overlap counts, and a mask -> ROI -> mask round trip
+#' on a sample of tiles. When the source `x` is supplied, each sampled tile is
+#' also re-rasterised from the annotations and compared exactly. Tile files
+#' outside the verified inventory are never opened. A check that cannot run
+#' on a malformed manifest is reported as `"fail"` rather than raising an
+#' error; only an unsupported major version aborts (`PROTOCOL_MISMATCH`).
 #'
 #' @param dataset Path of a dataset written by [at_training_export()].
 #' @param x Optional source [annot_session] or [annot_project].
@@ -449,109 +563,193 @@ at_training_check <- function(dataset, x = NULL, max_roundtrip_tiles = 20L,
   dir <- normalizePath(dataset, winslash = "/", mustWork = TRUE)
   rows <- list()
   add <- function(check, status, detail) rows[[length(rows) + 1L]] <<- .check_row(check, status, detail)
-  integ <- tryCatch({
-    doc <- .read_json_doc(file.path(dir, "integrity.json"), call = call)
-    actual <- .list_payload_files(dir)
-    listed <- vapply(doc$files, `[[`, character(1), "path")
-    bad <- Filter(function(f) !file.exists(file.path(dir, f$path)) ||
-                    !identical(.sha256_file(file.path(dir, f$path)), f$sha256), doc$files)
-    extra <- setdiff(actual, listed)
-    if (length(bad) || length(extra)) stop_msg <- sprintf("%d altered/missing, %d extra", length(bad), length(extra)) else stop_msg <- NULL
-    stop_msg
-  }, error = function(e) conditionMessage(e))
-  if (is.null(integ)) add("integrity", "ok", "inventory verified") else add("integrity", "fail", integ)
-  man <- .read_json_doc(file.path(dir, "training-manifest.json"), call = call)
-  .check_major_version(man$schema_version, 1L, "training manifest", call = call)
-
-  img_split <- stats::setNames(vapply(man$images, `[[`, character(1), "split"),
-                               vapply(man$images, `[[`, character(1), "entry_id"))
-  grp <- vapply(man$images, `[[`, character(1), "group_id")
-  leak_groups <- names(which(tapply(unname(img_split), grp, function(s) length(unique(s))) > 1L))
-  iid <- vapply(man$images, `[[`, character(1), "image_id")
-  leak_images <- names(which(tapply(unname(img_split), iid, function(s) length(unique(s))) > 1L))
-  tile_bad <- Filter(function(t) !identical(t$split, img_split[[t$entry_id]]), man$tiles)
-  if (length(leak_groups) || length(leak_images) || length(tile_bad)) {
-    add("split_leakage", "fail", sprintf("groups %s; images %s; %d tiles outside their image split",
-                                         paste(leak_groups, collapse = ","),
-                                         paste(leak_images, collapse = ","), length(tile_bad)))
+  # A check that cannot even run (malformed manifest) is a failure row, not
+  # an error that hides every other result.
+  guard <- function(check, expr) {
+    tryCatch(expr, error = function(e) add(check, "fail", paste("could not run:", conditionMessage(e))))
+  }
+  probs <- tryCatch(.inventory_problems(dir), error = function(e) conditionMessage(e))
+  # Without a readable inventory no tile file is trusted enough to open.
+  listed <- attr(probs, "listed") %||% character()
+  if (length(probs)) {
+    add("integrity", "fail", paste(probs, collapse = "; "))
   } else {
-    add("split_leakage", "ok", sprintf("%d groups, %d images, no shared source across splits",
-                                       length(unique(grp)), length(iid)))
+    add("integrity", "ok", "inventory verified")
   }
+  man <- .read_json_doc(file.path(dir, "training-manifest.json"),
+                        max_bytes = .interop_limits()$training_max_json_bytes, call = call)
+  .check_major_version(man[["schema_version"]], 1L, "training manifest", call = call)
+  schema_errs <- .schema_validate(man, .schema_load(.contract$handoff, "training-manifest"))
 
-  included <- Filter(function(t) identical(t$status, "included"), man$tiles)
-  codes <- vapply(man$mask_encoding$class_legend, function(l) as.integer(l$code), integer(1))
-  allowed <- switch(man$mask_encoding$mask_type,
-                    labelled = c(0L, codes),
-                    binary = c(0L, 1L),
-                    instance = NULL)
-  dim_bad <- 0L
-  range_bad <- 0L
-  for (t in included) {
-    m <- tryCatch(.read_tile_mask(dir, t$mask_file), error = function(e) NULL)
-    if (is.null(m) || nrow(m) != t$height || ncol(m) != t$width) {
-      dim_bad <- dim_bad + 1L
-      next
+  guard("split_leakage", {
+    img_split <- stats::setNames(vapply(man[["images"]], function(i) .json_chr(i[["split"]]), character(1)),
+                                 vapply(man[["images"]], function(i) .json_chr(i[["entry_id"]]), character(1)))
+    grp <- vapply(man[["images"]], function(i) .json_chr(i[["group_id"]]), character(1))
+    leak_groups <- names(which(tapply(unname(img_split), grp, function(s) length(unique(s))) > 1L))
+    iid <- vapply(man[["images"]], function(i) .json_chr(i[["image_id"]]), character(1))
+    leak_images <- names(which(tapply(unname(img_split), iid, function(s) length(unique(s))) > 1L))
+    tile_entry <- vapply(man[["tiles"]], function(t) .json_chr(t[["entry_id"]]), character(1))
+    tile_split <- vapply(man[["tiles"]], function(t) .json_chr(t[["split"]]), character(1))
+    unknown <- sum(is.na(tile_entry) | !tile_entry %in% names(img_split))
+    tile_bad <- sum(!is.na(tile_entry) & tile_entry %in% names(img_split) &
+                      tile_split != img_split[tile_entry])
+    if (length(leak_groups) || length(leak_images) || tile_bad || unknown) {
+      add("split_leakage", "fail",
+          sprintf("groups %s; images %s; %d tiles outside their image split; %d tiles of unknown images",
+                  paste(leak_groups, collapse = ","), paste(leak_images, collapse = ","),
+                  tile_bad, unknown))
+    } else {
+      add("split_leakage", "ok", sprintf("%d groups, %d images, no shared source across splits",
+                                         length(unique(grp)), length(iid)))
     }
-    vals <- unique(as.integer(m))
-    if (!is.null(allowed) && length(setdiff(vals, allowed))) range_bad <- range_bad + 1L
-    if (is.null(allowed)) {
-      inst <- Filter(function(im) identical(im$entry_id, t$entry_id), man$images)[[1]]$instance_legend
-      ids <- vapply(inst, function(l) as.integer(l$instance_id), integer(1))
-      if (length(setdiff(vals, c(0L, ids)))) range_bad <- range_bad + 1L
-    }
+  })
+
+  included <- Filter(function(t) identical(t[["status"]], "included"), man[["tiles"]] %||% list())
+  # Tile files must be clean relative paths inside the verified inventory;
+  # anything else is never opened.
+  safe_file <- function(rel) {
+    .is_string(rel) && .is_clean_relative(rel) && rel %in% listed
   }
-  add("mask_dimensions", if (dim_bad) "fail" else "ok",
-      sprintf("%d of %d tiles with wrong or unreadable dimensions", dim_bad, length(included)))
-  add("label_range", if (range_bad) "fail" else "ok",
-      sprintf("%d of %d tiles with codes outside the legend", range_bad, length(included)))
-  amb <- sum(vapply(included, function(t) as.integer(t$ambiguous_px), integer(1)))
-  add("overlap", if (amb > 0L) "warn" else "ok", sprintf("%d ambiguous (overlapping) pixels in included tiles", amb))
+  codes <- vapply(man[["mask_encoding"]][["class_legend"]] %||% list(), function(l) as.integer(l[["code"]]), integer(1))
+  guard("mask_dimensions", {
+    allowed <- switch(man[["mask_encoding"]][["mask_type"]] %||% "",
+                      labelled = c(0L, codes),
+                      binary = c(0L, 1L),
+                      NULL)
+    dim_bad <- 0L
+    range_bad <- 0L
+    unsafe <- 0L
+    for (t in included) {
+      if (!safe_file(t[["mask_file"]])) {
+        unsafe <- unsafe + 1L
+        next
+      }
+      m <- tryCatch(.read_tile_mask(dir, t[["mask_file"]]), error = function(e) NULL)
+      if (is.null(m) || !isTRUE(nrow(m) == t[["height"]]) || !isTRUE(ncol(m) == t[["width"]])) {
+        dim_bad <- dim_bad + 1L
+        next
+      }
+      vals <- unique(as.integer(m))
+      if (!is.null(allowed) && length(setdiff(vals, allowed))) range_bad <- range_bad + 1L
+      if (is.null(allowed)) {
+        img <- Filter(function(im) identical(im[["entry_id"]], t[["entry_id"]]), man[["images"]])
+        inst <- if (length(img)) img[[1]][["instance_legend"]] else NULL
+        ids <- vapply(inst %||% list(), function(l) as.integer(l[["instance_id"]]), integer(1))
+        if (!length(img) || length(setdiff(vals, c(0L, ids)))) range_bad <- range_bad + 1L
+      }
+    }
+    add("mask_dimensions", if (dim_bad || unsafe) "fail" else "ok",
+        sprintf("%d of %d tiles with wrong or unreadable dimensions; %d with unsafe paths",
+                dim_bad, length(included), unsafe))
+    add("label_range", if (range_bad) "fail" else "ok",
+        sprintf("%d of %d tiles with codes outside the legend", range_bad, length(included)))
+  })
+  guard("overlap", {
+    amb <- sum(vapply(included, function(t) as.integer(t[["ambiguous_px"]] %||% 0L), integer(1)))
+    add("overlap", if (amb > 0L) "warn" else "ok", sprintf("%d ambiguous (overlapping) pixels in included tiles", amb))
+  })
 
-  sample <- utils::head(Filter(function(t) as.integer(t$foreground_px) > 0L, included), max_roundtrip_tiles)
-  rt_bad <- 0L
-  src_bad <- 0L
   entries <- if (is.null(x)) NULL else .training_entries(x, call)
-  for (t in sample) {
-    m <- .read_tile_mask(dir, t$mask_file)
-    tmp <- tempfile(fileext = ".npy")
-    .npy_write_matrix(m, tmp, dtype = "int32")
-    vals <- sort(setdiff(unique(as.integer(m)), 0L))
-    lg <- tibble::tibble(value = vals, label = as.character(vals))
-    lyr <- suppressWarnings(at_read_mask(tmp, legend = lg))
-    unlink(tmp)
-    back <- matrix(0L, nrow(m), ncol(m))
-    for (r in lyr$rois) {
-      back[.cover(r$geometry[[1]], c(ncol(m), nrow(m)))] <- as.integer(r$label)
-    }
-    if (!identical(back, m)) rt_bad <- rt_bad + 1L
-    if (!is.null(entries)) {
-      e <- Filter(function(en) identical(en$entry_id, t$entry_id), entries)
-      if (length(e)) {
-        proj <- e[[1]]$project
-        lm <- stats::setNames(codes, vapply(man$mask_encoding$class_legend, `[[`, character(1), "label"))
-        full <- switch(man$mask_encoding$mask_type,
-                       labelled = at_mask(proj, type = "multiclass", level = t$level,
-                                          values = lm[unique(at_rois(proj)$label)]),
-                       instance = at_mask(proj, type = "labelled", level = t$level),
-                       binary = at_mask(proj, type = "binary", level = t$level))
-        fm <- as.matrix(full)
-        storage.mode(fm) <- "integer"
-        if (!identical(fm[(t$y + 1L):(t$y + t$height), (t$x + 1L):(t$x + t$width), drop = FALSE], m)) {
-          src_bad <- src_bad + 1L
+  guard("mask_roi_roundtrip", {
+    sample <- utils::head(Filter(function(t) as.integer(t[["foreground_px"]] %||% 0L) > 0L &&
+                                   safe_file(t[["mask_file"]]), included), max_roundtrip_tiles)
+    rt_bad <- 0L
+    src_bad <- 0L
+    for (t in sample) {
+      m <- tryCatch(.read_tile_mask(dir, t[["mask_file"]]), error = function(e) NULL)
+      if (is.null(m)) {
+        rt_bad <- rt_bad + 1L
+        next
+      }
+      tmp <- tempfile(fileext = ".npy")
+      .npy_write_matrix(m, tmp, dtype = "int32")
+      vals <- sort(setdiff(unique(as.integer(m)), 0L))
+      lg <- tibble::tibble(value = vals, label = as.character(vals))
+      lyr <- suppressWarnings(at_read_mask(tmp, legend = lg))
+      unlink(tmp)
+      back <- matrix(0L, nrow(m), ncol(m))
+      for (r in lyr$rois) {
+        back[.cover(r$geometry[[1]], c(ncol(m), nrow(m)))] <- as.integer(r$label)
+      }
+      if (!identical(back, m)) rt_bad <- rt_bad + 1L
+      if (!is.null(entries)) {
+        e <- Filter(function(en) identical(en$entry_id, t[["entry_id"]]), entries)
+        if (length(e)) {
+          proj <- e[[1]]$project
+          lm <- stats::setNames(codes, vapply(man[["mask_encoding"]][["class_legend"]], `[[`, character(1), "label"))
+          full <- switch(man[["mask_encoding"]][["mask_type"]],
+                         labelled = at_mask(proj, type = "multiclass", level = t[["level"]],
+                                            values = lm[unique(at_rois(proj)$label)]),
+                         instance = at_mask(proj, type = "labelled", level = t[["level"]]),
+                         binary = at_mask(proj, type = "binary", level = t[["level"]]))
+          fm <- as.matrix(full)
+          storage.mode(fm) <- "integer"
+          rows_t <- (t[["y"]] + 1L):(t[["y"]] + t[["height"]])
+          cols_t <- (t[["x"]] + 1L):(t[["x"]] + t[["width"]])
+          if (!identical(fm[rows_t, cols_t, drop = FALSE], m)) {
+            src_bad <- src_bad + 1L
+          }
         }
       }
     }
-  }
-  add("mask_roi_roundtrip", if (rt_bad) "fail" else "ok",
-      sprintf("%d of %d sampled tiles differ after mask -> ROI -> mask", rt_bad, length(sample)))
-  if (!is.null(entries)) {
-    add("source_agreement", if (src_bad) "fail" else "ok",
-        sprintf("%d of %d sampled tiles differ from re-rasterised annotations", src_bad, length(sample)))
+    add("mask_roi_roundtrip", if (rt_bad) "fail" else "ok",
+        sprintf("%d of %d sampled tiles differ after mask -> ROI -> mask", rt_bad, length(sample)))
+    if (!is.null(entries)) {
+      add("source_agreement", if (src_bad) "fail" else "ok",
+          sprintf("%d of %d sampled tiles differ from re-rasterised annotations", src_bad, length(sample)))
+    }
+  })
+  if (length(schema_errs)) {
+    add("manifest_schema", "fail", paste(utils::head(schema_errs, 5L), collapse = "; "))
+  } else {
+    add("manifest_schema", "ok", man[["schema_version"]])
   }
   out <- do.call(rbind, rows)
   class(out) <- c("at_training_check", class(out))
   out
+}
+
+# Problems with a dataset's integrity inventory (empty when verified): schema,
+# unsafe or duplicate paths, symbolic links, missing, resized, altered and
+# unlisted files. Unlisted operating-system metadata files are ignored. The
+# listed paths that are safe to open (clean, not at or below a symbolic link)
+# are attached as attribute "listed".
+.inventory_problems <- function(dir) {
+  doc <- .read_json_doc(file.path(dir, "integrity.json"),
+                        max_bytes = .interop_limits()$training_max_json_bytes)
+  probs <- character()
+  errs <- .schema_validate(doc, .schema_load(.contract$handoff, "integrity"))
+  if (length(errs)) probs <- c(probs, paste("schema:", errs[1]))
+  files <- doc[["files"]] %||% list()
+  listed <- vapply(files, function(f) .json_chr(f[["path"]]), character(1))
+  clean <- !is.na(listed) & vapply(listed, function(p) !is.na(p) && .is_clean_relative(p), logical(1))
+  if (any(!clean)) probs <- c(probs, sprintf("%d unsafe path(s)", sum(!clean)))
+  if (anyDuplicated(listed[clean])) probs <- c(probs, "duplicate paths")
+  entries <- .list_payload_entries(dir)
+  links <- entries[.is_symlink(file.path(dir, entries))]
+  if (length(links)) probs <- c(probs, sprintf("%d symbolic link(s)", length(links)))
+  missing <- 0L
+  altered <- 0L
+  for (f in files[clean]) {
+    full <- file.path(dir, f[["path"]])
+    if (!file.exists(full)) {
+      missing <- missing + 1L
+    } else if (!isTRUE(file.info(full)$size == f[["size_bytes"]]) ||
+               !identical(.sha256_file(full), f[["sha256"]])) {
+      altered <- altered + 1L
+    }
+  }
+  extra <- setdiff(.list_payload_files(dir), listed)
+  extra <- extra[!.is_os_metadata(extra)]
+  if (missing) probs <- c(probs, sprintf("%d missing", missing))
+  if (altered) probs <- c(probs, sprintf("%d altered", altered))
+  if (length(extra)) probs <- c(probs, sprintf("%d extra", length(extra)))
+  safe <- listed[clean]
+  if (length(links)) {
+    under <- vapply(safe, function(p) any(p == links | startsWith(p, paste0(links, "/"))), logical(1))
+    safe <- safe[!under]
+  }
+  structure(probs, listed = safe)
 }
 
 #' Import model predictions as staged annotations
@@ -575,7 +773,8 @@ at_training_check <- function(dataset, x = NULL, max_roundtrip_tiles = 20L,
 #' @param source ROI source string. Default `"dnn_prediction"`.
 #' @param model List with `name`, `version` and `sha256` of the model.
 #' @param confidence Optional numeric matrix of per-pixel confidence.
-#' @param min_confidence Optional threshold applied to `confidence`.
+#' @param min_confidence Optional threshold applied to `confidence` (which is
+#'   then required).
 #' @param layer Target layer name. Default `"predictions"`.
 #' @param replace Logical; stage removal of existing unreviewed ROIs of `layer`
 #'   not present in the prediction.
@@ -627,6 +826,9 @@ at_training_import <- function(x, predictions, label_map, level = 0L, source = "
     .at_abort("Prediction values {.val {bad}} are not in {.arg label_map}.", code = "LABEL_OUT_OF_RANGE",
               call = call)
   }
+  if (!is.null(min_confidence) && is.null(confidence)) {
+    .at_abort("{.arg min_confidence} needs a {.arg confidence} matrix to apply to.", call = call)
+  }
   policy <- list(min_confidence = min_confidence %||% NA_real_,
                  rule = if (is.null(min_confidence)) "none" else "pixels below min_confidence set to background")
   if (!is.null(confidence)) {
@@ -649,9 +851,9 @@ at_training_import <- function(x, predictions, label_map, level = 0L, source = "
     r$id <- sprintf("pred-%s-%05d", substr(pred_digest, 1L, 8L), k)
     r$source <- source
     r$attributes$review_status <- "unreviewed"
-    r$attributes$prediction <- list(model_name = model$name %||% NA_character_,
-                                    model_version = model$version %||% NA_character_,
-                                    model_sha256 = model$sha256 %||% NA_character_,
+    r$attributes$prediction <- list(model_name = model[["name"]] %||% NA_character_,
+                                    model_version = model[["version"]] %||% NA_character_,
+                                    model_sha256 = model[["sha256"]] %||% NA_character_,
                                     prediction_sha256 = pred_digest, confidence_policy = policy,
                                     label_map_sha256 = .digest_json(as.list(label_map)))
     out$rois <- c(out$rois, list(r))

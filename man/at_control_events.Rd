@@ -18,7 +18,8 @@ at_control_events(
 the retained buffer. A cursor from another instance or older than the
 buffer yields \code{resync_required = TRUE}.}
 
-\item{limit}{Maximum number of events to return.}
+\item{limit}{Maximum number of events to return (a positive integer; the
+service caps a page at 500).}
 
 \item{call}{The calling environment, for error reporting.}
 }

@@ -22,7 +22,7 @@
 
 .NPY_MAGIC <- c(0x93, 0x4e, 0x55, 0x4d, 0x50, 0x59)
 
-# Map an hyperannotatR dtype name to a numpy descr and a byte size.
+# Map a hyperannotatR dtype name to a numpy descr and a byte size.
 .npy_descr <- function(dtype) {
   switch(
     dtype,
@@ -34,6 +34,7 @@
 }
 
 .npy_write_matrix <- function(m, path, dtype = "int32") {
+  .npy_validate_output(m, dtype)
   storage.mode(m) <- "integer"
   d <- .npy_descr(dtype)
   # fortran_order = TRUE stores the column-major R matrix verbatim.
@@ -51,66 +52,91 @@
   invisible(path)
 }
 
+# Every sample must be a finite integer within the dtype's range, checked
+# before any output is created (A28): narrow dtypes never wrap.
+.npy_validate_output <- function(m, dtype, call = rlang::caller_env()) {
+  .mask_integers(m, "NPY output samples")
+  lower <- switch(dtype, uint8 = 0, int16 = -32768, int32 = -.Machine$integer.max)
+  upper <- switch(dtype, uint8 = 255, int16 = 32767, int32 = .Machine$integer.max)
+  if (is.null(lower) || any(m < lower | m > upper)) {
+    .at_abort(c("Mask samples exceed the {.val {dtype}} range.",
+                "i" = "Use {.code dtype = \"int32\"}."), call = call)
+  }
+  invisible(m)
+}
+
+# Parse and validate an NPY preamble and header. Only the three supported
+# scalar dictionary fields are accepted (no Python evaluation, object dtypes,
+# duplicate or unknown keys), shapes must be 2-D and dtypes scalar integers,
+# and the payload length is checked before any read.
+.npy_layout <- function(path, con, call = rlang::caller_env()) {
+  bad <- function(msg) .at_abort(msg, class = "io", code = "NPY_INVALID", call = call)
+  magic <- as.integer(.read_exact_raw(con, 6L, call = call))
+  if (!identical(magic, as.integer(.NPY_MAGIC))) bad("Not a NumPy .npy file.")
+  ver <- as.integer(.read_exact_raw(con, 2L, call = call))
+  if (!ver[1] %in% 1:3 || ver[2] != 0L) bad("Unsupported NPY version.")
+  hbytes <- if (ver[1] == 1L) 2L else 4L
+  hlen <- sum(as.integer(.read_exact_raw(con, hbytes, call = call)) * 256^(seq_len(hbytes) - 1))
+  limit <- getOption("hyperannotatR.max_npy_header_bytes", 1024^2)
+  if (!is.numeric(limit) || length(limit) != 1L || !is.finite(limit) || limit < 1) {
+    bad("Invalid NPY header byte limit.")
+  }
+  if (hlen < 1 || hlen > limit) bad("NPY header exceeds supported byte limit.")
+  if (file.info(path)$size < 8 + hbytes + hlen) bad("Short/truncated NPY header.")
+  hdr <- rawToChar(.read_exact_raw(con, hlen, call = call))
+  if (!endsWith(hdr, "\n")) bad("Invalid NPY header: expected newline terminator.")
+  txt <- trimws(hdr)
+  if (!startsWith(txt, "{") || !endsWith(txt, "}")) bad("Invalid NPY header dictionary.")
+  txt <- trimws(substr(txt, 2, nchar(txt) - 1))
+  fields <- list()
+  pat <- "^(['\"])(descr|fortran_order|shape)\\1[[:space:]]*:[[:space:]]*('[^']*'|\"[^\"]*\"|True|False|\\([^)]*\\))[[:space:]]*(,|$)"
+  while (nzchar(txt)) {
+    parts <- regmatches(txt, regexec(pat, txt, perl = TRUE))[[1]]
+    if (!length(parts) || parts[3] %in% names(fields)) bad("Invalid or duplicate NPY header fields.")
+    fields[[parts[3]]] <- parts[4]
+    txt <- trimws(substring(txt, nchar(parts[1]) + 1))
+  }
+  if (!setequal(names(fields), c("descr", "fortran_order", "shape"))) {
+    bad("Missing required NPY header fields.")
+  }
+  if (!fields$fortran_order %in% c("True", "False")) bad("Invalid NPY fortran_order.")
+  if (!grepl("^\\([[:space:]]*[0-9]+[[:space:]]*,[[:space:]]*[0-9]+[[:space:]]*,?[[:space:]]*\\)$",
+             fields$shape)) {
+    bad("Only 2-D integer NPY shapes are supported.")
+  }
+  dims <- as.numeric(strsplit(gsub("[()[:space:]]", "", fields$shape), ",")[[1]])
+  if (!grepl("^(['\"])[<>=|][iu][1248]\\1$", fields$descr, perl = TRUE)) {
+    bad("Only supported scalar integer NPY dtypes are allowed.")
+  }
+  descr <- substr(fields$descr, 2, nchar(fields$descr) - 1)
+  endc <- substr(descr, 1, 1)
+  size <- as.integer(substr(descr, 3, 3))
+  if (endc == "|" && size != 1L) bad("Invalid NPY byte order for multibyte dtype.")
+  layout <- .binary_layout(path, dims, size, 8 + hbytes + hlen, call = call)
+  c(layout, list(endian = if (endc == ">") "big" else if (endc == "=") .Platform$endian else "little",
+                 signed = substr(descr, 2, 2) == "i", fortran = fields$fortran_order == "True",
+                 descr = descr, version = ver))
+}
+
 .npy_read_matrix <- function(path, call = rlang::caller_env()) {
   con <- file(path, "rb")
   on.exit(close(con))
-  magic <- as.integer(readBin(con, "raw", n = 6L))
-  if (!identical(magic, as.integer(.NPY_MAGIC))) {
-    cli::cli_abort("{.path {path}} is not a NumPy {.file .npy} file.", call = call)
-  }
-  ver <- as.integer(readBin(con, "raw", n = 2L))
-  hlen <- if (ver[1] >= 2L) {
-    readBin(con, "integer", n = 1L, size = 4L, endian = "little")
-  } else {
-    readBin(con, "integer", n = 1L, size = 2L, signed = FALSE, endian = "little")
-  }
-  hdr <- rawToChar(readBin(con, "raw", n = hlen))
-  descr <- sub(".*'descr'\\s*:\\s*'([^']*)'.*", "\\1", hdr)
-  fortran <- grepl("'fortran_order'\\s*:\\s*True", hdr)
-  shp <- sub(".*'shape'\\s*:\\s*\\(([^)]*)\\).*", "\\1", hdr)
-  dims <- as.integer(stats::na.omit(as.integer(trimws(strsplit(shp, ",")[[1]]))))
-  if (length(dims) != 2L) {
-    cli::cli_abort(c(
-      "Only 2-D integer {.file .npy} masks are supported.",
-      "x" = "{.path {path}} has shape {.val {shp}}."
-    ), call = call)
-  }
-  endc <- substr(descr, 1L, 1L)
-  kind <- substr(descr, 2L, 2L)
-  sz <- as.integer(substr(descr, 3L, nchar(descr)))
-  if (!kind %in% c("i", "u")) {
-    cli::cli_abort(c(
-      "Only integer {.file .npy} masks are supported.",
-      "x" = "{.path {path}} has dtype {.val {descr}}."
-    ), call = call)
-  }
-  endian <- if (endc == ">") "big" else "little"
-  total <- as.double(dims[1]) * dims[2]
-  if (sz == 8L) {
-    # No native 64-bit integer in R: read 32-bit words and keep the low word
-    # (label masks fit comfortably in 32 bits).
-    words <- readBin(con, "integer", n = 2L * total, size = 4L, endian = endian)
-    v <- if (endian == "little") words[c(TRUE, FALSE)] else words[c(FALSE, TRUE)]
-  } else {
-    signed <- if (sz <= 2L) kind == "i" else TRUE
-    v <- readBin(con, "integer", n = total, size = sz, signed = signed, endian = endian)
-  }
-  m <- if (fortran) {
-    matrix(v, nrow = dims[1], ncol = dims[2])
-  } else {
-    matrix(v, nrow = dims[1], ncol = dims[2], byrow = TRUE)
-  }
-  storage.mode(m) <- "integer"
-  m
+  layout <- .npy_layout(path, con, call = call)
+  v <- .decode_integer_bytes(.read_exact_raw(con, layout$bytes, call = call), layout$size,
+                             layout$signed, layout$endian, mask = TRUE, call = call)
+  matrix(v, nrow = layout$dims[1], ncol = layout$dims[2], byrow = !layout$fortran)
 }
 
 #' Write a mask to a NumPy `.npy` file
 #'
 #' Write an `annot_mask` as a lossless integer NumPy array, for interchange with
-#' Python tools. A `<path>.legend.json` sidecar (value -> label) is written
-#' alongside so the array stays self-describing. Unlike [at_write_mask()], values
-#' are stored raw (no bit-depth normalisation), so bitfield artefact masks
-#' survive intact.
+#' Python tools. A `<path>.legend.json` sidecar (value -> label, plus the mask
+#' metadata and storage orientation) is written alongside so the array stays
+#' self-describing. Unlike [at_write_mask()], values are stored raw (no
+#' bit-depth normalisation), so bitfield artefact masks survive intact. The
+#' array and legend are staged as one output bundle; an existing sidecar also
+#' requires `overwrite = TRUE`. Values outside the chosen `dtype` are refused
+#' before anything is written. Concurrent writers must be serialised.
 #'
 #' @param mask An `annot_mask`.
 #' @param path Output file path.
@@ -129,7 +155,7 @@
 #' @family masks
 #' @seealso [at_read_npy()], [at_write_mask()]
 #' @export
-#' @examplesIf requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' m <- at_mask(at_example_project(), "labelled")
 #' f <- tempfile(fileext = ".npy")
 #' at_write_npy(m, f)
@@ -138,33 +164,22 @@ at_write_npy <- function(mask, path, dtype = c("int32", "uint8", "int16"),
                          call = rlang::caller_env()) {
   .check_class(mask, "annot_mask", call = call)
   .check_string(path, call = call)
-  dtype <- .check_choice(dtype, c("int32", "uint8", "int16"), call = call)
+  dtype <- .check_choice(dtype, c("int32", "uint8", "int16"), default = missing(dtype),
+                         call = call)
   .check_flag(transpose, call = call)
   .check_flag(legend, call = call)
   .check_flag(overwrite, call = call)
-  if (file.exists(path) && !overwrite) {
-    cli::cli_abort(
-      c("{.path {path}} already exists.",
-        "i" = "Pass {.code overwrite = TRUE} to replace it."),
-      call = call
-    )
-  }
-  m <- as.matrix(mask)
+  m <- .mask_info(mask)$m
   if (isTRUE(transpose)) m <- t(m)
-  storage.mode(m) <- "integer"
-  maxv <- max(m, 0L)
-  cap <- switch(dtype, uint8 = 255L, int16 = 32767L, int32 = .Machine$integer.max)
-  if (maxv > cap) {
-    cli::cli_abort(
-      c("Mask values up to {maxv} exceed the {.val {dtype}} range.",
-        "i" = "Use {.code dtype = \"int32\"}."),
-      call = call
-    )
-  }
-  .npy_write_matrix(m, path, dtype = dtype)
-  if (legend) {
-    .write_legend_json(mask, paste0(path, ".legend.json"))
-  }
+  .npy_validate_output(m, dtype, call = call)
+  paths <- c(path, if (legend) paste0(path, ".legend.json"))
+  .export_bundle(paths, function(stage) {
+    .npy_write_matrix(m, stage[1], dtype = dtype)
+    if (legend) {
+      .write_legend_json(mask, stage[2],
+                         storage = list(axes = if (transpose) "xy" else "yx", shape = as.integer(dim(m))))
+    }
+  }, overwrite)
   invisible(path)
 }
 
@@ -176,8 +191,17 @@ at_write_npy <- function(mask, path, dtype = c("int32", "uint8", "int16"),
 #' raw integer matrix is what you need, for example to derive a training mask or
 #' compute agreement against another mask.
 #'
+#' The header is validated strictly (NPY format versions 1-3, 2-D shapes,
+#' scalar integer dtypes of 1, 2, 4 or 8 bytes in either byte order) and the
+#' payload length is checked before reading; values that do not fit a 32-bit
+#' integer mask (including INT_MIN, R's missing-value code) are refused, never
+#' truncated. Reads are bounded by option `hyperannotatR.max_read_bytes` and
+#' headers by `hyperannotatR.max_npy_header_bytes`.
+#'
 #' @param path Path to a `.npy` file.
-#' @param level Integer pyramid level to record. Default `0`.
+#' @param level Integer pyramid level to record. `NULL` (default) recovers the
+#'   sidecar level, falling back to 0 without metadata. Explicit values override
+#'   the sidecar declaration without resampling pixels.
 #' @param transpose Logical; transpose the array on read, for files stored in
 #'   the native cube order `(width, height)` = `[x, y]` (e.g. TIVITA/HyperGui
 #'   masks) so the result lands in hyperannotatR's `[y, x]` convention. Default
@@ -185,42 +209,39 @@ at_write_npy <- function(mask, path, dtype = c("int32", "uint8", "int16"),
 #' @param legend Optional legend tibble (`value`, `label`) overriding the sidecar
 #'   / pixel-value labelling.
 #' @param call The calling environment, for error reporting.
+#' @param metadata Optional named list overriding semantic `mask_metadata`
+#'   fields, such as `encoding`, `background`, or `source`. Nested grid fields
+#'   merge; explicit `level` and `legend` take precedence. No pixels are
+#'   resampled. Versioned declarations must be structurally valid before
+#'   overrides apply.
 #'
-#' @return An `annot_mask`.
+#' @return An integer `annot_mask` preserving encoding, background, codebook,
+#'   grid and source metadata. Without encoding metadata, imports use exclusive
+#'   instance values and zero background with status `legacy-default`; signed
+#'   representable codes are preserved. A declared storage orientation must
+#'   match `transpose`, even for square arrays. Malformed sidecars are rejected.
 #' @family masks
 #' @seealso [at_write_npy()], [at_read_mask()]
 #' @export
-#' @examplesIf requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' m <- at_mask(at_example_project(), "labelled")
 #' f <- tempfile(fileext = ".npy")
 #' at_write_npy(m, f)
 #' at_read_npy(f)
-at_read_npy <- function(path, level = 0L, transpose = FALSE, legend = NULL,
-                        call = rlang::caller_env()) {
+at_read_npy <- function(path, level = NULL, transpose = FALSE, legend = NULL,
+                        call = rlang::caller_env(), metadata = NULL) {
   .check_file(path, call = call)
-  level <- .check_count(level, call = call)
   .check_flag(transpose, call = call)
   m <- .npy_read_matrix(path, call = call)
+  sidecar <- .mask_read_sidecar(path)
+  if (!is.null(sidecar[["storage"]])) {
+    storage <- sidecar[["storage"]]
+    .mask_validate_storage(m, storage)
+    if (isTRUE(transpose) != identical(storage[["axes"]], "xy")) {
+      .at_abort("NPY storage orientation requires {.code transpose = {identical(storage[['axes']], 'xy')}}.",
+                call = call)
+    }
+  }
   if (isTRUE(transpose)) m <- t(m)
-  side <- paste0(path, ".legend.json")
-  meta <- if (file.exists(side)) {
-    tryCatch(jsonlite::read_json(side, simplifyVector = TRUE), error = function(e) NULL)
-  } else {
-    NULL
-  }
-  lg <- legend
-  if (is.null(lg) && !is.null(meta)) {
-    lg <- tryCatch(tibble::as_tibble(meta$legend), error = function(e) NULL)
-  }
-  if (is.null(lg)) {
-    vals <- sort(unique(as.integer(m[m != 0L])))
-    lg <- tibble::tibble(
-      value = vals, label = as.character(vals), layer = NA_character_,
-      roi_id = NA_character_,
-      n_px = vapply(vals, function(v) as.integer(sum(m == v)), integer(1)),
-      colour = rep("#5E2C8E", length(vals))
-    )
-  }
-  mask_type <- if (!is.null(meta)) meta$mask_type %||% "labelled" else "labelled"
-  .new_annot_mask(m, lg, level, c(ncol(m), nrow(m)), mask_type, source = NA_character_)
+  .mask_recover(m, sidecar = sidecar, level = level, legend = legend, metadata = metadata)
 }

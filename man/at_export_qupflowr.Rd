@@ -17,7 +17,9 @@ at_export_qupflowr(
 }
 \arguments{
 \item{x}{An \link{annot_project} or \link{annot_session} (materialised entries are
-exported under \verb{entries/entry-NNNN/}).}
+exported under \verb{entries/<entry_id>/}, where \code{entry_id} is the session's
+stable entry id, or \code{entry-NNNN} by queue position for sessions without
+stable ids).}
 
 \item{destination}{Path of the handoff directory to create.}
 
@@ -59,10 +61,13 @@ the canonical \code{integrity.json}. Absolute paths are never used as identity.
 Files are written into a hidden sibling staging directory and moved into
 place only when complete, so a failed export never leaves a directory that
 looks valid. An existing destination is replaced only with
-\code{overwrite = TRUE}, and only when it is itself a handoff directory.
+\code{overwrite = TRUE}, and only when it is itself a handoff directory; if the
+new directory cannot be moved into place the previous one is restored. The
+optional \code{objects/project.rds} holds no pixels, read identity or local path
+(the image source is reduced to its file name).
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 dest <- file.path(tempdir(), "handoff-example")
 rc <- at_export_qupflowr(at_example_project(), dest, overwrite = TRUE)
 rc$handoff_digest

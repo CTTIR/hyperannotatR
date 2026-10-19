@@ -16,18 +16,21 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 <!-- badges: end -->
 
 **hyperannotatR** provides multi-layer region-of-interest annotation for
-hyperspectral imaging (HSI), including spectral cubes, band views, spectral
-extraction, and associated display rasters. ROI geometries, masks, resumable
-sessions and exports support HSI annotation and classification.
+hyperspectral imaging (HSI), including spectral cubes, band views,
+spectral extraction, and associated display rasters. ROI geometries,
+masks, resumable sessions and exports support HSI annotation and
+classification.
 
-Cell and nucleus annotation, segmentation, correction, training and review for
-microscopy belong to **segmantR**. Its independent drawing canvas and mask
-workflow do not require hyperannotatR. Generic raster and geometry APIs remain
-available for HSI previews and interchange compatibility.
+Cell and nucleus annotation, segmentation, correction, training and
+review for microscopy belong to **segmantR**. Its independent drawing
+canvas and mask workflow do not require hyperannotatR. Generic raster
+and geometry APIs remain available for HSI previews and interchange
+compatibility.
 
-The R package was renamed from `annotatR` to `hyperannotatR`; load it with
-`library(hyperannotatR)`. The `at_*` function names and saved object classes are
-retained. The hosted source repository is `CTTIR/hyperannotatR`.
+The R package was renamed from `annotatR` to `hyperannotatR`; load it
+with `library(hyperannotatR)`. The `at_*` function names and saved
+object classes are retained. The hosted source repository is
+`CTTIR/hyperannotatR`.
 
 ## Installation
 
@@ -73,9 +76,9 @@ at_plot_overlay(proj)
 
 | Format | Backend | Package required | Pyramid | Spectral |
 |----|----|----|----|----|
-| PNG / JPEG / TIFF | `raster` | magick or tiff | no | no |
-| Pyramidal / OME-TIFF | `tiff` | tiff | yes | multiplex |
-| qptiff, OME-TIFF | `ometiff` | RBioFormats | yes | multiplex |
+| PNG / JPEG | `raster` | magick | no | no |
+| TIFF, incl. pyramidal and multi-channel | `tiff` | tiff | yes | multiplex |
+| qptiff, OME-TIFF | `ometiff` | RBioFormats + xml2, windowed reads | yes | multiplex |
 | Cubert `.cu3s` | `cuvis` | cuvis.r + CUVIS SDK | no | yes |
 | ENVI cube (BSQ/BIL/BIP) | `envi` | base R, windowed reads | no | yes |
 | Diaspective Vision TIVITA | `tivita` | base R, declared profile or sidecar | no | yes |
@@ -83,7 +86,18 @@ at_plot_overlay(proj)
 A TIFF is treated as spectral only when wavelengths are declared.
 `at_bands()`, `at_hsi_meta()` and `at_read_stats()` report band
 wavelengths and gaps, value units, calibration and transform digests,
-and the bytes actually read.
+and the bytes actually read. The ENVI, TIVITA and OME readers read
+windows from the file; the raster, TIFF and Cubert backends decode the
+whole image when it is opened, so it must fit in memory.
+`at_image_capabilities()` reports which applies to an image.
+
+The `raster` backend converts samples to a 0–255 display convention and
+does not preserve original high-bit-depth intensities. The quantitative
+TIFF, OME and ENVI readers keep raw samples; format and optional-reader
+limits are documented in `vignette("images-and-backends")`. Extraction
+never applies plot contrast stretches. It reports selected, finite and
+nonfinite counts, with an explicit `nonfinite` policy and declared
+spectral units.
 
 ## The mask workflow
 
@@ -132,10 +146,10 @@ send typed commands to a running app. See `vignette("partner-interop")`.
 
 ## Related work
 
-Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious, hyperannotatR
-is R-native and script-first, handles hyperspectral cubes alongside
-microscopy, and treats the batch **mask** export as a first-class,
-reproducible artifact.
+Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious,
+hyperannotatR is R-native and script-first, focuses on hyperspectral
+cubes and their display rasters, and treats the batch **mask** export as
+a first-class, reproducible artifact.
 
 ## Acknowledgements
 
@@ -145,18 +159,19 @@ hyperannotatR builds on [Shiny](https://shiny.posit.co/), the
 
 ## Use of LLM tools
 
-Where applicable, LLM tools were used for narrowly defined, non-authorial tasks:
-copyediting, prose refinement, Markdown/LaTeX formatting, boilerplate scaffolding
-(such as CI configurations and build scripts), and code refactoring. Tools included
-[Chat AI](https://kisski.gwdg.de/leistungen/2-02-llm-service/), the KISSKI
-(GWDG) service, and self-hosted **Mistral Small (24B, Apache-2.0)** served through
-a local **vLLM architecture** on an Ubuntu Linux workstation with Intel
-processors and NVIDIA GPUs. The self-hosted model ran locally, with no data sent
-to third parties.
+Where applicable, LLM tools were used for narrowly defined,
+non-authorial tasks: copyediting, prose refinement, Markdown/LaTeX
+formatting, boilerplate scaffolding (such as CI configurations and build
+scripts), and code refactoring. Tools included [Chat
+AI](https://kisski.gwdg.de/leistungen/2-02-llm-service/), the KISSKI
+(GWDG) service, and self-hosted **Mistral Small (24B, Apache-2.0)**
+served through a local **vLLM architecture** on an Ubuntu Linux
+workstation with Intel processors and NVIDIA GPUs. The self-hosted model
+ran locally, with no data sent to third parties.
 
-All scientific claims, methodological choices, analyses, interpretations and
-conclusions remain the authors' own. Where applicable, LLM-generated material
-must be reviewed and revised before inclusion, and references must be verified
-against their DOI, arXiv ID or ISBN.
+All scientific claims, methodological choices, analyses, interpretations
+and conclusions remain the authors’ own. Where applicable, LLM-generated
+material must be reviewed and revised before inclusion, and references
+must be verified against their DOI, arXiv ID or ISBN.
 
 Local software setup: vLLM with Python/PyTorch, plus R and RStudio.

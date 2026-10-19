@@ -31,8 +31,10 @@ An \code{at_import_report}: a list with \code{status}, \code{format},
 \code{status}, \code{detail}), \code{objects} (\code{layers}: named list of \link{annot_layer};
 \code{masks}: named list of \code{annot_mask}; \code{images}: image records), \code{conversion}
 (tibble with one row per ROI: \code{roi_id}, \code{layer}, \code{label},
-\code{source_object_id}, \code{object_type}, \code{geometry_fidelity}, \code{geometry_match},
-\code{notes}) and \code{annotation_revision} of the imported layers.
+\code{source_object_id}, \code{object_type}, \code{geometry_fidelity}, \code{geometry_match}
+(\code{"exact"} bytes, \code{"equivalent"} within 1e-9 after level normalisation,
+\code{"changed"}, or \code{NA} without a manifest record), \code{notes}) and
+\code{annotation_revision} of the imported layers.
 }
 \description{
 Read only the neutral contract, validate it, and return a namespaced
@@ -40,15 +42,25 @@ hyperannotatR result together with a conversion report. For a handoff directory
 the SHA-256 inventory (missing, extra, duplicate, resized, altered or
 symlinked files), the manifest schema and major version, ROI id uniqueness
 and the id join between manifest and GeoJSON, layers, planes, mask
-dimensions, integer values and legend completeness are all checked; any
-integrity or schema failure aborts with an \code{at_validation_error}. Nothing
-is written, no analysis is started, and foreign objects are never returned as
-if they were hyperannotatR objects: imported ROIs carry \code{source = "imported"} and
-partner fields under \code{attributes$qupflowr}. An RDS file is refused, because
-deserialising it is not a neutral read.
+dimensions, integer values and legend completeness are all checked. Every
+file the manifest references must be a clean relative path listed in the
+verified inventory; unlisted operating-system metadata files (\code{.DS_Store},
+\verb{._*}, \code{Thumbs.db}, \code{desktop.ini}) are ignored with a warning. Any failure
+aborts with a classified \code{at_error}: \code{at_validation_error} for integrity,
+schema and join failures, \code{at_protocol_error} for an unsupported major
+version, \code{at_limit_error} for oversized inventories and \code{at_io_error} for
+missing files. Nothing is written, no analysis is started, and foreign
+objects are never returned as if they were hyperannotatR objects: imported ROIs
+carry \code{source = "imported"} and partner fields under
+\code{attributes$qupflowr}. Features of a single GeoJSON file that carry no id
+get a minted one and are flagged (\code{attributes$qupflowr$id_minted}), so
+\code{\link[=at_stage_qupflowr]{at_stage_qupflowr()}} creates them instead of joining them to an existing
+ROI; two features with the same id are refused (\code{DUPLICATE_ID}). Handoff
+coordinates are read at the export level recorded in the manifest. An RDS
+file is refused, because deserialising it is not a neutral read.
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 dest <- file.path(tempdir(), "handoff-import-example")
 at_export_qupflowr(at_example_project(), dest, overwrite = TRUE)
 rep <- at_import_qupflowr(dest)

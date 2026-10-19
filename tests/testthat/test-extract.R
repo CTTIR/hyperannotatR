@@ -73,3 +73,9 @@ test_that("at_extract_pixels returns per-pixel rows and guards on size", {
   expect_identical(names(px), c("roi_id", "layer", "label", "x", "y", "band", "value"))
   expect_error(at_extract_pixels(proj, max_px = 2), "max_px")
 })
+
+test_that("extraction refuses unknown layer names", {
+  proj <- at_project(known_image(), at_layer_add(at_layer("l"), at_roi_rect(2, 2, 5, 5, label = "a")))
+  expect_error(at_extract(proj, layer = "typo"), "typo")
+  expect_error(at_extract_pixels(proj, layer = "typo"), "typo")
+})

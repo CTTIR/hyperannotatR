@@ -11,7 +11,7 @@
 ^\.lintr$
 ^\.Rproj\.user$
 ^.*\.Rproj$
-^.*\.svg$
+^man/figures/logo\.svg$
 ^\.vscode$
 ^hyperannotatR_.*\.tar\.gz$
 ^hsi-workbench$
@@ -21,4 +21,10 @@
 ^CITATION\.cff$
 ^\.git$
 ^tests/testthat/_problems$
+^tests/audit$
+^tests/browser$
+^tests/qualification$
+^tests/testthat/testthat-problems\.rds$
 ^instructions$
+^node_modules$
+^package(-lock)?\.json$

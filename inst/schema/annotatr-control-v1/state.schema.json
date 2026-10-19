@@ -16,7 +16,8 @@
         "type": "object",
         "required": ["entry_id", "queue_index", "name", "status", "n_rois", "image_id"],
         "properties": {
-          "entry_id": {"type": "string", "pattern": "^entry-[0-9]{4,}$"},
+          "entry_id": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,128}$",
+                       "description": "The session's stable entry id (as in handoff manifests); positional entry-NNNN for sessions without one."},
           "queue_index": {"type": "integer", "minimum": 1},
           "image_id": {"type": ["string", "null"]}
         }

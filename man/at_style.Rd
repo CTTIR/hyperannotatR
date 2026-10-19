@@ -18,7 +18,8 @@ at_style(
 \item{colour}{Either \code{NULL} (default; the Okabe-Ito colourblind-safe palette
 is cycled over the layer's labels), a single colour recycled across labels,
 or a named character vector mapping labels to colours. The style is stored
-with the resolved mapping so colours are stable across sessions.}
+with the resolved mapping so colours are stable across sessions; the
+original specification is kept too, so labels added later follow it.}
 
 \item{fill_alpha}{Fill opacity in \verb{[0, 1]}. Default \code{0.3}.}
 

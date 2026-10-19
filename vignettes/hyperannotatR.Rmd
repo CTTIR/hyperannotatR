@@ -8,12 +8,17 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
+# The example images are a PNG (read with magick) and TIFFs (read and written
+# with tiff); without them the code is shown but not run.
+has_deps <- requireNamespace("magick", quietly = TRUE) &&
+  requireNamespace("tiff", quietly = TRUE)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4,
+                      eval = has_deps)
 library(hyperannotatR)
 ```
 
-```{r hexlogo, echo=FALSE, fig.align="center", out.width="220px", fig.alt="hyperannotatR hex sticker"}
-knitr::include_graphics("../man/figures/hyperannotatR-hex.png")
+```{r hexlogo, echo=FALSE, eval=TRUE, fig.align="center", out.width="220px", fig.alt="hyperannotatR logo"}
+knitr::include_graphics("../man/figures/logo.png")
 ```
 
 hyperannotatR helps you draw, organise and export regions of interest (ROIs) across
@@ -43,8 +48,9 @@ img <- at_example_image("tissue")
 img
 ```
 
-An `annot_image` is a thin, lazy handle over a pluggable backend rather than the
-pixels themselves. A handful of accessors tell you what you are working with:
+An `annot_image` is a handle over a pluggable backend: it carries the image's
+metadata and serves pixels through `at_tile()`. A handful of accessors tell you
+what you are working with:
 
 ```{r image-meta}
 at_dims(img)
@@ -109,7 +115,7 @@ sf::st_drop_geometry(roi_tbl)[, c("roi_id", "layer", "label", "geom_type",
 
 Notice that the circle has been stored as a many-vertex polygon: hyperannotatR keeps
 every ROI as a genuine simple feature, so areas, overlaps and set operations are
-all exact. `at_rois()` also accepts `layer` and `label` arguments when you want
+computed on the stored geometry. `at_rois()` also accepts `layer` and `label` arguments when you want
 to pull out a subset, and `at_summary()` rolls the same table up into per-label
 counts and areas — a quick sanity check before you commit to a mask.
 
@@ -142,8 +148,9 @@ A pixel is filled when its centre lies inside the polygon (the default,
 `touches = FALSE`), using a half-open tie rule so that shared edges are never
 double-counted; set `touches = TRUE` if you would rather include any pixel the
 polygon so much as grazes. Where ROIs overlap, the `overlap` argument decides
-who wins — by default the region drawn last, but `"first"`, `"max"`, `"min"` and
-`"error"` are all available. The mask carries a self-describing legend, and
+who wins: by default the region drawn last, but `"first"`, `"max"`, `"min"` and
+`"error"` are available, and `"bitor"` combines power-of-two class codes
+bitwise so that overlapping classes stay recoverable in a multiclass mask. The mask carries a self-describing legend, and
 because it is a plain integer matrix underneath you can tabulate it directly.
 
 ```{r mask-legend}

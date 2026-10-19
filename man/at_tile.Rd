@@ -26,14 +26,18 @@ inclusive) at \code{level}. \code{NULL} (default) means the full extent.}
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-A numeric array with dimensions \verb{[y, x, band]}.
+A numeric array with dimensions \verb{[y, x, band]}. An image whose
+pixel handle was not saved is reopened from its source descriptor; a
+missing or ambiguous source is an error with code \code{IMAGE_UNAVAILABLE} and
+a changed source \code{IMAGE_CHANGED} (see \code{\link[=at_inspect_source]{at_inspect_source()}} and
+\code{\link[=at_relink_source]{at_relink_source()}}).
 }
 \description{
 The single, format-independent tile accessor. Returns a numeric array with
 dimensions \verb{[y, x, band]} — always three-dimensional, even for a single band.
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 img <- at_example_image("tissue")
 dim(at_tile(img, xrange = c(1, 16), yrange = c(1, 16)))
 \dontshow{\}) # examplesIf}
@@ -41,9 +45,11 @@ dim(at_tile(img, xrange = c(1, 16), yrange = c(1, 16)))
 \seealso{
 Other images:
 \code{\link[=at_bands]{at_bands()}},
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_dims]{at_dims()}},
 \code{\link[=at_example_image]{at_example_image()}},
 \code{\link[=at_hsi_meta]{at_hsi_meta()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_is_pyramidal]{at_is_pyramidal()}},
 \code{\link[=at_is_spectral]{at_is_spectral()}},
 \code{\link[=at_meta]{at_meta()}},
@@ -59,7 +65,9 @@ Other backends:
 \code{\link[=at_backend_get]{at_backend_get()}},
 \code{\link[=at_backend_list]{at_backend_list()}},
 \code{\link[=at_backend_register]{at_backend_register()}},
+\code{\link[=at_close_image]{at_close_image()}},
 \code{\link[=at_cubert_export_envi]{at_cubert_export_envi()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_read_image]{at_read_image()}},
 \code{\link[=at_tivita_profile]{at_tivita_profile()}}
 }

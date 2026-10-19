@@ -22,7 +22,10 @@ at_convert_values(
 \item{to}{Target unit: \code{"reflectance"} or \code{"absorbance"}.}
 
 \item{calibration}{For \code{raw -> reflectance}, a list with numeric \code{white}
-and \code{dark} references (scalars, or one value per band for arrays).}
+and \code{dark} references: scalars, or one value per band. Per-band references
+apply along the band axis of a \verb{[y, x, band]} array, the columns of a
+pixel-by-band matrix, or the elements of a single spectrum vector; any
+other length is refused.}
 
 \item{call}{The calling environment, for error reporting.}
 }

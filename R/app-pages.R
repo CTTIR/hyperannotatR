@@ -43,20 +43,38 @@ extracted from the original hyperspectral data**, not from the display image.
 
 ### 1. Data
 Load a folder of images or cubes, or start from the queue already configured for
-the session. The table lists every image and its status.
+the session. The table lists every image and its status. Loading a new folder
+retains the previous queue and its unsaved annotations. Use **Restore previous
+queue** to recover it, and save it before closing the app. Paths are read on the
+machine running R; the app is meant for local use.
 
 ### 2. Annotate
 Three columns: the **queue** (left), the **canvas and tools** (middle), and
 **layers & labels** (right).
 
 - **Tools:** pan, rectangle, polygon, freehand, circle, point, edit (drag a
-  region), erase (click a region to remove it).
+  region), erase (click a region to remove it), probe and select. **Undo**,
+  **Redo** and **Copy previous** (the previous image's regions) sit next to them.
 - Pick a **layer** (anatomy / state / uncertain / artefact) -- the label list
   updates to that layer's vocabulary. Add your own layers and labels with the
   fields beneath each list.
 - Draw a region and it joins the **active layer** with the **active label**.
   Overlapping regions are expected and fine.
-- Annotations **autosave**. Mark an image **Complete** or **Flag** it as you go.
+- Annotations autosave when enabled for the session. Otherwise press **Save**.
+  The badge next to Save shows the state (*unsaved*, *saved*, *staged*,
+  *committed*, *read-only*), followed by the time of the last checkpoint and its
+  folder; a warning appears when that folder is temporary and deleted when R
+  exits. **Complete** saves before marking the entry complete; **Shift+Enter**
+  also advances after a successful save. Reloading the page continues from the
+  latest edits.
+- Tab to the canvas. Arrows move the cursor (Shift: 10 pixels); Enter or Space
+  places point/rectangle anchors. Space adds polygon vertices and Enter finishes.
+  Escape cancels unfinished geometry. Shortcuts leave focused form controls their
+  native behavior.
+- The canvas shows an image overview with pan/zoom, not streamed pyramid tiles.
+  It reports missing display capabilities and decoding failures before editing.
+  Locked layers and protected ROIs cannot be changed in the app. Hidden layers
+  remain included in analytical masks and exports.
 - Press **?** (or the *? shortcuts* button) for the full keyboard-shortcut list:
   `n`/`p` to move between images, `q w e r t y` for tools, `1`-`9` for labels,
   `Ctrl+Z` to undo, `Shift+Enter` to complete and advance.

@@ -15,8 +15,10 @@ at_layer_add(layer, roi, call = rlang::caller_env())
 }
 \value{
 A new \link{annot_layer} with the ROI appended. The label vocabulary and
-colour mapping are extended if the ROI introduces a new label. A colliding
-ROI identifier is re-minted to preserve uniqueness. The input is unchanged.
+colour mapping are extended if the ROI introduces a new label (following
+the colour specification given to \code{\link[=at_layer]{at_layer()}}). A missing, empty or
+colliding ROI identifier is re-minted to one unused in the layer. The
+input is unchanged.
 }
 \description{
 Add an ROI to a layer

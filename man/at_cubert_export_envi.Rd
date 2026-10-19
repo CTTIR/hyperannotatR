@@ -34,6 +34,8 @@ Other backends:
 \code{\link[=at_backend_get]{at_backend_get()}},
 \code{\link[=at_backend_list]{at_backend_list()}},
 \code{\link[=at_backend_register]{at_backend_register()}},
+\code{\link[=at_close_image]{at_close_image()}},
+\code{\link[=at_image_capabilities]{at_image_capabilities()}},
 \code{\link[=at_read_image]{at_read_image()}},
 \code{\link[=at_tile]{at_tile()}},
 \code{\link[=at_tivita_profile]{at_tivita_profile()}}

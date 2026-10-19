@@ -155,3 +155,33 @@ test_that("windowed reads touch only the requested bytes and never the whole cub
   withr::local_options(hyperannotatR.max_tile_bytes = 100)
   expect_identical(tryCatch(at_tile(img), error = function(e) e$code), "TILE_TOO_LARGE")
 })
+
+test_that("full-width windows read as blocks match the formula for every interleave", {
+  for (il in c("bsq", "bil", "bip")) {
+    d <- withr::local_tempdir()
+    hdr <- write_envi_bytes(d, samples = 5L, lines = 7L, bands = 4L, interleave = il, dtype = 2L)
+    img <- at_read_image(hdr)
+    full <- expected_cube(samples = 5L, lines = 7L, bands = 4L)
+    .tile_cache_clear()
+    expect_equal(at_tile(img, yrange = c(2, 6), bands = c(4L, 1L)),
+                 full[2:6, , c(4, 1), drop = FALSE], tolerance = 0, label = il)
+    expect_equal(at_tile(img, yrange = c(3, 3), bands = 2L),
+                 full[3, , 2, drop = FALSE], tolerance = 0, label = il)
+    # Several row chunks: a 7-value budget holds less than one 20-value row.
+    h <- img$handle$header
+    expect_equal(.envi_read_window(img$handle$dat, h, c(1L, 5L), c(1L, 7L), 1:4, chunk_values = 7),
+                 full, tolerance = 0, ignore_attr = TRUE, label = il)
+    expect_equal(.envi_read_window(img$handle$dat, h, c(1L, 5L), c(2L, 7L), c(3L, 2L, 4L, 1L),
+                                   chunk_values = 45),
+                 full[2:7, , c(3, 2, 4, 1)], tolerance = 0, ignore_attr = TRUE, label = il)
+  }
+})
+
+test_that("a header without a data type is refused instead of guessed", {
+  d <- withr::local_tempdir()
+  hdr <- write_envi_bytes(d)
+  writeLines(c("ENVI", "samples = 4", "lines = 3", "bands = 2", "interleave = bsq"), hdr)
+  err <- tryCatch(at_read_image(hdr), error = function(e) e)
+  expect_identical(err$code, "ENVI_HEADER_INVALID")
+  expect_match(conditionMessage(err), "data type")
+})

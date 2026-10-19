@@ -141,7 +141,10 @@ at_hsi_meta <- function(x, call = rlang::caller_env()) {
 #'   `NULL`.
 #' @param to Target unit: `"reflectance"` or `"absorbance"`.
 #' @param calibration For `raw -> reflectance`, a list with numeric `white`
-#'   and `dark` references (scalars, or one value per band for arrays).
+#'   and `dark` references: scalars, or one value per band. Per-band references
+#'   apply along the band axis of a `[y, x, band]` array, the columns of a
+#'   pixel-by-band matrix, or the elements of a single spectrum vector; any
+#'   other length is refused.
 #' @param call The calling environment, for error reporting.
 #'
 #' @return `x` converted, with attribute `value_unit` set to `to` and
@@ -221,9 +224,26 @@ at_convert_values <- function(x, from = NULL, to = c("reflectance", "absorbance"
     }
     return(out)
   }
+  if (length(white) == 1L && length(dark) == 1L) {
+    den <- white - dark
+    return(if (den == 0) x * NA_real_ else (x - dark) / den)
+  }
+  # Per-band references: columns of a pixel x band matrix, else the elements of
+  # one spectrum.
+  nb <- if (length(d) == 2L) d[2] else length(x)
+  if (!length(white) %in% c(1L, nb) || !length(dark) %in% c(1L, nb)) {
+    .at_abort("Calibration references must have one value per band ({nb}).",
+              code = "CALIBRATION_INVALID", call = call)
+  }
+  white <- rep_len(white, nb)
+  dark <- rep_len(dark, nb)
   den <- white - dark
-  out <- (x - dark) / den
-  out[den == 0] <- NA_real_
+  den[den == 0] <- NA_real_
+  if (length(d) == 2L) {
+    out <- sweep(sweep(x, 2L, dark, "-"), 2L, den, "/")
+  } else {
+    out <- (x - dark) / den
+  }
   out
 }
 
@@ -375,14 +395,20 @@ at_band_view <- function(img, operation = "rgb", bands = NULL, params = list(),
   )
 }
 
-# A digest identifying an image handle without reading pixels: backend, source
-# basename, size and modification time of the file when present, dimensions.
+# A digest identifying an image handle without reading pixels: backend, the
+# absolute source path (hashed, never exposed), size and modification time of
+# the file when present, dimensions. Equally named files in different folders
+# therefore get different identities.
 .image_identity_digest <- function(img) {
-  info <- if (file.exists(img$source)) file.info(img$source) else NULL
+  src <- img$source
+  exists <- .is_string(src) && file.exists(src)
+  info <- if (exists) file.info(src) else NULL
   .digest_json(list(
     backend = img$backend,
-    source_name = basename(img$source),
+    source_name = basename(src),
+    source_path = if (exists) normalizePath(src, winslash = "/") else src,
     size_bytes = if (is.null(info)) NULL else as.numeric(info$size),
+    mtime = if (is.null(info)) NULL else format(as.numeric(info$mtime), digits = 17),
     level_dims = lapply(img$level_dims, as.list),
     n_bands = img$n_bands
   ))
@@ -392,7 +418,7 @@ at_band_view <- function(img, operation = "rgb", bands = NULL, params = list(),
 
 .read_stats_env <- new.env(parent = emptyenv())
 
-.read_stats_key <- function(img) paste(img$backend, img$source, sep = "|")
+.read_stats_key <- function(img) img$cache_identity %||% paste(img$source, img$backend, sep = "|")
 
 # Record one tile request: bytes read from the file (0 when served from memory)
 # and bytes returned in the decoded array.

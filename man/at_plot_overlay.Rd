@@ -16,13 +16,14 @@ at_plot_overlay(project, img = NULL, layer = NULL, call = rlang::caller_env())
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
-A \link[ggplot2:ggplot]{ggplot2::ggplot} object with the image and ROI outlines.
+A \link[ggplot2:ggplot]{ggplot2::ggplot} object with the image and ROI outlines (points
+as markers), both in level-0 image coordinates.
 }
 \description{
 Plot ROIs overlaid on the image
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE) || requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 at_plot_overlay(at_example_project())
 \dontshow{\}) # examplesIf}
 }

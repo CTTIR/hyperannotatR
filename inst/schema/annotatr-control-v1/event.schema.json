@@ -9,7 +9,7 @@
     "seq": {"type": "integer", "minimum": 1},
     "type": {"type": "string", "enum": ["service.started", "session.loaded", "session.saved", "image.changed",
       "view.changed", "selection.changed", "annotations.staged", "annotations.committed",
-      "annotations.edited", "mask.previewed", "export.completed", "training.exported",
+      "annotations.edited", "queue.status_changed", "mask.previewed", "export.completed", "training.exported",
       "app.connected", "app.disconnected", "connection.closing"]},
     "session_id": {"type": "string"},
     "state_revision": {"type": "string", "pattern": "^[0-9]+$"},

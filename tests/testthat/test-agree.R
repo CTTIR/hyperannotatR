@@ -1,4 +1,4 @@
-# Mask agreement metrics: to validate an hyperannotatR mask against a ground-truth
+# Mask agreement metrics: to validate a hyperannotatR mask against a ground-truth
 # .npy (or a second annotator), we need per-class Dice/IoU and an overall
 # accuracy / Cohen's kappa. The package had no mask-vs-mask comparator.
 

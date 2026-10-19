@@ -157,9 +157,11 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
     details = list(profile = profile$name, expected_bytes = expected, actual_bytes = size),
     call = call)
   }
+  files <- .persisted_source_files(c(payload = path))
   con <- file(path, "rb")
   header_vals <- if (profile$header_values > 0L) {
-    readBin(con, "double", n = profile$header_values, size = profile$value_bytes,
+    raw <- .window_read_raw(con, profile$header_values * profile$value_bytes, call = call)
+    readBin(raw, "double", n = profile$header_values, size = profile$value_bytes,
             endian = profile$endian)
   } else {
     numeric(0)
@@ -175,7 +177,7 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
     wavelength_unit = if (spectral) profile$wavelength_unit else NULL,
     pixel_size = c(1, 1), pixel_unit = "px",
     dtype = if (profile$value_bytes == 4L) "float32" else "float64",
-    handle = list(dat = normalizePath(path), profile = unclass(profile)),
+    handle = list(dat = normalizePath(path), profile = unclass(profile), files = files),
     meta = list(
       vendor = "Diaspective Vision Tivita", format = "SpecCube",
       profile = profile$name, profile_source = source_of_profile,
@@ -184,6 +186,8 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
       byte_order = profile$endian, interleave = "tivita_x_y_band",
       axis_order = "y,x,band", value_unit = value_unit %||% profile$value_unit,
       window_read = TRUE, calibration = list(status = "missing"),
+      reader_contract = list(axes = "yxb", samples = "raw-scalar-v1"),
+      capabilities = .window_capabilities("binary"),
       calibration_digest = NA_character_,
       profile_digest = .digest_json(c(unclass(profile)[setdiff(names(profile), "wavelengths")],
                                       list(wavelengths = as.list(profile$wavelengths))))
@@ -192,10 +196,12 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
 }
 
 # Windowed SpecCube read. Storage index of (x, y, band), zero-based:
-# header + ((x * height + y) * bands + band) * value_bytes.
+# header + ((x * height + y) * bands + band) * value_bytes. Each column of the
+# window is one contiguous run of ny * bands values.
 .tivita_read_window <- function(dat, profile, xrange, yrange, bands) {
   nx <- xrange[2] - xrange[1] + 1L
   ny <- yrange[2] - yrange[1] + 1L
+  .window_budget(nx, ny, length(bands))
   H <- as.double(profile$height)
   B <- as.double(profile$bands)
   vb <- profile$value_bytes
@@ -207,14 +213,13 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
     x <- xrange[1] - 1 + ix - 1
     off <- hb + ((x * H + (yrange[1] - 1)) * B) * vb
     seek(con, where = off, origin = "start", rw = "read")
-    v <- readBin(con, "double", n = ny * profile$bands, size = vb, endian = profile$endian)
-    if (length(v) != ny * profile$bands) {
-      .at_abort("The SpecCube payload ended before the requested window.", code = "PAYLOAD_SHORT")
-    }
+    raw <- .window_read_raw(con, ny * profile$bands * vb)
+    v <- readBin(raw, "double", n = ny * profile$bands, size = vb, endian = profile$endian)
     m <- matrix(v, nrow = profile$bands) # [band, y]
     out[, ix, ] <- t(m[bands, , drop = FALSE])
   }
   attr(out, "file_bytes") <- nx * ny * as.double(profile$bands) * vb
+  .read_telemetry_add(decoded_bytes = 8 * length(out))
   out
 }
 

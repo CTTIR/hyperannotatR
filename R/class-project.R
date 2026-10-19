@@ -86,6 +86,38 @@ new_annot_project <- function(image,
   )
 }
 
+.valid_roi_id <- function(id) .is_string(id) && nzchar(id)
+
+# Preserve each first valid incoming identifier. Collisions and invalid IDs are
+# re-minted against the complete occupied and incoming ID sets, so a generated
+# ID cannot accidentally take a valid identifier that appears later.
+.unique_layer_roi_ids <- function(layers, occupied = character()) {
+  incoming <- unlist(lapply(layers, function(layer) {
+    vapply(layer$rois, function(roi) {
+      if (.valid_roi_id(roi$id)) roi$id else NA_character_
+    }, character(1))
+  }), use.names = FALSE)
+  reserved <- unique(c(occupied, incoming[!is.na(incoming)]))
+  used <- unique(occupied)
+  for (layer_i in seq_along(layers)) {
+    for (roi_i in seq_along(layers[[layer_i]]$rois)) {
+      roi <- layers[[layer_i]]$rois[[roi_i]]
+      if (.valid_roi_id(roi$id) && !roi$id %in% used) {
+        used <- c(used, roi$id)
+        next
+      }
+      repeat {
+        candidate <- .new_id("roi")
+        if (!candidate %in% c(reserved, used)) break
+      }
+      roi$id <- candidate
+      layers[[layer_i]]$rois[[roi_i]] <- roi
+      used <- c(used, candidate)
+    }
+  }
+  layers
+}
+
 # ---- Constructor -----------------------------------------------------------
 
 #' Create an annotation project
@@ -108,6 +140,7 @@ new_annot_project <- function(image,
 at_project <- function(image, layers = list(), ..., call = rlang::caller_env()) {
   .check_image(image, call = call)
   layers <- .normalize_layers(layers, call = call)
+  layers <- .unique_layer_roi_ids(layers)
   provenance <- list(
     created          = .now(),
     modified         = .now(),
@@ -127,7 +160,10 @@ at_project <- function(image, layers = list(), ..., call = rlang::caller_env()) 
 #' @param project An [annot_project].
 #' @param layer An [annot_layer] with a name not already used in the project.
 #' @param call The calling environment, for error reporting.
-#' @return A new [annot_project] with the layer added. The input is unchanged.
+#' @return A new [annot_project] with the layer added. ROIs in `layer` whose
+#'   identifiers are missing, already used in the project, or repeated within
+#'   the layer are re-minted; the first occurrence of each valid id is kept.
+#'   The input is unchanged.
 #' @family projects
 #' @export
 at_add_layer <- function(project, layer, call = rlang::caller_env()) {
@@ -142,6 +178,10 @@ at_add_layer <- function(project, layer, call = rlang::caller_env()) {
       call = call
     )
   }
+  layer <- .unique_layer_roi_ids(
+    stats::setNames(list(layer), layer$name),
+    occupied = .all_roi_ids(project)
+  )[[1L]]
   project$layers[[layer$name]] <- layer
   .log_edit(project, "add_layer", layer$name)
 }
@@ -194,8 +234,13 @@ at_add_roi <- function(project, layer, roi, call = rlang::caller_env()) {
       call = call
     )
   }
-  if (roi$id %in% .all_roi_ids(project)) {
-    roi$id <- .new_id("roi")
+  occupied <- .all_roi_ids(project)
+  if (!.valid_roi_id(roi$id) || roi$id %in% occupied) {
+    repeat {
+      candidate <- .new_id("roi")
+      if (!candidate %in% occupied) break
+    }
+    roi$id <- candidate
   }
   project$layers[[layer]] <- at_layer_add(project$layers[[layer]], roi)
   .log_edit(project, "add_roi", paste0(layer, "/", roi$id))
@@ -261,8 +306,8 @@ at_layers <- function(project, call = rlang::caller_env()) {
 #' Return a tidy table of ROIs, optionally filtered by layer and/or label.
 #'
 #' Coordinates in the `geometry` column, together with `area_px` and the
-#' centroid, are expressed at pyramid level 0; the `level` column records the
-#' level at which each ROI was originally defined.
+#' centroid, are expressed at pyramid level 0. The `level` column is 0;
+#' `source_level` records the stored level at which each ROI was defined.
 #'
 #' @param project An [annot_project].
 #' @param layer Optional single layer name to filter to.
@@ -276,7 +321,8 @@ at_layers <- function(project, call = rlang::caller_env()) {
 #'     \item{`layer`}{Layer name (character).}
 #'     \item{`label`}{Class label (character).}
 #'     \item{`geom_type`}{Geometry type, e.g. `"POLYGON"` (character).}
-#'     \item{`level`}{Reference pyramid level (integer).}
+#'     \item{`level`}{Coordinate pyramid level, always 0 (integer).}
+#'     \item{`source_level`}{Stored ROI reference level (integer provenance).}
 #'     \item{`area_px`}{Area in level-0 pixels (double); `NA` for points/lines.}
 #'     \item{`centroid_x`,`centroid_y`}{Centroid at level 0 (double).}
 #'     \item{`n_vertices`}{Vertex count (integer).}
@@ -286,6 +332,9 @@ at_layers <- function(project, call = rlang::caller_env()) {
 #'     \item{`geometry`}{The `sf` geometry column (`sfc`), at level 0.}
 #'   }
 #'   Returns a 0-row tibble with these columns if no ROIs match.
+#' @details Older tables used `level` for the stored reference level despite
+#'   returning level-0 geometry. Consumers needing that provenance must now use
+#'   `source_level`. The stored ROI geometry, level, and identifier are unchanged.
 #' @family projects
 #' @seealso [at_layers()], `at_mask()`
 #' @export
@@ -309,14 +358,8 @@ at_rois <- function(project, layer = NULL, label = NULL,
     }
     Ls <- Ls[layer]
   }
-  rois <- list()
-  lyr_names <- character()
-  for (nm in names(Ls)) {
-    for (r in Ls[[nm]]$rois) {
-      rois <- c(rois, list(r))
-      lyr_names <- c(lyr_names, nm)
-    }
-  }
+  rois <- unlist(lapply(Ls, `[[`, "rois"), recursive = FALSE, use.names = FALSE)
+  lyr_names <- rep(names(Ls), vapply(Ls, function(L) length(L$rois), integer(1)))
   if (!is.null(label)) {
     label <- as.character(label)
     keep <- vapply(rois, function(r) r$label %in% label, logical(1))
@@ -331,7 +374,8 @@ at_rois <- function(project, layer = NULL, label = NULL,
 #' Validate a project's invariants
 #'
 #' Check that layer names are unique, ROI identifiers are unique across the
-#' project, and all geometries are valid.
+#' project, every ROI has one geometry at a pyramid level the image has, and
+#' all geometries are valid.
 #'
 #' @param project An [annot_project].
 #' @param call The calling environment, for error reporting.
@@ -340,7 +384,7 @@ at_rois <- function(project, layer = NULL, label = NULL,
 #' @family projects
 #' @seealso `at_check_geometry()`
 #' @export
-#' @examples
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' proj <- at_validate(at_example_project())
 at_validate <- function(project, call = rlang::caller_env()) {
   .check_project(project, call = call)
@@ -360,8 +404,24 @@ at_validate <- function(project, call = rlang::caller_env()) {
       call = call
     )
   }
+  n_levels <- project$image$n_levels %||% 1L
   for (nm in names(project$layers)) {
     for (r in project$layers[[nm]]$rois) {
+      if (!inherits(r$geometry, "sfc") || length(r$geometry) != 1L) {
+        cli::cli_abort(
+          c("ROI {.val {r$id}} in layer {.val {nm}} must hold exactly one geometry.",
+            "x" = "It holds {length(r$geometry)}."),
+          call = call
+        )
+      }
+      if (!is.numeric(r$level) || length(r$level) != 1L || is.na(r$level) ||
+          r$level < 0L || r$level > n_levels - 1L) {
+        cli::cli_abort(
+          c("ROI {.val {r$id}} in layer {.val {nm}} refers to a pyramid level the image does not have.",
+            "x" = "Level {r$level}; the image has levels {.val {seq_len(n_levels) - 1L}}."),
+          call = call
+        )
+      }
       if (!isTRUE(sf::st_is_valid(r$geometry))) {
         cli::cli_abort(
           c("ROI {.val {r$id}} in layer {.val {nm}} has invalid geometry.",
@@ -382,7 +442,7 @@ at_validate <- function(project, call = rlang::caller_env()) {
 #'   per-label ROI counts, and total area per label.
 #' @family projects
 #' @export
-#' @examples
+#' @examplesIf requireNamespace("magick", quietly = TRUE)
 #' at_summary(at_example_project())
 at_summary <- function(project, call = rlang::caller_env()) {
   .check_project(project, call = call)

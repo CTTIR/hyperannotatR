@@ -8,7 +8,7 @@ at_session(
   paths,
   labels = character(),
   layers = NULL,
-  out_dir = tempdir(),
+  out_dir = .session_out_dir(),
   autosave = TRUE,
   ...,
   call = rlang::caller_env()
@@ -17,13 +17,17 @@ at_session(
 \arguments{
 \item{paths}{Character vector of image file paths forming the queue.}
 
-\item{labels}{Character vector of the global label vocabulary.}
+\item{labels}{Character vector of the global label vocabulary. Duplicates
+are dropped.}
 
 \item{layers}{An \link{annot_layer}, a list of them, or \code{NULL}. Applied as a
 template to every image visited.}
 
-\item{out_dir}{Directory for autosave and exports. Defaults to a session
-temporary directory.}
+\item{out_dir}{Directory for autosave and exports. Defaults to a new,
+unique directory under \code{\link[=tempdir]{tempdir()}}, which R deletes when the process
+ends: pass a persistent directory to keep autosaved work. Separate
+sessions never share a default directory. A relative path is resolved
+against the working directory when the session is created.}
 
 \item{autosave}{Logical; whether to autosave on annotation commits. Default
 \code{TRUE}.}
