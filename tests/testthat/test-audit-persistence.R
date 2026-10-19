@@ -69,7 +69,7 @@ test_that("A22 project names cannot escape mask export directory", {
   expect_identical(rc$status, "ok")
   expect_true(all(file.exists(rc$path)))
   expect_false(file.exists(file.path(dir,"escaped.tif")))
-  expect_true(all(startsWith(normalizePath(rc$path),paste0(normalizePath(out),"/"))))
+  expect_true(all(startsWith(normalizePath(rc$path,winslash="/"),paste0(normalizePath(out,winslash="/"),"/"))))
 })
 
 test_that("A23 default session path honours overwrite FALSE", {
