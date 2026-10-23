@@ -373,7 +373,7 @@ mod_canvas_server <- function(id, rv) {
       if (is.null(rv$project)) return(htmlwidgets::createWidget("atcanvas",
         x = list(tileSource = list(width = 1, height = 1, displayError = rv$display_error),
           identity = .state_stamp(rv), annotations = list(features = list()), tool = "pan"),
-        package = "hyperannotatR"))
+        package = "hyperannotatR", dependencies = .canvas_dependencies()))
       at_canvas(rv$project$image, project = rv$project, tool = rv$tool %||% "pan",
                 view = rv$view,
                 options = list(

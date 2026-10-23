@@ -445,3 +445,26 @@ test_that("the canvas shows an 8-bit image with its stored values and stretches 
   stretched <- .view_display_array(multiplex, NULL)
   expect_equal(range(stretched), c(0, 1))
 })
+
+test_that("canvas script URLs change with content for both Shiny and standalone widgets", {
+  skip_if_not_installed("magick")
+  path <- tempfile(fileext = ".js")
+  writeLines("// first build", path)
+  first <- .canvas_asset_version("0.3.0", path)
+  expect_identical(.canvas_asset_version("0.3.0", path), first)
+  writeLines("// patched build", path)
+  second <- .canvas_asset_version("0.3.0", path)
+  expect_false(identical(first, second))
+  expect_gt(package_version(first), package_version("0.3.0"))
+  binding <- function(deps) {
+    Filter(function(d) d$name == "atcanvas-binding",
+           htmltools::resolveDependencies(deps))[[1]]
+  }
+  expected <- .canvas_asset_version(as.character(utils::packageVersion("hyperannotatR")),
+    system.file("htmlwidgets", "atcanvas.js", package = "hyperannotatR"))
+  expect_identical(binding(htmltools::htmlDependencies(atCanvasOutput("x")))$version,
+                   expected)
+  widget <- at_canvas(at_example_image("tissue"))
+  html <- htmltools::as.tags(widget)
+  expect_identical(binding(htmltools::findDependencies(html))$version, expected)
+})

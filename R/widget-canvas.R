@@ -18,6 +18,26 @@
 .canvas_tool_names <- c("pan", "rect", "polygon", "freehand", "circle", "point", "reflection", "edit",
                         "erase", "probe", "select")
 
+# Local builds can change without changing the package version. Shiny caches
+# dependency URLs, so include the script content in the binding's version.
+# Numeric components keep htmltools' dependency ordering well-defined.
+.canvas_asset_version <- function(version, path) {
+  hash <- digest::digest(file = path, algo = "sha256")
+  paste(version, strtoi(substr(hash, 1L, 7L), 16L),
+        strtoi(substr(hash, 8L, 14L), 16L), sep = ".")
+}
+
+.canvas_dependencies <- function() {
+  deps <- htmlwidgets::getDependency("atcanvas", package = "hyperannotatR")
+  for (i in seq_along(deps)) {
+    if (identical(deps[[i]]$name, "atcanvas-binding")) {
+      deps[[i]]$version <- .canvas_asset_version(deps[[i]]$version,
+        system.file("htmlwidgets", "atcanvas.js", package = "hyperannotatR"))
+    }
+  }
+  deps
+}
+
 .canvas_deps_ok <- function(call = rlang::caller_env()) {
   missing <- character()
   for (p in c("htmlwidgets", "htmltools")) {
@@ -356,6 +376,7 @@ at_canvas <- function(img, project = NULL, tool = "pan", width = NULL,
   htmlwidgets::createWidget(
     name = "atcanvas", x = x, width = width, height = height,
     package = "hyperannotatR", elementId = elementId,
+    dependencies = .canvas_dependencies(),
     sizingPolicy = htmlwidgets::sizingPolicy(defaultWidth = "100%", defaultHeight = 600,
                                              browser.fill = TRUE)
   )
@@ -368,7 +389,9 @@ at_canvas <- function(img, project = NULL, tool = "pan", width = NULL,
 #' @family shiny
 #' @export
 atCanvasOutput <- function(outputId, width = "100%", height = "600px") {
-  htmlwidgets::shinyWidgetOutput(outputId, "atcanvas", width, height, package = "hyperannotatR")
+  output <- htmlwidgets::shinyWidgetOutput(outputId, "atcanvas", width, height,
+                                          package = "hyperannotatR")
+  htmltools::attachDependencies(output, .canvas_dependencies(), append = FALSE)
 }
 
 #' Render an annotation canvas in Shiny

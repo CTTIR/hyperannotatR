@@ -1,5 +1,7 @@
 # hyperannotatR (development)
 
+* Canvas script URLs now change with their contents, preventing browsers from
+  retaining older drawing code after a local app update at the same version.
 * The annotation app offers three point marker display sizes and three fixed
   round-area diameters (5, 10 and 20 image pixels), plus drag-to-size circles.
   Point sizes persist per ROI without changing their single-pixel masks.

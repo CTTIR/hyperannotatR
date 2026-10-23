@@ -30,9 +30,19 @@ tryCatch({
     app$wait_for_js(sprintf("window.atcanvasInspect('canvas-canvas').tool === '%s'", name))
   }
   at <- function(x, y) {
-    app$run_js(sprintf("(function(){var p=window.atcanvasInspect('canvas-canvas').toClient(%f,%f);var c=document.querySelector('#canvas-canvas canvas');c.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,clientX:p[0],clientY:p[1]}));c.dispatchEvent(new MouseEvent('mouseup',{bubbles:true,clientX:p[0],clientY:p[1]}));})()", x, y))
+    app$run_js("document.querySelector('#canvas-canvas canvas').scrollIntoView({block:'center'})")
+    p <- app$get_js(sprintf("window.atcanvasInspect('canvas-canvas').toClient(%f,%f)", x, y))
+    browser <- app$get_chromote_session()
+    browser$Input$dispatchMouseEvent(type = 'mousePressed',
+      x = p[[1]], y = p[[2]], button = 'left', clickCount = 1)
+    browser$Input$dispatchMouseEvent(type = 'mouseReleased',
+      x = p[[1]], y = p[[2]], button = 'left', clickCount = 1)
   }
   ready()
+  binding <- Filter(function(d) d$name == 'atcanvas-binding', .canvas_dependencies())[[1]]
+  stopifnot(app$get_js(sprintf(
+    "Array.from(document.scripts).some(s => s.src.endsWith('atcanvas-binding-%s/atcanvas.js'))",
+    binding$version)))
   tool('point')
   app$wait_for_js("document.getElementById('canvas-point_radius').closest('.shiny-input-container').offsetParent !== null")
   app$set_inputs(`canvas-point_radius` = '8')

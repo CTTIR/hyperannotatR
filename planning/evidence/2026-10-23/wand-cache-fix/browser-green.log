@@ -1,0 +1,5 @@
+Registered S3 method overwritten by 'stars':
+  method                  from
+  st_interpolate_aw.stars sf
+PASS: visible size selectors, three fixed diameters, point size persistence,
+reflection preview/discard/accept and exact saved 20-pixel geometry.
