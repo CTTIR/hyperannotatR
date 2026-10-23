@@ -1,0 +1,61 @@
+Registered S3 method overwritten by 'stars':
+  method                  from
+  st_interpolate_aw.stars sf  
+✔ | F W  S  OK | Context
+
+⠏ |          0 | app-modules-extra                                              
+⠋ |          1 | app-modules-extra                                              Loading required package: shiny
+
+⠸ |         24 | app-modules-extra                                              
+⠴ |         26 | app-modules-extra                                              
+⠇ |         29 | app-modules-extra                                              
+⠏ |         30 | app-modules-extra                                              
+⠼ |         35 | app-modules-extra                                              
+⠴ |         36 | app-modules-extra                                              
+⠦ |         37 | app-modules-extra                                              
+⠧ |         38 | app-modules-extra                                              
+⠹ |         43 | app-modules-extra                                              
+⠼ |         45 | app-modules-extra                                              
+⠴ |         46 | app-modules-extra                                              
+⠧ |         48 | app-modules-extra                                              
+⠸ |         54 | app-modules-extra                                              
+⠼ |         55 | app-modules-extra                                              
+⠦ |         57 | app-modules-extra                                              
+⠋ |         61 | app-modules-extra                                              
+⠴ |         66 | app-modules-extra                                              
+⠧ |         68 | app-modules-extra                                              
+⠦ |         77 | app-modules-extra                                              
+⠇ |         79 | app-modules-extra                                              
+⠏ |         80 | app-modules-extra                                              
+⠋ |         81 | app-modules-extra                                              
+⠙ |         82 | app-modules-extra                                              
+⠴ |         86 | app-modules-extra                                              
+⠏ |         90 | app-modules-extra                                              
+⠹ |         93 | app-modules-extra                                              
+⠸ |         94 | app-modules-extra                                              
+⠧ |         98 | app-modules-extra                                              
+⠏ |        100 | app-modules-extra                                              
+⠙ |        102 | app-modules-extra                                              
+⠸ |        104 | app-modules-extra                                              
+⠼ |        105 | app-modules-extra                                              
+⠧ |        108 | app-modules-extra                                              
+⠙ |        112 | app-modules-extra                                              
+⠹ |        113 | app-modules-extra                                              
+⠼ |        115 | app-modules-extra                                              
+⠦ |        117 | app-modules-extra                                              
+⠸ |        124 | app-modules-extra                                              
+⠼ |        135 | app-modules-extra                                              
+⠴ |        136 | app-modules-extra                                              
+⠇ |        139 | app-modules-extra                                              
+⠙ |        142 | app-modules-extra                                              
+⠹ |        143 | app-modules-extra                                              
+⠼ |        145 | app-modules-extra                                              
+⠦ |        147 | app-modules-extra                                              
+⠇ |        149 | app-modules-extra                                              
+⠹ |        153 | app-modules-extra                                              
+✔ |        155 | app-modules-extra [39.3s]
+
+══ Results ═════════════════════════════════════════════════════════════════════
+Duration: 39.3 s
+
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 155 ]

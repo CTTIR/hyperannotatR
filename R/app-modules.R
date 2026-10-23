@@ -271,7 +271,7 @@ mod_layers_server <- function(id, rv) {
 
 # ---- Canvas -----------------------------------------------------------------------
 
-.canvas_tools <- c("pan", "rect", "polygon", "freehand", "circle", "point", "edit", "erase",
+.canvas_tools <- c("pan", "rect", "polygon", "freehand", "circle", "point", "reflection", "edit", "erase",
                    "probe", "select")
 .read_only_tools <- c("pan", "probe", "select")
 
@@ -280,11 +280,26 @@ mod_canvas_ui <- function(id) {
   shiny::tagList(
     shiny::div(
       class = "at-toolbar", role = "toolbar", `aria-label` = "drawing tools",
-      lapply(.canvas_tools, function(t) .at_action(ns(paste0("tool_", t)), t, `aria-pressed` = "false")),
+      lapply(.canvas_tools, function(t) .at_action(ns(paste0("tool_", t)),
+        switch(t, circle = "Round area", reflection = "Reflection wand", t),
+        `aria-pressed` = "false")),
       .at_action(ns("undo"), "Undo"), .at_action(ns("redo"), "Redo"),
       .at_action(ns("copy"), "Copy previous")
     ),
-    shiny::p(class = "at-progress", "Focus the canvas with Tab. Arrows move 1 image pixel (Shift: 10). Enter or Space anchors a point/rectangle; polygon: Space adds a vertex, Enter finishes. Escape cancels. Shift+Enter saves, completes and advances."),
+    shiny::conditionalPanel("output.tool == 'point'", ns = ns,
+      shiny::selectInput(ns("point_radius"), "Point marker size (display only)",
+        c("Small - 4 px" = 2, "Medium - 8 px" = 4, "Large - 16 px" = 8), selected = 4)),
+    shiny::conditionalPanel("output.tool == 'circle'", ns = ns,
+      shiny::selectInput(ns("circle_radius"), "Round area diameter (image pixels)",
+        c("Small - 5 px" = 2.5, "Medium - 10 px" = 5,
+          "Large - 20 px" = 10, "Drag to size" = 0), selected = 5)),
+    shiny::conditionalPanel("output.tool == 'reflection'", ns = ns,
+      shiny::selectInput(ns("reflection_tolerance"), "Reflection extent",
+        c("Tight" = 0.04, "Normal" = 0.1, "Broad" = 0.18), selected = 0.1),
+      shiny::p(class = "at-progress",
+        "Choose your reflection label, then click a bright reflection. Review the dashed outline: pale tissue can also appear bright."),
+      shiny::uiOutput(ns("reflection_review"))),
+    shiny::p(class = "at-progress", "Focus the canvas with Tab. Arrows move 1 image pixel (Shift: 10). Enter or Space places a point or fixed round area, or anchors a rectangle; polygon: Space adds a vertex, Enter finishes. Escape cancels. Shift+Enter saves, completes and advances."),
     shiny::div(role = "status", `aria-live` = "polite", class = "atcanvas-status",
                shiny::textOutput(ns("display"))),
     shiny::div(
@@ -296,7 +311,17 @@ mod_canvas_ui <- function(id) {
 
 # Turn a drawn GeoJSON feature (level-0 pixels) into an annot_roi.
 .feature_to_roi <- function(feature, label, level = 0L) {
-  at_roi_from_geojson(feature, label = label, level = level)
+  roi <- at_roi_from_geojson(feature, label = label, level = level)
+  radius <- feature$properties$attributes$point_radius
+  if (!is.null(radius) && identical(feature$geometry$type, "Point")) {
+    if (!is.numeric(radius) || length(radius) != 1L ||
+        !is.finite(radius) || radius <= 0 || radius > 100) {
+      .at_abort("Point marker radius must be a number between 0 and 100.",
+                class = "validation", code = "POINT_SIZE")
+    }
+    roi$attributes$point_radius <- radius
+  }
+  roi
 }
 
 # Copy every ROI of `from` into `to` as fresh, editable ROIs (new ids,
@@ -310,6 +335,7 @@ mod_canvas_ui <- function(id) {
     if (isTRUE(to$layers[[nm]]$style$locked)) next
     for (r in from$layers[[nm]]$rois) {
       cp <- at_roi_from_sf(r$geometry, label = r$label, level = r$level, source = "copied")
+      cp$attributes$point_radius <- r$attributes$point_radius
       to <- at_add_roi(to, nm, cp)
     }
   }
@@ -328,6 +354,17 @@ mod_canvas_server <- function(id, rv) {
   shiny::moduleServer(id, function(input, output, session) {
     .state_init(rv)
     proxy <- at_canvas_proxy("canvas", session = session)
+    .reflection_server(input, output, session, rv)
+    output$tool <- shiny::renderText(rv$tool %||% "pan")
+    shiny::outputOptions(output, "tool", suspendWhenHidden = FALSE)
+    shiny::observeEvent(input$point_radius, {
+      if (input$point_radius %in% c("2", "4", "8"))
+        rv$point_radius <- as.numeric(input$point_radius)
+    })
+    shiny::observeEvent(input$circle_radius, {
+      if (input$circle_radius %in% c("0", "2.5", "5", "10"))
+        rv$circle_radius <- as.numeric(input$circle_radius)
+    })
     # Render on image / ROI / tool / band-view change. The widget caches the
     # base image by data URI and keeps the viewport, so an ROI edit redraws
     # the overlay only. The identity and the drawing target travel with the
@@ -340,6 +377,9 @@ mod_canvas_server <- function(id, rv) {
       at_canvas(rv$project$image, project = rv$project, tool = rv$tool %||% "pan",
                 view = rv$view,
                 options = list(
+                  pointRadius = rv$point_radius %||% 4,
+                  circleRadius = rv$circle_radius %||% 5,
+                  suggestion = .reflection_preview_feature(rv),
                   selection = as.list(rv$selection %||% character()),
                   creationTarget = list(
                     layer = rv$active_layer, label = rv$active_label,

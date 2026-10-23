@@ -1,3 +1,13 @@
+# hyperannotatR (development)
+
+* The annotation app offers three point marker display sizes and three fixed
+  round-area diameters (5, 10 and 20 image pixels), plus drag-to-size circles.
+  Point sizes persist per ROI without changing their single-pixel masks.
+* A reflection wand proposes the connected bright region around a clicked
+  pixel. Tight, normal and broad extent settings are available. Proposals
+  require explicit review and acceptance, preserve holes and pixel alignment,
+  and are cleared when the image, annotation target or view changes.
+
 # hyperannotatR 0.3.0
 
 * Renamed the R package to hyperannotatR and focused its scope on HSI.

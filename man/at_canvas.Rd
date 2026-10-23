@@ -22,7 +22,8 @@ at_canvas(
 \item{project}{Optional \link{annot_project} whose ROIs are shown initially.}
 
 \item{tool}{Initial tool: one of \code{"pan"}, \code{"rect"}, \code{"polygon"}, \code{"freehand"},
-\code{"circle"}, \code{"point"}, \code{"edit"}, \code{"erase"}, \code{"probe"} (emit a pixel
+\code{"circle"}, \code{"point"}, \code{"reflection"} (request a reflection proposal),
+\code{"edit"}, \code{"erase"}, \code{"probe"} (emit a pixel
 position for spectra) or \code{"select"} (emit the clicked ROI id).}
 
 \item{width, height}{Widget dimensions.}
@@ -31,7 +32,11 @@ position for spectra) or \code{"select"} (emit the clicked ROI id).}
 
 \item{options}{A list of extra options passed to the widget:
 \code{creationTarget} (a list with \code{layer}, \code{label} and \code{locked}; drawing is
-refused on a locked target) and \code{selection} (ROI ids to highlight).}
+refused on a locked target), \code{selection} (ROI ids to highlight),
+\code{pointRadius} (display radius in CSS pixels, default 4; saved with new
+points as \code{attributes$point_radius}, without changing mask membership),
+\code{circleRadius} (fixed radius in level-0 image pixels; 0/default draws by
+dragging), and \code{suggestion} (an unsaved GeoJSON feature shown dashed).}
 
 \item{view}{Optional band view passed to \code{\link[=at_tile_source]{at_tile_source()}}.}
 
@@ -64,6 +69,8 @@ drawing began. A click with the rectangle or circle tool is not a shape.}
 \item{\verb{<id>_erased}}{The erased ROI id.}
 \item{\verb{<id>_selected}}{The ids of the selected ROIs (possibly none).}
 \item{\verb{<id>_probed}}{\code{x}, \code{y}: the probed level-0 pixel position.}
+\item{\verb{<id>_reflection_seed}}{\code{x}, \code{y} and \code{target}: a clicked pixel
+for a reflection proposal. It does not create an ROI.}
 \item{\verb{<id>_viewport}}{\code{zoom}, \code{center_x}, \code{center_y} and \code{bounds}
 (\code{xmin}, \code{ymin}, \code{xmax}, \code{ymax} in level-0 pixels) after a pan or zoom.}
 \item{\verb{<id>_ready}}{\code{ready} and \code{error}: whether the image is displayed.}

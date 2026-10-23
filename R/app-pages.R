@@ -53,13 +53,21 @@ Three columns: the **queue** (left), the **canvas and tools** (middle), and
 **layers & labels** (right).
 
 - **Tools:** pan, rectangle, polygon, freehand, circle, point, edit (drag a
-  region), erase (click a region to remove it), probe and select. **Undo**,
+  region), erase (click a region to remove it), reflection wand, probe and select. **Undo**,
   **Redo** and **Copy previous** (the previous image's regions) sit next to them.
 - Pick a **layer** (anatomy / state / uncertain / artefact) -- the label list
   updates to that layer's vocabulary. Add your own layers and labels with the
   fields beneath each list.
 - Draw a region and it joins the **active layer** with the **active label**.
   Overlapping regions are expected and fine.
+- **Point:** choose a small, medium or large display marker. It remains a
+  single pixel in analytical masks. **Round area:** choose a 5, 10 or 20 image
+  pixel diameter and click its centre, or choose *Drag to size*.
+- **Reflection wand:** select a reflection label and click a bright highlight.
+  Inspect the dashed proposal, then **Accept reflection** or **Discard** it.
+  Tight/normal/broad controls connected-region growth. Pale tissue can also
+  appear bright; this tool suggests an outline, not a tissue diagnosis.
+  It supports image displays up to 2048 pixels per side.
 - Annotations autosave when enabled for the session. Otherwise press **Save**.
   The badge next to Save shows the state (*unsaved*, *saved*, *staged*,
   *committed*, *read-only*), followed by the time of the last checkpoint and its

@@ -88,7 +88,7 @@ HTMLWidgets.widget({
       imgW: 1, imgH: 1, baseImg: null, overlayImg: null, overlayAlpha: 0.5,
       zoom: 1, panX: 0, panY: 0, tool: "pan", viewW: 1, viewH: 1, scaleX: 1, scaleY: 1,
       features: [], drawing: null, selection: [], pending: [], ready: false, cursor: [0, 0],
-      viewNote: null
+      viewNote: null, pointRadius: 4, circleRadius: 0, suggestion: null
     };
     var inset = { l: 0, t: 0 };   // canvas border + padding (CSS px)
     var pendingTimer = null;
@@ -169,7 +169,8 @@ HTMLWidgets.widget({
       ctx.beginPath();
       function point(c) {
         var p = toScreen(c[0], c[1]);
-        ctx.moveTo(p[0] + 4, p[1]); ctx.arc(p[0], p[1], 4, 0, 2 * Math.PI);
+        var radius = markerRadius(props);
+        ctx.moveTo(p[0] + radius, p[1]); ctx.arc(p[0], p[1], radius, 0, 2 * Math.PI);
       }
       function line(ring, close) {
         ring.forEach(function (c, i) {
@@ -224,6 +225,7 @@ HTMLWidgets.widget({
       state.features.forEach(function (f) { drawFeature(f, "roi"); });
       state.pending.forEach(function (f) { drawFeature(f, "pending"); });
       if (state.drawing) drawFeature(state.drawing, "draw");
+      if (state.suggestion) drawFeature(state.suggestion, "draw");
       if (document.activeElement === canvas && state.keyboardCursor) {
         var cursor = toScreen(state.cursor[0], state.cursor[1]);
         ctx.beginPath(); ctx.moveTo(cursor[0]-6,cursor[1]); ctx.lineTo(cursor[0]+6,cursor[1]);
@@ -297,7 +299,11 @@ HTMLWidgets.widget({
     function pointInPolygon(pt, rings) {
       return pointInRing(pt, rings[0]) && !rings.slice(1).some(function (r) { return pointInRing(pt, r); });
     }
-    function nearPoint(pt, p) { return Math.hypot(pt[0] - p[0], pt[1] - p[1]) <= 6 / state.zoom; }
+    function markerRadius(properties) {
+      var r = properties && properties.attributes && properties.attributes.point_radius;
+      return typeof r === "number" && isFinite(r) && r > 0 && r <= 100 ? r : 4;
+    }
+    function nearPoint(pt, p, radius) { return Math.hypot(pt[0] - p[0], pt[1] - p[1]) <= (radius || 6) / state.zoom; }
     function nearLine(pt, coords) {
       for (var i = 1; i < coords.length; i++) {
         var a = coords[i - 1], b = coords[i], dx = b[0] - a[0], dy = b[1] - a[1];
@@ -316,8 +322,8 @@ HTMLWidgets.widget({
         var g = state.features[k].geometry, c = g.coordinates;
         if ((g.type === "Polygon" && pointInPolygon(ic, c)) ||
             (g.type === "MultiPolygon" && c.some(function (p) { return pointInPolygon(ic, p); })) ||
-            (g.type === "Point" && nearPoint(ic, c)) ||
-            (g.type === "MultiPoint" && c.some(function (p) { return nearPoint(ic, p); })) ||
+            (g.type === "Point" && nearPoint(ic, c, Math.max(6, markerRadius(properties)))) ||
+            (g.type === "MultiPoint" && c.some(function (p) { return nearPoint(ic, p, Math.max(6, markerRadius(properties))); })) ||
             (g.type === "LineString" && nearLine(ic, c)) ||
             (g.type === "MultiLineString" && c.some(function (l) { return nearLine(ic, l); }))) return state.features[k];
       }
@@ -390,7 +396,7 @@ HTMLWidgets.widget({
       return true;
     }
 
-    var drawingTools = ["point", "rect", "polygon", "freehand", "circle"];
+    var drawingTools = ["point", "rect", "polygon", "freehand", "circle", "reflection"];
     function down(s, src) {
       // Focusing must not scroll a partly visible canvas under the pointer.
       canvas.focus({ preventScroll: true }); state.keyboardCursor = false; render();
@@ -410,10 +416,19 @@ HTMLWidgets.widget({
         drag = { type: "rect", src: src, s0: s, last: s };
         state.drawing = { type: "Feature", geometry: { type: "Polygon", coordinates: [[[ic[0], ic[1]]]] }, _start: ic };
       } else if (tool === "circle") {
-        drag = { type: "circle", src: src, s0: s, last: s };
-        state.drawing = { type: "Feature", geometry: { type: "Polygon", coordinates: [[[ic[0], ic[1]]]] }, _center: ic };
+        if (state.circleRadius > 0) {
+          emitCreated({type: "Polygon", coordinates: [circlePoly(ic, state.circleRadius)]});
+          cancelGesture();
+        } else {
+          drag = { type: "circle", src: src, s0: s, last: s };
+          state.drawing = { type: "Feature", geometry: { type: "Polygon", coordinates: [[[ic[0], ic[1]]]] }, _center: ic };
+        }
       } else if (tool === "point") {
         emitCreated({ type: "Point", coordinates: [ic[0], ic[1]] });
+        cancelGesture();
+      } else if (tool === "reflection") {
+        shinyInput("reflection_seed", {x: ic[0], y: ic[1], target: gestureTarget}, gesture);
+        cancelGesture();
       } else if (tool === "probe") {
         shinyInput("probed", { x: ic[0], y: ic[1] });
       } else if (tool === "select") {
@@ -654,7 +669,10 @@ HTMLWidgets.widget({
         }
         render(); announce("Cursor " + state.cursor.join(", ") + (state.drawing ? "; drawing in progress" : "")); return;
       }
-      if (!["point","rect","polygon"].includes(state.tool)) { announce("Choose point, rectangle or polygon for keyboard drawing."); return; }
+      if (!["point","rect","polygon","reflection"].includes(state.tool) &&
+          !(state.tool === "circle" && state.circleRadius > 0)) {
+        announce("Choose point, fixed round area, rectangle, polygon or reflection wand for keyboard drawing."); return;
+      }
       if (state.creationTarget && state.creationTarget.locked) { announce("This layer is locked. Select an unlocked layer to draw."); return; }
       if (!gesture) {
         gesture = identity();
@@ -663,6 +681,10 @@ HTMLWidgets.widget({
       var c = state.cursor.slice();
       if (state.tool === "point") {
         emitCreated({type:"Point",coordinates:c}); cancelGesture();
+      } else if (state.tool === "circle") {
+        emitCreated({type:"Polygon",coordinates:[circlePoly(c,state.circleRadius)]}); cancelGesture();
+      } else if (state.tool === "reflection") {
+        shinyInput("reflection_seed", {x:c[0], y:c[1], target:gestureTarget}, gesture); cancelGesture();
       } else if (state.tool === "rect") {
         if (!state.drawing) state.drawing = {type:"Feature",geometry:{type:"Polygon",coordinates:[[c,c,c,c,c]]},_start:c};
         else {
@@ -694,6 +716,7 @@ HTMLWidgets.widget({
     function emitCreated(geometry) {
       if (!state.ready || (state.creationTarget && state.creationTarget.locked)) return;
       var f = { type: "Feature", geometry: geometry, properties: {} };
+      if (geometry.type === "Point") f.properties.attributes = {point_radius: state.pointRadius};
       if (gestureTarget) f.target = gestureTarget;
       if (window.Shiny && el.id) { state.pending.push(f); armPending(); }
       else state.features.push(f);  // a static page has no one to confirm it
@@ -784,6 +807,12 @@ HTMLWidgets.widget({
         state.tool = x.tool || "pan";
         canvas.style.cursor = cursorFor(state.tool);
         state.creationTarget = x.options && x.options.creationTarget;
+        var opts = x.options || {};
+        state.pointRadius = typeof opts.pointRadius === "number" && isFinite(opts.pointRadius) &&
+          opts.pointRadius > 0 && opts.pointRadius <= 100 ? opts.pointRadius : 4;
+        state.circleRadius = typeof opts.circleRadius === "number" && isFinite(opts.circleRadius) &&
+          opts.circleRadius > 0 && opts.circleRadius <= 1000 ? opts.circleRadius : 0;
+        state.suggestion = opts.suggestion || null;
         if (x.options && x.options.selection !== undefined) state.selection = toArray(x.options.selection);
         state.imgW = x.tileSource.width;
         state.imgH = x.tileSource.height;

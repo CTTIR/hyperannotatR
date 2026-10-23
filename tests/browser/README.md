@@ -37,6 +37,19 @@ qualification):
 node --test tests/audit/widget.test.js tests/audit/keyboard.test.js
 ```
 
+The drawing-controls runner uses shinytest2 with an isolated synthetic RGB
+image. It checks visible point/circle size selectors, saved point sizes, all
+three fixed circle diameters, and reflection preview/discard/accept without
+writing to a user's annotation queue:
+
+```sh
+NOT_CRAN=true CHROMOTE_CHROME=/path/to/chrome \
+  Rscript tests/browser/drawing-tools.R
+```
+
+`ANNOTATR_BROWSER_ARTIFACT_DIR` selects its output directory, including a
+screenshot of the unsaved reflection proposal.
+
 ## Browser protocol
 
 Every browser action is an envelope `{entry_id, revision, payload}`: the queue
