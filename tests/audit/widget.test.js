@@ -31,7 +31,7 @@ function harness(delayed = false, canvasSize = 100, extra = {}) {
     };
     canvas.getContext = () => ({
       setTransform() {}, beginPath() {}, moveTo(x,y) { canvas.moves.push([x,y]); }, lineTo(x,y) { canvas.commands.push(["lineTo",x,y]); },
-      arc(x,y) { canvas.commands.push(["arc",x,y]); }, closePath() { canvas.commands.push(["closePath"]); }, fill(rule) { canvas.commands.push(["fill",rule]); }, stroke() {},
+      arc(x,y,r) { canvas.commands.push(["arc",x,y]); canvas.lastRadius = r; }, closePath() { canvas.commands.push(["closePath"]); }, fill(rule) { canvas.commands.push(["fill",rule]); }, stroke() {},
       clearRect() { canvas.moves = []; canvas.commands = []; canvas.pixels = null; }, drawImage(im) { canvas.pixels = im.uri; }
     });
     return canvas;
@@ -384,4 +384,40 @@ test('a trusted double-click finishes a polygon even when the clicks were slower
   const ring = named(h,'_created').at(-1).value.payload.geometry.coordinates[0];
   assert.equal(ring.length,5,'four distinct vertices plus the closing one');
   assert.equal(inspect(h,'a').vertices,0);
+});
+
+
+for (const radius of [2, 4, 8]) test('point marker retains radius ' + radius, () => {
+  const h = harness(), a = h.create('a');
+  a.render({tool:'point', options:{pointRadius:radius}}); a.click(50,50);
+  const f = h.inputs.at(-1).value.payload;
+  assert.equal(f.geometry.type, 'Point');
+  assert.equal(f.properties.attributes.point_radius, radius);
+  assert.equal(a.canvas.lastRadius, radius);
+  a.render({annotations:{features:[f]}, options:{pointRadius:2}});
+  assert.equal(a.canvas.lastRadius, radius, 'saved marker keeps its own size');
+});
+
+for (const radius of [2.5, 5, 10]) test('fixed circle covers image radius ' + radius, () => {
+  const h = harness(), a = h.create('a');
+  a.render({tool:'circle', options:{circleRadius:radius}});
+  h.handlers['atcanvas-fit_bounds']({id:'a',bbox:[25,25,75,75]});
+  a.click(50,50);
+  const f = h.inputs.at(-1).value.payload;
+  assert.equal(f.geometry.type, 'Polygon');
+  for (const p of f.geometry.coordinates[0])
+    assert.ok(Math.abs(Math.hypot(p[0]-50,p[1]-50)-radius) < 1e-9);
+  assert.deepEqual(f.geometry.coordinates[0][0], f.geometry.coordinates[0].at(-1));
+});
+
+test('fixed circle keyboard placement and reflection seed emit the intended action', () => {
+  const h = harness(), a = h.create('a');
+  a.render({tool:'circle', options:{circleRadius:5}});
+  a.canvas.events.keydown({key:'Enter',preventDefault(){},stopPropagation(){}});
+  assert.equal(h.inputs.at(-1).value.payload.geometry.type, 'Polygon');
+  a.render({tool:'reflection',options:{creationTarget:{layer:'Artifacts',label:'reflectations'}}});
+  a.click(40,30);
+  assert.equal(h.inputs.at(-1).name, 'a_reflection_seed');
+  assert.deepEqual(JSON.parse(JSON.stringify(h.inputs.at(-1).value.payload)),
+    {x:40,y:30,target:{layer:'Artifacts',label:'reflectations'}});
 });

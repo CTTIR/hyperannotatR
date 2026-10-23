@@ -1,0 +1,92 @@
+✖ point marker retains radius 2 (4.777791ms)
+✖ point marker retains radius 4 (0.973375ms)
+✖ point marker retains radius 8 (0.579167ms)
+✖ fixed circle covers image radius 2.5 (0.823ms)
+✖ fixed circle covers image radius 5 (0.598417ms)
+✖ fixed circle covers image radius 10 (0.5255ms)
+✖ fixed circle keyboard placement and reflection seed emit the intended action (0.609667ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 0
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 156.687375
+
+✖ failing tests:
+
+test at tests/audit/widget.test.js:390:33
+✖ point marker retains radius 2 (4.777791ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'point_radius')
+      at TestContext.<anonymous> (<workspace>/tests/audit/widget.test.js:395:40)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+
+test at tests/audit/widget.test.js:390:33
+✖ point marker retains radius 4 (0.973375ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'point_radius')
+      at TestContext.<anonymous> (<workspace>/tests/audit/widget.test.js:395:40)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at tests/audit/widget.test.js:390:33
+✖ point marker retains radius 8 (0.579167ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'point_radius')
+      at TestContext.<anonymous> (<workspace>/tests/audit/widget.test.js:395:40)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/audit/widget.test.js:401:36
+✖ fixed circle covers image radius 2.5 (0.823ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'value')
+      at TestContext.<anonymous> (<workspace>/tests/audit/widget.test.js:406:28)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/audit/widget.test.js:401:36
+✖ fixed circle covers image radius 5 (0.598417ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'value')
+      at TestContext.<anonymous> (<workspace>/tests/audit/widget.test.js:406:28)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/audit/widget.test.js:401:36
+✖ fixed circle covers image radius 10 (0.5255ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'value')
+      at TestContext.<anonymous> (<workspace>/tests/audit/widget.test.js:406:28)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+
+test at tests/audit/widget.test.js:413:1
+✖ fixed circle keyboard placement and reflection seed emit the intended action (0.609667ms)
+  TypeError [Error]: Cannot read properties of undefined (reading 'value')
+      at TestContext.<anonymous> (<workspace>/tests/audit/widget.test.js:417:31)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)

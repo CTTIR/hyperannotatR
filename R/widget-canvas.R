@@ -15,7 +15,7 @@
 # the identity a render or annotation update carried (see .canvas_identity()
 # and the "Shiny inputs" section of ?at_canvas). The app rejects stale stamps.
 
-.canvas_tool_names <- c("pan", "rect", "polygon", "freehand", "circle", "point", "edit",
+.canvas_tool_names <- c("pan", "rect", "polygon", "freehand", "circle", "point", "reflection", "edit",
                         "erase", "probe", "select")
 
 .canvas_deps_ok <- function(call = rlang::caller_env()) {
@@ -300,6 +300,8 @@ at_tile_source <- function(img, level_max = NULL, tile_size = 512L, embed = TRUE
 #'   \item{`<id>_erased`}{The erased ROI id.}
 #'   \item{`<id>_selected`}{The ids of the selected ROIs (possibly none).}
 #'   \item{`<id>_probed`}{`x`, `y`: the probed level-0 pixel position.}
+#'   \item{`<id>_reflection_seed`}{`x`, `y` and `target`: a clicked pixel
+#'     for a reflection proposal. It does not create an ROI.}
 #'   \item{`<id>_viewport`}{`zoom`, `center_x`, `center_y` and `bounds`
 #'     (`xmin`, `ymin`, `xmax`, `ymax` in level-0 pixels) after a pan or zoom.}
 #'   \item{`<id>_ready`}{`ready` and `error`: whether the image is displayed.}
@@ -311,13 +313,18 @@ at_tile_source <- function(img, level_max = NULL, tile_size = 512L, embed = TRUE
 #' @param img An [annot_image] to display.
 #' @param project Optional [annot_project] whose ROIs are shown initially.
 #' @param tool Initial tool: one of `"pan"`, `"rect"`, `"polygon"`, `"freehand"`,
-#'   `"circle"`, `"point"`, `"edit"`, `"erase"`, `"probe"` (emit a pixel
+#'   `"circle"`, `"point"`, `"reflection"` (request a reflection proposal),
+#'   `"edit"`, `"erase"`, `"probe"` (emit a pixel
 #'   position for spectra) or `"select"` (emit the clicked ROI id).
 #' @param width,height Widget dimensions.
 #' @param elementId Optional element id.
 #' @param options A list of extra options passed to the widget:
 #'   `creationTarget` (a list with `layer`, `label` and `locked`; drawing is
-#'   refused on a locked target) and `selection` (ROI ids to highlight).
+#'   refused on a locked target), `selection` (ROI ids to highlight),
+#'   `pointRadius` (display radius in CSS pixels, default 4; saved with new
+#'   points as `attributes$point_radius`, without changing mask membership),
+#'   `circleRadius` (fixed radius in level-0 image pixels; 0/default draws by
+#'   dragging), and `suggestion` (an unsaved GeoJSON feature shown dashed).
 #' @param view Optional band view passed to [at_tile_source()].
 #' @param call The calling environment, for error reporting.
 #'

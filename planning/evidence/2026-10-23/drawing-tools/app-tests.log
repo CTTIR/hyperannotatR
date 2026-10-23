@@ -1,0 +1,151 @@
+Registered S3 method overwritten by 'stars':
+  method                  from
+  st_interpolate_aw.stars sf  
+✔ | F W  S  OK | Context
+
+⠏ |          0 | app-builder                                                    
+⠋ |          1 | app-builder                                                    
+⠙ |          2 | app-builder                                                    
+⠹ |          3 | app-builder                                                    Loading required package: shiny
+
+⠇ |          9 | app-builder                                                    
+⠏ |         10 | app-builder                                                    
+⠋ |         11 | app-builder                                                    
+⠸ |         14 | app-builder                                                    
+⠧ |         18 | app-builder                                                    
+⠴ |         26 | app-builder                                                    
+⠸ |         34 | app-builder                                                    
+⠼ |         35 | app-builder                                                    
+⠇ |         39 | app-builder                                                    
+⠏ |         40 | app-builder                                                    
+⠋ |         41 | app-builder                                                    
+⠸ |         44 | app-builder                                                    
+⠼ |         45 | app-builder                                                    
+⠦ |         47 | app-builder                                                    
+⠏ |         50 | app-builder                                                    
+⠹ |         53 | app-builder                                                    
+⠼ |         55 | app-builder                                                    
+⠦ |         57 | app-builder                                                    
+⠹ |         63 | app-builder                                                    
+⠼ |         65 | app-builder                                                    
+⠧ |         68 | app-builder                                                    
+⠙ |         72 | app-builder                                                    
+⠸ |         74 | app-builder                                                    
+⠼ |         75 | app-builder                                                    
+⠋ |         81 | app-builder                                                    
+⠴ |         86 | app-builder                                                    
+⠇ |         89 | app-builder                                                    
+⠹ |         93 | app-builder                                                    
+⠴ |         96 | app-builder                                                    
+⠇ |         99 | app-builder                                                    
+⠋ |        101 | app-builder                                                    
+⠙ |        102 | app-builder                                                    
+✔ |        113 | app-builder [39.6s]
+
+⠏ |          0 | app-capabilities                                               
+⠙ |         12 | app-capabilities                                               
+⠹ |         23 | app-capabilities                                               
+⠼ |         35 | app-capabilities                                               
+⠏ |         40 | app-capabilities                                               
+⠧ |         48 | app-capabilities                                               
+✔ |         59 | app-capabilities
+
+⠏ |          0 | app-drawing-tools                                              
+⠦ |         17 | app-drawing-tools                                              
+⠏ |         20 | app-drawing-tools                                              
+⠼ |         25 | app-drawing-tools                                              
+⠇ |         29 | app-drawing-tools                                              
+✔ |         37 | app-drawing-tools
+
+⠏ |          0 | app-modules-extra                                              
+⠋ |   1      0 | app-modules-extra                                              
+⠙ |   1      1 | app-modules-extra                                              
+⠼ |   1     24 | app-modules-extra                                              
+⠦ |   1     26 | app-modules-extra                                              
+⠏ |   1     29 | app-modules-extra                                              
+⠋ |   1     30 | app-modules-extra                                              
+⠴ |   1     35 | app-modules-extra                                              
+⠦ |   1     36 | app-modules-extra                                              
+⠧ |   1     37 | app-modules-extra                                              
+⠇ |   1     38 | app-modules-extra                                              
+⠸ |   1     43 | app-modules-extra                                              
+⠴ |   1     45 | app-modules-extra                                              
+⠦ |   1     46 | app-modules-extra                                              
+⠇ |   1     48 | app-modules-extra                                              
+⠼ |   1     54 | app-modules-extra                                              
+⠴ |   1     55 | app-modules-extra                                              
+⠧ |   1     57 | app-modules-extra                                              
+⠙ |   1     61 | app-modules-extra                                              
+⠦ |   1     66 | app-modules-extra                                              
+⠇ |   1     68 | app-modules-extra                                              
+⠧ |   1     77 | app-modules-extra                                              
+⠏ |   1     79 | app-modules-extra                                              
+⠋ |   1     80 | app-modules-extra                                              
+⠙ |   1     81 | app-modules-extra                                              
+⠹ |   1     82 | app-modules-extra                                              
+⠦ |   1     86 | app-modules-extra                                              
+⠋ |   1     90 | app-modules-extra                                              
+⠹ |   1     92 | app-modules-extra                                              
+⠸ |   1     93 | app-modules-extra                                              
+⠼ |   1     94 | app-modules-extra                                              
+⠇ |   1     98 | app-modules-extra                                              
+⠋ |   1    100 | app-modules-extra                                              
+⠹ |   1    102 | app-modules-extra                                              
+⠼ |   1    104 | app-modules-extra                                              
+⠴ |   1    105 | app-modules-extra                                              
+⠇ |   1    108 | app-modules-extra                                              
+⠹ |   1    112 | app-modules-extra                                              
+⠸ |   1    113 | app-modules-extra                                              
+⠴ |   1    115 | app-modules-extra                                              
+⠧ |   1    117 | app-modules-extra                                              
+⠼ |   1    124 | app-modules-extra                                              
+⠴ |   1    135 | app-modules-extra                                              
+⠦ |   1    136 | app-modules-extra                                              
+⠏ |   1    139 | app-modules-extra                                              
+⠹ |   1    142 | app-modules-extra                                              
+⠸ |   1    143 | app-modules-extra                                              
+⠴ |   1    145 | app-modules-extra                                              
+⠧ |   1    147 | app-modules-extra                                              
+⠏ |   1    149 | app-modules-extra                                              
+⠸ |   1    153 | app-modules-extra                                              
+✔ |   1    155 | app-modules-extra [40.9s]
+────────────────────────────────────────────────────────────────────────────────
+Warning ('test-app-modules-extra.R:35:3'): the full UI tree renders every page, module and asset reference
+cannot open file '<user>/Library/Caches/org.R-project.R/R/sass/5b2e0b5ab14e4ffd2b4e574a83edd569': Operation not permitted
+Backtrace:
+     ▆
+  1. └─htmltools::renderTags(ui) at test-app-modules-extra.R:35:3
+  2.   └─htmltools:::tagify(x)
+  3.     └─htmltools:::rewriteTags(...)
+  4.       └─base::lapply(ui, rewriteTags, func, preorder)
+  5.         └─htmltools (local) FUN(X[[i]], ...)
+  6.           └─htmltools (local) func(ui)
+  7.             ├─htmltools:::tagify(as.tags(uiObj))
+  8.             │ └─htmltools:::rewriteTags(...)
+  9.             │   └─htmltools:::assertNotTagEnvLike(ui, "rewriteTags")
+ 10.             │     └─htmltools:::isTagEnv(x)
+ 11.             ├─htmltools::as.tags(uiObj)
+ 12.             └─htmltools:::as.tags.shiny.tag.function(uiObj)
+ 13.               └─shiny (local) x()
+ 14.                 └─bslib::bs_theme_dependencies(theme)
+ 15.                   └─bslib:::sass_compile_theme(theme, sass_options, cache)
+ 16.                     └─sass::sass(...)
+ 17.                       └─cache$set_content(cache_key, css)
+ 18.                         ├─base::tryCatch(...)
+ 19.                         │ └─base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 20.                         │   └─base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 21.                         │     └─base (local) doTryCatch(return(expr), name, parentenv, handler)
+ 22.                         └─sass:::write_utf8(content, cache_file)
+ 23.                           └─base::writeBin(charToRaw(enc2utf8(text)), ...)
+ 24.                             └─base::file(con, "wb")
+────────────────────────────────────────────────────────────────────────────────
+
+⠏ |          0 | widget-events                                                  
+⠧ |         18 | widget-events                                                  
+⠧ |         28 | widget-events                                                  
+✔ |         30 | widget-events
+
+══ Results ═════════════════════════════════════════════════════════════════════
+Duration: 81.9 s
+
+[ FAIL 0 | WARN 1 | SKIP 0 | PASS 394 ]
