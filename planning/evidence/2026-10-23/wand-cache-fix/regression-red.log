@@ -1,0 +1,37 @@
+Registered S3 method overwritten by 'stars':
+  method                  from
+  st_interpolate_aw.stars sf
+✔ | F W  S  OK | Context
+
+⠏ |          0 | widget-canvas
+⠋ |          1 | widget-canvas
+⠸ |          4 | widget-canvas
+⠸ |         14 | widget-canvas
+⠏ |         40 | widget-canvas                                                  Loading required package: shiny
+
+⠦ |         47 | widget-canvas
+⠼ |         55 | widget-canvas
+⠧ |      1  57 | widget-canvas
+⠇ |      1  58 | widget-canvas
+⠏ |      1  59 | widget-canvas
+✖ | 1    1  59 | widget-canvas [1.6s]
+────────────────────────────────────────────────────────────────────────────────
+Error ('test-widget-canvas.R:453:3'): canvas script URLs change with content for both Shiny and standalone widgets
+Error in `.canvas_asset_version("0.3.0", path)`: could not find function ".canvas_asset_version"
+────────────────────────────────────────────────────────────────────────────────
+
+══ Results ═════════════════════════════════════════════════════════════════════
+Duration: 1.6 s
+
+── Skipped tests (1) ───────────────────────────────────────────────────────────
+• set ANNOTATR_BROWSER_TESTS=true to run the canvas browser tests (1):
+  'test-widget-canvas.R:310:3'
+
+── Failed tests ────────────────────────────────────────────────────────────────
+Error ('test-widget-canvas.R:453:3'): canvas script URLs change with content for both Shiny and standalone widgets
+Error in `.canvas_asset_version("0.3.0", path)`: could not find function ".canvas_asset_version"
+
+[ FAIL 1 | WARN 0 | SKIP 1 | PASS 59 ]
+Error:
+! Test failures.
+Execution halted

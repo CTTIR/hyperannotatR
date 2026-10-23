@@ -1,0 +1,33 @@
+Registered S3 method overwritten by 'stars':
+  method                  from
+  st_interpolate_aw.stars sf
+✔ | F W  S  OK | Context
+
+⠏ |          0 | app-drawing-tools
+⠸ |          4 | app-drawing-tools
+⠴ |          6 | app-drawing-tools
+⠦ |         17 | app-drawing-tools                                              Loading required package: shiny
+
+⠏ |         20 | app-drawing-tools
+⠸ |         24 | app-drawing-tools
+⠇ |         29 | app-drawing-tools
+✔ |         37 | app-drawing-tools [1.2s]
+
+⠏ |          0 | widget-canvas
+⠋ |          1 | widget-canvas
+⠸ |          4 | widget-canvas
+⠦ |         17 | widget-canvas
+⠦ |         47 | widget-canvas
+⠧ |      1  57 | widget-canvas
+⠇ |      1  58 | widget-canvas
+⠼ |      1  64 | widget-canvas
+✔ |      1  64 | widget-canvas [1.4s]
+
+══ Results ═════════════════════════════════════════════════════════════════════
+Duration: 2.7 s
+
+── Skipped tests (1) ───────────────────────────────────────────────────────────
+• set ANNOTATR_BROWSER_TESTS=true to run the canvas browser tests (1):
+  'test-widget-canvas.R:310:3'
+
+[ FAIL 0 | WARN 0 | SKIP 1 | PASS 101 ]
