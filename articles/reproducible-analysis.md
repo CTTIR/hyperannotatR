@@ -330,13 +330,13 @@ first$settings$versions
 #> 
 #> $sf_external
 #> $sf_external$GEOS
-#> [1] "3.12.1"
+#> [1] "3.14.1"
 #> 
 #> $sf_external$GDAL
-#> [1] "3.8.4"
+#> [1] "3.12.2"
 #> 
 #> $sf_external$proj.4
-#> [1] "9.4.0"
+#> [1] "9.7.1"
 #> 
 #> $sf_external$GDAL_with_GEOS
 #> [1] "true"
@@ -345,7 +345,7 @@ first$settings$versions
 #> [1] "true"
 #> 
 #> $sf_external$PROJ
-#> [1] "9.4.0"
+#> [1] "9.7.1"
 ```
 
 This is a descriptive example for one image and two overlapping ROIs.
