@@ -1,4 +1,4 @@
-# hyperannotatR
+# hyperannotatR ![hyperannotatR logo](reference/figures/logo-with-name.png)
 
 **hyperannotatR** provides multi-layer region-of-interest annotation for
 hyperspectral imaging (HSI), including spectral cubes, band views,

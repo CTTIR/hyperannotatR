@@ -50,8 +50,8 @@ at_session_status(sess)
 #> # A tibble: 3 × 9
 #>     idx entry_id              export_stem path  name  status project_path n_rois
 #>   <int> <chr>                 <chr>       <chr> <chr> <chr>  <chr>         <int>
-#> 1     1 entry_at_248d3ed7bbf… entry_at_2… /tmp… imag… pendi… NA                0
-#> 2     2 entry_at_248d3ed7bbf… entry_at_2… /tmp… imag… pendi… NA                0
-#> 3     3 entry_at_248d3ed7bbf… entry_at_2… /tmp… imag… pendi… NA                0
+#> 1     1 entry_at_24bb6f39f02… entry_at_2… /tmp… imag… pendi… NA                0
+#> 2     2 entry_at_24bb6f39f02… entry_at_2… /tmp… imag… pendi… NA                0
+#> 3     3 entry_at_24bb6f39f02… entry_at_2… /tmp… imag… pendi… NA                0
 #> # ℹ 1 more variable: modified <dttm>
 ```
