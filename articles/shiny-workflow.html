@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>The batch annotation app • hyperannotatR</title>
-<!-- favicons -->
-
-
-
-
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="icon" sizes="any" href="../favicon.ico">
+<link rel="manifest" href="../site.webmanifest">
 <!-- katex math --><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script><script src="../katex-auto.js"></script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
@@ -19,13 +19,6 @@
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The batch annotation app">
 <meta name="theme-color" content="#1565c0">
-<!-- Package browser icons -->
-<link rel="icon" type="image/x-icon" href="../favicon.ico?v=1aa2ff4522c2">
-<link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png?v=1aa2ff4522c2">
-<link rel="icon" type="image/svg+xml" sizes="any" href="../favicon.svg?v=1aa2ff4522c2">
-<link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=1aa2ff4522c2">
-<link rel="manifest" href="../site.webmanifest?v=1aa2ff4522c2">
-<!-- /Package browser icons -->
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -81,7 +74,7 @@
 
     
     
-<p><img src="../reference/figures/logo.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<p><img src="../reference/figures/logo-with-name.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
 <p>Annotating one image is a job for <code><a href="../reference/at_project.html">at_project()</a></code> and the
 ROI constructors. Annotating a <em>queue</em> of images — a plate of
 serial sections, a batch of slides, a folder of cubes — is what the
@@ -104,7 +97,7 @@ into a temporary directory so the queue has real files to iterate.</p>
 <span><span class="va">sess</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_session&gt;</span></span></span>
 <span><span class="co">#&gt; images: 3  |  complete: 0  |  cursor: 1</span></span>
-<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/Rtmpa6NpqG/hyperannotatR-example-session-33ac43330b14</span>  |  autosave: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpGXQtC4/hyperannotatR-example-session-32df49de41d6</span>  |  autosave: TRUE</span></span></code></pre></div>
 <p>Every image starts with status <code>"pending"</code>, the cursor
 sits on the first image, and per-image projects are materialised lazily
 — nothing is read from disk until you visit it.</p>
@@ -348,7 +341,7 @@ app refuses paths outside that folder.</p>
 <span><span class="va">recovered</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_session&gt;</span></span></span>
 <span><span class="co">#&gt; images: 3  |  complete: 1  |  cursor: 2</span></span>
-<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/Rtmpa6NpqG/hyperannotatR-example-session-33ac43330b14</span>  |  autosave: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpGXQtC4/hyperannotatR-example-session-32df49de41d6</span>  |  autosave: TRUE</span></span></code></pre></div>
 <p>The cursor, statuses, materialised projects, and templates all come
 back intact.</p>
 <p>File-backed images are saved as a versioned source descriptor (the
@@ -399,9 +392,9 @@ per label — with <code><a href="../reference/at_manifest.html">at_manifest()</
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 9</span></span></span>
 <span><span class="co">#&gt;     idx entry_id              export_stem path  name  status project_path n_rois</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 entry_at_33ac45c60fb… entry_at_3… /tmp… imag… compl… <span style="color: #BB0000;">NA</span>                0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 entry_at_33ac45c60fb… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 entry_at_33ac45c60fb… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 entry_at_32df4266e7f… entry_at_3… /tmp… imag… compl… <span style="color: #BB0000;">NA</span>                0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 entry_at_32df4266e7f… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 entry_at_32df4266e7f… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: modified &lt;dttm&gt;</span></span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/at_manifest.html">at_manifest</a></span><span class="op">(</span><span class="va">sess</span><span class="op">)</span></span>

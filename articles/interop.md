@@ -1,6 +1,6 @@
 # Interoperability
 
-![hyperannotatR logo](../reference/figures/logo.png)
+![hyperannotatR logo](../reference/figures/logo-with-name.png)
 
 Annotations are only useful if they can leave the tool that made them.
 hyperannotatR stores every region of interest as a validated

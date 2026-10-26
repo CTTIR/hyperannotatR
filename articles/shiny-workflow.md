@@ -1,6 +1,6 @@
 # The batch annotation app
 
-![hyperannotatR logo](../reference/figures/logo.png)
+![hyperannotatR logo](../reference/figures/logo-with-name.png)
 
 Annotating one image is a job for
 [`at_project()`](https://cttir.github.io/hyperannotatR/reference/at_project.md)
@@ -31,7 +31,7 @@ sess <- at_example_session(3)
 sess
 #> <annot_session>
 #> images: 3  |  complete: 0  |  cursor: 1
-#> out_dir: /tmp/Rtmpa6NpqG/hyperannotatR-example-session-33ac43330b14  |  autosave: TRUE
+#> out_dir: /tmp/RtmpGXQtC4/hyperannotatR-example-session-32df49de41d6  |  autosave: TRUE
 ```
 
 Every image starts with status `"pending"`, the cursor sits on the first
@@ -234,7 +234,7 @@ recovered <- at_resume(file.path(sess$out_dir, "_session.rds"))
 recovered
 #> <annot_session>
 #> images: 3  |  complete: 1  |  cursor: 2
-#> out_dir: /tmp/Rtmpa6NpqG/hyperannotatR-example-session-33ac43330b14  |  autosave: TRUE
+#> out_dir: /tmp/RtmpGXQtC4/hyperannotatR-example-session-32df49de41d6  |  autosave: TRUE
 ```
 
 The cursor, statuses, materialised projects, and templates all come back
@@ -301,9 +301,9 @@ at_session_status(sess)
 #> # A tibble: 3 × 9
 #>     idx entry_id              export_stem path  name  status project_path n_rois
 #>   <int> <chr>                 <chr>       <chr> <chr> <chr>  <chr>         <int>
-#> 1     1 entry_at_33ac45c60fb… entry_at_3… /tmp… imag… compl… NA                0
-#> 2     2 entry_at_33ac45c60fb… entry_at_3… /tmp… imag… pendi… NA                0
-#> 3     3 entry_at_33ac45c60fb… entry_at_3… /tmp… imag… pendi… NA                0
+#> 1     1 entry_at_32df4266e7f… entry_at_3… /tmp… imag… compl… NA                0
+#> 2     2 entry_at_32df4266e7f… entry_at_3… /tmp… imag… pendi… NA                0
+#> 3     3 entry_at_32df4266e7f… entry_at_3… /tmp… imag… pendi… NA                0
 #> # ℹ 1 more variable: modified <dttm>
 
 at_manifest(sess)
