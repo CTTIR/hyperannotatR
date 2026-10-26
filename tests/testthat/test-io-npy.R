@@ -95,17 +95,19 @@ test_that("transpose reconciles native-order (x, y) files with hyperannotatR [y,
 })
 
 test_that("transpose brings a TIVITA (width, height) ground truth into [y, x] (integration)", {
-  f <- file.path("..", "..", "hsi-workbench", "reference", "annotations",
-                 "HSI-BVZ-001_2019_11_11_22_11_52", "anatomy.npy")
-  skip_if(!file.exists(f), "no workbench reference annotation present")
+  f <- Sys.glob(file.path(
+    "..", "..", "hsi-workbench", "reference", "annotations", "*", "anatomy.npy"
+  ))[1]
+  skip_if(is.na(f), "no workbench reference annotation present")
   gt <- at_read_npy(f, transpose = TRUE)
   expect_identical(dim(as.matrix(gt)), c(480L, 640L)) # [y, x], matches the cube
 })
 
 test_that("reads a real Python-written ground-truth .npy (integration)", {
-  f <- file.path("..", "..", "hsi-workbench", "reference", "annotations",
-                 "HSI-BVZ-001_2019_11_11_22_11_52", "anatomy.npy")
-  skip_if(!file.exists(f), "no workbench reference annotation present")
+  f <- Sys.glob(file.path(
+    "..", "..", "hsi-workbench", "reference", "annotations", "*", "anatomy.npy"
+  ))[1]
+  skip_if(is.na(f), "no workbench reference annotation present")
   m <- .npy_read_matrix(f)
   expect_identical(dim(m), c(640L, 480L)) # numpy shape (640, 480), native (x, y)
   expect_true(all(unique(as.integer(m)) %in% 0:5))
