@@ -1,0 +1,10 @@
+{
+  "status": "pass",
+  "backup": "<annotation-workspace>/backups/before-package-update-20261027-20261027T134821Z",
+  "annotation_files": 3854,
+  "annotation_bytes_unchanged": true,
+  "source_commit": "90fc5db58c736170b22df1676cbc616e2d758b4c",
+  "upstream_commit": "fa6671685495ff05c4239ccab809b19cb153ae32",
+  "version": "0.3.0",
+  "live_http": "pass"
+}
