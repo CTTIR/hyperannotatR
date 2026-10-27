@@ -1,6 +1,10 @@
 # hyperannotatR (development)
 
-* The Line / distance tool records a straight line from two clicked endpoints.
+* The annotation tools are grouped into Navigate, Draw & mark,
+  Measure & detect, and Edit & reuse. Every button has a local icon,
+  a readable English name and a tooltip. Tool settings remain contextual,
+  keyboard help is collapsible, and updated styles bypass older browser caches.
+* The Distance tool records a straight line from two clicked endpoints.
   Layers with `role = "calibration_reference"` select this tool by default
   and show per-label repeated lengths in image pixels. The mean and sample
   standard deviation appear from three valid measurements; five are

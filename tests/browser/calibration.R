@@ -10,7 +10,7 @@ rgb[, 31:40, ] <- 0.65
 png::writePNG(rgb, file.path(dir, "fixture.png"))
 s <- at_session(file.path(dir, "fixture.png"), layers = list(
   at_layer("tissue", labels = "cord"),
-  at_layer("Kalibrierung", labels = "Retraktorst\u00e4rke",
+  at_layer("Calibration", labels = "Retractor thickness",
            role = "calibration_reference")),
   out_dir = file.path(dir, "saved"), autosave = TRUE)
 saveRDS(s, file.path(dir, "session.rds"))
@@ -30,7 +30,7 @@ tryCatch({
   text <- function() app$get_js("document.getElementById('canvas-calibration_summary').textContent")
   choose <- function() {
     ready()
-    app$run_js("document.querySelector('input[name=\"layers-layer\"][value=\"Kalibrierung\"]').click()")
+    app$run_js("document.querySelector('input[name=\"layers-layer\"][value=\"Calibration\"]').click()")
     app$wait_for_js("window.atcanvasInspect('canvas-canvas').tool === 'line'")
   }
   at <- function(x, y) {
@@ -68,7 +68,7 @@ tryCatch({
   ready()
   saved <- at_resume(file.path(dir, "saved/_session.rds"))
   p <- at_current(saved)
-  summary <- .calibration_summary(p, "Kalibrierung", "Retraktorst\u00e4rke")
+  summary <- .calibration_summary(p, "Calibration", "Retractor thickness")
   stopifnot(summary$n == 5L, abs(summary$mean_px - 10) < 1e-6,
             max(abs(unname(summary$lengths_px) - 8:12)) < 1e-6,
             p$image$pixel_unit == "px", all(p$image$pixel_size == 1))

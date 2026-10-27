@@ -104,6 +104,8 @@
 
 .app_ui <- function() {
   shiny::addResourcePath("hyperannotatR-www", .app_www())
+  css_hash <- digest::digest(file = file.path(.app_www(), "custom.css"),
+                             algo = "sha256")
   annotate_page <- bslib::layout_columns(
     col_widths = c(3, 6, 3),
     bslib::card(
@@ -146,7 +148,8 @@
     ),
     header = shiny::tagList(
       shinyjs::useShinyjs(),
-      shiny::tags$link(rel = "stylesheet", type = "text/css", href = "hyperannotatR-www/custom.css"),
+      shiny::tags$link(rel = "stylesheet", type = "text/css",
+        href = paste0("hyperannotatR-www/custom.css?v=", substr(css_hash, 1, 12))),
       shiny::tags$script(src = "hyperannotatR-www/keys.js")
     ),
     bslib::nav_panel("About", .page_about()),

@@ -22,7 +22,7 @@
 .calibration_validate_roi <- function(layer, roi, image) {
   if (.is_calibration_layer(layer) &&
       !is.finite(.calibration_length(roi, image))) {
-    .at_abort(paste("Use Line / distance: choose two distinct endpoints",
+    .at_abort(paste("Use Distance: choose two distinct endpoints",
                     "inside the image for a calibration reference."),
               class = "validation", code = "CALIBRATION_SEGMENT")
   }
