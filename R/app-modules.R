@@ -279,6 +279,7 @@ mod_canvas_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     .canvas_toolbar_ui(id),
+    shiny::uiOutput(ns("calibration_settings")),
     shiny::uiOutput(ns("calibration_summary")),
     shiny::conditionalPanel("output.tool == 'line'", ns = ns,
       shiny::p(class = "at-progress",
@@ -358,7 +359,7 @@ mod_canvas_server <- function(id, rv) {
     .state_init(rv)
     proxy <- at_canvas_proxy("canvas", session = session)
     .reflection_server(input, output, session, rv)
-    .calibration_server(output, rv)
+    .calibration_server(input, output, session, rv)
     output$tool <- shiny::renderText(rv$tool %||% "pan")
     shiny::outputOptions(output, "tool", suspendWhenHidden = FALSE)
     shiny::observeEvent(input$point_radius, {

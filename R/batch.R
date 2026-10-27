@@ -9,7 +9,7 @@
   p <- session$projects[[i]]
   if (!is.null(p)) {
     p$image <- .reopen_image(p$image)
-    return(p)
+    return(.calibration_project_defaults(p, session$meta$calibration_defaults_mm))
   }
   path <- session$manifest$project_path[i]
   if (!is.na(path) && nzchar(path)) {
@@ -19,7 +19,7 @@
                 class = "conflict", code = "IDENTITY_MISMATCH", call = NULL)
     }
     p$meta$entry_id <- session$manifest$entry_id[i]
-    return(p)
+    return(.calibration_project_defaults(p, session$meta$calibration_defaults_mm))
   }
   img <- at_read_image(session$manifest$path[i])
   proj <- at_project(
@@ -31,7 +31,7 @@
   if (length(proj$layers) == 0L) {
     proj <- at_add_layer(proj, at_layer("annotations", labels = session$labels))
   }
-  proj
+  .calibration_project_defaults(proj, session$meta$calibration_defaults_mm)
 }
 
 # Which image indices a scope selects.

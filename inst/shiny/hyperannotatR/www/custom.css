@@ -115,6 +115,13 @@ table { font-size: .85rem; }
 .at-queue table, .at-metrics { font-family: var(--at-mono-font); }
 /* A narrow queue column scrolls its table instead of clipping the status and n columns. */
 .at-queue .card-body { overflow-x: auto; }
+
+.at-reference-settings {
+  border: 1px solid var(--at-border); border-radius: 6px;
+  padding: 12px; margin: 10px 0;
+}
+.at-reference-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.at-reference-settings .at-progress { margin-top: 10px; margin-bottom: 0; }
 .at-queue table { white-space: nowrap; }
 
 /* ---- Canvas -------------------------------------------------------------- */

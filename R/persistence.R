@@ -496,6 +496,8 @@ at_relink_source <- function(x, path, backend = NULL, options = NULL) {
       candidate$projects[[i]] <- p
     }
     if (is.null(p)) next
+    p <- .calibration_project_defaults(p, candidate$meta$calibration_defaults_mm)
+    candidate$projects[[i]] <- p
     path <- file.path(candidate$out_dir, "projects",
                       paste0(candidate$manifest$export_stem[i], "-", generation, ".rds"))
     write(.prepare_project(p), path, overwrite = FALSE)

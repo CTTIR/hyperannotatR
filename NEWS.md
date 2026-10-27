@@ -1,5 +1,10 @@
 # hyperannotatR (development)
 
+* The calibration panel now accepts a global reference length in mm and an
+  image-specific override for each reference label. **Use global default**
+  removes an override. Global changes preserve image overrides, reach existing
+  and new queue images, and survive saving and reopening. Estimated scales
+  show their source; blank, non-finite and non-positive entries are rejected.
 * Calibration layers can store per-label assumed lengths with
   `reference_assumptions_mm = list(label = 2)`. From three valid repeats,
   the panel calculates an explicitly estimated mm/pixel scale for that image.
