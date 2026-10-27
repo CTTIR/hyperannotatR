@@ -20,10 +20,10 @@ annotations at once:
 - **anatomy** -- the structural / anatomical region,
 - **state** -- the physiological or injury state (e.g. burn depth),
 - **uncertain** -- areas you are unsure about,
-- **artefact** -- blood, instruments, drape and other non-tissue.
+- **artifact** -- blood, instruments, drape and other non-tissue.
 
 Because these layers overlap freely, you can capture a wound region, the
-**penumbra ring** around an injury, and blood artefacts on top of tissue as
+**penumbra ring** around an injury, and blood artifacts on top of tissue as
 distinct annotations of the same image.
 
 Every cube is shown as a natural-colour RGB rendered from its visible bands, and
@@ -52,10 +52,13 @@ machine running R; the app is meant for local use.
 Three columns: the **queue** (left), the **canvas and tools** (middle), and
 **layers & labels** (right).
 
-- **Tools:** pan, rectangle, polygon, freehand, circle, point, line, edit (drag a
-  region), erase (click a region to remove it), reflection wand, probe and select. **Undo**,
-  **Redo** and **Copy previous** (the previous image's regions) sit next to them.
-- Pick a **layer** (anatomy / state / uncertain / artefact) -- the label list
+- **Navigate:** Pan, Select and Inspect spectrum.
+- **Draw & mark:** Polygon, Freehand, Rectangle, Round area and Point.
+- **Measure & detect:** Distance and Reflection wand.
+- **Edit & reuse:** Move region, Erase region, Undo, Redo and Copy previous.
+  Each tool has an icon, a text label and a tooltip. The active tool is
+  highlighted. Keyboard help can be expanded below the tool settings.
+- Pick a **layer** (anatomy / state / uncertain / artifact) -- the label list
   updates to that layer's vocabulary. Add your own layers and labels with the
   fields beneath each list.
 - Draw a region and it joins the **active layer** with the **active label**.
@@ -68,7 +71,7 @@ Three columns: the **queue** (left), the **canvas and tools** (middle), and
   Tight/normal/broad controls connected-region growth. Pale tissue can also
   appear bright; this tool suggests an outline, not a tissue diagnosis.
   It supports image displays up to 2048 pixels per side.
-- **Line / distance:** click the start and end of a straight reference length.
+- **Distance:** click the start and end of a straight reference length.
   Calibration layers select this tool automatically. Measure the same physical
   dimension at least three times per image, preferably five. The panel reports
   the mean and standard deviation in pixels; individual endpoints are saved.
@@ -99,7 +102,7 @@ Three columns: the **queue** (left), the **canvas and tools** (middle), and
   registered band operations (ratio, normalised difference, band means). These
   are display products only; masks, spectra and exports always use the
   original cube values.
-- The **probe** tool picks a pixel for its spectrum; **select** highlights an
+- **Inspect spectrum** picks a pixel for its spectrum; **Select** highlights an
   ROI. Changes proposed by a partner (for example qupflowR) appear as a
   **staged** patch that you commit or discard; the status badge shows
   *read-only*, *unsaved*, *staged* or *committed*.

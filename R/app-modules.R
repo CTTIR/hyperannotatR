@@ -278,15 +278,7 @@ mod_layers_server <- function(id, rv) {
 mod_canvas_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::div(
-      class = "at-toolbar", role = "toolbar", `aria-label` = "drawing tools",
-      lapply(.canvas_tools, function(t) .at_action(ns(paste0("tool_", t)),
-        switch(t, circle = "Round area", line = "Line / distance",
-               reflection = "Reflection wand", t),
-        `aria-pressed` = "false")),
-      .at_action(ns("undo"), "Undo"), .at_action(ns("redo"), "Redo"),
-      .at_action(ns("copy"), "Copy previous")
-    ),
+    .canvas_toolbar_ui(id),
     shiny::uiOutput(ns("calibration_summary")),
     shiny::conditionalPanel("output.tool == 'line'", ns = ns,
       shiny::p(class = "at-progress",
@@ -305,7 +297,9 @@ mod_canvas_ui <- function(id) {
         "Choose your reflection label, then click a bright reflection. Review the dashed outline: pale tissue can also appear bright."),
       shiny::uiOutput(ns("reflection_review"))),
     shiny::conditionalPanel("output.tool != 'line'", ns = ns,
-      shiny::p(class = "at-progress", "Focus the canvas with Tab. Arrows move 1 image pixel (Shift: 10). Enter or Space places a point or fixed round area, or anchors a rectangle; polygon: Space adds a vertex, Enter finishes. Escape cancels. Shift+Enter saves, completes and advances.")),
+      shiny::tags$details(class = "at-tool-help",
+        shiny::tags$summary("Keyboard help"),
+        shiny::p(class = "at-progress", "Focus the canvas with Tab. Arrows move 1 image pixel (Shift: 10). Enter or Space places a point or fixed round area, or anchors a rectangle; polygon: Space adds a vertex, Enter finishes. Escape cancels. Shift+Enter saves, completes and advances."))),
     shiny::div(role = "status", `aria-live` = "polite", class = "atcanvas-status",
                shiny::textOutput(ns("display"))),
     shiny::div(
@@ -938,7 +932,7 @@ mod_session_server <- function(id, rv) {
     action = c("canvas cursor: 1 / 10 image pixels",
                "point/rectangle anchors; polygon: Space vertices, Enter finish",
                "cancel unfinished drawing/edit", "next / previous image", "next pending image",
-               "select label", "tool: pan/rect/polygon/freehand/circle/point", "delete last ROI",
+               "select label", "Pan / Rectangle / Polygon / Freehand / Round area / Point", "delete last region",
                "undo / redo", "save, mark complete & advance",
                "paste previous image's ROIs", "flag image", "save session",
                "open export", "shortcut help"),
