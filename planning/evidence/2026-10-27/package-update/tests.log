@@ -1,0 +1,14 @@
+Registered S3 method overwritten by 'stars':
+  method                  from
+  st_interpolate_aw.stars sf
+Loading required package: shiny
+SKIP: 'test-io-npy.R:101:3' -----------------------
+Reason: no workbench reference annotation present
+
+SKIP: 'test-io-npy.R:110:3' -----------------------
+Reason: no workbench reference annotation present
+
+SKIP: 'test-widget-canvas.R:310:3' ----------------
+Reason: set ANNOTATR_BROWSER_TESTS=true to run the canvas browser tests
+
+[ FAIL 0 | WARN 0 | SKIP 3 | PASS 249 ]
