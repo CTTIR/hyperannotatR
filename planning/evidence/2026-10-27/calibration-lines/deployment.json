@@ -1,0 +1,16 @@
+{
+  "status": "pass",
+  "images": 95,
+  "original_rois": 142,
+  "complete": 28,
+  "cursor": 29,
+  "physical_scale_unchanged": true,
+  "calibration_lines": 0,
+  "minimum": 3,
+  "recommended": 5,
+  "installed_arithmetic_verified": true,
+  "backup": "<workspace>/backups/before-calibration-lines-20261027T144618Z",
+  "annotation_files": 3883,
+  "annotation_bytes_unchanged": true,
+  "canvas_sha256": "f39b52f252921dc4cc5ed2e1b1c0720c75b2a1253f30df80fae66ba67b1666f7"
+}

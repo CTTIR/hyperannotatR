@@ -50,6 +50,12 @@ NOT_CRAN=true CHROMOTE_CHROME=/path/to/chrome \
 `ANNOTATR_BROWSER_ARTIFACT_DIR` selects its output directory, including a
 screenshot of the unsaved reflection proposal.
 
+`tests/browser/calibration.R` uses the same environment settings to check
+two-click reference lines, automatic tool selection, the minimum of three
+and recommendation of five measurements, their exact mean and sample standard
+deviation, undo/redo, and a fresh app resuming the saved endpoints. Its RGB
+fixture is synthetic and never modifies a user's annotation queue.
+
 ## Browser protocol
 
 Every browser action is an envelope `{entry_id, revision, payload}`: the queue

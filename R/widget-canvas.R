@@ -15,7 +15,7 @@
 # the identity a render or annotation update carried (see .canvas_identity()
 # and the "Shiny inputs" section of ?at_canvas). The app rejects stale stamps.
 
-.canvas_tool_names <- c("pan", "rect", "polygon", "freehand", "circle", "point", "reflection", "edit",
+.canvas_tool_names <- c("pan", "rect", "polygon", "freehand", "circle", "point", "line", "reflection", "edit",
                         "erase", "probe", "select")
 
 # Local builds can change without changing the package version. Shiny caches
@@ -333,7 +333,8 @@ at_tile_source <- function(img, level_max = NULL, tile_size = 512L, embed = TRUE
 #' @param img An [annot_image] to display.
 #' @param project Optional [annot_project] whose ROIs are shown initially.
 #' @param tool Initial tool: one of `"pan"`, `"rect"`, `"polygon"`, `"freehand"`,
-#'   `"circle"`, `"point"`, `"reflection"` (request a reflection proposal),
+#'   `"circle"`, `"point"`, `"line"` (two clicks for start and end),
+#'   `"reflection"` (request a reflection proposal),
 #'   `"edit"`, `"erase"`, `"probe"` (emit a pixel
 #'   position for spectra) or `"select"` (emit the clicked ROI id).
 #' @param width,height Widget dimensions.

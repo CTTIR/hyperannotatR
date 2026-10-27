@@ -271,7 +271,7 @@ mod_layers_server <- function(id, rv) {
 
 # ---- Canvas -----------------------------------------------------------------------
 
-.canvas_tools <- c("pan", "rect", "polygon", "freehand", "circle", "point", "reflection", "edit", "erase",
+.canvas_tools <- c("pan", "rect", "polygon", "freehand", "circle", "point", "line", "reflection", "edit", "erase",
                    "probe", "select")
 .read_only_tools <- c("pan", "probe", "select")
 
@@ -281,11 +281,16 @@ mod_canvas_ui <- function(id) {
     shiny::div(
       class = "at-toolbar", role = "toolbar", `aria-label` = "drawing tools",
       lapply(.canvas_tools, function(t) .at_action(ns(paste0("tool_", t)),
-        switch(t, circle = "Round area", reflection = "Reflection wand", t),
+        switch(t, circle = "Round area", line = "Line / distance",
+               reflection = "Reflection wand", t),
         `aria-pressed` = "false")),
       .at_action(ns("undo"), "Undo"), .at_action(ns("redo"), "Redo"),
       .at_action(ns("copy"), "Copy previous")
     ),
+    shiny::uiOutput(ns("calibration_summary")),
+    shiny::conditionalPanel("output.tool == 'line'", ns = ns,
+      shiny::p(class = "at-progress",
+        "Click the start and end of a straight line. Escape cancels. Enter or Space places each endpoint with the keyboard.")),
     shiny::conditionalPanel("output.tool == 'point'", ns = ns,
       shiny::selectInput(ns("point_radius"), "Point marker size (display only)",
         c("Small - 4 px" = 2, "Medium - 8 px" = 4, "Large - 16 px" = 8), selected = 4)),
@@ -299,7 +304,8 @@ mod_canvas_ui <- function(id) {
       shiny::p(class = "at-progress",
         "Choose your reflection label, then click a bright reflection. Review the dashed outline: pale tissue can also appear bright."),
       shiny::uiOutput(ns("reflection_review"))),
-    shiny::p(class = "at-progress", "Focus the canvas with Tab. Arrows move 1 image pixel (Shift: 10). Enter or Space places a point or fixed round area, or anchors a rectangle; polygon: Space adds a vertex, Enter finishes. Escape cancels. Shift+Enter saves, completes and advances."),
+    shiny::conditionalPanel("output.tool != 'line'", ns = ns,
+      shiny::p(class = "at-progress", "Focus the canvas with Tab. Arrows move 1 image pixel (Shift: 10). Enter or Space places a point or fixed round area, or anchors a rectangle; polygon: Space adds a vertex, Enter finishes. Escape cancels. Shift+Enter saves, completes and advances.")),
     shiny::div(role = "status", `aria-live` = "polite", class = "atcanvas-status",
                shiny::textOutput(ns("display"))),
     shiny::div(
@@ -329,6 +335,9 @@ mod_canvas_ui <- function(id) {
 # A locked target layer is left unchanged.
 .copy_forward <- function(from, to) {
   for (nm in names(from$layers)) {
+    # A reference belongs to its acquisition; copying it is not a repeat.
+    if (.is_calibration_layer(from$layers[[nm]]) ||
+        .is_calibration_layer(to$layers[[nm]])) next
     if (!(nm %in% names(to$layers))) {
       to <- at_add_layer(to, at_layer(nm, labels = from$layers[[nm]]$labels))
     }
@@ -355,6 +364,7 @@ mod_canvas_server <- function(id, rv) {
     .state_init(rv)
     proxy <- at_canvas_proxy("canvas", session = session)
     .reflection_server(input, output, session, rv)
+    .calibration_server(output, rv)
     output$tool <- shiny::renderText(rv$tool %||% "pan")
     shiny::outputOptions(output, "tool", suspendWhenHidden = FALSE)
     shiny::observeEvent(input$point_radius, {
@@ -464,7 +474,10 @@ mod_canvas_server <- function(id, rv) {
         shiny::showNotification("Choose an unlocked layer and a label before drawing.", type = "warning")
         return(resend())
       }
-      roi <- tryCatch(.feature_to_roi(event$payload, target$label), error = function(e) e)
+      roi <- tryCatch(.calibration_validate_roi(
+        rv$project$layers[[target$layer]],
+        .feature_to_roi(event$payload, target$label), rv$project$image),
+        error = function(e) e)
       if (inherits(roi, "error")) {
         shiny::showNotification(paste("Could not add ROI:", .app_error_text(roi)), type = "warning")
         return(resend())
@@ -494,10 +507,11 @@ mod_canvas_server <- function(id, rv) {
       ids <- vapply(rv$project$layers[[layer]]$rois, `[[`, character(1), "id")
       index <- match(ed$roi_id, ids)
       original <- rv$project$layers[[layer]]$rois[[index]]
-      roi <- tryCatch(at_transform(
+      roi <- tryCatch(.calibration_validate_roi(rv$project$layers[[layer]], at_transform(
         .feature_to_roi(list(type = "Feature", geometry = ed$geometry, properties = list()),
                         original$label),
         from_level = 0L, to_level = original$level, img = rv$project$image),
+        rv$project$image),
                       error = function(e) e)
       if (inherits(roi, "error")) {
         shiny::showNotification(paste("Edit failed:", .app_error_text(roi)), type = "warning")

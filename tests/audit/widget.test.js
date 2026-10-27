@@ -52,6 +52,49 @@ function harness(delayed = false, canvasSize = 100, extra = {}) {
 const ring = (x0,y0,x1,y1) => [[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]];
 const feature = geometry => ({type:'Feature',properties:{roi_id:'roi',layer:'L',label:'a'},geometry});
 
+test('line uses two clicks, preserves endpoints under zoom and rejects zero length', () => {
+  const h = harness(), a = h.create('a');
+  a.render({tool:'line', options:{creationTarget:{layer:'reference',label:'thickness'}}});
+  a.canvas.events.wheel({clientX:0,clientY:0,deltaY:-1,preventDefault(){}});
+  a.click(12,24);
+  assert.equal(h.inputs.filter(x=>x.name==='a_created').length,0);
+  a.canvas.events.mousemove({clientX:36,clientY:48});
+  a.click(12,24);
+  assert.equal(h.inputs.filter(x=>x.name==='a_created').length,0);
+  a.click(36,48);
+  const f=h.inputs.find(x=>x.name==='a_created').value.payload;
+  assert.equal(f.geometry.type,'LineString');
+  assert.deepEqual(JSON.parse(JSON.stringify(f.geometry.coordinates)),[[10,20],[30,40]]);
+  assert.equal(f.target.layer,'reference');
+  assert.equal(f.target.label,'thickness');
+  a.click(24,24); a.click(36,24);
+  assert.equal(h.inputs.filter(x=>x.name==='a_created').length,2);
+});
+
+test('keyboard line and Escape preserve exactly two endpoints', () => {
+  const h=harness(),a=h.create('a'); a.render({tool:'line'});
+  const key=key=>a.canvas.events.keydown({key,preventDefault(){},stopPropagation(){}});
+  key('Enter'); key('ArrowRight'); key('ArrowDown'); key('Enter');
+  const f=h.inputs.find(x=>x.name==='a_created').value.payload;
+  assert.deepEqual(JSON.parse(JSON.stringify(f.geometry.coordinates)),[[50,50],[51,51]]);
+  key('Enter'); key('ArrowRight'); key('Escape'); key('Enter'); key('Escape');
+  assert.equal(h.inputs.filter(x=>x.name==='a_created').length,1);
+});
+
+test('partial line cancels when its layer, image or tool changes', () => {
+  const h=harness(),a=h.create('a');
+  a.render({tool:'line'}); a.click(10,10);
+  a.render({tool:'line',identity:{entry_id:'entry-b',revision:0}});
+  a.click(40,40);
+  assert.equal(h.inputs.filter(x=>x.name==='a_created').length,0);
+  h.handlers['atcanvas-set_tool']({id:'a',tool:'line'});
+  a.click(60,60);
+  assert.equal(h.inputs.filter(x=>x.name==='a_created').length,0);
+  a.render({tool:'line',options:{creationTarget:{layer:'locked',locked:true}}});
+  a.click(10,10); a.click(20,20);
+  assert.equal(h.inputs.filter(x=>x.name==='a_created').length,0);
+});
+
 test('A24 hole hit-testing ignores empty interior and selects shell', () => {
   const h = harness();
   const a = h.create('a',[feature({type:'Polygon',coordinates:[ring(0,0,100,100),ring(40,40,60,60)]})]);

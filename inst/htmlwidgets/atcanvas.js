@@ -182,7 +182,13 @@ HTMLWidgets.widget({
       function polygon(rings) { rings.forEach(function (ring) { line(ring, true); }); }
       if (g.type === "Point") point(g.coordinates);
       else if (g.type === "MultiPoint") g.coordinates.forEach(point);
-      else if (g.type === "LineString") line(g.coordinates, false);
+      else if (g.type === "LineString") {
+        line(g.coordinates, false);
+        if (g.coordinates.length === 2) g.coordinates.forEach(function (c) {
+          var p = toScreen(c[0], c[1]);
+          ctx.moveTo(p[0] + 3, p[1]); ctx.arc(p[0], p[1], 3, 0, 2 * Math.PI);
+        });
+      }
       else if (g.type === "MultiLineString") g.coordinates.forEach(function (l) { line(l, false); });
       else if (g.type === "Polygon") polygon(g.coordinates);
       else if (g.type === "MultiPolygon") g.coordinates.forEach(polygon);
@@ -360,7 +366,7 @@ HTMLWidgets.widget({
     // ---- Pointer interaction ----
     // `gesture` is the identity stamp taken when a gesture began; `drag` is the
     // in-progress single-pointer action.
-    var drag = null, polyPts = null, gesture = null, gestureTarget = null;
+    var drag = null, polyPts = null, lineStart = null, gesture = null, gestureTarget = null;
     var hover = null, lastClick = null, pointers = {}, pinch = null;
     function cursorFor(tool) {
       if (tool === "pan") return "grab";
@@ -371,7 +377,7 @@ HTMLWidgets.widget({
     function cancelGesture() {
       if (state.editing) state.editing.feature.geometry = state.editing.original;
       endMouseDrag();
-      drag = null; polyPts = null; gesture = null; gestureTarget = null;
+      drag = null; polyPts = null; lineStart = null; gesture = null; gestureTarget = null;
       hover = null; lastClick = null; pointers = {}; pinch = null;
       state.drawing = null; state.editing = null;
       canvas.style.cursor = cursorFor(state.tool);
@@ -396,7 +402,25 @@ HTMLWidgets.widget({
       return true;
     }
 
-    var drawingTools = ["point", "rect", "polygon", "freehand", "circle", "reflection"];
+    function linePreview(c) {
+      state.drawing = {type:"Feature", geometry:{type:"LineString", coordinates:[lineStart.slice(),c.slice()]}};
+      render();
+      announce("Length: " + Math.hypot(c[0]-lineStart[0], c[1]-lineStart[1]).toFixed(2) + " px; choose endpoint.");
+    }
+    function linePoint(c) {
+      if (c[0] < 0 || c[1] < 0 || c[0] > state.imgW || c[1] > state.imgH) {
+        announce("Choose an endpoint inside the image."); return false;
+      }
+      if (!lineStart) { lineStart = c.slice(); linePreview(c); return true; }
+      if (Math.hypot(c[0]-lineStart[0], c[1]-lineStart[1]) === 0) {
+        announce("Choose a different endpoint; a line must have positive length."); return false;
+      }
+      emitCreated({type:"LineString", coordinates:[lineStart.slice(),c.slice()]});
+      cancelGesture(); render(); announce("Line submitted. Choose the next start point.");
+      return true;
+    }
+
+    var drawingTools = ["point", "rect", "polygon", "freehand", "circle", "line", "reflection"];
     function down(s, src) {
       // Focusing must not scroll a partly visible canvas under the pointer.
       canvas.focus({ preventScroll: true }); state.keyboardCursor = false; render();
@@ -412,6 +436,8 @@ HTMLWidgets.widget({
       var tool = state.tool;
       if (tool === "pan") {
         drag = { type: "pan", src: src, last: s }; canvas.style.cursor = "grabbing";
+      } else if (tool === "line") {
+        linePoint(ic);
       } else if (tool === "rect") {
         drag = { type: "rect", src: src, s0: s, last: s };
         state.drawing = { type: "Feature", geometry: { type: "Polygon", coordinates: [[[ic[0], ic[1]]]] }, _start: ic };
@@ -467,11 +493,12 @@ HTMLWidgets.widget({
           announce("This annotation's layer is locked.");
         }
       }
-      if (!drag && !polyPts) { gesture = null; gestureTarget = null; }
+      if (!drag && !polyPts && !lineStart) { gesture = null; gestureTarget = null; }
     }
 
     function move(s) {
       if (!drag) {
+        if (state.tool === "line" && lineStart) linePreview(toImageCoords(s[0], s[1]));
         if (state.tool === "polygon" && polyPts) {
           hover = toImageCoords(s[0], s[1]); polygonPreview(); render();
         }
@@ -588,6 +615,7 @@ HTMLWidgets.widget({
         if (pointerIds().length < 2) { pinch = null; pointers = {}; emitViewport(); }
         return;
       }
+      if (cancelled && lineStart) { cancelGesture(); render(); return; }
       if (!drag || drag.src !== "pointer") return;
       if (cancelled) { cancelGesture(); render(); } else up(localPoint(e));
     }
@@ -667,11 +695,12 @@ HTMLWidgets.widget({
           var a = state.drawing._start, b = state.cursor;
           state.drawing.geometry.coordinates = [[[a[0],a[1]],[b[0],a[1]],[b[0],b[1]],[a[0],b[1]],[a[0],a[1]]]];
         }
+        if (lineStart && state.tool === "line") linePreview(state.cursor);
         render(); announce("Cursor " + state.cursor.join(", ") + (state.drawing ? "; drawing in progress" : "")); return;
       }
-      if (!["point","rect","polygon","reflection"].includes(state.tool) &&
+      if (!["point","rect","polygon","line","reflection"].includes(state.tool) &&
           !(state.tool === "circle" && state.circleRadius > 0)) {
-        announce("Choose point, fixed round area, rectangle, polygon or reflection wand for keyboard drawing."); return;
+        announce("Choose point, fixed round area, rectangle, polygon, line or reflection wand for keyboard drawing."); return;
       }
       if (state.creationTarget && state.creationTarget.locked) { announce("This layer is locked. Select an unlocked layer to draw."); return; }
       if (!gesture) {
@@ -679,6 +708,7 @@ HTMLWidgets.widget({
         gestureTarget = state.creationTarget && {layer:state.creationTarget.layer,label:state.creationTarget.label};
       }
       var c = state.cursor.slice();
+      if (state.tool === "line") { linePoint(c); return; }
       if (state.tool === "point") {
         emitCreated({type:"Point",coordinates:c}); cancelGesture();
       } else if (state.tool === "circle") {
