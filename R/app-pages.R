@@ -80,6 +80,13 @@ Three columns: the **queue** (left), the **canvas and tools** (middle), and
   explicitly estimated mm/pixel scale after three measurements. This assumes
   square pixels and leaves the image calibration and stored coordinates
   unchanged. Confirm the reference size before treating this as a known scale.
+- **Reference length:** enter a positive length in mm and choose **Apply
+  globally** for the selected reference label across the queue, or **Apply to
+  image** for the current image only. Image overrides take precedence and
+  survive global changes. **Use global default** removes the current override.
+  The panel shows the effective value and its source. Settings follow the
+  session's autosave option; press **Save** when autosave is off. Global
+  defaults are session settings; Undo/Redo applies to image overrides.
 - Annotations autosave when enabled for the session. Otherwise press **Save**.
   The badge next to Save shows the state (*unsaved*, *saved*, *staged*,
   *committed*, *read-only*), followed by the time of the last checkpoint and its

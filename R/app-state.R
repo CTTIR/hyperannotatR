@@ -411,6 +411,7 @@
   st$session <- .state_identify(sess)
   st$generation <- 0
   st$written <- character()
+  st$calibration_revision <- shiny::reactiveVal(0)
   st
 }
 
@@ -461,6 +462,7 @@
     return(candidate)
   }
   candidate$projects <- st$session$projects
+  candidate$meta$calibration_defaults_mm <- st$session$meta$calibration_defaults_mm
   for (col in c("status", "n_rois")) candidate$manifest[[col]] <- st$session$manifest[[col]]
   candidate
 }

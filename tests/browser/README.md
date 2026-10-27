@@ -53,7 +53,8 @@ screenshot of the unsaved reflection proposal.
 `tests/browser/calibration.R` uses the same environment settings to check
 two-click reference lines, automatic tool selection, the minimum of three
 and recommendation of five measurements, their exact mean and sample standard
-deviation, undo/redo, and a fresh app resuming the saved endpoints. Its RGB
+deviation, editable global/image reference lengths, resetting overrides,
+undo/redo, and a fresh app resuming the saved endpoints and settings. Its RGB
 fixture is synthetic and never modifies a user's annotation queue.
 
 ## Browser protocol
