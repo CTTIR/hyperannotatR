@@ -75,6 +75,11 @@ at_style <- function(colour = NULL, fill_alpha = 0.3, stroke_width = 2,
 #' @param labels Character vector; the controlled label vocabulary for the layer.
 #' @param style An `annot_style`, from [at_style()].
 #' @param ... Additional named metadata stored on the layer.
+#'   Set `role = "calibration_reference"` to default to two-click lines in
+#'   the app. For each label, at least three valid lines are required for a
+#'   mean reference length in level-0 pixels; five are recommended. The app
+#'   also reports their standard deviation. Reference layers are not copied
+#'   to subsequent images. No physical pixel size is assigned automatically.
 #' @param call The calling environment, for error reporting.
 #'
 #' @return An [annot_layer] with no ROIs and a resolved colour mapping.

@@ -1,0 +1,8 @@
+Registered S3 method overwritten by 'stars':
+  method                  from
+  st_interpolate_aw.stars sf  
+Loading required package: shiny
+SKIP: 'test-widget-canvas.R:310:3' ----------------
+Reason: set ANNOTATR_BROWSER_TESTS=true to run the canvas browser tests
+
+[ FAIL 0 | WARN 0 | SKIP 1 | PASS 413 ]

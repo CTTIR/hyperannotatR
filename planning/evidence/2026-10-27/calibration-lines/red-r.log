@@ -1,0 +1,101 @@
+Registered S3 method overwritten by 'stars':
+  method                  from
+  st_interpolate_aw.stars sf  
+ERROR: 'test-app-calibration.R:16:5' --------------
+Error in `.calibration_summary(p, "reference", "thickness")`: could not find function ".calibration_summary"
+
+ERROR: 'test-app-calibration.R:43:3' --------------
+Error in `.calibration_length(roi, img)`: could not find function ".calibration_length"
+Backtrace:
+    ▆
+ 1. └─testthat::expect_equal(...) at test-app-calibration.R:43:3
+ 2.   └─testthat::quasi_label(enquo(object), label)
+ 3.     └─rlang::eval_bare(expr, quo_get_env(quo))
+
+FAILURE: 'test-app-calibration.R:60:3' ------------
+Expected `copied$layers$reference$rois` to have length 0.
+Actual length: 1.
+
+Loading required package: shiny
+FAILURE: 'test-app-calibration.R:77:5' ------------
+Expected `rv$tool` to be identical to "line".
+Differences:
+`actual`:   "polygon"
+`expected`: "line"   
+
+Backtrace:
+     ▆
+  1. ├─shiny::testServer(...) at test-app-calibration.R:73:3
+  2. │ ├─shiny:::withMockContext(...)
+  3. │ │ ├─shiny::isolate(...)
+  4. │ │ │ ├─shiny::..stacktraceoff..(...)
+  5. │ │ │ └─ctx$run(...)
+  6. │ │ │   ├─promises::with_promise_domain(...)
+  7. │ │ │   │ └─domain$wrapSync(expr)
+  8. │ │ │   ├─shiny::withReactiveDomain(...)
+  9. │ │ │   │ └─promises::with_promise_domain(...)
+ 10. │ │ │   │   └─domain$wrapSync(expr)
+ 11. │ │ │   │     └─base::force(expr)
+ 12. │ │ │   ├─shiny:::with_otel_span_context(...)
+ 13. │ │ │   │ └─base::force(expr)
+ 14. │ │ │   ├─shiny::captureStackTraces(...)
+ 15. │ │ │   │ └─promises::with_promise_domain(...)
+ 16. │ │ │   │   └─domain$wrapSync(expr)
+ 17. │ │ │   │     └─base::withCallingHandlers(expr, error = doCaptureStack)
+ 18. │ │ │   └─env$runWith(self, func)
+ 19. │ │ │     └─shiny (local) contextFunc()
+ 20. │ │ │       └─shiny::..stacktraceon..(expr)
+ 21. │ │ ├─shiny::withReactiveDomain(...)
+ 22. │ │ │ └─promises::with_promise_domain(...)
+ 23. │ │ │   └─domain$wrapSync(expr)
+ 24. │ │ │     └─base::force(expr)
+ 25. │ │ └─withr::with_options(...)
+ 26. │ │   └─base::force(code)
+ 27. │ └─rlang::eval_tidy(quosure, mask, rlang::caller_env())
+ 28. └─testthat::expect_identical(rv$tool, "line") at test-app-calibration.R:77:5
+
+ERROR: 'test-app-calibration.R:88:5' --------------
+Error in `.subset2(x, "impl")$getOutput(name)`: The test referenced an output that hasn't been defined yet: output$canvas-calibration_summary
+Backtrace:
+     ▆
+  1. ├─shiny::testServer(...) at test-app-calibration.R:73:3
+  2. │ ├─shiny:::withMockContext(...)
+  3. │ │ ├─shiny::isolate(...)
+  4. │ │ │ ├─shiny::..stacktraceoff..(...)
+  5. │ │ │ └─ctx$run(...)
+  6. │ │ │   ├─promises::with_promise_domain(...)
+  7. │ │ │   │ └─domain$wrapSync(expr)
+  8. │ │ │   ├─shiny::withReactiveDomain(...)
+  9. │ │ │   │ └─promises::with_promise_domain(...)
+ 10. │ │ │   │   └─domain$wrapSync(expr)
+ 11. │ │ │   │     └─base::force(expr)
+ 12. │ │ │   ├─shiny:::with_otel_span_context(...)
+ 13. │ │ │   │ └─base::force(expr)
+ 14. │ │ │   ├─shiny::captureStackTraces(...)
+ 15. │ │ │   │ └─promises::with_promise_domain(...)
+ 16. │ │ │   │   └─domain$wrapSync(expr)
+ 17. │ │ │   │     └─base::withCallingHandlers(expr, error = doCaptureStack)
+ 18. │ │ │   └─env$runWith(self, func)
+ 19. │ │ │     └─shiny (local) contextFunc()
+ 20. │ │ │       └─shiny::..stacktraceon..(expr)
+ 21. │ │ ├─shiny::withReactiveDomain(...)
+ 22. │ │ │ └─promises::with_promise_domain(...)
+ 23. │ │ │   └─domain$wrapSync(expr)
+ 24. │ │ │     └─base::force(expr)
+ 25. │ │ └─withr::with_options(...)
+ 26. │ │   └─base::force(code)
+ 27. │ └─rlang::eval_tidy(quosure, mask, rlang::caller_env())
+ 28. ├─testthat::expect_match(output$calibration_summary$html, "5 / 5") at test-app-calibration.R:88:5
+ 29. │ └─testthat::quasi_label(enquo(object), label)
+ 30. │   └─rlang::eval_bare(expr, quo_get_env(quo))
+ 31. ├─output$calibration_summary
+ 32. ├─shiny:::`$.shinyoutput`(output, calibration_summary)
+ 33. │ └─.subset2(x, "impl")$getOutput(name)
+ 34. │   └─base::stop(...)
+ 35. └─base::.handleSimpleError(...)
+ 36.   └─shiny (local) h(simpleError(msg, call))
+
+[ FAIL 5 | WARN 0 | SKIP 0 | PASS 2 ]
+Error:
+! Test failures.
+Execution halted

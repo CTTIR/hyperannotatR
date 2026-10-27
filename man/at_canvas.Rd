@@ -22,7 +22,8 @@ at_canvas(
 \item{project}{Optional \link{annot_project} whose ROIs are shown initially.}
 
 \item{tool}{Initial tool: one of \code{"pan"}, \code{"rect"}, \code{"polygon"}, \code{"freehand"},
-\code{"circle"}, \code{"point"}, \code{"reflection"} (request a reflection proposal),
+\code{"circle"}, \code{"point"}, \code{"line"} (two clicks for start and end),
+\code{"reflection"} (request a reflection proposal),
 \code{"edit"}, \code{"erase"}, \code{"probe"} (emit a pixel
 position for spectra) or \code{"select"} (emit the clicked ROI id).}
 

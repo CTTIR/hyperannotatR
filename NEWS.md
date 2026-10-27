@@ -1,5 +1,11 @@
 # hyperannotatR (development)
 
+* The Line / distance tool records a straight line from two clicked endpoints.
+  Layers with `role = "calibration_reference"` select this tool by default
+  and show per-label repeated lengths in image pixels. The mean and sample
+  standard deviation appear from three valid measurements; five are
+  recommended. Saved endpoints survive resume, undo and redo. Reference
+  layers are not copied between images and do not assign a physical scale.
 * Canvas script URLs now change with their contents, preventing browsers from
   retaining older drawing code after a local app update at the same version.
 * The annotation app offers three point marker display sizes and three fixed

@@ -52,7 +52,7 @@ machine running R; the app is meant for local use.
 Three columns: the **queue** (left), the **canvas and tools** (middle), and
 **layers & labels** (right).
 
-- **Tools:** pan, rectangle, polygon, freehand, circle, point, edit (drag a
+- **Tools:** pan, rectangle, polygon, freehand, circle, point, line, edit (drag a
   region), erase (click a region to remove it), reflection wand, probe and select. **Undo**,
   **Redo** and **Copy previous** (the previous image's regions) sit next to them.
 - Pick a **layer** (anatomy / state / uncertain / artefact) -- the label list
@@ -68,6 +68,12 @@ Three columns: the **queue** (left), the **canvas and tools** (middle), and
   Tight/normal/broad controls connected-region growth. Pale tissue can also
   appear bright; this tool suggests an outline, not a tissue diagnosis.
   It supports image displays up to 2048 pixels per side.
+- **Line / distance:** click the start and end of a straight reference length.
+  Calibration layers select this tool automatically. Measure the same physical
+  dimension at least three times per image, preferably five. The panel reports
+  the mean and standard deviation in pixels; individual endpoints are saved.
+  Calibration references are not copied to subsequent images. A known physical
+  dimension is still needed before assigning an mm scale.
 - Annotations autosave when enabled for the session. Otherwise press **Save**.
   The badge next to Save shows the state (*unsaved*, *saved*, *staged*,
   *committed*, *read-only*), followed by the time of the last checkpoint and its
@@ -76,7 +82,8 @@ Three columns: the **queue** (left), the **canvas and tools** (middle), and
   also advances after a successful save. Reloading the page continues from the
   latest edits.
 - Tab to the canvas. Arrows move the cursor (Shift: 10 pixels); Enter or Space
-  places point/rectangle anchors. Space adds polygon vertices and Enter finishes.
+  places point/rectangle anchors or line endpoints. Space adds polygon vertices
+  and Enter finishes.
   Escape cancels unfinished geometry. Shortcuts leave focused form controls their
   native behavior.
 - The canvas shows an image overview with pan/zoom, not streamed pyramid tiles.
