@@ -11,7 +11,8 @@ png::writePNG(rgb, file.path(dir, "fixture.png"))
 s <- at_session(file.path(dir, "fixture.png"), layers = list(
   at_layer("tissue", labels = "cord"),
   at_layer("Calibration", labels = "Retractor thickness",
-           role = "calibration_reference")),
+           role = "calibration_reference",
+           reference_assumptions_mm = list("Retractor thickness" = 2))),
   out_dir = file.path(dir, "saved"), autosave = TRUE)
 saveRDS(s, file.path(dir, "session.rds"))
 writeLines(c(
@@ -44,6 +45,8 @@ tryCatch({
   }
   choose()
   stopifnot(grepl("0 / 5", text(), fixed = TRUE))
+  stopifnot(grepl("Assumed reference length: 2.00 mm", text(), fixed = TRUE),
+            !grepl("Estimated scale:", text(), fixed = TRUE))
   for (i in seq_len(5L)) {
     ready(); at(30, 5 + i * 10)
     stopifnot(app$get_value(export = "n_rois") == i - 1L)
@@ -57,6 +60,7 @@ tryCatch({
   }
   stopifnot(grepl("10.00 px", text(), fixed = TRUE),
             grepl("1.58 px", text(), fixed = TRUE),
+            grepl("Estimated scale: 0.20000 mm/px", text(), fixed = TRUE),
             grepl("Recommended number reached", text(), fixed = TRUE))
   app$get_screenshot(file = file.path(work,
     paste0(basename(dir), "-five-measurements.png")))
@@ -77,6 +81,7 @@ tryCatch({
     load_timeout = 90000, timeout = 30000, width = 1500, height = 1200)
   choose()
   stopifnot(grepl("5 / 5", text(), fixed = TRUE),
+            grepl("Estimated scale: 0.20000 mm/px", text(), fixed = TRUE),
             grepl("10.00 px", text(), fixed = TRUE))
   app$run_js("document.querySelector('input[name=\"layers-layer\"][value=\"tissue\"]').click()")
   app$wait_for_js("window.atcanvasInspect('canvas-canvas').tool === 'pan'")

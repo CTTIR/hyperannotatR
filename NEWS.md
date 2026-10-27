@@ -1,5 +1,10 @@
 # hyperannotatR (development)
 
+* Calibration layers can store per-label assumed lengths with
+  `reference_assumptions_mm = list(label = 2)`. From three valid repeats,
+  the panel calculates an explicitly estimated mm/pixel scale for that image.
+  Assumptions persist with the layer; geometry and image calibration stay in
+  their original units. The estimate updates when measurements change.
 * The annotation tools are grouped into Navigate, Draw & mark,
   Measure & detect, and Edit & reuse. Every button has a local icon,
   a readable English name and a tooltip. Tool settings remain contextual,

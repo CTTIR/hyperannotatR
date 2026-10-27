@@ -8,6 +8,34 @@ calibration_line <- function(x, y = 0, label = "thickness", level = 0L) {
                  label = label, level = level)
 }
 
+test_that("assumed reference sizes give per-image estimates after three repeats", {
+  layer <- calibration_layer()
+  layer$meta$reference_assumptions_mm <- list(thickness = 2)
+  p <- at_project(tiny_image(), layer)
+  image <- p$image
+  for (i in seq_len(3L)) {
+    p <- at_add_roi(p, "reference", calibration_line(5))
+    s <- .calibration_summary(p, "reference", "thickness")
+    expect_equal(s$assumed_length_mm, 2)
+    if (i < 3L) expect_true(is.na(s$estimated_mm_per_px))
+    else expect_equal(s$estimated_mm_per_px, 0.4)
+  }
+  expect_true(is.na(.calibration_summary(p, "reference", "other")$assumed_length_mm))
+  path <- tempfile(fileext = ".rds")
+  at_save_project(p, path)
+  restored <- at_load_project(path)
+  expect_equal(.calibration_summary(restored, "reference", "thickness"), s)
+  # New geometry changes the estimate; the image calibration is never replaced.
+  p <- at_add_roi(p, "reference", calibration_line(9))
+  expect_equal(.calibration_summary(p, "reference", "thickness")$estimated_mm_per_px,
+               2 / 6)
+  expect_identical(p$image, image)
+  for (invalid in list(NULL, NA_real_, 0, -1, Inf, "2", c(2, 3))) {
+    p$layers$reference$meta$reference_assumptions_mm <- list(thickness = invalid)
+    expect_true(is.na(.calibration_summary(p, "reference", "thickness")$estimated_mm_per_px))
+  }
+})
+
 test_that("reference length uses at least three independent two-endpoint lines", {
   p <- at_project(tiny_image(), calibration_layer())
   image <- p$image
@@ -67,6 +95,7 @@ test_that("calibration defaults to line and follows saves, undo and redo", {
   s <- demo_session(1); s$autosave <- FALSE
   p <- at_project(tiny_image(), list(at_layer("tissue", labels = "cord"),
                                     calibration_layer()))
+  p$layers$reference$meta$reference_assumptions_mm <- list(thickness = 2)
   rv <- shiny::reactiveValues(session = s, cursor = 1L, project = p,
                               tool = "polygon")
   .state_init(rv)
@@ -87,6 +116,8 @@ test_that("calibration defaults to line and follows saves, undo and redo", {
     expect_length(rv$project$layers$reference$rois, 5L)
     expect_match(output$calibration_summary$html, "5 / 5")
     expect_match(output$calibration_summary$html, "5.00 px")
+    expect_match(output$calibration_summary$html, "Assumed reference length: 2.00 mm")
+    expect_match(output$calibration_summary$html, "Estimated scale: 0.40000 mm/px")
     # Area/point tools cannot silently become calibration measurements.
     session$setInputs(canvas_created = event(drawn("Point", c(1, 1))))
     expect_length(rv$project$layers$reference$rois, 5L)
