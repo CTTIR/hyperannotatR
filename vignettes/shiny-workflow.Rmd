@@ -8,7 +8,7 @@ vignette: >
 ---
 
 ```{r hexlogo, echo=FALSE, fig.align="right", out.width="110px", fig.alt="hyperannotatR logo"}
-knitr::include_graphics("../man/figures/logo.png")
+knitr::include_graphics("../man/figures/logo-with-name.png")
 ```
 
 ```{r setup, include=FALSE}

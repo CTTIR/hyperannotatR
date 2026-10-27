@@ -18,7 +18,7 @@ library(hyperannotatR)
 ```
 
 ```{r hexlogo, echo=FALSE, eval=TRUE, fig.align="center", out.width="220px", fig.alt="hyperannotatR logo"}
-knitr::include_graphics("../man/figures/logo.png")
+knitr::include_graphics("../man/figures/logo-with-name.png")
 ```
 
 hyperannotatR helps you draw, organise and export regions of interest (ROIs) across

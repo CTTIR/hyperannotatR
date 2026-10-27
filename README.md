@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# hyperannotatR <img src="man/figures/logo.png" align="right" height="139" alt="hyperannotatR logo" />
+# hyperannotatR <picture class="cttir-readme-logo"><source class="cttir-logo-dark-source" media="(prefers-color-scheme: dark)" srcset="man/figures/logo-with-name-dark.png" /><img src="man/figures/logo-with-name.png" align="right" alt="hyperannotatR logo" width="120" height="139" /></picture>
 
 <!-- badges: start -->
 
@@ -175,3 +175,8 @@ material must be reviewed and revised before inclusion, and references
 must be verified against their DOI, arXiv ID or ISBN.
 
 Local software setup: vLLM with Python/PyTorch, plus R and RStudio.
+
+## Branding
+
+Editable R sources and regeneration instructions are in
+[tools/branding](https://github.com/CTTIR/hyperannotatR/tree/main/tools/branding).
