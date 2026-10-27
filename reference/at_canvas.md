@@ -39,8 +39,9 @@ at_canvas(
 - tool:
 
   Initial tool: one of `"pan"`, `"rect"`, `"polygon"`, `"freehand"`,
-  `"circle"`, `"point"`, `"edit"`, `"erase"`, `"probe"` (emit a pixel
-  position for spectra) or `"select"` (emit the clicked ROI id).
+  `"circle"`, `"point"`, `"reflection"` (request a reflection proposal),
+  `"edit"`, `"erase"`, `"probe"` (emit a pixel position for spectra) or
+  `"select"` (emit the clicked ROI id).
 
 - width, height:
 
@@ -54,7 +55,12 @@ at_canvas(
 
   A list of extra options passed to the widget: `creationTarget` (a list
   with `layer`, `label` and `locked`; drawing is refused on a locked
-  target) and `selection` (ROI ids to highlight).
+  target), `selection` (ROI ids to highlight), `pointRadius` (display
+  radius in CSS pixels, default 4; saved with new points as
+  `attributes$point_radius`, without changing mask membership),
+  `circleRadius` (fixed radius in level-0 image pixels; 0/default draws
+  by dragging), and `suggestion` (an unsaved GeoJSON feature shown
+  dashed).
 
 - view:
 
@@ -102,6 +108,11 @@ are never sent.
 - `<id>_probed`:
 
   `x`, `y`: the probed level-0 pixel position.
+
+- `<id>_reflection_seed`:
+
+  `x`, `y` and `target`: a clicked pixel for a reflection proposal. It
+  does not create an ROI.
 
 - `<id>_viewport`:
 

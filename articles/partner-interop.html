@@ -181,7 +181,7 @@ directory of neutral files:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> masks/regions_labelled.tif                   <span style="text-decoration: underline;">2</span>936 mask_tiff     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> masks/regions_labelled.tif.legend.json       <span style="text-decoration: underline;">1</span>811 legend_json</span></span>
 <span><span class="va">receipt</span><span class="op">$</span><span class="va">handoff_digest</span></span>
-<span><span class="co">#&gt; [1] "70bf859cf01178f1b52116c90f399cff26b4572551c40d582cff3e17b4c0085b"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "c1ded20f1d405518d8c42a1b3a046be6f4a4319eace8ba1fac9c6cf2aff19def"</span></span></code></pre></div>
 <ul>
 <li>
 <code>annotations_qupath.geojson</code> uses the QuPath 0.4+ dialect
@@ -484,7 +484,7 @@ service refuses to start.</p>
 <span><span class="co">#&gt; [1] "0"</span></span>
 <span><span class="fu"><a href="../reference/at_control_command.html">at_control_command</a></span><span class="op">(</span><span class="va">handle</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>operation <span class="op">=</span> <span class="st">"context.goto"</span>, payload <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>queue_index <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
 <span>                                expected_revision <span class="op">=</span> <span class="va">state</span><span class="op">$</span><span class="va">state_revision</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">entry_id</span></span>
-<span><span class="co">#&gt; [1] "entry_at_2fa04b065b76_000000005"</span></span>
+<span><span class="co">#&gt; [1] "entry_at_301916f3e869_000000005"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_control_events.html">at_control_events</a></span><span class="op">(</span><span class="va">handle</span><span class="op">)</span><span class="op">$</span><span class="va">events</span>, <span class="va">`[[`</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="st">"type"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "service.started" "image.changed"</span></span>
 <span><span class="fu"><a href="../reference/at_control_stop.html">at_control_stop</a></span><span class="op">(</span><span class="va">handle</span><span class="op">)</span></span></code></pre></div>

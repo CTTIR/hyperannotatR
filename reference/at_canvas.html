@@ -7,7 +7,7 @@ says why instead of keeping a previous image."><meta property="og:description" c
 drawn in their label colours (hidden layers are left out; locked layers
 cannot be erased or moved on the canvas). It pans with a drag and zooms
 with the mouse wheel or a two-finger pinch. When no image can be shown, it
-says why instead of keeping a previous image."><meta property="og:image" content="https://cttir.github.io/hyperannotatR/logo.svg"><!-- dependencies from examples --><script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="libs/atcanvas-css-0.3.0/atcanvas.css" rel="stylesheet"><script src="libs/atcanvas-binding-0.3.0/atcanvas.js"></script><meta name="theme-color" content="#1565c0"><!-- Package browser icons -->
+says why instead of keeping a previous image."><meta property="og:image" content="https://cttir.github.io/hyperannotatR/logo.svg"><!-- dependencies from examples --><script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script><link href="libs/atcanvas-css-0.3.0/atcanvas.css" rel="stylesheet"><script src="libs/atcanvas-binding-0.3.0.121766086.3873374/atcanvas.js"></script><meta name="theme-color" content="#1565c0"><!-- Package browser icons -->
 <link rel="icon" type="image/x-icon" href="../favicon.ico?v=1aa2ff4522c2">
 <link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png?v=1aa2ff4522c2">
 <link rel="icon" type="image/svg+xml" sizes="any" href="../favicon.svg?v=1aa2ff4522c2">
@@ -91,7 +91,8 @@ says why instead of keeping a previous image.</p>
 
 <dt id="arg-tool">tool<a class="anchor" aria-label="anchor" href="#arg-tool"></a></dt>
 <dd><p>Initial tool: one of <code>"pan"</code>, <code>"rect"</code>, <code>"polygon"</code>, <code>"freehand"</code>,
-<code>"circle"</code>, <code>"point"</code>, <code>"edit"</code>, <code>"erase"</code>, <code>"probe"</code> (emit a pixel
+<code>"circle"</code>, <code>"point"</code>, <code>"reflection"</code> (request a reflection proposal),
+<code>"edit"</code>, <code>"erase"</code>, <code>"probe"</code> (emit a pixel
 position for spectra) or <code>"select"</code> (emit the clicked ROI id).</p></dd>
 
 
@@ -106,7 +107,11 @@ position for spectra) or <code>"select"</code> (emit the clicked ROI id).</p></d
 <dt id="arg-options">options<a class="anchor" aria-label="anchor" href="#arg-options"></a></dt>
 <dd><p>A list of extra options passed to the widget:
 <code>creationTarget</code> (a list with <code>layer</code>, <code>label</code> and <code>locked</code>; drawing is
-refused on a locked target) and <code>selection</code> (ROI ids to highlight).</p></dd>
+refused on a locked target), <code>selection</code> (ROI ids to highlight),
+<code>pointRadius</code> (display radius in CSS pixels, default 4; saved with new
+points as <code>attributes$point_radius</code>, without changing mask membership),
+<code>circleRadius</code> (fixed radius in level-0 image pixels; 0/default draws by
+dragging), and <code>suggestion</code> (an unsaved GeoJSON feature shown dashed).</p></dd>
 
 
 <dt id="arg-view">view<a class="anchor" aria-label="anchor" href="#arg-view"></a></dt>
@@ -147,6 +152,10 @@ drawing began. A click with the rectangle or circle tool is not a shape.</p></dd
 
 <dt><code>&lt;id&gt;_probed</code></dt>
 <dd><p><code>x</code>, <code>y</code>: the probed level-0 pixel position.</p></dd>
+
+<dt><code>&lt;id&gt;_reflection_seed</code></dt>
+<dd><p><code>x</code>, <code>y</code> and <code>target</code>: a clicked pixel
+for a reflection proposal. It does not create an ROI.</p></dd>
 
 <dt><code>&lt;id&gt;_viewport</code></dt>
 <dd><p><code>zoom</code>, <code>center_x</code>, <code>center_y</code> and <code>bounds</code>
