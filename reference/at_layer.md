@@ -31,7 +31,13 @@ at_layer(
 
 - ...:
 
-  Additional named metadata stored on the layer.
+  Additional named metadata stored on the layer. Set
+  `role = "calibration_reference"` to default to two-click lines in the
+  app. For each label, at least three valid lines are required for a
+  mean reference length in level-0 pixels; five are recommended. The app
+  also reports their standard deviation. Reference layers are not copied
+  to subsequent images. No physical pixel size is assigned
+  automatically.
 
 - call:
 

@@ -39,9 +39,10 @@ at_canvas(
 - tool:
 
   Initial tool: one of `"pan"`, `"rect"`, `"polygon"`, `"freehand"`,
-  `"circle"`, `"point"`, `"reflection"` (request a reflection proposal),
-  `"edit"`, `"erase"`, `"probe"` (emit a pixel position for spectra) or
-  `"select"` (emit the clicked ROI id).
+  `"circle"`, `"point"`, `"line"` (two clicks for start and end),
+  `"reflection"` (request a reflection proposal), `"edit"`, `"erase"`,
+  `"probe"` (emit a pixel position for spectra) or `"select"` (emit the
+  clicked ROI id).
 
 - width, height:
 
