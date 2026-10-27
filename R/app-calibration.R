@@ -1,6 +1,7 @@
 # Calibration references are independent, two-endpoint measurements. Their
 # coordinates remain in image pixels; a reference annotation never assigns a
-# physical pixel size. Summaries are recomputed from saved ROI geometry.
+# physical pixel size. Summaries and provisional scales are recomputed from
+# saved ROI geometry; assumed reference sizes remain explicitly unverified.
 .is_calibration_layer <- function(layer) {
   identical(layer$meta$role, "calibration_reference")
 }
@@ -37,9 +38,15 @@
   valid <- is.finite(lengths)
   lengths_px <- lengths[valid]
   n <- length(lengths_px)
+  assumptions <- project$layers[[layer]]$meta$reference_assumptions_mm
+  assumed <- if (is.list(assumptions)) assumptions[[label]] else NULL
+  if (!is.numeric(assumed) || length(assumed) != 1L ||
+      !is.finite(assumed) || assumed <= 0) assumed <- NA_real_
   list(n = n, lengths_px = lengths_px, excluded = sum(!valid),
        mean_px = if (n >= 3L) mean(lengths_px) else NA_real_,
        sd_px = if (n >= 3L) stats::sd(lengths_px) else NA_real_,
+       assumed_length_mm = assumed,
+       estimated_mm_per_px = if (n >= 3L) assumed / mean(lengths_px) else NA_real_,
        status = if (n < 3L) "insufficient" else
          if (n < 5L) "minimum" else "recommended")
 }
@@ -72,12 +79,19 @@
       shiny::p(progress),
       if (s$n >= 3L) shiny::p(shiny::strong(sprintf(
         "Mean reference length: %.2f px; SD: %.2f px", s$mean_px, s$sd_px))),
+      if (is.finite(s$assumed_length_mm)) shiny::p(sprintf(
+        "Assumed reference length: %.2f mm (unverified).", s$assumed_length_mm)),
+      if (is.finite(s$estimated_mm_per_px)) shiny::p(shiny::strong(sprintf(
+        "Estimated scale: %.5f mm/px", s$estimated_mm_per_px))),
       if (s$n) shiny::tags$details(shiny::tags$summary("Measurements (px)"),
         paste(sprintf("%.2f", s$lengths_px), collapse = ", ")),
       if (s$excluded) shiny::p(sprintf(
         "%d existing ROI(s) excluded: use distinct endpoints; copied or area ROIs are not repeats.",
         s$excluded)),
       shiny::p(class = "at-progress",
-        "Repeat the same reference dimension in this image. Its known physical size is required for mm calibration."))
+        if (is.finite(s$assumed_length_mm))
+          "The estimated scale assumes square pixels and the stated reference size. Stored geometry remains in pixels."
+        else
+          "Repeat the same reference dimension in this image. Its known physical size is required for mm calibration."))
   })
 }

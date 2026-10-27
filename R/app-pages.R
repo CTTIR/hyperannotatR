@@ -75,8 +75,11 @@ Three columns: the **queue** (left), the **canvas and tools** (middle), and
   Calibration layers select this tool automatically. Measure the same physical
   dimension at least three times per image, preferably five. The panel reports
   the mean and standard deviation in pixels; individual endpoints are saved.
-  Calibration references are not copied to subsequent images. A known physical
-  dimension is still needed before assigning an mm scale.
+  Calibration references are not copied to subsequent images. A layer with
+  per-label assumed lengths (`reference_assumptions_mm`, in mm) also shows an
+  explicitly estimated mm/pixel scale after three measurements. This assumes
+  square pixels and leaves the image calibration and stored coordinates
+  unchanged. Confirm the reference size before treating this as a known scale.
 - Annotations autosave when enabled for the session. Otherwise press **Save**.
   The badge next to Save shows the state (*unsaved*, *saved*, *staged*,
   *committed*, *read-only*), followed by the time of the last checkpoint and its
