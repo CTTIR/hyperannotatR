@@ -1,6 +1,7 @@
 # Get started with hyperannotatR
 
-![hyperannotatR logo](../reference/figures/logo-with-name.png)
+![hyperannotatR logo](figures/logo.svg)![hyperannotatR
+logo](figures/logo-dark.svg)
 
 hyperannotatR helps you draw, organise and export regions of interest
 (ROIs) across ordinary images, whole-slide microscopy and hyperspectral

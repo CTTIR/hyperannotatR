@@ -1,6 +1,7 @@
 # Reproducible analytical summaries
 
-![hyperannotatR logo](../reference/figures/logo-with-name.png)
+![hyperannotatR logo](figures/logo.svg)![hyperannotatR
+logo](figures/logo-dark.svg)
 
 This example follows persisted annotations through masks, raw pixel
 records, ROI spectra, image summaries, and agreement tables. It uses the

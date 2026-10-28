@@ -28,6 +28,7 @@ the canonical integrity.json. Absolute paths are never used as identity."><meta 
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
+    <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
@@ -166,7 +167,7 @@ optional <code>objects/project.rds</code> holds no pixels, read identity or loca
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"handoff-example"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rc</span> <span class="op">&lt;-</span> <span class="fu">at_export_qupflowr</span><span class="op">(</span><span class="fu"><a href="at_example_project.html">at_example_project</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">dest</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rc</span><span class="op">$</span><span class="va">handoff_digest</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "5dc41cb9262624f937983250e9f326746cc3e92c1f52118225e20b2d33d6ac05"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "b46b8c049f3191a319a6d64252968db199f52036a144f33467fb219613a6dd4e"</span>
 <span class="r-in"><span><span class="va">rc</span><span class="op">$</span><span class="va">files</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path"</span>, <span class="st">"format"</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   path                                   format        </span>

@@ -33,6 +33,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
+    <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
@@ -81,7 +82,25 @@
 
     
     
-<p><img src="../reference/figures/logo-with-name.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<!-- cttir-vignette-logo: start -->
+<style>
+.cttir-vignette-logo { float: right; width: 120px; max-width: 30%; margin: 0 0 1rem 1.5rem; }
+.cttir-vignette-logo img { width: 100%; height: auto; border: 0; background: transparent; box-shadow: none; }
+.cttir-vignette-logo .cttir-vignette-logo-light { display: block; }
+.cttir-vignette-logo .cttir-vignette-logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  .cttir-vignette-logo .cttir-vignette-logo-light { display: none; }
+  .cttir-vignette-logo .cttir-vignette-logo-dark { display: block; }
+}
+[data-bs-theme="light"] .cttir-vignette-logo .cttir-vignette-logo-light { display: block; }
+[data-bs-theme="light"] .cttir-vignette-logo .cttir-vignette-logo-dark { display: none; }
+[data-bs-theme="dark"] .cttir-vignette-logo .cttir-vignette-logo-light { display: none; }
+[data-bs-theme="dark"] .cttir-vignette-logo .cttir-vignette-logo-dark { display: block; }
+</style>
+<div class="cttir-vignette-logo">
+<p><img class="cttir-vignette-logo-light" src="figures/logo.svg" alt="hyperannotatR logo" width="120" height="139"><img class="cttir-vignette-logo-dark" src="figures/logo-dark.svg" alt="hyperannotatR logo" width="120" height="139"></p>
+</div>
+<!-- cttir-vignette-logo: end -->
 <div class="section level2">
 <h2 id="image-handles-and-windowed-readers">Image handles and windowed readers<a class="anchor" aria-label="anchor" href="#image-handles-and-windowed-readers"></a>
 </h2>
@@ -431,7 +450,7 @@ registry, is auto-detected from the file, and serves tiles through
 <span></span>
 <span><span class="va">cimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_read_image.html">at_read_image</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
 <span><span class="va">cimg</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file2f2a412dcb5a.const</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file2e11773fcebb.const</span></span></span>
 <span><span class="co">#&gt; backend: <span style="color: #0000BB;">"const"</span>  |  dtype: <span style="color: #0000BB;">"double"</span></span></span>
 <span><span class="co">#&gt; size: 64 x 48 px  |  levels: 1  |  bands: 2</span></span>
 <span><span class="co">#&gt; pixel size: 1 x 1 px</span></span>

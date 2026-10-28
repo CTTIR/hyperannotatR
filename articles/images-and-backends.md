@@ -1,6 +1,7 @@
 # Images and backends
 
-![hyperannotatR logo](../reference/figures/logo-with-name.png)
+![hyperannotatR logo](figures/logo.svg)![hyperannotatR
+logo](figures/logo-dark.svg)
 
 ## Image handles and windowed readers
 
@@ -336,7 +337,7 @@ saveRDS(list(width = 64L, height = 48L, bands = 2L, value = 0.5), path)
 
 cimg <- at_read_image(path)
 cimg
-#> <annot_image> file2f2a412dcb5a.const
+#> <annot_image> file2e11773fcebb.const
 #> backend: "const"  |  dtype: "double"
 #> size: 64 x 48 px  |  levels: 1  |  bands: 2
 #> pixel size: 1 x 1 px

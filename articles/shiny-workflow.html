@@ -33,6 +33,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
+    <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
@@ -81,7 +82,25 @@
 
     
     
-<p><img src="../reference/figures/logo-with-name.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<!-- cttir-vignette-logo: start -->
+<style>
+.cttir-vignette-logo { float: right; width: 120px; max-width: 30%; margin: 0 0 1rem 1.5rem; }
+.cttir-vignette-logo img { width: 100%; height: auto; border: 0; background: transparent; box-shadow: none; }
+.cttir-vignette-logo .cttir-vignette-logo-light { display: block; }
+.cttir-vignette-logo .cttir-vignette-logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  .cttir-vignette-logo .cttir-vignette-logo-light { display: none; }
+  .cttir-vignette-logo .cttir-vignette-logo-dark { display: block; }
+}
+[data-bs-theme="light"] .cttir-vignette-logo .cttir-vignette-logo-light { display: block; }
+[data-bs-theme="light"] .cttir-vignette-logo .cttir-vignette-logo-dark { display: none; }
+[data-bs-theme="dark"] .cttir-vignette-logo .cttir-vignette-logo-light { display: none; }
+[data-bs-theme="dark"] .cttir-vignette-logo .cttir-vignette-logo-dark { display: block; }
+</style>
+<div class="cttir-vignette-logo">
+<p><img class="cttir-vignette-logo-light" src="figures/logo.svg" alt="hyperannotatR logo" width="120" height="139"><img class="cttir-vignette-logo-dark" src="figures/logo-dark.svg" alt="hyperannotatR logo" width="120" height="139"></p>
+</div>
+<!-- cttir-vignette-logo: end -->
 <p>Annotating one image is a job for <code><a href="../reference/at_project.html">at_project()</a></code> and the
 ROI constructors. Annotating a <em>queue</em> of images — a plate of
 serial sections, a batch of slides, a folder of cubes — is what the
@@ -104,7 +123,7 @@ into a temporary directory so the queue has real files to iterate.</p>
 <span><span class="va">sess</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_session&gt;</span></span></span>
 <span><span class="co">#&gt; images: 3  |  complete: 0  |  cursor: 1</span></span>
-<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpsYOKWF/hyperannotatR-example-session-33cf8c39d62</span>  |  autosave: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpwMLVaX/hyperannotatR-example-session-32b767cb156c</span>  |  autosave: TRUE</span></span></code></pre></div>
 <p>Every image starts with status <code>"pending"</code>, the cursor
 sits on the first image, and per-image projects are materialised lazily
 — nothing is read from disk until you visit it.</p>
@@ -348,7 +367,7 @@ app refuses paths outside that folder.</p>
 <span><span class="va">recovered</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_session&gt;</span></span></span>
 <span><span class="co">#&gt; images: 3  |  complete: 1  |  cursor: 2</span></span>
-<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpsYOKWF/hyperannotatR-example-session-33cf8c39d62</span>  |  autosave: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt; out_dir: <span style="color: #0000BB;">/tmp/RtmpwMLVaX/hyperannotatR-example-session-32b767cb156c</span>  |  autosave: TRUE</span></span></code></pre></div>
 <p>The cursor, statuses, materialised projects, and templates all come
 back intact.</p>
 <p>File-backed images are saved as a versioned source descriptor (the
@@ -399,9 +418,9 @@ per label — with <code><a href="../reference/at_manifest.html">at_manifest()</
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 9</span></span></span>
 <span><span class="co">#&gt;     idx entry_id              export_stem path  name  status project_path n_rois</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 entry_at_33cf1730cb8… entry_at_3… /tmp… imag… compl… <span style="color: #BB0000;">NA</span>                0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 entry_at_33cf1730cb8… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 entry_at_33cf1730cb8… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 entry_at_32b72204b43… entry_at_3… /tmp… imag… compl… <span style="color: #BB0000;">NA</span>                0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 entry_at_32b72204b43… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 entry_at_32b72204b43… entry_at_3… /tmp… imag… pendi… <span style="color: #BB0000;">NA</span>                0</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: modified &lt;dttm&gt;</span></span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/at_manifest.html">at_manifest</a></span><span class="op">(</span><span class="va">sess</span><span class="op">)</span></span>

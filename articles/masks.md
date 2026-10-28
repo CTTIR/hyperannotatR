@@ -1,6 +1,7 @@
 # Masks
 
-![hyperannotatR logo](../reference/figures/logo-with-name.png)
+![hyperannotatR logo](figures/logo.svg)![hyperannotatR
+logo](figures/logo-dark.svg)
 
 A *mask* is the artefact that turns hand-drawn regions into something a
 segmentation or classification pipeline can consume: an integer raster
@@ -339,7 +340,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>         "schema_version": 1,
 #>         "signature": {
 #>           "size": 526756,
-#>           "mtime": 1793113730
+#>           "mtime": 1793175222
 #>         },
 #>         "files": null,
 #>         "path": "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png",
@@ -375,7 +376,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>   },
 #>   "storage": null,
 #>   "annotatR_version": "0.3.0",
-#>   "created": "2026-10-27T15:10:33+0000",
+#>   "created": "2026-10-28T08:15:53+0000",
 #>   "mask_type": "multiclass",
 #>   "level": 0,
 #>   "dims": [512, 512],

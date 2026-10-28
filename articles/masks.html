@@ -33,6 +33,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
+    <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
@@ -81,7 +82,25 @@
 
     
     
-<p><img src="../reference/figures/logo-with-name.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<!-- cttir-vignette-logo: start -->
+<style>
+.cttir-vignette-logo { float: right; width: 120px; max-width: 30%; margin: 0 0 1rem 1.5rem; }
+.cttir-vignette-logo img { width: 100%; height: auto; border: 0; background: transparent; box-shadow: none; }
+.cttir-vignette-logo .cttir-vignette-logo-light { display: block; }
+.cttir-vignette-logo .cttir-vignette-logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  .cttir-vignette-logo .cttir-vignette-logo-light { display: none; }
+  .cttir-vignette-logo .cttir-vignette-logo-dark { display: block; }
+}
+[data-bs-theme="light"] .cttir-vignette-logo .cttir-vignette-logo-light { display: block; }
+[data-bs-theme="light"] .cttir-vignette-logo .cttir-vignette-logo-dark { display: none; }
+[data-bs-theme="dark"] .cttir-vignette-logo .cttir-vignette-logo-light { display: none; }
+[data-bs-theme="dark"] .cttir-vignette-logo .cttir-vignette-logo-dark { display: block; }
+</style>
+<div class="cttir-vignette-logo">
+<p><img class="cttir-vignette-logo-light" src="figures/logo.svg" alt="hyperannotatR logo" width="120" height="139"><img class="cttir-vignette-logo-dark" src="figures/logo-dark.svg" alt="hyperannotatR logo" width="120" height="139"></p>
+</div>
+<!-- cttir-vignette-logo: end -->
 <p>A <em>mask</em> is the artefact that turns hand-drawn regions into
 something a segmentation or classification pipeline can consume: an
 integer raster on the same pixel grid as the image, where each pixel
@@ -413,7 +432,7 @@ it:</p>
 <span><span class="co">#&gt;         "schema_version": 1,</span></span>
 <span><span class="co">#&gt;         "signature": {</span></span>
 <span><span class="co">#&gt;           "size": 526756,</span></span>
-<span><span class="co">#&gt;           "mtime": 1793113730</span></span>
+<span><span class="co">#&gt;           "mtime": 1793175222</span></span>
 <span><span class="co">#&gt;         },</span></span>
 <span><span class="co">#&gt;         "files": null,</span></span>
 <span><span class="co">#&gt;         "path": "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png",</span></span>
@@ -449,7 +468,7 @@ it:</p>
 <span><span class="co">#&gt;   },</span></span>
 <span><span class="co">#&gt;   "storage": null,</span></span>
 <span><span class="co">#&gt;   "annotatR_version": "0.3.0",</span></span>
-<span><span class="co">#&gt;   "created": "2026-10-27T15:10:33+0000",</span></span>
+<span><span class="co">#&gt;   "created": "2026-10-28T08:15:53+0000",</span></span>
 <span><span class="co">#&gt;   "mask_type": "multiclass",</span></span>
 <span><span class="co">#&gt;   "level": 0,</span></span>
 <span><span class="co">#&gt;   "dims": [512, 512],</span></span>

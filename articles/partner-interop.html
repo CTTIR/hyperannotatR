@@ -33,6 +33,7 @@
 
     <nav class="navbar navbar-expand-lg fixed-top " aria-label="Site navigation"><div class="container">
 
+    <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">hyperannotatR</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
@@ -81,7 +82,25 @@
 
     
     
-<p><img src="../reference/figures/logo-with-name.png" class="r-plt" alt="hyperannotatR logo" width="110px" style="display: block; margin: auto 0 auto auto;"></p>
+<!-- cttir-vignette-logo: start -->
+<style>
+.cttir-vignette-logo { float: right; width: 120px; max-width: 30%; margin: 0 0 1rem 1.5rem; }
+.cttir-vignette-logo img { width: 100%; height: auto; border: 0; background: transparent; box-shadow: none; }
+.cttir-vignette-logo .cttir-vignette-logo-light { display: block; }
+.cttir-vignette-logo .cttir-vignette-logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  .cttir-vignette-logo .cttir-vignette-logo-light { display: none; }
+  .cttir-vignette-logo .cttir-vignette-logo-dark { display: block; }
+}
+[data-bs-theme="light"] .cttir-vignette-logo .cttir-vignette-logo-light { display: block; }
+[data-bs-theme="light"] .cttir-vignette-logo .cttir-vignette-logo-dark { display: none; }
+[data-bs-theme="dark"] .cttir-vignette-logo .cttir-vignette-logo-light { display: none; }
+[data-bs-theme="dark"] .cttir-vignette-logo .cttir-vignette-logo-dark { display: block; }
+</style>
+<div class="cttir-vignette-logo">
+<p><img class="cttir-vignette-logo-light" src="figures/logo.svg" alt="hyperannotatR logo" width="120" height="139"><img class="cttir-vignette-logo-dark" src="figures/logo-dark.svg" alt="hyperannotatR logo" width="120" height="139"></p>
+</div>
+<!-- cttir-vignette-logo: end -->
 <p>hyperannotatR and the qupflowR package (a QuPath bridge, analysis and
 workflow package) exchange annotations, masks, hyperspectral metadata
 and deep-learning datasets through a small, versioned contract. qupflowR
@@ -181,7 +200,7 @@ directory of neutral files:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> masks/regions_labelled.tif                   <span style="text-decoration: underline;">2</span>936 mask_tiff     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> masks/regions_labelled.tif.legend.json       <span style="text-decoration: underline;">1</span>811 legend_json</span></span>
 <span><span class="va">receipt</span><span class="op">$</span><span class="va">handoff_digest</span></span>
-<span><span class="co">#&gt; [1] "092fad1253d8d00e7788f8d365a75f00b82103469a3ec7ab7daba5940ce79821"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "546923b82572800294efa0ba00bb3659cee2cdfd0d85eeec90cec7612cf3f8f4"</span></span></code></pre></div>
 <ul>
 <li>
 <code>annotations_qupath.geojson</code> uses the QuPath 0.4+ dialect
@@ -484,7 +503,7 @@ service refuses to start.</p>
 <span><span class="co">#&gt; [1] "0"</span></span>
 <span><span class="fu"><a href="../reference/at_control_command.html">at_control_command</a></span><span class="op">(</span><span class="va">handle</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>operation <span class="op">=</span> <span class="st">"context.goto"</span>, payload <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>queue_index <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span>
 <span>                                expected_revision <span class="op">=</span> <span class="va">state</span><span class="op">$</span><span class="va">state_revision</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">entry_id</span></span>
-<span><span class="co">#&gt; [1] "entry_at_300c29430784_000000005"</span></span>
+<span><span class="co">#&gt; [1] "entry_at_2ef5e262685_000000005"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_control_events.html">at_control_events</a></span><span class="op">(</span><span class="va">handle</span><span class="op">)</span><span class="op">$</span><span class="va">events</span>, <span class="va">`[[`</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>, <span class="st">"type"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "service.started" "image.changed"</span></span>
 <span><span class="fu"><a href="../reference/at_control_stop.html">at_control_stop</a></span><span class="op">(</span><span class="va">handle</span><span class="op">)</span></span></code></pre></div>

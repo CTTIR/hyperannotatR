@@ -1,6 +1,7 @@
 # The annotation model
 
-![hyperannotatR logo](../reference/figures/logo-with-name.png)
+![hyperannotatR logo](figures/logo.svg)![hyperannotatR
+logo](figures/logo-dark.svg)
 
 hyperannotatR represents an annotation as a small hierarchy of plain R
 objects, each a validated layer built on the one below. This vignette
