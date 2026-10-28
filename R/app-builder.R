@@ -141,7 +141,7 @@
     selected = "Annotate",
     title = shiny::span(
       class = "at-brand",
-      shiny::img(src = "hyperannotatR-www/logo.svg", class = "at-logo", alt = "hyperannotatR"),
+      .cttir_brand_logo(),
       shiny::span("hyperannotatR", class = "at-brandname")
     ),
     header = shiny::tagList(
