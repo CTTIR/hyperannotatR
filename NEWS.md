@@ -1,5 +1,8 @@
 # hyperannotatR (development)
 
+* Standardise the named v5 package logo across README, documentation pages
+  and available application headers, with matching light and dark artwork.
+
 * The Line / distance tool records a straight line from two clicked endpoints.
   Layers with `role = "calibration_reference"` select this tool by default
   and show per-label repeated lengths in image pixels. The mean and sample
