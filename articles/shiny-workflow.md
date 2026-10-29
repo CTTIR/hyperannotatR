@@ -32,7 +32,7 @@ sess <- at_example_session(3)
 sess
 #> <annot_session>
 #> images: 3  |  complete: 0  |  cursor: 1
-#> out_dir: /tmp/RtmpwMLVaX/hyperannotatR-example-session-32b767cb156c  |  autosave: TRUE
+#> out_dir: /tmp/RtmpN1va2m/hyperannotatR-example-session-32df3dc2e611  |  autosave: TRUE
 ```
 
 Every image starts with status `"pending"`, the cursor sits on the first
@@ -235,7 +235,7 @@ recovered <- at_resume(file.path(sess$out_dir, "_session.rds"))
 recovered
 #> <annot_session>
 #> images: 3  |  complete: 1  |  cursor: 2
-#> out_dir: /tmp/RtmpwMLVaX/hyperannotatR-example-session-32b767cb156c  |  autosave: TRUE
+#> out_dir: /tmp/RtmpN1va2m/hyperannotatR-example-session-32df3dc2e611  |  autosave: TRUE
 ```
 
 The cursor, statuses, materialised projects, and templates all come back
@@ -302,9 +302,9 @@ at_session_status(sess)
 #> # A tibble: 3 × 9
 #>     idx entry_id              export_stem path  name  status project_path n_rois
 #>   <int> <chr>                 <chr>       <chr> <chr> <chr>  <chr>         <int>
-#> 1     1 entry_at_32b72204b43… entry_at_3… /tmp… imag… compl… NA                0
-#> 2     2 entry_at_32b72204b43… entry_at_3… /tmp… imag… pendi… NA                0
-#> 3     3 entry_at_32b72204b43… entry_at_3… /tmp… imag… pendi… NA                0
+#> 1     1 entry_at_32df270acc5… entry_at_3… /tmp… imag… compl… NA                0
+#> 2     2 entry_at_32df270acc5… entry_at_3… /tmp… imag… pendi… NA                0
+#> 3     3 entry_at_32df270acc5… entry_at_3… /tmp… imag… pendi… NA                0
 #> # ℹ 1 more variable: modified <dttm>
 
 at_manifest(sess)
