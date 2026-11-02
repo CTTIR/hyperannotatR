@@ -63,9 +63,11 @@ replaces an existing \verb{_session.rds} that holds another queue or more ROIs,
 the app keeps a timestamped \verb{_session-*.previous.rds} copy.
 
 The Data page reads folder and handoff paths on the machine running R. The
-app is meant for local use; for a shared deployment set
-\code{options(hyperannotatR.app_root = "/allowed/folder")} to refuse paths outside one
-folder.
+app is meant for local use. Set
+\code{options(hyperannotatR.app_root = "/allowed/folder")} to restrict canonical
+image paths and known ENVI/TIVITA companions to that folder. This is not an
+operating-system sandbox: custom readers, external references and concurrent
+filesystem changes need separate controls in a shared deployment.
 }
 \examples{
 \dontshow{if (requireNamespace("shiny", quietly = TRUE) && requireNamespace("bslib", quietly = TRUE) && requireNamespace("shinyjs", quietly = TRUE) && requireNamespace("htmlwidgets", quietly = TRUE)) withAutoprint(\{ # examplesIf}
