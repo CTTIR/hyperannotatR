@@ -32,10 +32,10 @@ at_example_path <- function(which = c("tissue", "multiplex", "cube"),
 #' @family images
 #' @export
 #' @details The tissue example is a PNG and needs \pkg{magick}; the multiplex
-#'   example needs \pkg{magick} or \pkg{tiff}; the cube needs nothing beyond
+#'   example needs \pkg{tiff}; the cube needs nothing beyond
 #'   hyperannotatR.
-#' @examplesIf requireNamespace("magick", quietly = TRUE)
-#' img <- at_example_image("tissue")
+#' @examples
+#' img <- at_example_image("cube")
 #' at_dims(img)
 at_example_image <- function(which = c("tissue", "multiplex", "cube"),
                              call = rlang::caller_env()) {

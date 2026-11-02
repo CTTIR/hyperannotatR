@@ -23,14 +23,12 @@ Read a bundled example image
 }
 \details{
 The tissue example is a PNG and needs \pkg{magick}; the multiplex
-example needs \pkg{magick} or \pkg{tiff}; the cube needs nothing beyond
+example needs \pkg{tiff}; the cube needs nothing beyond
 hyperannotatR.
 }
 \examples{
-\dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-img <- at_example_image("tissue")
+img <- at_example_image("cube")
 at_dims(img)
-\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other example data:

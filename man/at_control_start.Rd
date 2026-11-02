@@ -90,7 +90,8 @@ entry whose content id \code{GET /v1/state} computes before the entry is visited
 }
 \examples{
 \dontshow{if (requireNamespace("httpuv", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-h <- at_control_start(at_example_session(2), serve = FALSE)
+sess <- at_session(rep(at_example_path("cube"), 2))
+h <- at_control_start(sess, serve = FALSE)
 at_control_state(h)$state_revision
 at_control_stop(h)
 \dontshow{\}) # examplesIf}

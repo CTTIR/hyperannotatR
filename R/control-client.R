@@ -223,7 +223,8 @@ at_control_events <- function(handle, after = NULL, limit = 100L, call = rlang::
 #' @seealso [at_control_request_status()]
 #' @export
 #' @examplesIf requireNamespace("httpuv", quietly = TRUE)
-#' h <- at_control_start(at_example_session(3), serve = FALSE)
+#' sess <- at_session(rep(at_example_path("cube"), 3))
+#' h <- at_control_start(sess, serve = FALSE)
 #' st <- at_control_state(h)
 #' at_control_command(h, list(operation = "context.goto", payload = list(queue_index = 2),
 #'                            expected_revision = st$state_revision))

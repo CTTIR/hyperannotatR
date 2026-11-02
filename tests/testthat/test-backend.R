@@ -6,10 +6,11 @@ test_that("all six backends are registered with availability flags", {
   expect_type(bl$available, "logical")
 })
 
-test_that("core backends are available; Bioc/vendor backends reflect installation", {
+test_that("core backends are available; optional backends reflect installation", {
   bl <- at_backend_list()
   avail <- setNames(bl$available, bl$name)
-  expect_true(avail[["raster"]])
+  expect_identical(avail[["raster"]], requireNamespace("magick", quietly = TRUE))
+  expect_identical(avail[["tiff"]], requireNamespace("tiff", quietly = TRUE))
   expect_true(avail[["envi"]])
   expect_identical(avail[["cuvis"]], nzchar(system.file(package = "cuvis.r")))
   expect_identical(avail[["ometiff"]], requireNamespace("RBioFormats", quietly = TRUE))
@@ -20,7 +21,12 @@ test_that("at_backend_get errors on unknown backends", {
 })
 
 test_that("at_backend_detect picks the right backend by content/extension", {
-  expect_identical(at_backend_detect(at_example_path("tissue")), "raster")
+  if (requireNamespace("magick", quietly = TRUE)) {
+    expect_identical(at_backend_detect(at_example_path("tissue")), "raster")
+  } else {
+    expect_error(at_backend_detect(at_example_path("tissue")),
+                 "matching backend is not installed.*raster")
+  }
   expect_identical(at_backend_detect(at_example_path("cube")), "envi")
 })
 
@@ -35,14 +41,12 @@ test_that("at_tile returns [y, x, band] arrays for every access pattern", {
 })
 
 test_that("at_tile is always 3-dimensional even for single band", {
-  skip_if_not_installed("tiff")
-  img <- at_example_image("tissue")
+  img <- at_example_image("cube")
   expect_length(dim(at_tile(img, bands = 1L)), 3L)
 })
 
 test_that("at_tile validates ranges, level, and bands", {
-  skip_if_not_installed("tiff")
-  img <- at_example_image("tissue")
+  img <- at_example_image("cube")
   expect_error(at_tile(img, xrange = c(1, 9999)), "out of bounds")
   expect_error(at_tile(img, level = 5), "exceed")
   expect_error(at_tile(img, bands = 99), "out of range")

@@ -380,7 +380,7 @@
 #' @seealso [at_annotate()], [at_control_start()]
 #' @export
 #' @examplesIf requireNamespace("shiny", quietly = TRUE) && requireNamespace("bslib", quietly = TRUE) && requireNamespace("shinyjs", quietly = TRUE) && requireNamespace("htmlwidgets", quietly = TRUE)
-#' app <- at_app(session = at_example_session(2))
+#' app <- at_app(input = at_example_path("cube"))
 #' class(app)
 #' \dontrun{
 #' shiny::runApp(app)
