@@ -369,9 +369,11 @@
 #' the app keeps a timestamped `_session-*.previous.rds` copy.
 #'
 #' The Data page reads folder and handoff paths on the machine running R. The
-#' app is meant for local use; for a shared deployment set
-#' `options(hyperannotatR.app_root = "/allowed/folder")` to refuse paths outside one
-#' folder.
+#' app is meant for local use. Set
+#' `options(hyperannotatR.app_root = "/allowed/folder")` to restrict canonical
+#' image paths and known ENVI/TIVITA companions to that folder. This is not an
+#' operating-system sandbox: custom readers, external references and concurrent
+#' filesystem changes need separate controls in a shared deployment.
 #'
 #' @return A `shiny.appobj`.
 #' @family shiny

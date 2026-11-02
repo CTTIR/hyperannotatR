@@ -66,18 +66,83 @@
 
 .data_exts <- "\\.(dat|hdr|tif|tiff|png|jpe?g|qptiff|cu3|cu3s)$"
 
+# Check known composite inputs before their readers open metadata or pixels.
+# Readers resolve the image path before locating companions, so do the same
+# here. This is a local app input restriction, not a sandbox for custom readers.
+.app_image_allowed <- function(path) {
+  if (!.app_path_allowed(path)) return(FALSE)
+  if (is.null(getOption("hyperannotatR.app_root", default = NULL))) return(TRUE)
+  path <- .app_real_path(path)
+  companions <- character()
+  if (grepl("\\.(hdr|dat|img|raw|bin|bsq|bil|bip)$", path, ignore.case = TRUE)) {
+    pair <- .envi_paths(path)
+    if (file.exists(pair$hdr)) companions <- unlist(pair, use.names = FALSE)
+    else if (.tivita_is_speccube(path)) companions <- .tivita_sidecar(path)
+  }
+  companions <- companions[!is.na(companions) & file.exists(companions)]
+  all(vapply(companions, .app_path_allowed, logical(1)))
+}
+
+# Importers can read an inventory or mask legend before validating the whole
+# document. Check those inputs first. Handoffs already prohibit descendant
+# symlinks; reject them before the verifier's recursive inventory listing.
+.app_import_preflight <- function(path) {
+  if (is.null(getOption("hyperannotatR.app_root", default = NULL))) return(invisible(NULL))
+  check <- function(path) {
+    if (!.app_path_allowed(path)) {
+      .at_abort("An import input is outside the folder this app may read (option hyperannotatR.app_root).",
+                class = "io", code = "PATH_OUTSIDE_ROOT")
+    }
+  }
+  check(path)
+  handoff <- dir.exists(path) || tolower(basename(path)) %in% c("manifest.json", "integrity.json")
+  if (handoff) {
+    queue <- if (dir.exists(path)) path else dirname(path)
+    while (length(queue)) {
+      current <- queue[1]
+      queue <- queue[-1]
+      check(current)
+      entries <- list.files(current, full.names = TRUE, all.files = TRUE, no.. = TRUE)
+      for (entry in entries) {
+        check(entry)
+        if (.is_symlink(entry)) {
+          .at_abort("The handoff contains symbolic links.", code = "INTEGRITY_SYMLINK")
+        }
+      }
+      queue <- c(queue, entries[dir.exists(entries)])
+    }
+  } else if (tolower(tools::file_ext(path)) %in% c("tif", "tiff", "png", "npy")) {
+    side <- paste0(path, ".legend.json")
+    if (file.exists(side)) check(side)
+  }
+  invisible(NULL)
+}
+
 # Image files under `dir`, breadth first and bounded in depth and count. An
 # ENVI payload whose header is also listed is dropped (the header opens the
-# pair); a folder holding TIVITA SpecCubes lists only the cubes.
+# pair); a folder holding TIVITA SpecCubes lists only the cubes. Resolve each
+# directory before walking it, both to enforce app_root and to avoid cycles.
 .app_list_images <- function(dir, pattern = .data_exts, max_depth = 4L, max_files = 5000L) {
   found <- character()
+  restricted <- FALSE
+  visited <- new.env(parent = emptyenv())
   queue <- list(list(path = dir, depth = 0L))
   while (length(queue) && length(found) < max_files) {
     cur <- queue[[1]]
     queue <- queue[-1]
+    if (!.app_path_allowed(cur$path)) {
+      restricted <- TRUE
+      next
+    }
+    real <- .app_real_path(cur$path)
+    if (exists(real, envir = visited, inherits = FALSE)) next
+    assign(real, TRUE, envir = visited)
     entries <- list.files(cur$path, full.names = TRUE, no.. = TRUE)
     is_dir <- dir.exists(entries)
-    found <- c(found, entries[!is_dir & grepl(pattern, basename(entries), ignore.case = TRUE)])
+    images <- entries[!is_dir & grepl(pattern, basename(entries), ignore.case = TRUE)]
+    allowed <- vapply(images, .app_image_allowed, logical(1))
+    restricted <- restricted || any(!allowed)
+    found <- c(found, images[allowed])
     if (cur$depth < max_depth) {
       for (d in entries[is_dir]) queue[[length(queue) + 1L]] <- list(path = d, depth = cur$depth + 1L)
     }
@@ -94,6 +159,7 @@
     found <- found[!(is_dat & has_hdr)]
   }
   attr(found, "truncated") <- truncated
+  attr(found, "restricted") <- restricted
   found
 }
 
@@ -1097,7 +1163,10 @@ mod_data_server <- function(id, rv) {
       }
       files <- .app_list_images(d)
       if (!length(files)) {
-        msg("No supported images found in that folder."); return()
+        msg(if (isTRUE(attr(files, "restricted")))
+          "No allowed images found: linked files or folders are outside the folder this app may read (option hyperannotatR.app_root)."
+          else "No supported images found in that folder.")
+        return()
       }
       new_sess <- tryCatch(
         at_session(as.character(files), labels = rv$session$labels,
@@ -1108,9 +1177,10 @@ mod_data_server <- function(id, rv) {
         msg(paste("Load failed:", .app_error_text(new_sess))); return()
       }
       if (.state_replace(rv, new_sess, event)) {
-        msg(sprintf("Loaded %d image(s)%s. Previous queue retained; use Restore previous queue to recover its annotations.",
+        msg(sprintf("Loaded %d image(s)%s%s. Previous queue retained; use Restore previous queue to recover its annotations.",
                     nrow(new_sess$manifest),
-                    if (isTRUE(attr(files, "truncated"))) " (listing truncated)" else ""))
+                    if (isTRUE(attr(files, "truncated"))) " (listing truncated)" else "",
+                    if (isTRUE(attr(files, "restricted"))) " (outside-root links skipped)" else ""))
       }
     })
 
@@ -1136,6 +1206,7 @@ mod_data_server <- function(id, rv) {
         stage_msg("That path is outside the folder this app may read (option hyperannotatR.app_root)."); return()
       }
       res <- tryCatch({
+        .app_import_preflight(path)
         rep <- at_import_qupflowr(path)
         at_stage_qupflowr(rv$project, rep)
       }, error = function(e) e)
