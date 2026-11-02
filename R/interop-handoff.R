@@ -1360,6 +1360,37 @@ print.at_staged_patch <- function(x, ...) {
 
 .commit_registry <- new.env(parent = emptyenv())
 
+# Resolve an existing ancestor for destinations not yet created. Keep this
+# identity separate from the selected path so publication still rejects links.
+.commit_target_identity <- function(path) {
+  if (is.null(path)) return(NA_character_)
+  tail <- character()
+  ancestor <- path.expand(path)
+  while (!file.exists(ancestor) && !identical(dirname(ancestor), ancestor)) {
+    tail <- c(basename(ancestor), tail)
+    ancestor <- dirname(ancestor)
+  }
+  resolved <- normalizePath(ancestor, winslash = "/", mustWork = TRUE)
+  if (length(tail)) resolved <- do.call(file.path, as.list(c(resolved, tail)))
+  resolved
+}
+
+# A replay must describe the file it returns, whether its receipt came from
+# this process's cache or the durable sidecar.
+.commit_replay_project <- function(target, expected, call) {
+  project <- at_load_project(target, call = call)
+  current <- at_annotation_revision(project)
+  if (!identical(current, expected)) {
+    .at_abort(
+      c("{.path {basename(target)}} changed after the recorded commit.",
+        "x" = "Receipt records {.val {expected}}, file now at {.val {current}}."),
+      class = "conflict", code = "REVISION_CONFLICT",
+      details = list(expected = expected, actual = current), call = call
+    )
+  }
+  project
+}
+
 #' Commit a staged partner patch
 #'
 #' Apply an [at_stage_qupflowr()] patch. Conflicting operations are never
@@ -1370,7 +1401,13 @@ print.at_staged_patch <- function(x, ...) {
 #' `destination` names one), the file is re-read and its revision re-checked
 #' immediately before writing; an existing file is only replaced with
 #' `overwrite = TRUE`. A `<file>.commit.json` receipt records the key across R
-#' sessions.
+#' sessions. The project and receipt are staged together; a failed publication
+#' restores both previous files, or reports retained recovery backups if
+#' restoration also fails. Writers to the same destination must be
+#' serialised; this is not a cross-file transaction against process or machine
+#' failure. A replay aborts with `REVISION_CONFLICT` if the saved project has
+#' changed since that receipt was written. Reusing a cached key for a different
+#' destination aborts with `IDEMPOTENCY_CONFLICT`.
 #'
 #' @param x An `at_staged_patch`.
 #' @param idempotency_key Optional client key; defaults to one derived from the
@@ -1403,20 +1440,29 @@ at_commit_qupflowr <- function(x, idempotency_key = NULL, destination = NULL, ov
     .at_abort("{.arg idempotency_key} must be 1-128 characters of letters, digits, '.', '_', ':' or '-'.",
               call = call)
   }
+  target <- destination %||% (if (is.na(x$target_path)) NULL else x$target_path)
+  if (!is.null(target)) .check_string(target, call = call)
+  target_identity <- .commit_target_identity(target)
   prior <- .commit_registry[[key]]
   if (!is.null(prior)) {
-    if (!identical(prior$patch_digest, x$patch_digest)) {
-      .at_abort("The idempotency key {.val {key}} was already used for a different patch.",
+    if (!identical(prior$patch_digest, x$patch_digest) ||
+        !identical(prior$receipt$written, target_identity)) {
+      .at_abort("The idempotency key {.val {key}} was already used for a different patch or destination.",
                 class = "conflict", code = "IDEMPOTENCY_CONFLICT", call = call)
     }
     out <- prior$receipt
+    if (!is.null(target)) {
+      out$project <- .commit_replay_project(target, out$new_revision, call)
+    }
     out$replayed <- TRUE
     return(out)
   }
-  target <- destination %||% (if (is.na(x$target_path)) NULL else x$target_path)
   if (!is.null(target)) {
-    .check_string(target, call = call)
     side <- paste0(target, ".commit.json")
+    if (dir.exists(side)) {
+      .at_abort("The commit receipt path is a directory.", class = "io",
+                code = "INVALID_PATH", call = call)
+    }
     if (file.exists(side)) {
       rec <- tryCatch(.read_json_doc(side, call = call), error = function(e) NULL)
       if (identical(rec[["idempotency_key"]], key)) {
@@ -1424,7 +1470,7 @@ at_commit_qupflowr <- function(x, idempotency_key = NULL, destination = NULL, ov
           .at_abort("The idempotency key {.val {key}} was already used for a different patch.",
                     class = "conflict", code = "IDEMPOTENCY_CONFLICT", call = call)
         }
-        proj <- at_load_project(target, call = call)
+        proj <- .commit_replay_project(target, rec[["new_revision"]], call)
         return(structure(list(
           state = "committed", patch_id = rec[["patch_id"]], idempotency_key = key,
           previous_revision = rec[["previous_revision"]], new_revision = rec[["new_revision"]],
@@ -1457,24 +1503,18 @@ at_commit_qupflowr <- function(x, idempotency_key = NULL, destination = NULL, ov
   committed_at <- .utc_stamp()
   new_rev <- at_annotation_revision(project)
   if (!is.null(target)) {
-    # The target is the user's own project file: keep its image source (and
-    # reader) so the image can be reopened; drop the pixels and read identity.
-    lite <- project
-    lite$image$handle <- NULL
-    lite$image$read_key <- NULL
-    tmp <- tempfile(pattern = ".hyperannotatR-commit-", tmpdir = dirname(target), fileext = ".rds")
-    at_save_project(lite, tmp, call = call)
-    if (!.rename_path(tmp, target)) {
-      unlink(tmp)
-      .at_abort("Could not replace {.path {basename(target)}}.", class = "io",
-                code = "WRITE_FAILED", call = call)
-    }
-    written <- normalizePath(target, winslash = "/")
-    .write_json_atomic(list(
+    metadata <- list(
       document = "annotatr_commit_receipt", idempotency_key = key, patch_id = x$patch_id,
       patch_digest = x$patch_digest, previous_revision = x$base_revision,
       new_revision = new_rev, committed_at = committed_at
-    ), paste0(target, ".commit.json"))
+    )
+    .export_bundle(c(target, side), function(stage) {
+      # Shared persistence preparation retains irreplaceable in-memory
+      # pixels and strips only handles backed by verifiable source files.
+      at_save_project(project, stage[1], call = call)
+      .write_json_atomic(metadata, stage[2])
+    }, overwrite = overwrite, rename = .rename_path)
+    written <- normalizePath(target, winslash = "/")
   }
   receipt <- structure(list(
     state = "committed",

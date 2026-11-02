@@ -40,7 +40,8 @@ normalize other accepted backgrounds to the stored logical \code{FALSE}/\code{0}
 \item{touches}{Logical; see the coverage contract. Default \code{FALSE}.}
 
 \item{dims}{Optional \code{c(width, height)}; taken from the image (projects) or
-the geometry bounding box otherwise, including containing cells for points.}
+the geometry bounding box otherwise, including containing cells for points.
+Dimensions must be positive and finite; fractional extents round up.}
 
 \item{values}{Optional named integer vector mapping labels to explicit class
 codes (e.g. \code{c(specular = 1L, blood = 2L, shadow = 4L)}), used only for
@@ -100,6 +101,14 @@ all-touched rasterisation; lines and other geometry types also retain the
 selected engine's rasterisation behavior. Engine equality is guaranteed for
 centre-based polygons and points. ROI coordinates use the image convention
 (top-left origin, y down).
+
+Full-grid allocation is checked against
+\code{getOption("hyperannotatR.max_read_bytes", 1024^3)} before rasterisation,
+using a conservative estimate of 32 bytes per pixel for arrays and working
+copies. The default allows 33,554,432 pixels. This is not a bound on total
+process memory or geometry/native-library overhead. Trusted larger masks
+require raising that option; over-budget requests fail with
+\code{READ_BUDGET_EXCEEDED}, and unsupported array sizes with \code{MASK_TOO_LARGE}.
 }
 \examples{
 \dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}

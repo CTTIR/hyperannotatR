@@ -623,7 +623,12 @@
     .control_fail("REVISION_CONFLICT", "The image annotations changed since staging; stage again.",
                   class = "conflict")
   }
-  rc <- at_commit_qupflowr(st, idempotency_key = paste0("control:", env$idempotency_key))
+  # Client keys belong to one control instance; the direct commit registry is
+  # process-wide. Hash the pair to keep even maximum-length client keys valid.
+  key <- paste0("control:", .digest_json(list(
+    instance_id = hub$instance_id, idempotency_key = env$idempotency_key
+  )))
+  rc <- at_commit_qupflowr(st, idempotency_key = key)
   i <- hub$session$cursor
   # Save the committed session first; the hub changes only after the save
   # succeeded, so a failed save leaves the hub, its revision and the staged
