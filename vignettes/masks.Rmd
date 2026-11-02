@@ -68,6 +68,28 @@ Every mask is an `annot_mask`: a matrix with an attached `legend` tibble
 `mask_type` and `mask_metadata` attributes; the last records how to read the
 values (below). Read the legend back with `at_mask_legend()`.
 
+## Grid size and memory budget
+
+`at_mask()` checks dimensions and the full grid before allocating raster
+arrays, including empty masks. Dimensions must be positive and finite;
+fractional extents round up, so `dims = c(3.1, 2.1)` produces four columns and
+three rows. A grid beyond supported integer indexing fails with
+`MASK_TOO_LARGE` before rasterisation.
+
+The existing `hyperannotatR.max_read_bytes` option also limits mask work. The
+estimate is `32 * width * height` bytes for output, coverage arrays and working
+copies. Its default of `1024^3` bytes (1 GiB) permits 33,554,432 pixels per grid;
+larger requests fail with `READ_BUDGET_EXCEEDED`. The error includes
+`requested_bytes` and `limit_bytes` in its `details`. For a trusted larger mask,
+set a suitable byte limit before calling `at_mask()`, or choose a coarser
+pyramid level when available.
+
+The estimate is a preflight check, not a guarantee about total process memory
+(RSS). It excludes geometry and native-library overhead. `at_mask_stack()`
+retains per-layer masks and builds a combined stack, so this per-grid check
+does not bound its aggregate memory use. Account for the number of layers and
+other live arrays when choosing a limit.
+
 ## Encoding metadata and alignment
 
 `attr(mask, "mask_metadata")` is a versioned semantic description. Schema 1

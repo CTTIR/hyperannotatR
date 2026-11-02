@@ -40,7 +40,13 @@ with \code{IDEMPOTENCY_CONFLICT}. When the patch targets a saved project file (o
 \code{destination} names one), the file is re-read and its revision re-checked
 immediately before writing; an existing file is only replaced with
 \code{overwrite = TRUE}. A \verb{<file>.commit.json} receipt records the key across R
-sessions.
+sessions. The project and receipt are staged together; a failed publication
+restores both previous files, or reports retained recovery backups if
+restoration also fails. Writers to the same destination must be
+serialised; this is not a cross-file transaction against process or machine
+failure. A replay aborts with \code{REVISION_CONFLICT} if the saved project has
+changed since that receipt was written. Reusing a cached key for a different
+destination aborts with \code{IDEMPOTENCY_CONFLICT}.
 }
 \examples{
 \dontshow{if (requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}

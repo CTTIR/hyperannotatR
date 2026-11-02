@@ -186,7 +186,7 @@
     if (!is.numeric(dims) || length(dims) != 2L) {
       .at_abort("{.arg dims} must be a length-2 numeric vector.", call = call)
     }
-    return(as.integer(ceiling(dims)))
+    return(dims)
   }
   if (inherits(x, "annot_project")) {
     return(at_dims(x$image, level))
@@ -205,7 +205,27 @@
     xmax <- max(xmax, extent[, "X"], na.rm = TRUE)
     ymax <- max(ymax, extent[, "Y"], na.rm = TRUE)
   }
-  as.integer(c(ceiling(xmax), ceiling(ymax)))
+  c(xmax, ymax)
+}
+
+# Bound full-grid work before integer coercion or any rasteriser allocation.
+# The 32 bytes/pixel allowance covers output, coverage and temporary copies;
+# it is an array-work estimate, not a bound on native or geometry memory.
+.mask_grid_budget <- function(dims, call = rlang::caller_env()) {
+  if (!is.numeric(dims) || is.complex(dims) || length(dims) != 2L ||
+      any(!is.finite(dims)) || any(dims <= 0)) {
+    .at_abort("Mask dimensions must be two positive finite numbers.",
+              code = "LAYOUT_INVALID", call = call)
+  }
+  dims <- ceiling(dims)
+  count <- prod(as.double(dims))
+  if (any(dims > .Machine$integer.max) || !is.finite(count) ||
+      count > .Machine$integer.max) {
+    .at_abort("Mask exceeds supported array indexing limits.", class = "limit",
+              code = "MASK_TOO_LARGE", call = call)
+  }
+  .read_budget(count * 32, call = call)
+  as.integer(dims)
 }
 
 # ---- The mask constructor --------------------------------------------------
@@ -235,6 +255,14 @@
 #' centre-based polygons and points. ROI coordinates use the image convention
 #' (top-left origin, y down).
 #'
+#' Full-grid allocation is checked against
+#' `getOption("hyperannotatR.max_read_bytes", 1024^3)` before rasterisation,
+#' using a conservative estimate of 32 bytes per pixel for arrays and working
+#' copies. The default allows 33,554,432 pixels. This is not a bound on total
+#' process memory or geometry/native-library overhead. Trusted larger masks
+#' require raising that option; over-budget requests fail with
+#' `READ_BUDGET_EXCEEDED`, and unsupported array sizes with `MASK_TOO_LARGE`.
+#'
 #' @param x An [annot_roi], [annot_layer], or [annot_project].
 #' @param image Optional [annot_image] for standalone ROIs or layers. Required
 #'   when changing coordinate levels; dimensions alone do not define a scale.
@@ -252,6 +280,7 @@
 #' @param touches Logical; see the coverage contract. Default `FALSE`.
 #' @param dims Optional `c(width, height)`; taken from the image (projects) or
 #'   the geometry bounding box otherwise, including containing cells for points.
+#'   Dimensions must be positive and finite; fractional extents round up.
 #' @param values Optional named integer vector mapping labels to explicit class
 #'   codes (e.g. `c(specular = 1L, blood = 2L, shadow = 4L)`), used only for
 #'   `type = "multiclass"`. When `NULL` (default) codes follow first-seen label
@@ -319,6 +348,7 @@ at_mask <- function(x,
   }
   entries <- .collect_mask_rois(x, layer = layer, label = label, level = level, call = call, image = image)
   d <- .resolve_mask_dims(x, level, dims, entries, call = call)
+  d <- .mask_grid_budget(d, call = call)
   width <- d[1]
   height <- d[2]
 

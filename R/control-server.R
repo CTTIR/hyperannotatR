@@ -29,7 +29,7 @@
 }
 
 # Stop serving and mark the hub stopped. Idempotent.
-.control_shutdown <- function(hub, reason = "stopped") {
+.control_shutdown <- function(hub, reason = "stopped", write_manifest = TRUE) {
   if (identical(hub$status, "stopped")) {
     return(invisible(FALSE))
   }
@@ -49,7 +49,7 @@
   if (exists(hub$instance_id, envir = .control_registry, inherits = FALSE)) {
     rm(list = hub$instance_id, envir = .control_registry)
   }
-  if (!is.na(hub$manifest_path)) {
+  if (write_manifest && !is.na(hub$manifest_path)) {
     tryCatch(.control_write_manifest(hub, final, reason), error = function(e) NULL)
   }
   invisible(TRUE)
@@ -173,7 +173,8 @@
 #' owner-only permissions (on Windows, file modes are not enforced; keep the
 #' file in a directory only the user can read). A sanitised lifecycle manifest
 #' `annotatr-control-<instance_id>.json` is written to `root` at start and
-#' rewritten when the service stops.
+#' rewritten when the service stops. If startup fails, its listener, expiry
+#' timer, registry entries and newly created token file are removed.
 #'
 #' The service stops itself when the token expires: either when the expiry
 #' timer runs or, if a request arrives first (for example after the computer
@@ -257,17 +258,36 @@ at_control_start <- function(session, control = "loopback", host = "127.0.0.1", 
   token <- .random_hex(32L)
   sess <- .to_session(session, character(), NULL, NULL, call = call)
   root <- root %||% file.path(sess$out_dir, "control")
-  dir.create(root, recursive = TRUE, showWarnings = FALSE)
+  .check_string(root, call = call)
+  if (file.exists(root) && !dir.exists(root)) {
+    .at_abort("The control {.arg root} must be a directory.", class = "io",
+              code = "INVALID_PATH", call = call)
+  }
+  if (!dir.exists(root) && !dir.create(root, recursive = TRUE, showWarnings = FALSE)) {
+    .at_abort("Could not create the control {.arg root} directory.", class = "io",
+              code = "WRITE_FAILED", call = call)
+  }
   root <- normalizePath(root, winslash = "/", mustWork = TRUE)
   if (serve && port == 0L) {
     port <- httpuv::randomPort(min = 20000L, max = 60000L, host = host)
   }
   hub <- .new_control_hub(sess, root, ttl_seconds, host, port, read_only, max_body_bytes)
   hub$manifest_path <- file.path(root, paste0("annotatr-control-", hub$instance_id, ".json"))
+  started <- FALSE
+  token_created <- FALSE
+  on.exit({
+    if (!started) {
+      # No handle was returned. Revoke only this attempt's resources without
+      # publishing a stopped manifest for a service that never started.
+      .control_shutdown(hub, "start failed", write_manifest = FALSE)
+      if (token_created) unlink(token_file)
+    }
+  }, add = TRUE)
   # The token file is written before the hub is registered, so a refused or
   # failed token file leaves nothing running.
   if (!is.null(token_file)) {
     .control_write_token(token, token_file, call = call)
+    token_created <- TRUE
   }
   assign(hub$instance_id, token, envir = .control_tokens)
   assign(hub$instance_id, hub, envir = .control_registry)
@@ -275,8 +295,6 @@ at_control_start <- function(session, control = "loopback", host = "127.0.0.1", 
     hub$server <- tryCatch(
       httpuv::startServer(host, port, .control_httpuv_app(hub)),
       error = function(e) {
-        .control_shutdown(hub, "listen failed")
-        if (!is.null(token_file)) unlink(token_file)
         .at_abort("Could not listen on {host}:{port}: {conditionMessage(e)}", class = "io",
                   code = "LISTEN_FAILED", call = call)
       }
@@ -292,8 +310,14 @@ at_control_start <- function(session, control = "loopback", host = "127.0.0.1", 
     }, delay = ttl_seconds)
   }
   .hub_event(hub, "service.started", list(read_only = hub$read_only))
-  .control_write_manifest(hub, "running")
-  .new_control_handle(hub)
+  handle <- .new_control_handle(hub)
+  tryCatch(.control_write_manifest(hub, "running"), error = function(e) {
+    if (inherits(e, "at_error")) rlang::cnd_signal(e)
+    .at_abort("Could not write the control service manifest: {conditionMessage(e)}",
+              class = "io", code = "WRITE_FAILED", call = call)
+  })
+  started <- TRUE
+  handle
 }
 
 .new_control_handle <- function(hub) {
