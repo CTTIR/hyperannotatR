@@ -1,5 +1,9 @@
 # hyperannotatR (development)
 
+* Standardize the named v5 package logo across README, documentation pages
+  and available application headers, with matching light and dark artwork.
+
+
 * The calibration panel now accepts a global reference length in mm and an
   image-specific override for each reference label. **Use global default**
   removes an override. Global changes preserve image overrides, reach existing
