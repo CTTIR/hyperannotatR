@@ -1,0 +1,64 @@
+# App and integration qualification — 2026-11-02
+
+Scope: isolated public hyperannotatR worktree, baseline merge 23cc5f94bef632e82ee14d56955d946b693de827. All runtime fixtures were synthetic. No original annotation service, private data, Desktop/TSCI workspace, or original checkout was used or modified. No commit or publication was performed.
+
+## Confirmed defect and repair
+
+Medium severity: Data → Load folder checked only the typed folder against `hyperannotatR.app_root`; recursive discovery followed linked directories and accepted linked files outside that root. The real baseline browser loaded the synthetic outside image and reported success (`symlink-ui-baseline.json`, `.png`, `.log`). ENVI companion payload/header links and TIVITA profile links could also escape. Directory alias cycles produced 126 duplicate queue entries at depth 12 in the synthetic regression.
+
+`R/app-modules.R` now resolves and checks every directory before listing it, tracks canonical directories to avoid repeat traversal, filters each image and known ENVI/TIVITA companion before reader invocation, and explains rejected/skipped links. Allowed in-root links and unrestricted local use remain supported. New `tests/testthat/test-app-path-boundaries.R` covers directory/file escapes, cycles, valid links, composite sources, preservation of a dirty queue on rejection, valid-folder recovery, and restoration.
+
+The five new tests fail on the preserved baseline and pass on the repaired code (22 expectations). Combined with existing app-module tests: 177 passed; zero failures, errors, warnings, or skips (`path-boundaries-baseline.log`, `path-boundaries-fixed.log`, `app-focused-fixed.log`). An independent code review checked resolution against backend discovery and found no material issue.
+
+The repaired real browser run (`symlink-ui-fixed.cjs`, `.json`, `.log`, `*-rejected.png`, `*-restored.png`) created a point ROI, rejected the same escaped folder, retained the dirty ROI and queue identity, loaded an allowed folder, then restored the original unsaved ROI. Screenshot inspected. Initial custom harness attempts lacked correct canvas focus and a fixture label; those logs are retained as harness failures, not product failures.
+
+## Browser workflows actually exercised
+
+- Existing full app journey passed before and after the repairs: keyboard rectangle/polygon/point drawing; label selection; protected and hidden ROI behavior; undo/redo; stale gesture rejection; exactly-once complete/advance; missing/undecodable image recovery; failed folder replacement; save; real ZIP download; independent new-browser checkpoint resume; scaled pointer coordinates and keyboard focus. Final evidence: `final-journey.log` and `final-journey/`.
+- Independent inspection of both actual export ZIPs matched all five feature IDs, layers, labels and geometries to final browser state; coordinate schema remained `annotatR-pixel-level-v1`; receipt count/status/byte size matched. `export-verification.json`, `final-export-verification.json`.
+- Existing action-origin browser runner passed: delayed controls keep their displayed identity, unseen entries are not saved/completed, and annotations remain saveable after display failures. `action.log`, `action/`.
+- Existing calibration browser runner passed five actual two-click reference lines of lengths 8–12, mean 10, sample SD 1.58; estimates only after three references; editable global and per-image assumptions, undo/redo, override reset, and fresh-app persistence. Image units remained px with pixel size 1. Estimated mm/px remains explicitly based on an unverified assumption. `calibration.log`, `calibration/`.
+- Existing drawing-controls runner passed point marker sizing without mask mutation, exact circle diameters 5/10/20, unsaved reflection preview, discard, regenerate, explicit acceptance, and reviewed saved geometry. `drawing.log`, `drawing/`.
+- Viewports 390, 1024, 1450: rectangle tool selection/aria-pressed state passed; 15 tool controls present; no horizontal document overflow and no page JavaScript errors. `responsive-browser.json`, `app-390.png`, `app-1024.png`, `app-1450.png`. Mobile screenshot visually inspected. This is bounded responsive/keyboard verification, not a comprehensive WCAG audit.
+
+## Independent changed-persistence integration
+
+`commit-integration.R create` and a separate `commit-integration.R reopen` passed. A staged reviewed annotation was committed into a three-band in-memory project; all 60 exact pixel values and assumption metadata survived save/load and same-process replay. Fresh-process durable replay retained those values. After a further annotation edit, stale replay returned `REVISION_CONFLICT`; both saved project and receipt remained byte-for-byte unchanged. Logs: `commit-integration-create.log`, `commit-integration-reopen.log`. The initial custom fixture used an incorrect positional constructor argument; its retained harness log does not indicate a product defect.
+
+Read the reader/provenance changes independently: current source validation precedes cached pixel use, selected profile dependencies are canonicalized, and closed-reader reopen validates decoding metadata. No additional material finding in that bounded review. File hashes at handover are in `verified-source-hashes.json`.
+
+## Reproduction
+
+From the isolated worktree, use `../../evidence/hyperannotatR/run.sh Rscript -e 'testthat::test_local(filter="app-(modules-extra|path-boundaries)", reporter="summary", stop_on_failure=TRUE)'`.
+
+The baseline regression command loads `../../evidence/hyperannotatR/baseline-source` with `pkgload::load_all()` then runs the new test file via `testthat::test_file()`; it must fail. The frozen baseline was not modified.
+
+Browser runner prerequisites and commands are in `tests/browser/README.md`. For this machine: Playwright was loaded from the audit tools/browser-test/node_modules/playwright folder, Node 24 from Homebrew, and Chromium from the existing chromium-1248 cache. `ANNOTATR_BROWSER_PORT=3887` and `ANNOTATR_BROWSER_URL=http://127.0.0.1:3887` selected the owned full-app fixture. The custom symlink fixture used owned port 3888. Artifacts and exact custom scripts are retained here.
+
+## Limits
+
+`app_root` restricts local Data-page input discovery; it is not an operating-system sandbox. Concurrent filesystem replacement races, custom reader internals and external reader multi-file references were not qualified as a security boundary. Production datasets, real service state, optional vendor reader correctness, and full release/CI readiness remain outside this app evidence. No deployment, submission, publication, or external acceptance is claimed. The parent audit owns broader checks and release documentation.
+
+## Follow-up release review: staged import boundary
+
+A second confirmed medium-severity path bypassed the same configured restriction: an allowed handoff directory could read a linked external `integrity.json` before validating links, and an allowed mask path could read an external `.legend.json`. The preserved baseline reproduces the external inventory's synthetic version `999.0` in the UI error and imports the unique label `outside-sidecar-label` from an external legend. Evidence: `import-boundary-baseline-probe.log`, `import-boundary-probe.json`.
+
+The app now preflights known import companions before decoding, walks handoff entries without following descendant symlinks, and preserves the existing handoff prohibition of all descendant links. Neutral import APIs remain unchanged. Two additional regression cases fail on frozen baseline with six failed assertions (`import-only-baseline.log`); the complete seven-case boundary file passes 39 assertions (`import-boundaries-fixed.log`). Independent integrity review found no material issue. The real browser refused both external sources, retained a dirty point ROI, staged a valid handoff afterward, and discarded it without mutating annotations (`import-boundary-browser.json`, `.log`, `import-boundary-rejected.png`). Its owned server was stopped after verification.
+
+The Shiny workflow vignette now documents actual reference-layer construction, three/five measurement guidance, global defaults versus image overrides, assumption/pixel-unit semantics, folder/import restrictions and their limits, source provenance checks and recovery. Its evaluated chunks rendered successfully (`shiny-workflow-render.log`, `doc-preview/shiny-workflow.html`); the subsequent short import-preflight clarification is included in the final site rebuild.
+
+## Final control-path boundary review
+
+The same confirmed medium-severity issue affected the typed control API: `annotations.stage` resolved the primary `payload_ref`, then read an external linked inventory or mask legend. A real HTTP public client against the pre-repair candidate observed the synthetic outside inventory version `999.0` and an imported outside legend (`control-import-baseline.json`, `.log`). A scoped audit also confirmed `session.load` accepted an ENVI payload or TIVITA profile outside its negotiated root and could read an external handoff inventory. The new two-case control regression fails 16 assertions against frozen baseline: six stage assertions and ten session-load assertions (`control-root-baseline.log`).
+
+Shared explicit-root helpers in `R/interop-utils.R` now enforce the known image and import companion checks before decoding; app wrappers retain their own option, while control calls pass their own negotiated root without reading or changing that option. All image inputs and the optional handoff are preflighted before `session.load` creates a new output directory or queue. Valid in-root image links remain supported; handoff descendant symlinks remain prohibited. `app-path-boundaries` plus `control-import-boundaries` pass 85 assertions, zero failures, errors, warnings or skips (`control-root-fixed.log`). Independent review of the final helper and both control entrypoints identified no material issue.
+
+A fresh public HTTP server/client run rejected all five synthetic outside-source paths with `PATH_OUTSIDE_ROOT`: ENVI payload, TIVITA profile, session-load handoff, staged handoff, and mask legend. The original revision/current state stayed unchanged. Replacing the ENVI payload with an allowed in-root link restored successful loading; a PNG load and valid handoff stage then succeeded (`control-root-http-fixed.json`, `.log`). The server deliberately had an unrelated app-root option, proving control-instance scope remained independent. Its token stayed in its owned fixture file and was not printed. The owned listener was closed through the public API, and the exact fixture process was stopped afterward.
+
+Control input-path inventory: `annotations.stage` and `session.load` are the typed file-input entrypoints addressed here. Inline features use an owned temporary GeoJSON. `session.save` writes the existing authorized session; `export` and training export already use the canonical output-directory guard. Context/view/selection and mask-preview commands operate on typed parameters and existing queue objects, without a new caller path. Client-side manifest/token paths are caller-explicit connection inputs, not server payload reads. These checks are local input restrictions, not an OS sandbox for custom readers, external-reader references, or concurrent filesystem replacement.
+
+Fresh-process app verification after shared-helper extraction also passed: external inventory and mask legend were rejected, the dirty ROI survived, and a valid handoff staged and discarded without mutation or page errors (`final3-import-browser.json`, `.log`). The rejection screenshot was visually inspected. The owned browser fixture was stopped afterward; ports 3887 and 3888 were clear at handover.
+
+## Installed candidate 3 bundled-cube first use
+
+A fresh browser fixture loaded the installed package exclusively from `final-library-3` (version 0.3.1), using the bundled public 128×128, 40-band ENVI cube and actual native display encoder, with no source or image mocks. Natural RGB rendered; selecting band 12 through the visible controls produced a different grayscale canvas. The Cube panel correctly showed 450–900 nm, no wavelength gaps, unknown value unit and missing calibration. A point ROI was created and saved, then a separate browser session called `at_resume()` and restored the exact ROI ID, label, geometry, entry ID and 40-band metadata. No page errors occurred. Display selection returns to the natural-colour default on fresh app creation; no persistence claim is made for that transient view. Both saved and resumed screenshots were visually inspected. Evidence: `final3-cube-app.R`, `final3-cube-browser.cjs`, `.json`, `.log`, and `final3-cube-{natural,band12,saved,resumed}.png`. Exact owned fixture process stopped afterward; ports 3887/3888 clear.

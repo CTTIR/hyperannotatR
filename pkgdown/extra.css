@@ -1,0 +1,5 @@
+/* The article header already supplies the logo on the documentation site.
+   Standalone vignettes retain their embedded light and dark artwork. */
+.template-article .cttir-vignette-logo {
+  display: none;
+}

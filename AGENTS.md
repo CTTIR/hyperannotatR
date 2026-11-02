@@ -2,7 +2,7 @@
 
 Instructions for coding agents working in this repository. For the current
 state of the work and what to do next, read
-[planning/HANDOVER.md](planning/HANDOVER.md) first.
+`planning/HANDOVER.md` first (in the source checkout).
 
 ## What this package is
 

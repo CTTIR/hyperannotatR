@@ -1,0 +1,253 @@
+inst/examples/reproducible-analysis.R:18:5: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    stop("Output directory already exists; choose a new directory.")
+    ^~~~~
+inst/examples/reproducible-analysis.R:22:47: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  if (!identical(source$status, "available")) stop("Source is not available.")
+                                              ^~~~~
+inst/examples/reproducible-analysis.R:25:5: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    stop("This example requires the persisted analytical fixture cube.")
+    ^~~~~
+inst/examples/reproducible-analysis.R:27:5: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    stop("Persist an entry_id before analysis.")
+    ^~~~~
+inst/examples/reproducible-analysis.R:169:52: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    if (!dir.create(output_dir, recursive = TRUE)) stop("Cannot create output directory.")
+                                                   ^~~~~
+R/geometry.R:695:38: style: [cttir_quiet] Use `quiet` (readr/usethis spelling) as the single chattiness argument.
+at_fix_geometry <- function(project, verbose = TRUE, call = rlang::caller_env()) {
+                                     ^~~~~~~~~~~~~~
+tests/audit/run-regressions.R:6:3: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  stop("Usage: Rscript tests/audit/run-regressions.R <geometry|io|mask|persistence|app>")
+  ^~~~~
+tests/browser/calibration.R:50:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(grepl("0 / 5", text(), fixed = TRUE))
+  ^~~~~~~~~~
+tests/browser/calibration.R:51:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(grepl("Assumed reference length: 2.00 mm", text(), fixed = TRUE),
+  ^~~~~~~~~~
+tests/browser/calibration.R:55:5: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+    stopifnot(app$get_value(export = "n_rois") == i - 1L)
+    ^~~~~~~~~~
+tests/browser/calibration.R:58:5: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+    stopifnot(app$get_value(export = "n_rois") == i)
+    ^~~~~~~~~~
+tests/browser/calibration.R:60:16: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+    if (i < 3) stopifnot(!grepl("Mean reference length", text(), fixed = TRUE))
+               ^~~~~~~~~~
+tests/browser/calibration.R:61:17: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+    if (i == 3) stopifnot(grepl("9.00 px", text(), fixed = TRUE),
+                ^~~~~~~~~~
+tests/browser/calibration.R:64:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(grepl("10.00 px", text(), fixed = TRUE),
+  ^~~~~~~~~~
+tests/browser/calibration.R:72:12: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  ready(); stopifnot(grepl("4 / 5", text(), fixed = TRUE))
+           ^~~~~~~~~~
+tests/browser/calibration.R:79:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(summary$n == 5L, abs(summary$mean_px - 10) < 1e-6,
+  ^~~~~~~~~~
+tests/browser/calibration.R:95:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(grepl("Image override", text(), fixed = TRUE),
+  ^~~~~~~~~~
+tests/browser/calibration.R:100:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(grepl("Assumed reference length: 4.00 mm", text(), fixed = TRUE),
+  ^~~~~~~~~~
+tests/browser/calibration.R:106:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(grepl("Assumed reference length: 3.00 mm", text(), fixed = TRUE))
+  ^~~~~~~~~~
+tests/browser/calibration.R:110:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(grepl("Global default", text(), fixed = TRUE))
+  ^~~~~~~~~~
+tests/browser/calibration.R:116:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(grepl("5 / 5", text(), fixed = TRUE),
+  ^~~~~~~~~~
+tests/browser/calibration.R:123:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(grepl("Assumed reference length: 5.00 mm", text(), fixed = TRUE),
+  ^~~~~~~~~~
+tests/browser/calibration.R:136:3: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  stop(e)
+  ^~~~~
+tests/browser/drawing-tools.R:43:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(app$get_js(sprintf(
+  ^~~~~~~~~~
+tests/browser/drawing-tools.R:51:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(app$get_value(export = 'n_rois') == 1L)
+  ^~~~~~~~~~
+tests/browser/drawing-tools.R:58:5: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+    stopifnot(app$get_value(export = 'n_rois') == i + 1L)
+    ^~~~~~~~~~
+tests/browser/drawing-tools.R:63:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(app$get_value(export = 'n_rois') == 4L)
+  ^~~~~~~~~~
+tests/browser/drawing-tools.R:71:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(app$get_value(export = 'n_rois') == 5L)
+  ^~~~~~~~~~
+tests/browser/drawing-tools.R:75:3: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  stopifnot(length(rois) == 5L, rois[[1]]$attributes$point_radius == 8,
+  ^~~~~~~~~~
+tests/browser/drawing-tools.R:81:5: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+    stopifnot(abs(unname(bbox['xmax'] - bbox['xmin']) - c(5,10,20)[i]) < 1e-8)
+    ^~~~~~~~~~
+tests/browser/minimal-app.R:4:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(!requireNamespace("magick",quietly=TRUE),requireNamespace("tiff",quietly=TRUE))
+^~~~~~~~~~
+tests/browser/minimal-app.R:10:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(is.null(source$dataUri),grepl("magick",source$displayError))
+^~~~~~~~~~
+tests/browser/minimal-app.R:12:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(is.character(png_error),grepl("PNG.*magick",png_error))
+^~~~~~~~~~
+tests/qualification/installed-identity.R:5:3: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  stop("Usage: Rscript tests/qualification/installed-identity.R <library>")
+  ^~~~~
+tests/qualification/installed-identity.R:9:3: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  stop("The installed identity regression requires the suggested tiff package")
+  ^~~~~
+tests/qualification/installed-identity.R:72:5: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    stop(paste(readLines(log_path, warn = FALSE), collapse = "\n"))
+    ^~~~~
+tests/qualification/installed-identity.R:82:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(
+^~~~~~~~~~
+tests/qualification/installed-persistence.R:4:23: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+if (length(args)!=1L) stop('Usage: Rscript tests/qualification/installed-persistence.R <library>')
+                      ^~~~~
+tests/qualification/installed-persistence.R:24:6: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  '  stopifnot(identical(linked[fields],fresh[fields]),identical(at_tile(linked),at_tile(fresh)))',
+     ^~~~~~~~~~
+tests/qualification/installed-persistence.R:40:8: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  '    stopifnot(identical(p$image[fields],expected$metadata),identical(s$manifest$entry_id,expected$entry), identical(at_tile(p$image),expected$tile),identical(at_extract(p),expected$extract),identical(at_rois(p)$roi_id,expected$ids))',
+       ^~~~~~~~~~
+tests/qualification/installed-persistence.R:43:8: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  '    stopifnot(file.info(png)$size>0)',
+       ^~~~~~~~~~
+tests/qualification/installed-persistence.R:46:8: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+  '    stopifnot(nrow(at_rois(at_current(at_resume(path))))==2,anyDuplicated(at_rois(p)$roi_id)==0)',
+       ^~~~~~~~~~
+tests/qualification/installed-persistence.R:53:19: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  if (status!=0L) stop(paste(readLines(log,warn=FALSE),collapse='\n'))
+                  ^~~~~
+tests/qualification/installed-windows.R:22:5: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+    stopifnot(hyperannotatR:::.read_telemetry()$decoded_bytes==0,
+    ^~~~~~~~~~
+tests/qualification/installed-windows.R:26:5: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+    stopifnot(identical(as.vector(tile[,,1]),c(322,332,323,333)),
+    ^~~~~~~~~~
+tests/qualification/installed-windows.R:29:5: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+    stopifnot(is.null(closed$image$handle),identical(at_tile(closed$image,xrange=c(2,3),yrange=c(2,3),bands=c(3,1,3)),tile))
+    ^~~~~~~~~~
+tests/qualification/qupath-roundtrip.R:5:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(length(args)>=2L)
+^~~~~~~~~~
+tests/qualification/qupath-roundtrip.R:21:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(status==0L,file.exists(native),file.exists(diagnostics))
+^~~~~~~~~~
+tests/qualification/qupath-roundtrip.R:23:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(identical(vapply(back$rois,`[[`,character(1),'id'),vapply(L$rois,`[[`,character(1),'id')))
+^~~~~~~~~~
+tests/qualification/qupath-roundtrip.R:24:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(identical(unname(back$style$colour[c('region','donut','cell')]),c('#123456','#ABCDEF','#010203')))
+^~~~~~~~~~
+tests/qualification/qupath-roundtrip.R:25:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(isTRUE(back$rois[[1]]$attributes$locked),identical(back$rois[[3]]$attributes$qupath$object_type,'detection'))
+^~~~~~~~~~
+tests/qualification/qupath-roundtrip.R:26:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(identical(as.numeric(sf::st_bbox(back$rois[[1]]$geometry)),c(8,6,20,14)))
+^~~~~~~~~~
+tests/qualification/qupath-roundtrip.R:27:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(identical(vapply(back$rois,function(r) as.numeric(sf::st_area(r$geometry)),numeric(1)),c(96,84,4)))
+^~~~~~~~~~
+tests/qualification/qupath-roundtrip.R:30:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(identical(features[[3]]$properties$objectType,'detection'))
+^~~~~~~~~~
+tests/qualification/window-resources.R:34:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(identical(dim(tile),c(64L,64L,3L)),all(tile==if(backend!='ometiff') 0 else 7),
+^~~~~~~~~~
+tests/qualification/window-resources.R:36:24: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+if (backend=='tivita') stopifnot(identical(img$meta$format,'SpecCube'))
+                       ^~~~~~~~~~
+tests/testthat/test-app-capabilities.R:37:38: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    rv$load_project <- function(...) stop("corrupt image")
+                                     ^~~~~
+tests/testthat/test-app-modules-extra.R:146:51: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    expect_no_error(.state_mutate(rv, function(p) stop("injected failure")))
+                                                  ^~~~~
+tests/testthat/test-audit-app.R:299:20: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+      if (i == 2L) stop("Synthetic unavailable image")
+                   ^~~~~
+tests/testthat/test-audit-app.R:330:45: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+        if (basename(path)=='_session.rds') stop('injected manifest failure')
+                                            ^~~~~
+tests/testthat/test-batch.R:141:17: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    if (i == 3) stop("boom")
+                ^~~~~
+tests/testthat/test-control-protocol.R:349:37: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    at_save_session = function(...) stop("disk full")
+                                    ^~~~~
+tests/testthat/test-export-contract.R:23:68: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  testthat::local_mocked_bindings(.write_legend_json=function(...) stop('injected legend failure'))
+                                                                   ^~~~~
+tests/testthat/test-export-contract.R:34:73: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  expect_error(.export_bundle(paths,function(p) {writeLines('new',p[1]);stop('legend failed')},TRUE),'legend failed')
+                                                                        ^~~~~
+tests/testthat/test-export-contract.R:86:65: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  testthat::local_mocked_bindings(at_write_qupath=function(...) stop('broken QuPath writer'))
+                                                                ^~~~~
+tests/testthat/test-export-contract.R:91:64: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  testthat::local_mocked_bindings(.export_bundle=function(...) stop('injected receipt failure'))
+                                                               ^~~~~
+tests/testthat/test-export-contract.R:98:61: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  testthat::local_mocked_bindings(at_manifest=function(...) stop('injected summary failure'))
+                                                            ^~~~~
+tests/testthat/test-geometry.R:118:51: style: [cttir_quiet] Use `quiet` (readr/usethis spelling) as the single chattiness argument.
+  fixed <- suppressMessages(at_fix_geometry(proj, verbose = FALSE))
+                                                  ^~~~~~~~~~~~~~~
+tests/testthat/test-geometry.R:229:57: style: [cttir_quiet] Use `quiet` (readr/usethis spelling) as the single chattiness argument.
+  fixed <- at_fix_geometry(at_project(tiny_image(), l), verbose = FALSE)
+                                                        ^~~~~~~~~~~~~~~
+tests/testthat/test-geometry.R:240:54: style: [cttir_quiet] Use `quiet` (readr/usethis spelling) as the single chattiness argument.
+    after <- at_check_geometry(at_fix_geometry(proj, verbose = FALSE))$issue
+                                                     ^~~~~~~~~~~~~~~
+tests/testthat/test-mask-budget.R:9:38: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    .rasterize_batch = function(...) stop("rasterisation reached"),
+                                     ^~~~~
+tests/testthat/test-mask-budget.R:10:40: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    .rasterize_per_roi = function(...) stop("rasterisation reached")
+                                       ^~~~~
+tests/testthat/test-mask-budget.R:32:40: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    .rasterize_per_roi = function(...) stop("rasterisation reached")
+                                       ^~~~~
+tests/testthat/test-persistence-contract.R:63:64: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+    writer=function(object,path) { writeLines('partial',path); stop('injected write') }), 'injected write')
+                                                               ^~~~~
+tests/testthat/test-persistence-contract.R:91:35: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+      writeLines('partial',path); stop('project serialization failure')
+                                  ^~~~~
+tests/testthat/test-persistence-source.R:44:63: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  testthat::local_mocked_bindings(at_read_image=function(...) stop('Unexpected pixel read'),.package='hyperannotatR')
+                                                              ^~~~~
+tests/testthat/test-refine-correctness.R:48:34: style: [cttir_quiet] Use `quiet` (readr/usethis spelling) as the single chattiness argument.
+  fixed <- at_fix_geometry(proj, verbose = FALSE)
+                                 ^~~~~~~~~~~~~~~
+tests/testthat/test-shiny-modules.R:156:67: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  testthat::local_mocked_bindings(at_write_qupath = function(...) stop("injected format failure"))
+                                                                  ^~~~~
+tests/testthat/test-training.R:174:59: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  local_mocked_bindings(at_training_check = function(...) stop("check failed"))
+                                                          ^~~~~
+tests/testthat/test-widget-canvas.R:98:61: warning: [cttir_condition] Use cli::cli_abort() rather than stop(); it carries a class and a call.
+  local_mocked_bindings(.view_display_array = function(...) stop("decoder exploded"))
+                                                            ^~~~~
+vignettes/reproducible-analysis.Rmd:82:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(identical(first, second))
+^~~~~~~~~~
+vignettes/reproducible-analysis.Rmd:84:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(identical(
+^~~~~~~~~~
+vignettes/reproducible-analysis.Rmd:138:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(first$tables$image_statistics$sum[1] == 1937)
+^~~~~~~~~~
+vignettes/reproducible-analysis.Rmd:139:1: warning: [cttir_condition] Use cli::cli_abort() with a condition class rather than stopifnot().
+stopifnot(first$tables$image_statistics$mean[1] == 1937 / 15)
+^~~~~~~~~~
+lint count: 84 

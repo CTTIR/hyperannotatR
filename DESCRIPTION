@@ -1,7 +1,7 @@
 Package: hyperannotatR
 Type: Package
 Title: Region-of-Interest Annotation for Hyperspectral Data
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: person("Raban", "Heller", email = "raban.heller@charite.de",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8006-9742"))
 Description: Annotate multiple layers of regions of interest in hyperspectral
@@ -56,7 +56,7 @@ Suggests:
     shinyjs,
     shinytest2,
     terra,
-    testthat (>= 3.0.0),
+    testthat (>= 3.3.2),
     tiff,
     withr,
     xml2,

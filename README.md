@@ -34,10 +34,24 @@ object classes are retained. The hosted source repository is
 
 ## Installation
 
+Use R 4.1 or newer; this candidate is tested locally with R 4.6.1 on
+macOS. Source installs need GDAL, GEOS, PROJ and udunits for the spatial
+packages. The PNG examples need ImageMagick through `magick`, and TIFF
+export needs `tiff`. Install the app dependencies explicitly when using
+the interactive workflow:
+
 ``` r
-# install.packages("pak")
+install.packages("pak")
 pak::pak("CTTIR/hyperannotatR")
+install.packages(c("magick", "tiff", "shiny", "bslib", "htmlwidgets",
+                   "htmltools", "shinyjs", "zip"))
 ```
+
+The GitHub command installs the published branch. To test a locally
+prepared source package, use `R CMD INSTALL hyperannotatR_0.3.1.tar.gz`
+after installing its dependencies. OME-TIFF additionally needs Java and
+the Bioconductor package `RBioFormats`; see
+`vignette("images-and-backends")` for backend requirements.
 
 ## Quick start
 
@@ -90,6 +104,16 @@ and the bytes actually read. The ENVI, TIVITA and OME readers read
 windows from the file; the raster, TIFF and Cubert backends decode the
 whole image when it is opened, so it must fit in memory.
 `at_image_capabilities()` reports which applies to an image.
+`hyperannotatR.max_read_bytes` limits window/NPY array allocations and
+mask grids; it does not bound eager TIFF decoding or total process
+memory.
+
+For a bundled spectral example, `at_example_image("cube")` opens a
+40-band ENVI cube without a vendor SDK. Saved file-backed projects
+retain references to their source files. Keep the header, payload and
+any TIVITA profile sidecar together; changed or ambiguous inputs need
+deliberate `at_relink_source()` revalidation. File signatures use size
+and modification time, not content hashes.
 
 The `raster` backend converts samples to a 0–255 display convention and
 does not preserve original high-bit-depth intensities. The quantitative
@@ -108,6 +132,10 @@ feed segmentation, classification, and spectral-extraction pipelines in
 Python, ImageJ, QuPath, or R. See `vignette("masks")` for the
 pixel-coverage contract and downstream consumption.
 
+Mask allocation checks use a conservative 32-byte-per-pixel estimate
+against the shared byte budget. Aggregate multi-layer stacks and native
+geometry allocations are not covered by that per-grid estimate.
+
 ## The annotation app
 
 ``` r
@@ -119,6 +147,12 @@ Iterate through an image queue, draw multi-layer ROIs, watch the mask
 render live, and export everything in one pass — with resumable sessions
 and keyboard-first throughput. `at_app()` returns the same app as a
 `shiny.appobj` for embedding and testing.
+
+Reference layers can collect repeated pixel lengths and record assumed
+physical lengths, with global defaults and image-specific overrides.
+Estimated mm/pixel values remain explicitly provisional; they do not
+change geometry coordinates or establish measured physical calibration.
+See `vignette("shiny-workflow")`.
 
 ## Working with qupflowR
 
