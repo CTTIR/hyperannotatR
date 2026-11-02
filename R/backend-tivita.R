@@ -94,6 +94,29 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
   if (length(cand)) cand[1] else NA_character_
 }
 
+# A sidecar is part of the decoding input. Also check discovery: a new,
+# higher-priority sidecar must not silently replace the recorded profile.
+.tivita_source_status <- function(img) {
+  d <- img[["source_descriptor"]]
+  if (!identical(d[["backend"]], "tivita")) return("available")
+  if (!identical(img[["meta"]][["format"]], "SpecCube")) {
+    return(if (all(c("header", "payload") %in% names(d[["files"]]))) "available" else "unresolved")
+  }
+  if (file.exists(.envi_paths(d[["path"]])$hdr)) return("changed")
+  if (is.null(img[["meta"]][["profile_digest"]])) return("unresolved")
+  source <- img[["meta"]][["profile_source"]]
+  if (isTRUE(source %in% c("explicit", "arguments"))) return("available")
+  selected <- .tivita_sidecar(d[["path"]])
+  if (identical(source, "default_profile")) {
+    return(if (is.na(selected)) "available" else "changed")
+  }
+  recorded <- d[["files"]][["profile"]]
+  if (!identical(source, "sidecar") || is.null(recorded)) return("unresolved")
+  if (is.na(selected)) return("missing")
+  if (!identical(normalizePath(selected, winslash = "/"), recorded[["path"]])) return("changed")
+  "available"
+}
+
 # Build and validate a profile from a sidecar JSON document.
 .tivita_profile_from_sidecar <- function(file, call = rlang::caller_env()) {
   doc <- .read_json_doc(file, max_bytes = 1024^2, call = call)
@@ -121,6 +144,7 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
                                   header = NULL, wavelengths = NULL, value_unit = NULL,
                                   ..., call = rlang::caller_env()) {
   source_of_profile <- "explicit"
+  profile_files <- NULL
   legacy <- !is.null(nx) || !is.null(ny) || !is.null(nb) || !is.null(header)
   if (is.null(profile) && legacy) {
     # Legacy dimension arguments build an ad hoc profile. The canonical
@@ -136,6 +160,7 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
   if (is.null(profile)) {
     side <- .tivita_sidecar(path)
     if (!is.na(side)) {
+      profile_files <- .persisted_source_files(c(profile = side))
       profile <- .tivita_profile_from_sidecar(side, call = call)
       source_of_profile <- "sidecar"
     } else {
@@ -157,7 +182,7 @@ at_tivita_profile <- function(name = .TIVITA_DEFAULT_PROFILE, width = 640L, heig
     details = list(profile = profile$name, expected_bytes = expected, actual_bytes = size),
     call = call)
   }
-  files <- .persisted_source_files(c(payload = path))
+  files <- c(.persisted_source_files(c(payload = path)), profile_files)
   con <- file(path, "rb")
   header_vals <- if (profile$header_values > 0L) {
     raw <- .window_read_raw(con, profile$header_values * profile$value_bytes, call = call)
