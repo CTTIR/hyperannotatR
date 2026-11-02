@@ -24,7 +24,7 @@ independent of timestamps, authors, file paths and pixel data. Partners pass
 it back as \code{expected_revision} to detect stale patches.
 }
 \examples{
-proj <- at_example_project()
+proj <- at_project(at_example_image("cube"))
 at_annotation_revision(proj)
 }
 \seealso{

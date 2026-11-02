@@ -53,7 +53,18 @@ test_that('genuine repeated-source legacy queue migrates positionally and keeps 
   expect_equal(vapply(s$projects,function(p) at_rois(p)$label,character(1)),c('first','second'))
   expect_identical(at_rois(s$projects[[1]])$roi_id,'roi_000000001')
   expect_null(s$projects[[1]]$image$handle)
-  expect_error(at_tile(s$projects[[1]]$image),'metadata|revalidate')
+  if (requireNamespace('tiff', quietly = TRUE)) {
+    expect_error(at_tile(s$projects[[1]]$image),'metadata|revalidate')
+  } else {
+    expect_error(at_tile(s$projects[[1]]$image),'Backend "tiff" is not available',
+                 class = 'at_io_error')
+  }
+})
+
+test_that('genuine legacy queue TIFF sources relink and reopen in a fresh process', {
+  skip_if_not_installed('tiff')
+  dir <- withr::local_tempdir(); path <- legacy_copy('session-lite.rds',dir)
+  s <- at_resume(path)
   s$projects <- lapply(s$projects,function(p) at_relink_source(p,p$image$source))
   expect_identical(at_rois(s$projects[[1]])$roi_id,'roi_000000001')
   at_save_session(s,file.path(dir,'new.rds'))

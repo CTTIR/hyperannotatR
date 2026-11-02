@@ -205,7 +205,7 @@
 #' @family interop
 #' @export
 #' @examples
-#' proj <- at_example_project()
+#' proj <- at_project(at_example_image("cube"))
 #' at_annotation_revision(proj)
 at_annotation_revision <- function(x, call = rlang::caller_env()) {
   core <- if (inherits(x, "annot_project")) {

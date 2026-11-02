@@ -1,3 +1,8 @@
+export_cube_session <- function(n) {
+  at_session(rep(at_example_path("cube"), n),
+             labels = c("tumour", "necrosis", "stroma"))
+}
+
 test_that('derived mask filenames are contained, unique and retain display labels', {
   skip_if_not_installed('tiff')
   p <- at_project(small_image(), at_layer_add(at_layer('../L'), at_roi_rect(1,1,5,5,'a/b')), name='../escaped')
@@ -37,7 +42,7 @@ test_that('bundle replacement stages all files and rolls back publication failur
 
 test_that('batch preflight rejects symlink destinations before writing anything', {
   skip_on_os('windows')
-  s <- at_example_session(1); d <- withr::local_tempdir(); outside <- withr::local_tempdir()
+  s <- export_cube_session(1); d <- withr::local_tempdir(); outside <- withr::local_tempdir()
   expect_true(file.symlink(outside,file.path(d,'geojson')))
   expect_error(at_export_all(s,d,formats=c('csv','geojson'),scope='all',progress=FALSE),'[Ss]ymlink|containment')
   expect_length(list.files(outside),0)
@@ -45,7 +50,7 @@ test_that('batch preflight rejects symlink destinations before writing anything'
 })
 
 test_that('receipts retain per-format materialization failures and skip existing bundles', {
-  s <- at_example_session(2); d <- withr::local_tempdir()
+  s <- export_cube_session(2); d <- withr::local_tempdir()
   s$manifest$path[1] <- file.path(d,'missing.tif')
   rc <- suppressWarnings(at_export_all(s,d,formats=c('geojson','csv'),scope='all',progress=FALSE))
   expect_equal(nrow(rc),4)
@@ -66,7 +71,7 @@ test_that('explicit single-file paths stay caller-selected and sidecars are chec
 })
 
 test_that('actual output bundles disambiguate cross-format aliases and reserved names', {
-  s <- at_example_session(2);s$manifest$export_stem <- c('same','same_qupath')
+  s <- export_cube_session(2);s$manifest$export_stem <- c('same','same_qupath')
   d <- withr::local_tempdir()
   rc <- .export_session_items(s,1:2,d,c('geojson','qupath'),function(i) demo_project(),flat=TRUE)
   expect_identical(rc$status,rep('ok',4))
@@ -77,7 +82,7 @@ test_that('actual output bundles disambiguate cross-format aliases and reserved 
 })
 
 test_that('one format failure does not suppress siblings or hide a receipt publication failure', {
-  s <- at_example_session(1); d <- withr::local_tempdir()
+  s <- export_cube_session(1); d <- withr::local_tempdir()
   testthat::local_mocked_bindings(at_write_qupath=function(...) stop('broken QuPath writer'))
   rc <- suppressWarnings(at_export_all(s,d,formats=c('qupath','geojson'),scope='all',progress=FALSE))
   expect_identical(rc$status,c('error','ok'))
@@ -89,7 +94,7 @@ test_that('one format failure does not suppress siblings or hide a receipt publi
 })
 
 test_that('summary generation failure does not discard completed item receipts', {
-  s <- at_example_session(1); d <- withr::local_tempdir()
+  s <- export_cube_session(1); d <- withr::local_tempdir()
   testthat::local_mocked_bindings(at_manifest=function(...) stop('injected summary failure'))
   expect_warning(rc <- at_export_all(s,d,formats='csv',scope='all',progress=FALSE),'summary')
   expect_identical(rc$status,'ok')
