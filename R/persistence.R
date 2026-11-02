@@ -19,7 +19,7 @@
 # the interop manifest's .source_files(), which describes files for partners.)
 .persisted_source_files <- function(paths) {
   lapply(paths, function(p) {
-    list(path = normalizePath(p, mustWork = TRUE), signature = .source_signature(p))
+    list(path = normalizePath(p, winslash = "/", mustWork = TRUE), signature = .source_signature(p))
   })
 }
 
@@ -165,7 +165,21 @@
     if (!file.exists(f[["path"]])) return("missing")
     if (!identical(f[["signature"]], .source_signature(f[["path"]]))) return("changed")
   }
-  "available"
+  # ENVI discovers companions by precedence, including for TIVITA exports.
+  # Unchanged recorded files alone cannot detect a newly preferred sibling
+  # or a sibling symlink that now resolves to a different original file.
+  if (d[["backend"]] %in% c("envi", "tivita") &&
+      all(c("header", "payload") %in% names(d[["files"]]))) {
+    selected <- .envi_paths(d[["path"]])
+    paths <- c(header = selected$hdr, payload = selected$dat)
+    if (anyNA(paths) || any(!file.exists(paths))) return("missing")
+    paths <- vapply(paths, normalizePath, character(1), winslash = "/", mustWork = TRUE)
+    recorded <- vapply(d[["files"]][c("header", "payload")], function(f) {
+      normalizePath(f[["path"]], winslash = "/", mustWork = TRUE)
+    }, character(1))
+    if (!identical(paths, recorded)) return("changed")
+  }
+  .tivita_source_status(img)
 }
 
 #' Inspect an image source without changing annotations or reading pixels
@@ -199,7 +213,8 @@ at_inspect_source <- function(x) {
 # arrays are immutable snapshots and are returned unchanged. A missing, changed
 # or ambiguous source leaves the image without pixels (and, with
 # `require_pixels`, raises an at_io_error) instead of guessing.
-.reopen_image <- function(img, require_pixels = FALSE, call = rlang::caller_env()) {
+.reopen_image <- function(img, require_pixels = FALSE, call = rlang::caller_env(),
+                          materialize = TRUE) {
   img <- .migrate_image(img)
   if (.holds_pixel_arrays(img)) return(img)
   status <- .source_status(img)
@@ -208,7 +223,7 @@ at_inspect_source <- function(x) {
     img[["meta"]][["source_error"]] <-
       "Composite source provenance is unverified; use at_relink_source() to revalidate."
   }
-  if (status == "available" && is.null(img[["handle"]])) {
+  if (materialize && status == "available" && is.null(img[["handle"]])) {
     d <- img[["source_descriptor"]]
     result <- tryCatch(
       do.call(at_read_image, c(list(path = d[["path"]], backend = d[["backend"]]), d[["options"]])),
@@ -232,6 +247,15 @@ at_inspect_source <- function(x) {
           "explicitly revalidate with at_relink_source(). Annotations are preserved."
         ))
       }
+      if (!inherits(result, "error") && identical(img[["meta"]][["format"]], "SpecCube") &&
+          (is.null(img[["meta"]][["profile_digest"]]) ||
+           !identical(result[["meta"]][["profile_digest"]], img[["meta"]][["profile_digest"]]) ||
+           !identical(result[["meta"]][["value_unit"]], img[["meta"]][["value_unit"]]))) {
+        result <- simpleError(paste(
+          "Reopened TIVITA profile differs or is legacy-ambiguous;",
+          "explicitly revalidate with at_relink_source(). Annotations are preserved."
+        ))
+      }
     }
     if (inherits(result, "error")) {
       img[["meta"]][["source_error"]] <- conditionMessage(result)
@@ -241,7 +265,10 @@ at_inspect_source <- function(x) {
       img[["source_descriptor"]] <- d
       img[["handle"]] <- result[["handle"]]
       img[["read_generation"]] <- result[["read_generation"]]
-      img[["cache_identity"]] <- result[["cache_identity"]]
+      # Reopening does not change the caller's image identity: tile-cache
+      # entries and public read counters belong to that image. Loading and
+      # explicitly closing an image already mint their own fresh identities.
+      img[["cache_identity"]] <- img[["cache_identity"]] %||% result[["cache_identity"]]
       img[["meta"]][["source_error"]] <- NULL
     }
   }

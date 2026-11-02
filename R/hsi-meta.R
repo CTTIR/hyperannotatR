@@ -140,8 +140,10 @@ at_hsi_meta <- function(x, call = rlang::caller_env()) {
 #'   `"intensity"`, `"absorbance"`. Taken from `attr(x, "value_unit")` when
 #'   `NULL`.
 #' @param to Target unit: `"reflectance"` or `"absorbance"`.
-#' @param calibration For `raw -> reflectance`, a list with numeric `white`
-#'   and `dark` references: scalars, or one value per band. Per-band references
+#' @param calibration For `raw -> reflectance`, a list with finite numeric
+#'   `white` and `dark` reference vectors: scalars, or one value per band.
+#'   Factors, complex values and non-finite references are refused.
+#'   Per-band references
 #'   apply along the band axis of a `[y, x, band]` array, the columns of a
 #'   pixel-by-band matrix, or the elements of a single spectrum vector; any
 #'   other length is refused.
@@ -199,12 +201,24 @@ at_convert_values <- function(x, from = NULL, to = c("reflectance", "absorbance"
 }
 
 .raw_to_reflectance <- function(x, calibration, call) {
+  if (!is.null(calibration) && !is.list(calibration)) {
+    .at_abort("{.arg calibration} must be a list of numeric white and dark references.",
+              code = "CALIBRATION_INVALID", call = call)
+  }
   if (is.null(calibration) || is.null(calibration$white) || is.null(calibration$dark)) {
     .at_abort(
       c("Converting raw values to reflectance needs a dark/white calibration.",
         "i" = "Supply {.code calibration = list(white = ..., dark = ...)}."),
       class = "capability", code = "CALIBRATION_MISSING", call = call
     )
+  }
+  valid_reference <- function(ref) {
+    is.numeric(ref) && !is.complex(ref) && is.null(dim(ref)) &&
+      length(ref) > 0L && all(is.finite(ref))
+  }
+  if (!valid_reference(calibration$white) || !valid_reference(calibration$dark)) {
+    .at_abort("Calibration references must be nonempty, finite numeric vectors.",
+              code = "CALIBRATION_INVALID", call = call)
   }
   white <- as.numeric(calibration$white)
   dark <- as.numeric(calibration$dark)
@@ -305,8 +319,9 @@ at_band_operations <- function() {
     }
     lo <- params$wavelength_min
     hi <- params$wavelength_max
-    if (!is.numeric(lo) || !is.numeric(hi) || length(lo) != 1L || length(hi) != 1L || lo > hi) {
-      .at_abort("Pass numeric {.field wavelength_min} <= {.field wavelength_max}.", call = call)
+    if (!is.numeric(lo) || !is.numeric(hi) || length(lo) != 1L || length(hi) != 1L ||
+        !is.finite(lo) || !is.finite(hi) || lo > hi) {
+      .at_abort("Pass finite numeric {.field wavelength_min} <= {.field wavelength_max}.", call = call)
     }
     wl <- at_wavelengths(img)
     bands <- which(!is.na(wl) & wl >= lo & wl <= hi)
@@ -326,11 +341,12 @@ at_band_operations <- function() {
                       seq_len(nb))
     }
   }
-  bands <- as.integer(bands)
-  if (length(bands) == 0L || anyNA(bands) || any(bands < 1L | bands > nb)) {
+  if (!is.numeric(bands) || is.complex(bands) || length(bands) == 0L || any(!is.finite(bands)) ||
+      any(bands != floor(bands)) || any(bands < 1L | bands > nb)) {
     .at_abort("{.arg bands} must be band indices in 1..{nb}.", code = "BAND_OUT_OF_RANGE",
               call = call)
   }
+  bands <- as.integer(bands)
   if (!is.na(op$n_bands) && length(bands) != op$n_bands) {
     .at_abort("Operation {.val {operation}} needs exactly {op$n_bands} band{?s}.",
               code = "BAND_COUNT", call = call)

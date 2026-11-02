@@ -21,8 +21,10 @@ at_convert_values(
 
 \item{to}{Target unit: \code{"reflectance"} or \code{"absorbance"}.}
 
-\item{calibration}{For \code{raw -> reflectance}, a list with numeric \code{white}
-and \code{dark} references: scalars, or one value per band. Per-band references
+\item{calibration}{For \code{raw -> reflectance}, a list with finite numeric
+\code{white} and \code{dark} reference vectors: scalars, or one value per band.
+Factors, complex values and non-finite references are refused.
+Per-band references
 apply along the band axis of a \verb{[y, x, band]} array, the columns of a
 pixel-by-band matrix, or the elements of a single spectrum vector; any
 other length is refused.}

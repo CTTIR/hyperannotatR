@@ -160,8 +160,8 @@ at_close_image <- function(x) {
   close_fn <- at_backend_get(img[["backend"]])[["close_fn"]]
   if (!is.null(img[["handle"]]) && is.function(close_fn)) close_fn(img)
   img$handle <- NULL
-  # Cached tiles of the closed read must never be served again; a fresh read
-  # identity is minted when the handle is reopened.
+  # Cached tiles of the previous read must never be served again. This new
+  # identity is retained across later reopenings of this closed image.
   img$cache_identity <- .new_identity_id("closed")
   img$read_generation <- NULL
   if (project) {

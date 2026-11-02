@@ -352,13 +352,16 @@ at_tile <- function(img, level = 0L, xrange = NULL, yrange = NULL, bands = NULL,
       call = call
     )
   }
-  img <- .reopen_image(img, require_pixels = TRUE, call = call)
-  b <- at_backend_get(img[["backend"]], call = call)
+  # Validate the current source before looking up cached pixels, but defer
+  # reopening a closed reader until a cache miss actually needs its handle.
+  img <- .reopen_image(img, require_pixels = TRUE, call = call, materialize = FALSE)
   key <- .tile_key(img, level, xrange, yrange, bands)
   cached <- .tile_cache_get(key)
   if (!is.null(cached)) {
     return(cached)
   }
+  img <- .reopen_image(img, require_pixels = TRUE, call = call)
+  b <- at_backend_get(img[["backend"]], call = call)
   arr <- b$tile_fn(img, level, xrange, yrange, bands)
   if (!.holds_pixel_arrays(img) && !is.null(img[["source_descriptor"]]) &&
       .source_status(img) != "available") {
