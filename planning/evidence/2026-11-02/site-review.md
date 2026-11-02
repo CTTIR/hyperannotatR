@@ -1,0 +1,15 @@
+# Documentation site review — hyperannotatR candidate 3
+
+Reviewed the locally built site in `site/`, with evidence under `site-review/`. The source package and site were not published. The final candidate 3 rebuild was checked again; candidate 2 evidence is retained separately.
+
+Static validation checked 186 HTML pages and 9,721 local links/assets: zero missing targets and zero invalid fragment targets (`local-links-candidate3.json`). An initial checkout-only `planning/HANDOVER.html` link in AGENTS was corrected to a code-form source path; the failed initial check is retained in `local-links.json`.
+
+Actual Chromium page cases passed for desktop/mobile home, dark home, Shiny/partner/mask articles, and the `at_app()` reference: no failed asset requests, broken images, page JavaScript errors, or document overflow. The mobile menu navigated through Articles to the Shiny guide, desktop reference navigation reached `at_app()`, and dark-mode switching worked (`candidate3/browser.json`, `candidate3/navigation.json`, and corresponding logs). These are bounded responsive/navigation checks, not a comprehensive accessibility audit. External links were not exhaustively checked.
+
+Visual inspection found duplicate branding on the Shiny article. A scoped pkgdown CSS rule now hides the standalone article logo only inside the site article template. Final desktop light/dark and 390-pixel mobile screenshots were visually inspected: one clear page identity, readable content, no overlap. The independently rendered standalone vignette keeps one visible embedded logo in both light and dark cases (`candidate3/final-branding.json`, `.log`, `candidate3/final-site-*.png`, `candidate3/final-standalone-*.png`). The new import restriction paragraph is present.
+
+Initial local Python HTTP-server connection resets caused incomplete asset loading; those harness logs were retained, and the complete cases were rerun successfully using an owned Node static server. No product check was weakened. The exact owned server was stopped after review; no deployment or external production operation is claimed.
+
+The final partner guide explicitly lists known image/import companions, per-control-instance root scope, and custom-reader, external-reference and filesystem-race limits. Its rendered paragraph was visually checked (`candidate3/control-root-limits.png`). A first content assertion failed because HTML source lines split a phrase; normalizing whitespace preserved the same assertion and the rerun passed. The initial harness log is retained (`candidate3/browser-initial-whitespace.log`).
+
+Minor deferred theme limitation: ANSI-colored temporary output paths in example blocks retain a dark blue foreground in dark mode, giving low contrast on the dark background. This affects incidental printed example paths; normal prose, navigation and highlighted source remain readable. A broader theme contrast pass is a future accessibility improvement. No remaining broken navigation, missing asset or responsive layout blocker was found in these cases. The final owned Node fixture was stopped; ports 3887 and 3888 were clear.

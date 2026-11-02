@@ -1,0 +1,109 @@
+{
+  "repository": "CTTIR/hyperannotatR",
+  "version": "0.3.1",
+  "status": "locally-validated; hosted-matrix-real-SDK-partners-and-publication-pending",
+  "original_head": "3731c2f208ebb80a87067d552df226436088c35f",
+  "baseline_head": "23cc5f94bef632e82ee14d56955d946b693de827",
+  "code_head": "fdcd5a40b585627675f13f9eb13e7a82e9979e46",
+  "branch": "maintenance/public-readiness-20261030",
+  "host": "R 4.6.1; macOS 27.0.1 arm64",
+  "checks": {
+    "full": {
+      "errors": 0,
+      "warnings": 0,
+      "notes": 1,
+      "note_text": "checking CRAN incoming feasibility ... [4s/12s] NOTE\nMaintainer: \u2018Raban Heller <raban.heller@charite.de>\u2019\n\nNew submission"
+    },
+    "minimal": {
+      "errors": 0,
+      "warnings": 0,
+      "notes": 1,
+      "note_text": "checking CRAN incoming feasibility ... NOTE\nMaintainer: \u2018Raban Heller <raban.heller@charite.de>\u2019\n\nNew submission"
+    }
+  },
+  "test_results": {
+    "full": {
+      "fail": 0,
+      "warn": 0,
+      "skip": 13,
+      "pass": 5462
+    },
+    "minimal": {
+      "fail": 0,
+      "warn": 0,
+      "skip": 108,
+      "pass": 3420
+    },
+    "coverage": {
+      "fail": 0,
+      "warn": 0,
+      "skip": 8,
+      "pass": 5504
+    }
+  },
+  "coverage": {
+    "percent": 91.8730109446557,
+    "executable_lines": 12883,
+    "covered_lines": 11836,
+    "source_unchanged": true
+  },
+  "coverage_floor": 85,
+  "javascript_tests": 59,
+  "site": {
+    "html_pages": 186,
+    "local_references": 9721,
+    "missing": 0,
+    "invalid_fragments": 0
+  },
+  "installed_first_use": "passed",
+  "fresh_process_qualification": "passed",
+  "real_browser_and_control_http": "passed",
+  "package": {
+    "file": "final-check-3/hyperannotatR_0.3.1.tar.gz",
+    "bytes": 5100961,
+    "sha256": "885217e497a2df441f096be466e88c6d3011aef0920bc35c5b84162b2f1fe668",
+    "entries": 612,
+    "files": 575,
+    "unchanged_current_inputs": 549,
+    "different_current_inputs_except_packaged_DESCRIPTION": [],
+    "excluded_path_leaks": [],
+    "credential_pattern_hits": [],
+    "machine_path_hits": []
+  },
+  "manual": {
+    "path": "manual-review/candidate3/hyperannotatR-manual.pdf",
+    "pages": 139,
+    "sha256": "f4a2671579899e0c078f83b9fc4001f1a768a97ef2bdcca6ec7c4f550e364843",
+    "toc_entries": 155,
+    "numbered_internal_links": 1875,
+    "standard_pdf_known_clips": 9,
+    "all_pages_visually_reviewed": true
+  },
+  "lint": {
+    "baseline": 81,
+    "current": 84,
+    "blocking": false,
+    "new_findings": "three deliberate test allocation sentinels"
+  },
+  "preservation": {
+    "original_files": 1016,
+    "changed_original_files": [],
+    "original_head_preserved": true,
+    "original_status_preserved": true,
+    "protected_files": 594,
+    "changed_protected": [],
+    "maintainer_section_preserved": true
+  },
+  "published": false,
+  "submitted": false,
+  "deployed": false,
+  "remaining": [
+    "hosted Windows/Linux/R matrix and minimum-R qualification",
+    "real vendor SDK and partner-client qualification",
+    "maintainer release/submission decisions",
+    "eager TIFF and aggregate/native memory limitations",
+    "concurrent/crash-atomic writer semantics",
+    "custom-reader OS containment",
+    "report-only lint and minor dark-theme ANSI contrast"
+  ]
+}
