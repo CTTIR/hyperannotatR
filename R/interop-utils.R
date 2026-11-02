@@ -451,6 +451,66 @@
   real
 }
 
+# Canonical containment for existing inputs. The caller supplies its own root;
+# this helper never reads or changes another app or control instance's options.
+.input_path_allowed <- function(path, root) {
+  root <- sub("/+$", "", normalizePath(root, winslash = "/", mustWork = TRUE))
+  real <- normalizePath(path, winslash = "/", mustWork = FALSE)
+  identical(real, root) || startsWith(real, paste0(root, "/"))
+}
+
+# Check known image companions before a reader opens metadata or pixels.
+# Readers resolve the primary path before selecting companions. This does
+# not sandbox custom reader code or additional external-reader references.
+.image_path_allowed <- function(path, root) {
+  if (!.input_path_allowed(path, root)) return(FALSE)
+  path <- normalizePath(path, winslash = "/", mustWork = FALSE)
+  companions <- character()
+  if (grepl("\\.(hdr|dat|img|raw|bin|bsq|bil|bip)$", path, ignore.case = TRUE)) {
+    pair <- .envi_paths(path)
+    if (file.exists(pair$hdr)) companions <- unlist(pair, use.names = FALSE)
+    else if (.tivita_is_speccube(path)) companions <- .tivita_sidecar(path)
+  }
+  companions <- companions[!is.na(companions) & file.exists(companions)]
+  all(vapply(companions, .input_path_allowed, logical(1), root = root))
+}
+
+# Importers can read an inventory or mask legend before validating the whole
+# document. Enforce the caller's explicit root first, without global options.
+# Handoffs already prohibit descendant links: reject them before recursively
+# listing the inventory, including links that remain within the root.
+.import_path_preflight <- function(path, root, call = rlang::caller_env()) {
+  root <- normalizePath(root, winslash = "/", mustWork = TRUE)
+  check <- function(path) {
+    if (!.input_path_allowed(path, root)) {
+      .at_abort("An import input is outside the folder this session may read.",
+                class = "io", code = "PATH_OUTSIDE_ROOT", call = call)
+    }
+  }
+  check(path)
+  handoff <- dir.exists(path) || tolower(basename(path)) %in% c("manifest.json", "integrity.json")
+  if (handoff) {
+    queue <- if (dir.exists(path)) path else dirname(path)
+    while (length(queue)) {
+      current <- queue[1]
+      queue <- queue[-1]
+      check(current)
+      entries <- list.files(current, full.names = TRUE, all.files = TRUE, no.. = TRUE)
+      for (entry in entries) {
+        check(entry)
+        if (.is_symlink(entry)) {
+          .at_abort("The handoff contains symbolic links.", code = "INTEGRITY_SYMLINK", call = call)
+        }
+      }
+      queue <- c(queue, entries[dir.exists(entries)])
+    }
+  } else if (tolower(tools::file_ext(path)) %in% c("tif", "tiff", "png", "npy")) {
+    side <- paste0(path, ".legend.json")
+    if (file.exists(side)) check(side)
+  }
+  invisible(NULL)
+}
+
 # Relative path of `path` below `root` using forward slashes.
 .relative_to <- function(path, root) {
   root_n <- normalizePath(root, winslash = "/", mustWork = TRUE)

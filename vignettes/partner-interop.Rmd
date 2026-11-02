@@ -256,14 +256,22 @@ Training itself remains an external, optional workflow.
 A partner process can drive a running app through the loopback service. It is
 off unless started, binds only to `127.0.0.1`, authenticates with a random
 bearer token that expires, rejects browser-origin requests and oversized
-bodies, resolves file references only below its root, and offers no endpoint
-that evaluates R, shell or Python code. Tokens come from the operating system's
+bodies, validates requested file paths against its negotiated root, and offers
+no endpoint that evaluates R, shell or Python code. Tokens come from the operating system's
 random source (`/dev/urandom`) or, where that does not exist (Windows), from the
 optional `openssl` package; without either, the service refuses to start.
 The control root must be a directory. If startup fails after resources have
 been created, the service removes that attempt's listener, expiry timer,
 registry entries and newly created token file. Existing files and unrelated
 listeners remain available.
+
+Before loading an image or import, the service also checks the canonical paths
+of known companion files, including ENVI headers and payloads, TIVITA profile
+sidecars, mask legends and handoff members. Each control instance uses its own
+negotiated root, independently of the app's `app_root` option. These checks do
+not sandbox custom reader code or additional external references, and they do
+not prevent concurrent filesystem changes between validation and reading.
+Shared deployments need separate operating-system access controls.
 
 ```{r control, eval = has_raster && requireNamespace("httpuv", quietly = TRUE)}
 handle <- at_control_start(at_example_session(2), serve = FALSE)
