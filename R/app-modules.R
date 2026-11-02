@@ -66,55 +66,14 @@
 
 .data_exts <- "\\.(dat|hdr|tif|tiff|png|jpe?g|qptiff|cu3|cu3s)$"
 
-# Check known composite inputs before their readers open metadata or pixels.
-# Readers resolve the image path before locating companions, so do the same
-# here. This is a local app input restriction, not a sandbox for custom readers.
 .app_image_allowed <- function(path) {
-  if (!.app_path_allowed(path)) return(FALSE)
-  if (is.null(getOption("hyperannotatR.app_root", default = NULL))) return(TRUE)
-  path <- .app_real_path(path)
-  companions <- character()
-  if (grepl("\\.(hdr|dat|img|raw|bin|bsq|bil|bip)$", path, ignore.case = TRUE)) {
-    pair <- .envi_paths(path)
-    if (file.exists(pair$hdr)) companions <- unlist(pair, use.names = FALSE)
-    else if (.tivita_is_speccube(path)) companions <- .tivita_sidecar(path)
-  }
-  companions <- companions[!is.na(companions) & file.exists(companions)]
-  all(vapply(companions, .app_path_allowed, logical(1)))
+  root <- getOption("hyperannotatR.app_root", default = NULL)
+  is.null(root) || .image_path_allowed(path, root)
 }
 
-# Importers can read an inventory or mask legend before validating the whole
-# document. Check those inputs first. Handoffs already prohibit descendant
-# symlinks; reject them before the verifier's recursive inventory listing.
 .app_import_preflight <- function(path) {
-  if (is.null(getOption("hyperannotatR.app_root", default = NULL))) return(invisible(NULL))
-  check <- function(path) {
-    if (!.app_path_allowed(path)) {
-      .at_abort("An import input is outside the folder this app may read (option hyperannotatR.app_root).",
-                class = "io", code = "PATH_OUTSIDE_ROOT")
-    }
-  }
-  check(path)
-  handoff <- dir.exists(path) || tolower(basename(path)) %in% c("manifest.json", "integrity.json")
-  if (handoff) {
-    queue <- if (dir.exists(path)) path else dirname(path)
-    while (length(queue)) {
-      current <- queue[1]
-      queue <- queue[-1]
-      check(current)
-      entries <- list.files(current, full.names = TRUE, all.files = TRUE, no.. = TRUE)
-      for (entry in entries) {
-        check(entry)
-        if (.is_symlink(entry)) {
-          .at_abort("The handoff contains symbolic links.", code = "INTEGRITY_SYMLINK")
-        }
-      }
-      queue <- c(queue, entries[dir.exists(entries)])
-    }
-  } else if (tolower(tools::file_ext(path)) %in% c("tif", "tiff", "png", "npy")) {
-    side <- paste0(path, ".legend.json")
-    if (file.exists(side)) check(side)
-  }
+  root <- getOption("hyperannotatR.app_root", default = NULL)
+  if (!is.null(root)) .import_path_preflight(path, root)
   invisible(NULL)
 }
 

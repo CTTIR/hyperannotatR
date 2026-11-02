@@ -408,6 +408,15 @@
     .control_fail("VALIDATION_FAILED", "'images' must list image paths relative to the root.")
   }
   paths <- vapply(imgs, function(p) .resolve_under_root(hub$root, as.character(p)), character(1))
+  if (any(!vapply(paths, .image_path_allowed, logical(1), root = hub$root))) {
+    .control_fail("PATH_OUTSIDE_ROOT", "An image or its companion resolves outside the negotiated root.",
+                  class = "io")
+  }
+  handoff <- NULL
+  if (!is.null(payload$handoff)) {
+    handoff <- .resolve_under_root(hub$root, as.character(payload$handoff))
+    .import_path_preflight(handoff, hub$root)
+  }
   labels <- as.character(unlist(payload$labels %||% list()))
   # A loaded session saves into its own directory under the root, so it never
   # overwrites the checkpoint of the session it replaces.
@@ -415,9 +424,8 @@
   out_dir <- file.path(hub$root, session_dir)
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
   sess <- at_session(paths, labels = labels, out_dir = out_dir)
-  if (!is.null(payload$handoff)) {
-    dir <- .resolve_under_root(hub$root, as.character(payload$handoff))
-    rep <- at_import_qupflowr(dir)
+  if (!is.null(handoff)) {
+    rep <- at_import_qupflowr(handoff)
     layers <- rep$objects$layers
     if (length(layers) && all(vapply(layers, inherits, logical(1), "annot_layer"))) {
       p <- .materialize_project(sess, 1L)
@@ -580,6 +588,7 @@
   proj <- .hub_project(hub)
   report <- if (!is.null(payload$payload_ref)) {
     ref <- .resolve_under_root(hub$root, as.character(payload$payload_ref))
+    .import_path_preflight(ref, hub$root)
     if (!is.null(payload$payload_sha256) && !dir.exists(ref) &&
         !identical(.sha256_file(ref), payload$payload_sha256)) {
       .control_fail("CONTENT_DIGEST_MISMATCH", "payload_ref does not match payload_sha256.")
