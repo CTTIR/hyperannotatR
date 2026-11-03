@@ -55,3 +55,13 @@ A31 evidence: [actual QuPath consumer observations](evidence/implementation-2026
 A32 evidence and a qualified optional-writer candidate are in [mask depth probes](evidence/implementation-2026-09-10/mask-pgm-probe.md), with [literal PNG reader observations](evidence/implementation-2026-09-10/png16-reader-baseline.json). The candidate does not constitute an implemented fix.
 
 A33 was discovered on the uncommitted implementation after T07, not on the original audited revision. The [public derivation and NPY observation](evidence/implementation-2026-09-10/metadata-key-observed.json) and [probe](evidence/implementation-2026-09-10/metadata-key-probe.R) confirm that R partial field matching can turn an unsupported near-prefix field into an authoritative reader contract. The diagnostic exits normally while reporting the incorrect verified result; it is not a passing correctness test. Exact key handling must preserve unknown metadata without interpreting it as a supported field.
+
+### A39 — Windows file-link fixtures must not use directory junctions
+
+Native Windows execution of the first hosted follow-up exposed a test-fixture
+construction error: fs creates directory junctions on Windows, including for
+file targets. File and dangling-file fixtures now use base file.symlink on
+Windows; directory fixtures retain junction coverage and fs cleanup. Added
+fixture type/readback checks preserve all existing containment assertions.
+Runtime code and source fixture payloads are unchanged. See the appended
+2026-11-03 hosted evidence record for the failed run and qualification limits.
