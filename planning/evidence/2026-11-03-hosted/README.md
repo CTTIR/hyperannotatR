@@ -111,3 +111,31 @@ portable link contracts and source-retargeting suites. Runtime bytes are unchang
 from the archive already checked locally; the next hosted run checks the
 corrected test package on Windows. An initial local invocation used unavailable
 `devtools`; the actual successful command used `testthat::test_local()`.
+
+## Dangling-link oracle after the corrected native run
+
+At `7c16da7e96040b6f7cdf63362bca8b6c1252cb66`, native Windows passed 5,473
+assertions with zero warnings and 18 existing platform/optional skips. The sole
+failure was the added fixture assertion expecting `file.exists(missing_link)`
+to be false. The actual Windows result was true. The genuine file-link,
+containment, retargeting, and export-refusal checks passed.
+
+The [official R file-manipulation documentation](https://stat.ethz.ch/R-manual/R-devel/library/base/html/files.html)
+explicitly states that `file.exists()` is unreliable for broken symbolic links
+on Windows. The fixture now checks the known ordinary target is absent, retains
+link and non-directory classification, and requires reading through the dangling
+link to fail with its connection warning/error. This strengthens the observable
+fixture contract without treating OS-specific link existence as target
+readability. No runtime or production-refusal assertion changed. Exact native
+confirmation of this test-only correction remains pending its next hosted run.
+
+The failed Windows log is preserved as `hosted-windows-fixture.log` in the local
+follow-up evidence. Previous source-archive validation still covers identical
+runtime files; it is not presented as a fresh check of this final test package.
+
+The four affected app/control/link/source-selection suites pass 130 assertions
+locally, with zero failures or warnings and one Windows-only junction skip.
+The first three suites passed before the receipt exporter encountered a list
+column; their complete RDS result was retained and combined with the separately
+run source-selection suite. No failed test is counted as passing. The exact
+native Windows run is still required for this final oracle.
