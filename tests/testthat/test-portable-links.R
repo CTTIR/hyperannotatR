@@ -5,9 +5,9 @@ test_that("handoff and export link guards work with Windows readlink semantics",
   target <- file.path(root, "target.json")
   writeLines("preserved", target)
   links <- file.path(root, c("linked.json", "dangling.json", "folder"))
-  fs::link_create(target, links[[1L]])
-  fs::link_create(file.path(d, "missing"), links[[2L]])
-  fs::link_create(d, links[[3L]])
+  portable_test_link(target, links[[1L]])
+  portable_test_link(file.path(d, "missing"), links[[2L]])
+  portable_test_link(d, links[[3L]])
   withr::defer(fs::link_delete(links[fs::is_link(links)]))
   local_mocked_bindings(Sys.readlink = function(paths) rep("", length(paths)),
                         .package = "base")
@@ -33,7 +33,7 @@ test_that("ENVI reads use resolved companion metadata and retain retarget checks
   writeLines(c("ENVI", "samples = 2", "lines = 1", "bands = 1",
                "data type = 4", "interleave = bsq", "byte order = 0"), hdr)
   writeBin(c(11, 22), target, size = 4, endian = "little")
-  fs::link_create(target, dat)
+  portable_test_link(target, dat)
   withr::defer(fs::link_delete(dat[fs::is_link(dat)]))
   real_info <- base::file.info
   local_mocked_bindings(file.info = function(..., extra_cols = TRUE) {
@@ -46,6 +46,25 @@ test_that("ENVI reads use resolved companion metadata and retain retarget checks
   expect_identical(as.numeric(at_tile(img)), c(11, 22))
   expect_identical(.source_signature(dat), .source_signature(target))
   expect_identical(at_inspect_source(img)$status, "available")
+})
+
+test_that("link fixtures distinguish files, dangling files and directories", {
+  d <- normalizePath(withr::local_tempdir(), winslash = "/")
+  target <- file.path(d, "target.txt")
+  writeLines("real file payload", target)
+  file_link <- file.path(d, "file-link")
+  missing_link <- file.path(d, "missing-link")
+  dir_link <- file.path(d, "dir-link")
+  portable_test_link(target, file_link)
+  portable_test_link(file.path(d, "absent.txt"), missing_link)
+  portable_test_link(d, dir_link)
+  expect_true(all(.is_symlink(c(file_link, missing_link, dir_link))))
+  expect_false(dir.exists(file_link))
+  expect_identical(readLines(file_link), "real file payload")
+  expect_identical(normalizePath(file_link), normalizePath(target))
+  expect_false(file.exists(missing_link))
+  expect_false(dir.exists(missing_link))
+  expect_true(dir.exists(dir_link))
 })
 
 test_that("Windows junctions cannot become export descendants", {

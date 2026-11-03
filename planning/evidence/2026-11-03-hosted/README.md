@@ -80,3 +80,34 @@ The first-use path remains `pak::pak("CTTIR/hyperannotatR")`, followed by
 readers retain their documented prerequisites. No release or submission was
 performed. Next publication step is the authorized normal main push and hosted
 matrix verification.
+
+## Windows fixture correction after hosted execution
+
+The published `ec10690321bca5eb416b32f87a9c1e74c648bdd3` passed the five
+Linux/macOS R-check rows, including oldrel-3, but the native Windows row failed
+with 28 failures and 17 warnings. The new fixture helper had used
+`fs::link_create()` for every target. Its Windows implementation creates a
+directory junction even when the target is a file, producing invalid-directory
+errors instead of exercising a genuine file symlink. The exact hosted log is
+retained as `hosted-failed.log` in the local follow-up evidence.
+
+The helper now uses base `file.symlink()` for Windows file and dangling-file
+targets, retains directory junctions for directory targets, and continues to
+remove links explicitly before recursive fixture cleanup. Creation failure is
+an error, not a skipped security assertion. Seven additional assertions verify
+link classification, readable file bytes, resolved identity, dangling behavior
+and directory behavior. Existing containment, retargeting and error-code
+expectations are unchanged. No runtime source or fixture source data changed.
+
+This behavior was checked against the [fs implementation](https://github.com/r-lib/fs/blob/v1.6.6/src/link.cc)
+and [R canonical-path documentation](https://stat.ethz.ch/R-manual/R-devel/library/base/html/normalizePath.html).
+An independent review of the two test-file changes found no weakened guard.
+Native Windows qualification remains pending the corrected exact-head run.
+
+All four suites using the shared link helper pass locally after correction:
+128 assertions, zero failures or warnings, and one genuine Windows-only junction
+skip on macOS. These are the app path boundaries, control import boundaries,
+portable link contracts and source-retargeting suites. Runtime bytes are unchanged
+from the archive already checked locally; the next hosted run checks the
+corrected test package on Windows. An initial local invocation used unavailable
+`devtools`; the actual successful command used `testthat::test_local()`.

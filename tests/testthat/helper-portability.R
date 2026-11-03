@@ -1,7 +1,14 @@
 # Remove genuine links before withr's recursive temporary-directory cleanup.
 # R's Windows unlink can reject a reparse point that it successfully created.
 portable_test_link <- function(from, to, envir = parent.frame()) {
-  fs::link_create(normalizePath(from, winslash = "/", mustWork = TRUE), to)
+  from <- normalizePath(from, winslash = "/", mustWork = file.exists(from))
+  # fs uses directory junctions on Windows, including for file targets.
+  # Base R creates genuine file symlinks; keep fs for directory junctions.
+  if (.Platform$OS.type == "windows" && !dir.exists(from)) {
+    if (!isTRUE(file.symlink(from, to))) stop("Cannot create the required file symlink fixture.")
+  } else {
+    fs::link_create(from, to)
+  }
   withr::defer(fs::link_delete(to[fs::is_link(to)]), envir = envir)
   invisible(TRUE)
 }
