@@ -1,5 +1,108 @@
 # Changelog
 
+## hyperannotatR 0.3.1 (unreleased)
+
+- TIVITA source descriptors include the selected profile sidecar.
+  Changing, removing or superseding that profile, or introducing a
+  preferred ENVI header or payload, now refuses stale pixel access.
+  Older projects whose decoding provenance cannot be verified require
+  [`at_relink_source()`](https://cttir.github.io/hyperannotatR/reference/at_relink_source.md);
+  their annotations remain available.
+
+- Repeated reads of a closed image reuse its cache and update its read
+  counters correctly. Source freshness is checked before cached pixels
+  are returned.
+
+- Band operations reject fractional or non-finite band indices.
+  Raw-value conversion requires finite numeric dark and white reference
+  vectors; factors and infinite references no longer produce misleading
+  values.
+
+- Partner commits retain in-memory image pixels and stage the project
+  and receipt together. Ordinary publication failures roll back both
+  files. Replays check the current saved revision and canonical
+  destination; conflicting state is refused. Publication is not
+  crash-atomic, and callers must serialize writes to one destination.
+
+- Failed control-service startup cleans up its own listener, timer,
+  token and registration. Independent control instances can use the same
+  client commit key without colliding.
+
+- Restricted app folder loading checks canonical image and known
+  companion paths before opening them. External symlinks are refused and
+  directory cycles no longer duplicate queue entries. Rejected inputs
+  preserve the existing queue and annotations.
+
+- Restricted staged imports check handoff entries and mask legend
+  sidecars before parsing them, refusing external companion links
+  without reading their contents.
+
+- Control-service staging and session loading apply the same
+  explicit-root checks to known image and import companions. Each
+  control instance uses its negotiated root independently of the app’s
+  folder option; rejected requests preserve the current session and
+  annotations.
+
+- Masks validate dimensions before allocation and apply a conservative
+  32-byte-per-pixel working-array estimate to
+  `hyperannotatR.max_read_bytes` (default 1 GiB). This is a per-grid
+  check, not an RSS or aggregate mask-stack limit. Trusted callers may
+  raise it.
+
+- Candidate citation metadata no longer claims an unregistered Zenodo
+  DOI or a release date. Test development uses testthat 3.3.2 or newer.
+
+- Core examples and export tests use the bundled ENVI cube without
+  optional PNG/TIFF readers. Reader-specific prerequisites and
+  unavailable-reader diagnostics are checked explicitly. CI coverage now
+  has an 85% floor.
+
+- Standardize the named v5 package logo across README, documentation
+  pages and available application headers, with matching light and dark
+  artwork.
+
+- The calibration panel now accepts a global reference length in mm and
+  an image-specific override for each reference label. **Use global
+  default** removes an override. Global changes preserve image
+  overrides, reach existing and new queue images, and survive saving and
+  reopening. Estimated scales show their source; blank, non-finite and
+  non-positive entries are rejected.
+
+- Calibration layers can store per-label assumed lengths with
+  `reference_assumptions_mm = list(label = 2)`. From three valid
+  repeats, the panel calculates an explicitly estimated mm/pixel scale
+  for that image. Assumptions persist with the layer; geometry and image
+  calibration stay in their original units. The estimate updates when
+  measurements change.
+
+- The annotation tools are grouped into Navigate, Draw & mark, Measure &
+  detect, and Edit & reuse. Every button has a local icon, a readable
+  English name and a tooltip. Tool settings remain contextual, keyboard
+  help is collapsible, and updated styles bypass older browser caches.
+
+- The Distance tool records a straight line from two clicked endpoints.
+  Layers with `role = "calibration_reference"` select this tool by
+  default and show per-label repeated lengths in image pixels. The mean
+  and sample standard deviation appear from three valid measurements;
+  five are recommended. Saved endpoints survive resume, undo and redo.
+  Reference layers are not copied between images and do not assign a
+  physical scale.
+
+- Canvas script URLs now change with their contents, preventing browsers
+  from retaining older drawing code after a local app update at the same
+  version.
+
+- The annotation app offers three point marker display sizes and three
+  fixed round-area diameters (5, 10 and 20 image pixels), plus
+  drag-to-size circles. Point sizes persist per ROI without changing
+  their single-pixel masks.
+
+- A reflection wand proposes the connected bright region around a
+  clicked pixel. Tight, normal and broad extent settings are available.
+  Proposals require explicit review and acceptance, preserve holes and
+  pixel alignment, and are cleared when the image, annotation target or
+  view changes.
+
 ## hyperannotatR 0.3.0
 
 - Renamed the R package to hyperannotatR and focused its scope on HSI.

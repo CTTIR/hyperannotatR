@@ -77,7 +77,7 @@ Other interop:
 ``` r
 m <- at_interop_manifest(at_example_project())
 m$annotations$annotation_revision
-#> [1] "sha256:10f56448a98dc069007b9366fb6c4eaf3777abea004593e3f5b7d0fb6fd2d052"
+#> [1] "sha256:515598f2a13941c7e2f24798faac9c4d141a1fb4352db40cad7d3e707fee4141"
 m$images[[1]]$image_id
 #> [1] "sha256:3fa00078c93c3a7d"
 ```

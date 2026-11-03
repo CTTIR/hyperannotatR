@@ -17,7 +17,8 @@
 <link href="../deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Masks">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Masks">
 <meta name="theme-color" content="#1565c0">
 <!-- Package browser icons -->
 <link rel="icon" type="image/x-icon" href="../favicon.ico?v=1aa2ff4522c2">
@@ -36,7 +37,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -137,6 +138,31 @@ value. Use it for semantic segmentation, where you care about the class
 <code>mask_type</code> and <code>mask_metadata</code> attributes; the
 last records how to read the values (below). Read the legend back with
 <code><a href="../reference/at_mask_legend.html">at_mask_legend()</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="grid-size-and-memory-budget">Grid size and memory budget<a class="anchor" aria-label="anchor" href="#grid-size-and-memory-budget"></a>
+</h2>
+<p><code><a href="../reference/at_mask.html">at_mask()</a></code> checks dimensions and the full grid before
+allocating raster arrays, including empty masks. Dimensions must be
+positive and finite; fractional extents round up, so
+<code>dims = c(3.1, 2.1)</code> produces four columns and three rows. A
+grid beyond supported integer indexing fails with
+<code>MASK_TOO_LARGE</code> before rasterisation.</p>
+<p>The existing <code>hyperannotatR.max_read_bytes</code> option also
+limits mask work. The estimate is <code>32 * width * height</code> bytes
+for output, coverage arrays and working copies. Its default of
+<code>1024^3</code> bytes (1 GiB) permits 33,554,432 pixels per grid;
+larger requests fail with <code>READ_BUDGET_EXCEEDED</code>. The error
+includes <code>requested_bytes</code> and <code>limit_bytes</code> in
+its <code>details</code>. For a trusted larger mask, set a suitable byte
+limit before calling <code><a href="../reference/at_mask.html">at_mask()</a></code>, or choose a coarser pyramid
+level when available.</p>
+<p>The estimate is a preflight check, not a guarantee about total
+process memory (RSS). It excludes geometry and native-library overhead.
+<code><a href="../reference/at_mask_stack.html">at_mask_stack()</a></code> retains per-layer masks and builds a
+combined stack, so this per-grid check does not bound its aggregate
+memory use. Account for the number of layers and other live arrays when
+choosing a limit.</p>
 </div>
 <div class="section level2">
 <h2 id="encoding-metadata-and-alignment">Encoding metadata and alignment<a class="anchor" aria-label="anchor" href="#encoding-metadata-and-alignment"></a>
@@ -432,7 +458,7 @@ it:</p>
 <span><span class="co">#&gt;         "schema_version": 1,</span></span>
 <span><span class="co">#&gt;         "signature": {</span></span>
 <span><span class="co">#&gt;           "size": 526756,</span></span>
-<span><span class="co">#&gt;           "mtime": 1793287498</span></span>
+<span><span class="co">#&gt;           "mtime": 1793697034</span></span>
 <span><span class="co">#&gt;         },</span></span>
 <span><span class="co">#&gt;         "files": null,</span></span>
 <span><span class="co">#&gt;         "path": "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png",</span></span>
@@ -446,7 +472,7 @@ it:</p>
 <span><span class="co">#&gt;             "attributes": null</span></span>
 <span><span class="co">#&gt;           }</span></span>
 <span><span class="co">#&gt;         },</span></span>
-<span><span class="co">#&gt;         "options_identity": "580a0000000200040601000203000000001300000000",</span></span>
+<span><span class="co">#&gt;         "options_identity": "580a0000000200040602000203000000001300000000",</span></span>
 <span><span class="co">#&gt;         "reader_contract": null,</span></span>
 <span><span class="co">#&gt;         "options_encoding": "typed-json-v2"</span></span>
 <span><span class="co">#&gt;       }</span></span>
@@ -467,8 +493,8 @@ it:</p>
 <span><span class="co">#&gt;     ]</span></span>
 <span><span class="co">#&gt;   },</span></span>
 <span><span class="co">#&gt;   "storage": null,</span></span>
-<span><span class="co">#&gt;   "annotatR_version": "0.3.0",</span></span>
-<span><span class="co">#&gt;   "created": "2026-10-29T15:26:47+0000",</span></span>
+<span><span class="co">#&gt;   "annotatR_version": "0.3.1",</span></span>
+<span><span class="co">#&gt;   "created": "2026-11-03T09:12:33+0000",</span></span>
 <span><span class="co">#&gt;   "mask_type": "multiclass",</span></span>
 <span><span class="co">#&gt;   "level": 0,</span></span>
 <span><span class="co">#&gt;   "dims": [512, 512],</span></span>

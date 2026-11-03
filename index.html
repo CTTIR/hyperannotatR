@@ -17,7 +17,8 @@
 <link href="deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Region-of-Interest Annotation for Hyperspectral Data">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="Region-of-Interest Annotation for Hyperspectral Data">
 <meta name="description" content="Annotate multiple layers of regions of interest in hyperspectral data cubes and their associated display rasters. Annotations are stored as validated simple-feature geometries in image pixel coordinates with explicit pyramid-level transforms, and can be rasterised to binary, labelled, or multi-class integer masks for downstream segmentation and classification workflows. A batch annotation application built on shiny supports resumable sessions across image queues, live mask preview, and export to GeoJSON, QuPath, and TIFF formats. A versioned partner contract exchanges hash-inventoried handoff directories, deep-learning training datasets and typed commands over an optional local control service.">
 <meta property="og:description" content="Annotate multiple layers of regions of interest in hyperspectral data cubes and their associated display rasters. Annotations are stored as validated simple-feature geometries in image pixel coordinates with explicit pyramid-level transforms, and can be rasterised to binary, labelled, or multi-class integer masks for downstream segmentation and classification workflows. A batch annotation application built on shiny supports resumable sessions across image queues, live mask preview, and export to GeoJSON, QuPath, and TIFF formats. A versioned partner contract exchanges hash-inventoried handoff directories, deep-learning training datasets and typed commands over an optional local control service.">
 <meta property="og:image" content="https://cttir.github.io/hyperannotatR/logo.svg">
@@ -39,7 +40,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="index.html"><img src="logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="reference/figures/logo-dark.svg">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,9 +85,13 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
+<p>Use R 4.1 or newer; this candidate is tested locally with R 4.6.1 on macOS. Source installs need GDAL, GEOS, PROJ and udunits for the spatial packages. The PNG examples need ImageMagick through <code>magick</code>, and TIFF export needs <code>tiff</code>. Install the app dependencies explicitly when using the interactive workflow:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
-<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CTTIR/hyperannotatR"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"pak"</span><span class="op">)</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"CTTIR/hyperannotatR"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"magick"</span>, <span class="st">"tiff"</span>, <span class="st">"shiny"</span>, <span class="st">"bslib"</span>, <span class="st">"htmlwidgets"</span>,</span>
+<span>                   <span class="st">"htmltools"</span>, <span class="st">"shinyjs"</span>, <span class="st">"zip"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The GitHub command installs the published branch. To test a locally prepared source package, use <code>R CMD INSTALL hyperannotatR_0.3.1.tar.gz</code> after installing its dependencies. OME-TIFF additionally needs Java and the Bioconductor package <code>RBioFormats</code>; see <code><a href="articles/images-and-backends.html">vignette("images-and-backends")</a></code> for backend requirements.</p>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
@@ -182,13 +187,15 @@
 </tr>
 </tbody>
 </table>
-<p>A TIFF is treated as spectral only when wavelengths are declared. <code><a href="reference/at_bands.html">at_bands()</a></code>, <code><a href="reference/at_hsi_meta.html">at_hsi_meta()</a></code> and <code><a href="reference/at_read_stats.html">at_read_stats()</a></code> report band wavelengths and gaps, value units, calibration and transform digests, and the bytes actually read. The ENVI, TIVITA and OME readers read windows from the file; the raster, TIFF and Cubert backends decode the whole image when it is opened, so it must fit in memory. <code><a href="reference/at_image_capabilities.html">at_image_capabilities()</a></code> reports which applies to an image.</p>
+<p>A TIFF is treated as spectral only when wavelengths are declared. <code><a href="reference/at_bands.html">at_bands()</a></code>, <code><a href="reference/at_hsi_meta.html">at_hsi_meta()</a></code> and <code><a href="reference/at_read_stats.html">at_read_stats()</a></code> report band wavelengths and gaps, value units, calibration and transform digests, and the bytes actually read. The ENVI, TIVITA and OME readers read windows from the file; the raster, TIFF and Cubert backends decode the whole image when it is opened, so it must fit in memory. <code><a href="reference/at_image_capabilities.html">at_image_capabilities()</a></code> reports which applies to an image. <code>hyperannotatR.max_read_bytes</code> limits window/NPY array allocations and mask grids; it does not bound eager TIFF decoding or total process memory.</p>
+<p>For a bundled spectral example, <code>at_example_image("cube")</code> opens a 40-band ENVI cube without a vendor SDK. Saved file-backed projects retain references to their source files. Keep the header, payload and any TIVITA profile sidecar together; changed or ambiguous inputs need deliberate <code><a href="reference/at_relink_source.html">at_relink_source()</a></code> revalidation. File signatures use size and modification time, not content hashes.</p>
 <p>The <code>raster</code> backend converts samples to a 0–255 display convention and does not preserve original high-bit-depth intensities. The quantitative TIFF, OME and ENVI readers keep raw samples; format and optional-reader limits are documented in <code><a href="articles/images-and-backends.html">vignette("images-and-backends")</a></code>. Extraction never applies plot contrast stretches. It reports selected, finite and nonfinite counts, with an explicit <code>nonfinite</code> policy and declared spectral units.</p>
 </div>
 <div class="section level2">
 <h2 id="the-mask-workflow">The mask workflow<a class="anchor" aria-label="anchor" href="#the-mask-workflow"></a>
 </h2>
 <p>A <strong>mask</strong> is the central output artifact: a binary, labelled, or multi-class integer raster derived from your annotations, exportable at any pyramid level and self-describing via a sidecar JSON legend. Masks feed segmentation, classification, and spectral-extraction pipelines in Python, ImageJ, QuPath, or R. See <code><a href="articles/masks.html">vignette("masks")</a></code> for the pixel-coverage contract and downstream consumption.</p>
+<p>Mask allocation checks use a conservative 32-byte-per-pixel estimate against the shared byte budget. Aggregate multi-layer stacks and native geometry allocations are not covered by that per-grid estimate.</p>
 </div>
 <div class="section level2">
 <h2 id="the-annotation-app">The annotation app<a class="anchor" aria-label="anchor" href="#the-annotation-app"></a>
@@ -197,6 +204,7 @@
 <code class="sourceCode R"><span><span class="co"># Launch the batch annotation app over a queue of images:</span></span>
 <span><span class="fu"><a href="reference/at_annotate.html">at_annotate</a></span><span class="op">(</span><span class="fu"><a href="reference/at_example_session.html">at_example_session</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Iterate through an image queue, draw multi-layer ROIs, watch the mask render live, and export everything in one pass — with resumable sessions and keyboard-first throughput. <code><a href="reference/at_app.html">at_app()</a></code> returns the same app as a <code>shiny.appobj</code> for embedding and testing.</p>
+<p>Reference layers can collect repeated pixel lengths and record assumed physical lengths, with global defaults and image-specific overrides. Estimated mm/pixel values remain explicitly provisional; they do not change geometry coordinates or establish measured physical calibration. See <code><a href="articles/shiny-workflow.html">vignette("shiny-workflow")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="working-with-qupflowr">Working with qupflowR<a class="anchor" aria-label="anchor" href="#working-with-qupflowr"></a>

@@ -5,11 +5,12 @@ logo](figures/logo-dark.svg)
 
 Annotating one image is a job for
 [`at_project()`](https://cttir.github.io/hyperannotatR/reference/at_project.md)
-and the ROI constructors. Annotating a *queue* of images — a plate of
-serial sections, a batch of slides, a folder of cubes — is what the
-annotation app is for. It wraps a Shiny app and a self-contained HTML5
-canvas around a resumable **session**, so you can work through many
-images without losing your place, your labels, or your unsaved edits.
+and the ROI constructors. Annotating a *queue* of images — repeated
+acquisitions, a time series, a folder of hyperspectral cubes — is what
+the annotation app is for. It wraps a Shiny app and a self-contained
+HTML5 canvas around a resumable **session**, so you can work through
+many images while retaining your place, labels and edits. Save a
+checkpoint to preserve them after the app closes.
 [`at_app()`](https://cttir.github.io/hyperannotatR/reference/at_app.md)
 builds the app as an ordinary `shiny.appobj` from explicit arguments
 (for embedding or testing), and
@@ -32,7 +33,7 @@ sess <- at_example_session(3)
 sess
 #> <annot_session>
 #> images: 3  |  complete: 0  |  cursor: 1
-#> out_dir: /tmp/RtmpN1va2m/hyperannotatR-example-session-32df3dc2e611  |  autosave: TRUE
+#> out_dir: /tmp/RtmpiJlKSC/hyperannotatR-example-session-339f6c9f9f65  |  autosave: TRUE
 ```
 
 Every image starts with status `"pending"`, the cursor sits on the first
@@ -87,7 +88,8 @@ image, a vector of paths, a directory, or `NULL` to open the bundled
 example.
 
 To embed the app, or to exercise it in tests without a browser, build
-the app object instead. Nothing is passed through global options:
+the app object instead. The session and read-only setting are explicit
+arguments:
 
 ``` r
 
@@ -110,6 +112,64 @@ unit, calibration state, plane and how many bytes have been read. The
 next to ROI and layer spectra, and **Download region** exports the raw
 values of a selected ROI, the current view or custom bounds as an ENVI
 cube with provenance.
+
+## Reference lengths and estimated spatial scale
+
+A reference layer records repeated measurements of a visible dimension
+in each image. Create it with `role = "calibration_reference"` and a
+label for each dimension you intend to measure. An optional
+`reference_assumptions_mm` list gives an initial assumed length in
+millimetres for each label:
+
+``` r
+
+reference <- at_layer(
+  "Reference", labels = "reference dimension",
+  role = "calibration_reference",
+  # Illustrative assumption only: replace with the length of your reference.
+  reference_assumptions_mm = list("reference dimension" = 2)
+)
+reference_session <- at_session(
+  paths, layers = list(regions, reference),
+  out_dir = tempfile("reference-session-")
+)
+```
+
+Select the reference layer and label on the Annotate page. The app
+selects **Distance** automatically: click two distinct endpoints inside
+the image to record one measurement. Repeat the same reference dimension
+at least three times; five measurements are recommended. The panel then
+shows the mean and sample standard deviation in level-0 pixels.
+**Measurements (px)** lists the included lengths. Copied ROIs, area
+shapes and invalid segments are excluded, so copying a measurement to
+another image does not count as a new repeat. Undo and redo restore the
+saved reference geometry.
+
+The reference controls apply to the selected layer and label:
+
+- **Global reference length (mm)** and **Apply globally** set the
+  default for this session. Images with their own overrides keep them.
+- **Image reference length (mm)** and **Apply to image** set an override
+  for the current image.
+- **Use global default** removes the current image’s override, so it
+  follows the session default again.
+
+Lengths must be finite and greater than zero. The panel identifies
+whether the effective value comes from the global default or an image
+override. Successful checkpoints preserve the reference endpoints,
+session defaults and image overrides; with autosave disabled, save
+before closing the app. Global defaults are also copied into
+materialised projects when they are saved.
+
+Once three valid measurements and an assumed length are available, the
+displayed estimate is
+`assumed length in mm / mean measured length in pixels`. This assumes
+square pixels and the stated physical reference size. The app labels
+that size **unverified**: drawing repeats does not establish that the
+assumption is true. It does not assign a physical pixel size to the
+image, change its stored coordinate units, or convert masks and exported
+geometry to millimetres. This spatial estimate is separate from
+dark/white calibration of spectral values.
 
 ## Staged changes and status
 
@@ -142,8 +202,8 @@ table below is the one the app shows when you press `?`:
 | n / p | next / previous image |
 | N | next pending image |
 | 1-9 | select label |
-| q w e r t y | tool: pan/rect/polygon/freehand/circle/point |
-| d | delete last ROI |
+| q w e r t y | Pan / Rectangle / Polygon / Freehand / Round area / Point |
+| d | delete last region |
 | Ctrl+Z / Ctrl+Shift+Z | undo / redo |
 | Shift+Enter | save, mark complete & advance |
 | Shift+V | paste previous image’s ROIs |
@@ -220,10 +280,32 @@ back. That recovery copy lives only in the running app: restore and save
 it before closing. An app attached to a control service refuses folder
 loads; the controller loads sessions instead.
 
-The Data page reads folder and handoff paths on the machine running R:
-the app is meant for local use. For any shared deployment, set
-`options(hyperannotatR.app_root = "/allowed/folder")` so the app refuses
-paths outside that folder.
+### Folder restrictions
+
+The Data page reads folder and handoff paths on the machine running R.
+For local use, `options(hyperannotatR.app_root = "/allowed/folder")`
+restricts these inputs to a chosen folder. Paths are compared after
+resolving symbolic links. Folder discovery checks each directory before
+walking it and each candidate image before loading it; links resolving
+outside the allowed root are skipped. Known ENVI header/payload pairs
+and TIVITA profile sidecars are checked too. In-root links remain
+usable, and linked directory cycles are visited only once. A message
+explains skipped links; if no allowed image remains, the existing queue
+and its unsaved edits are retained.
+
+Staged imports check handoff inventories and mask legend sidecars before
+reading them. Handoffs prohibit descendant symbolic links, including
+in-root links; the app refuses these before recursively listing the
+handoff. A refused import leaves existing annotations unchanged, and a
+valid handoff can still be staged afterward.
+
+This option governs Data-page inputs, not an operating-system sandbox or
+every path accepted by the R API. It does not contain custom reader
+code, qualify additional file references opened internally by external
+readers, or prevent another process from replacing files between a path
+check and a read. Keep the app local and use operating-system
+permissions and trusted readers when access must be restricted. A shared
+deployment needs its own access controls.
 
 ``` r
 
@@ -235,7 +317,7 @@ recovered <- at_resume(file.path(sess$out_dir, "_session.rds"))
 recovered
 #> <annot_session>
 #> images: 3  |  complete: 1  |  cursor: 2
-#> out_dir: /tmp/RtmpN1va2m/hyperannotatR-example-session-32df3dc2e611  |  autosave: TRUE
+#> out_dir: /tmp/RtmpiJlKSC/hyperannotatR-example-session-339f6c9f9f65  |  autosave: TRUE
 ```
 
 The cursor, statuses, materialised projects, and templates all come back
@@ -261,9 +343,23 @@ Relinking explicitly accepts a replacement source after checking its
 size, pyramid levels, bands and wavelengths. For readers with
 non-default options, pass `options = list(...)` when an old file does
 not record them. The saved source signature compares file size and
-modification time (for ENVI cubes, of both the header and the data
-file): it detects many replacements but cannot prove identical content.
-Changed source metadata needs explicit relinking.
+modification time: it detects many replacements but cannot prove
+identical content. ENVI provenance includes both header and payload;
+TIVITA SpecCube provenance includes the selected profile sidecar when
+used. Discovery is checked as well, so a newly preferred companion or a
+redirected link cannot silently replace the recorded decoding input.
+These companion checks also run before a cached ENVI or TIVITA tile is
+reused.
+
+Missing or changed inputs, and legacy sources whose decoding metadata
+cannot be verified, leave the annotations available but prevent pixel
+reads. Use
+[`at_inspect_source()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_source.md)
+to investigate, restore the original files where appropriate, or
+explicitly revalidate with
+[`at_relink_source()`](https://cttir.github.io/hyperannotatR/reference/at_relink_source.md).
+Do not accept a replacement solely to clear the error: its identity and
+scientific suitability still need checking.
 
 Queue entries saved without identifiers are migrated by their recorded
 row position; existing valid identifiers and geometry are kept. Older
@@ -302,9 +398,9 @@ at_session_status(sess)
 #> # A tibble: 3 × 9
 #>     idx entry_id              export_stem path  name  status project_path n_rois
 #>   <int> <chr>                 <chr>       <chr> <chr> <chr>  <chr>         <int>
-#> 1     1 entry_at_32df270acc5… entry_at_3… /tmp… imag… compl… NA                0
-#> 2     2 entry_at_32df270acc5… entry_at_3… /tmp… imag… pendi… NA                0
-#> 3     3 entry_at_32df270acc5… entry_at_3… /tmp… imag… pendi… NA                0
+#> 1     1 entry_at_339f4d64b4e… entry_at_3… /tmp… imag… compl… NA                0
+#> 2     2 entry_at_339f4d64b4e… entry_at_3… /tmp… imag… pendi… NA                0
+#> 3     3 entry_at_339f4d64b4e… entry_at_3… /tmp… imag… pendi… NA                0
 #> # ℹ 1 more variable: modified <dttm>
 
 at_manifest(sess)

@@ -17,7 +17,8 @@
 <link href="../deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Images and backends">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Images and backends">
 <meta name="theme-color" content="#1565c0">
 <!-- Package browser icons -->
 <link rel="icon" type="image/x-icon" href="../favicon.ico?v=1aa2ff4522c2">
@@ -36,7 +37,7 @@
     <!-- Standard logo aliases contain the named v5 light and dark hexes. -->
     <a class="navbar-brand me-2" href="../index.html"><img src="../logo.svg" alt="" class="themakr-navbar-logo" data-cttir-dark-src="../reference/figures/logo-dark.svg">hyperannotatR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -289,19 +290,13 @@ value cannot be an integer mask code. Signed and unsigned 64-bit inputs
 are accepted only when every complete value fits this mask range. A NPY
 reader consumes the declared array and permits subsequent
 bytes/arrays.</p>
-<p>The default <code>hyperannotatR.max_read_bytes</code> budget is 1
-GiB. For windowed readers it limits the requested decoded double array,
-before allocation; a valid large source is not rejected because its full
-cube exceeds that budget. Binary file sizes/offsets must fit exact
-double integer arithmetic (at most 2^53-1 bytes), and each declared
-dimension and each returned window’s element count must fit R’s integer
-indexing limit. NPY remains eager and checks both payload and decoded
-bytes. These are array limits, not RSS guarantees: temporary buffers and
-the cache need additional memory. ENVI headers have a fixed 1 MiB limit;
-NPY headers have a separate 1 MiB default configurable with
-<code>hyperannotatR.max_npy_header_bytes</code>. For trusted larger
-arrays, set a positive finite <code>hyperannotatR.max_read_bytes</code>
-value.</p>
+<p>Binary file sizes/offsets must fit exact double integer arithmetic
+(at most 2^53-1 bytes), and each declared dimension and each returned
+window’s element count must fit R’s integer indexing limit. ENVI headers
+have a fixed 1 MiB limit; NPY headers have a separate 1 MiB default
+configurable with <code>hyperannotatR.max_npy_header_bytes</code>. Array
+budgets and their limits are described under <strong>Memory
+discipline</strong> below.</p>
 <p>The <code>tiff</code> backend preserves raw grayscale uint8/uint16,
 signed int16 and float32 samples, and RGB uint16 samples. Sample type
 and photometric metadata determine decoding; integer display
@@ -330,6 +325,22 @@ single finite integer plane.</p>
 <div class="section level2">
 <h2 id="reopening-saved-reader-contracts">Reopening saved reader contracts<a class="anchor" aria-label="anchor" href="#reopening-saved-reader-contracts"></a>
 </h2>
+<p>ENVI source descriptors record the canonical paths, byte sizes and
+modification times of both the header and payload, regardless of which
+path was opened. TIVITA SpecCubes also record the selected
+<code>.tivita.json</code> profile when a sidecar was used. Source checks
+verify both the recorded files and current discovery: a new
+higher-priority header, payload or profile, or a retargeted companion
+symlink, cannot silently select different decoding inputs. A newly
+introduced sidecar invalidates a cube previously opened with the default
+profile. Explicit <code><a href="../reference/at_tivita_profile.html">at_tivita_profile()</a></code> arguments continue to
+ignore incidental sidecars.</p>
+<p><code><a href="../reference/at_inspect_source.html">at_inspect_source()</a></code> reports changed, missing or
+unresolved inputs without reading pixels. File-backed tile requests
+check the source before consulting the cache and again before caching a
+newly read result. These size/mtime checks detect ordinary replacements,
+not edits that preserve both values. Concurrent file writers are
+unsupported.</p>
 <p>Saved TIFF/OME images record a stable semantic contract
 (<code>axes = "yxb"</code>, <code>samples = "raw-scalar-v1"</code>) in
 image metadata and durable source descriptors. This describes pixel
@@ -340,16 +351,25 @@ being certified as source-aligned. Custom backends without this marker
 retain their existing descriptor comparison semantics.</p>
 <p>On reopen, dimensions, levels, band count, dtype, channel names,
 wavelengths, units, pixel calibration and the reader contract must
-agree. A stale or ambiguous lightweight project still loads its
-annotations and IDs, but pixel access reports the mismatch. Inspect it
-and explicitly revalidate with
-<code>at_relink_source(project, project$image$source)</code>. Relinking
-refreshes reader metadata and retains its existing geometry/wavelength
-compatibility guard; an old transposed OME geometry or changed
-wavelength declaration is not guessed or automatically registered.
-Caller-modified calibration also requires explicit review if it differs
-from the reopened reader. Full legacy snapshots whose in-memory pixel
-handles remain available retain those original pixels.</p>
+agree. TIVITA also checks the effective profile digest and value unit. A
+stale or ambiguous lightweight project still loads its annotations and
+IDs, but pixel access reports the mismatch. Historical ENVI descriptors
+without both companion files, and TIVITA sidecar descriptors without the
+recorded profile dependency, remain unverified. Today’s files are never
+used to backfill historical provenance automatically.</p>
+<p>After checking that the cube, profile and reader options are the
+intended ones, inspect and explicitly revalidate the source:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/at_inspect_source.html">at_inspect_source</a></span><span class="op">(</span><span class="va">project</span><span class="op">)</span></span>
+<span><span class="va">project</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_relink_source.html">at_relink_source</a></span><span class="op">(</span><span class="va">project</span>, <span class="va">project</span><span class="op">$</span><span class="va">image</span><span class="op">$</span><span class="va">source</span><span class="op">)</span></span></code></pre></div>
+<p>Relinking refreshes reader metadata and retains its
+geometry/wavelength compatibility guard; an old transposed OME geometry
+or changed wavelength declaration is not guessed or automatically
+registered. Caller-modified calibration also requires explicit review if
+it differs from the reopened reader. Full legacy snapshots whose
+in-memory pixel handles remain available retain those original pixels,
+including when saved again. Releasing such a snapshot may make its
+pixels unavailable if the source cannot be revalidated.</p>
 </div>
 <div class="section level2">
 <h2 id="the-universal-tile-accessor">The universal tile accessor<a class="anchor" aria-label="anchor" href="#the-universal-tile-accessor"></a>
@@ -359,7 +379,7 @@ handles remain available retain those original pixels.</p>
 <code>[y, x, band]</code> numeric array — even for a single band. You
 choose the pyramid level, an optional pixel window, and an optional
 subset of bands.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tile</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_tile.html">at_tile</a></span><span class="op">(</span><span class="va">mx</span>, level <span class="op">=</span> <span class="fl">0</span>, xrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">64</span><span class="op">)</span>, yrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">64</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">tile</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 64 64  4</span></span></code></pre></div>
@@ -368,7 +388,7 @@ Eager backends have already read the underlying image; the
 window-capable backends read only the requested runs or subsets. Band
 selections are finite whole indices, keep their order and may repeat. To
 request a thumbnail, read the coarsest level:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">overview</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_tile.html">at_tile</a></span><span class="op">(</span><span class="va">mx</span>, level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">overview</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 128 128   4</span></span>
@@ -378,7 +398,7 @@ request a thumbnail, read the coarsest level:</p>
 <p>Spectral cubes are handled by the very same accessor; their band
 metadata simply carries wavelengths, which you can read back with the
 image accessors.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/at_is_spectral.html">at_is_spectral</a></span><span class="op">(</span><span class="va">cu</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span>
@@ -391,6 +411,29 @@ image accessors.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 Band 3       473. nm       <span style="color: #BB0000;">NA</span>     3 ok</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_wavelengths.html">at_wavelengths</a></span><span class="op">(</span><span class="va">cu</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 450 900</span></span></code></pre></div>
+<p><code><a href="../reference/at_band_view.html">at_band_view()</a></code> also requires finite numeric whole band
+indices: <code>1.9</code>, <code>"1"</code> and factors are rejected
+before integer conversion. Its <code>wavelength_window_mean</code>
+operation requires finite numeric bounds with
+<code>wavelength_min &lt;= wavelength_max</code>. Band views are display
+products; they do not replace the stored samples used for
+extraction.</p>
+<p>Raw-to-reflectance conversion requires explicitly supplied finite
+numeric <code>white</code> and <code>dark</code> reference vectors. Each
+reference is a scalar or has one value per band; per-band values follow
+the third dimension of a <code>[y,x,band]</code> array, the columns of a
+pixel-by-band matrix, or the elements of a spectrum. Factors, strings,
+complex values, empty vectors and nonfinite references fail with
+<code>CALIBRATION_INVALID</code>, rather than being coerced to different
+numbers. A zero white-minus-dark denominator yields <code>NA</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/at_convert_values.html">at_convert_values</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">550</span>, <span class="fl">1000</span><span class="op">)</span>, from <span class="op">=</span> <span class="st">"raw"</span>, to <span class="op">=</span> <span class="st">"reflectance"</span>,</span>
+<span>                  calibration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>white <span class="op">=</span> <span class="fl">1000</span>, dark <span class="op">=</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.0 0.5 1.0</span></span>
+<span><span class="co">#&gt; attr(,"value_unit")</span></span>
+<span><span class="co">#&gt; [1] "reflectance"</span></span>
+<span><span class="co">#&gt; attr(,"conversion")</span></span>
+<span><span class="co">#&gt; [1] "raw-&gt;reflectance"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="registering-a-custom-backend">Registering a custom backend<a class="anchor" aria-label="anchor" href="#registering-a-custom-backend"></a>
@@ -403,7 +446,7 @@ turns a request into a <code>[y, x, band]</code> array. Here is a
 complete, self-contained backend for a toy “constant image” format that
 stores only a size and a fill value, and synthesises pixels on
 demand.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">const_read</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span>                 <span class="co"># list(width, height, bands, value)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/structure.html" class="external-link">structure</a></span><span class="op">(</span></span>
@@ -444,13 +487,13 @@ demand.</p>
 <p>The new backend now behaves like any other — it appears in the
 registry, is auto-detected from the file, and serves tiles through
 <code><a href="../reference/at_tile.html">at_tile()</a></code>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".const"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">64L</span>, height <span class="op">=</span> <span class="fl">48L</span>, bands <span class="op">=</span> <span class="fl">2L</span>, value <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>, <span class="va">path</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_read_image.html">at_read_image</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
 <span><span class="va">cimg</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file2e3710c6e45d.const</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file2ef72449f952.const</span></span></span>
 <span><span class="co">#&gt; backend: <span style="color: #0000BB;">"const"</span>  |  dtype: <span style="color: #0000BB;">"double"</span></span></span>
 <span><span class="co">#&gt; size: 64 x 48 px  |  levels: 1  |  bands: 2</span></span>
 <span><span class="co">#&gt; pixel size: 1 x 1 px</span></span>
@@ -460,49 +503,102 @@ registry, is auto-detected from the file, and serves tiles through
 <div class="section level2">
 <h2 id="memory-discipline">Memory discipline<a class="anchor" aria-label="anchor" href="#memory-discipline"></a>
 </h2>
-<p>Tile requests are bounded: <code><a href="../reference/at_tile.html">at_tile()</a></code> refuses a request
-larger than <code>options(hyperannotatR.max_tile_bytes)</code> (default
-2 GiB) before reading any pixels. Windowed <code><a href="../reference/at_tile.html">at_tile()</a></code> calls
-bound the returned array and binary reader buffers by the requested
-window. ENVI BSQ/BIL use contiguous x runs; BIP and SpecCube use
-contiguous selected-band runs (complete band selections coalesce spatial
-runs). Sparse band selections can require many seeks. This is a
-bounded-memory claim, not a speed guarantee. OME delegates subset
+<p>The limits below check particular arrays. They do not bound total
+process memory, temporary copies, native decoder buffers or filesystem
+cache use.</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Option</th>
+<th>Default</th>
+<th>What is checked</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>hyperannotatR.max_tile_bytes</code></td>
+<td>2 GiB</td>
+<td>Every <code><a href="../reference/at_tile.html">at_tile()</a></code> request, estimated as eight bytes per
+returned sample, before reopening or reading pixels</td>
+</tr>
+<tr class="even">
+<td><code>hyperannotatR.max_read_bytes</code></td>
+<td>1 GiB</td>
+<td>Decoded double windows for ENVI, SpecCube and OME; for eager NPY
+imports, the larger of encoded payload bytes and eight bytes per
+element</td>
+</tr>
+<tr class="odd">
+<td><code>hyperannotatR.cache_size</code></td>
+<td>512 MiB</td>
+<td>Retained R tile objects in the shared cache</td>
+</tr>
+</tbody>
+</table>
+<p>Set a positive finite <code>hyperannotatR.max_read_bytes</code> value
+when a trusted array needs a larger limit. A valid windowed source is
+not rejected solely because its complete cube exceeds that budget. Plain
+TIFF and raster image opening is eager and has no predecode check
+against these tile/read budgets: the complete image or pyramid must fit
+in memory before a tile is requested. The isolated TIFF decoder protects
+the calling process from decoder failures; it does not make TIFF opening
+a windowed or memory-budgeted operation.</p>
+<p>Binary readers restrict spatial reads to the requested window, but
+encoded input buffers can include unrequested bands. ENVI BSQ uses
+contiguous runs per selected band. BIL uses band runs or full-band row
+chunks; BIP reads every band for the requested rows and columns.
+SpecCube reads every band for the requested rows of each selected
+column. Conversion buffers and reordered output copies need additional
+memory beyond the selected-band array budget. OME delegates subset
 decoding to BioFormats; compressed blocks may exceed the requested
-window and its native buffers are not directly controlled by the R array
-budget.</p>
+window, and the R array budget does not control its native buffers.</p>
 <p>Full-image <code><a href="../reference/at_tile.html">at_tile()</a></code> still requests a full image.
 Extraction reads one ROI bounding-box tile, without within-ROI
-streaming. <code><a href="../reference/at_mask.html">at_mask()</a></code> returns a full output matrix. Preview,
-queue and export memory require their own limits; windowing alone does
-not make every annotation workflow bounded.</p>
+streaming. <code><a href="../reference/at_mask.html">at_mask()</a></code> checks a full-grid estimate of 32
+bytes per pixel against <code>hyperannotatR.max_read_bytes</code> before
+rasterisation. This covers an array-work allowance, not native/geometry
+memory; <code><a href="../reference/at_mask_stack.html">at_mask_stack()</a></code> can retain several layer masks and
+a combined array. Preview, queue and export memory require their own
+limits; windowing alone does not make every annotation workflow
+bounded.</p>
 <p><code>at_close_image(img)</code> returns a copy with its handle
-released; assign it back. The next tile reopens a verified durable
-descriptor. Closing does not purge the shared tile cache; its byte limit
-still governs retained cache entries. Built-in window handles contain
-only paths/layout metadata, open each binary connection per read and
-close it on exit, including errors. No native pointer is serialized.
-Registered backends can supply optional <code>capabilities</code> and
+released and a fresh runtime identity; assign it back. The first
+subsequent tile reopens a verified durable descriptor. Repeated
+identical requests on that closed image can then use its cache without
+reopening again, after validating source freshness. Closing does not
+purge the shared cache, whose byte limit still governs retained entries;
+the fresh identity prevents reuse of the previous image’s tiles and
+counters. Built-in window handles contain only paths/layout metadata,
+open each binary connection per read and close it on exit, including
+errors. No native pointer is serialized. Registered backends can supply
+optional <code>capabilities</code> and
 <code>close_fn=function(img)</code> arguments; existing positional
 registration calls remain valid. Per-image
 <code>meta$capabilities</code> may refine registry declarations. A
 retained in-memory array always reports a memory snapshot through
 <code><a href="../reference/at_image_capabilities.html">at_image_capabilities()</a></code>.</p>
-<p>ENVI descriptors fingerprint both header and payload by normalized
-path, byte size and modification time, regardless of which input path
-the caller supplied. Every file-backed tile validates all fingerprints
-before consulting the cache and again before caching a new result.
-Changed/missing files require explicit <code><a href="../reference/at_relink_source.html">at_relink_source()</a></code>;
-cached pixels cannot hide replacement. These stat fingerprints detect
-ordinary replacements, not adversarial edits preserving size/mtime.
-Concurrent file writers are unsupported. Historical descriptors without
-the complete companion-file evidence stay unverified; today’s header is
-never used to backfill historical provenance. Mask alignment compares
-these composite descriptors and accepts an explicit alignment assertion
-when needed. Actual retained legacy pixel arrays remain usable even when
-sources change; saving such historical snapshots preserves their pixels.
-Releasing a snapshot may make those old pixels unavailable if its source
-cannot be revalidated.</p>
+<p><code><a href="../reference/at_read_stats.html">at_read_stats()</a></code> counts backend tile reads, payload bytes
+and decoded-array bytes under the caller’s image identity, including
+after a closed image reopens. Cache hits do not count as backend reads;
+header/metadata I/O is not included in the payload counter. This example
+makes two identical requests but records one backend tile read:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_close_image.html">at_close_image</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_read_stats.html">at_read_stats</a></span><span class="op">(</span><span class="va">cu</span>, reset <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_tile.html">at_tile</a></span><span class="op">(</span><span class="va">cu</span>, xrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, yrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, bands <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/invisible.html" class="external-link">invisible</a></span><span class="op">(</span><span class="fu"><a href="../reference/at_tile.html">at_tile</a></span><span class="op">(</span><span class="va">cu</span>, xrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, yrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, bands <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/at_read_stats.html">at_read_stats</a></span><span class="op">(</span><span class="va">cu</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tiles"</span>, <span class="st">"file_bytes"</span>, <span class="st">"decoded_bytes"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; $tiles</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $file_bytes</span></span>
+<span><span class="co">#&gt; [1] 8</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $decoded_bytes</span></span>
+<span><span class="co">#&gt; [1] 32</span></span></code></pre></div>
 <p>For qualification, internal <code>.read_telemetry_reset()</code> /
 <code>.read_telemetry()</code> counters can bracket open and tile
 operations. <code>binary_bytes</code> counts bytes actually returned by

@@ -80,6 +80,6 @@ img <- at_example_image("multiplex")
 r <- at_roi_rect(0, 0, 100, 100, label = "a")
 at_transform(r, from_level = 0, to_level = 2, img = img)
 #> <annot_roi> a (POLYGON)
-#> id: "roi_000000117"  |  level: 2  |  source: manual
+#> id: "roi_000000114"  |  level: 2  |  source: manual
 #> bbox: [0, 0] - [25, 25]
 ```

@@ -35,6 +35,32 @@ Every mask is an `annot_mask`: a matrix with an attached `legend` tibble
 to read the values (below). Read the legend back with
 [`at_mask_legend()`](https://cttir.github.io/hyperannotatR/reference/at_mask_legend.md).
 
+## Grid size and memory budget
+
+[`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md)
+checks dimensions and the full grid before allocating raster arrays,
+including empty masks. Dimensions must be positive and finite;
+fractional extents round up, so `dims = c(3.1, 2.1)` produces four
+columns and three rows. A grid beyond supported integer indexing fails
+with `MASK_TOO_LARGE` before rasterisation.
+
+The existing `hyperannotatR.max_read_bytes` option also limits mask
+work. The estimate is `32 * width * height` bytes for output, coverage
+arrays and working copies. Its default of `1024^3` bytes (1 GiB) permits
+33,554,432 pixels per grid; larger requests fail with
+`READ_BUDGET_EXCEEDED`. The error includes `requested_bytes` and
+`limit_bytes` in its `details`. For a trusted larger mask, set a
+suitable byte limit before calling
+[`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md),
+or choose a coarser pyramid level when available.
+
+The estimate is a preflight check, not a guarantee about total process
+memory (RSS). It excludes geometry and native-library overhead.
+[`at_mask_stack()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stack.md)
+retains per-layer masks and builds a combined stack, so this per-grid
+check does not bound its aggregate memory use. Account for the number of
+layers and other live arrays when choosing a limit.
+
 ## Encoding metadata and alignment
 
 `attr(mask, "mask_metadata")` is a versioned semantic description.
@@ -340,7 +366,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>         "schema_version": 1,
 #>         "signature": {
 #>           "size": 526756,
-#>           "mtime": 1793287498
+#>           "mtime": 1793697034
 #>         },
 #>         "files": null,
 #>         "path": "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png",
@@ -354,7 +380,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>             "attributes": null
 #>           }
 #>         },
-#>         "options_identity": "580a0000000200040601000203000000001300000000",
+#>         "options_identity": "580a0000000200040602000203000000001300000000",
 #>         "reader_contract": null,
 #>         "options_encoding": "typed-json-v2"
 #>       }
@@ -375,8 +401,8 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>     ]
 #>   },
 #>   "storage": null,
-#>   "annotatR_version": "0.3.0",
-#>   "created": "2026-10-29T15:26:47+0000",
+#>   "annotatR_version": "0.3.1",
+#>   "created": "2026-11-03T09:12:33+0000",
 #>   "mask_type": "multiclass",
 #>   "level": 0,
 #>   "dims": [512, 512],

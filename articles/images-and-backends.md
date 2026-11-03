@@ -162,18 +162,12 @@ unsigned 64-bit inputs are accepted only when every complete value fits
 this mask range. A NPY reader consumes the declared array and permits
 subsequent bytes/arrays.
 
-The default `hyperannotatR.max_read_bytes` budget is 1 GiB. For windowed
-readers it limits the requested decoded double array, before allocation;
-a valid large source is not rejected because its full cube exceeds that
-budget. Binary file sizes/offsets must fit exact double integer
-arithmetic (at most 2^53-1 bytes), and each declared dimension and each
-returned window’s element count must fit R’s integer indexing limit. NPY
-remains eager and checks both payload and decoded bytes. These are array
-limits, not RSS guarantees: temporary buffers and the cache need
-additional memory. ENVI headers have a fixed 1 MiB limit; NPY headers
-have a separate 1 MiB default configurable with
-`hyperannotatR.max_npy_header_bytes`. For trusted larger arrays, set a
-positive finite `hyperannotatR.max_read_bytes` value.
+Binary file sizes/offsets must fit exact double integer arithmetic (at
+most 2^53-1 bytes), and each declared dimension and each returned
+window’s element count must fit R’s integer indexing limit. ENVI headers
+have a fixed 1 MiB limit; NPY headers have a separate 1 MiB default
+configurable with `hyperannotatR.max_npy_header_bytes`. Array budgets
+and their limits are described under **Memory discipline** below.
 
 The `tiff` backend preserves raw grayscale uint8/uint16, signed int16
 and float32 samples, and RGB uint16 samples. Sample type and photometric
@@ -201,6 +195,24 @@ single finite integer plane.
 
 ## Reopening saved reader contracts
 
+ENVI source descriptors record the canonical paths, byte sizes and
+modification times of both the header and payload, regardless of which
+path was opened. TIVITA SpecCubes also record the selected
+`.tivita.json` profile when a sidecar was used. Source checks verify
+both the recorded files and current discovery: a new higher-priority
+header, payload or profile, or a retargeted companion symlink, cannot
+silently select different decoding inputs. A newly introduced sidecar
+invalidates a cube previously opened with the default profile. Explicit
+[`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
+arguments continue to ignore incidental sidecars.
+
+[`at_inspect_source()`](https://cttir.github.io/hyperannotatR/reference/at_inspect_source.md)
+reports changed, missing or unresolved inputs without reading pixels.
+File-backed tile requests check the source before consulting the cache
+and again before caching a newly read result. These size/mtime checks
+detect ordinary replacements, not edits that preserve both values.
+Concurrent file writers are unsupported.
+
 Saved TIFF/OME images record a stable semantic contract (`axes = "yxb"`,
 `samples = "raw-scalar-v1"`) in image metadata and durable source
 descriptors. This describes pixel meaning, independently of package
@@ -212,16 +224,30 @@ comparison semantics.
 
 On reopen, dimensions, levels, band count, dtype, channel names,
 wavelengths, units, pixel calibration and the reader contract must
-agree. A stale or ambiguous lightweight project still loads its
-annotations and IDs, but pixel access reports the mismatch. Inspect it
-and explicitly revalidate with
-`at_relink_source(project, project$image$source)`. Relinking refreshes
-reader metadata and retains its existing geometry/wavelength
+agree. TIVITA also checks the effective profile digest and value unit. A
+stale or ambiguous lightweight project still loads its annotations and
+IDs, but pixel access reports the mismatch. Historical ENVI descriptors
+without both companion files, and TIVITA sidecar descriptors without the
+recorded profile dependency, remain unverified. Today’s files are never
+used to backfill historical provenance automatically.
+
+After checking that the cube, profile and reader options are the
+intended ones, inspect and explicitly revalidate the source:
+
+``` r
+
+at_inspect_source(project)
+project <- at_relink_source(project, project$image$source)
+```
+
+Relinking refreshes reader metadata and retains its geometry/wavelength
 compatibility guard; an old transposed OME geometry or changed
 wavelength declaration is not guessed or automatically registered.
 Caller-modified calibration also requires explicit review if it differs
 from the reopened reader. Full legacy snapshots whose in-memory pixel
-handles remain available retain those original pixels.
+handles remain available retain those original pixels, including when
+saved again. Releasing such a snapshot may make its pixels unavailable
+if the source cannot be revalidated.
 
 ## The universal tile accessor
 
@@ -272,6 +298,33 @@ head(at_bands(cu), 3)
 #> 3     3 Band 3       473. nm       NA     3 ok
 range(at_wavelengths(cu))
 #> [1] 450 900
+```
+
+[`at_band_view()`](https://cttir.github.io/hyperannotatR/reference/at_band_view.md)
+also requires finite numeric whole band indices: `1.9`, `"1"` and
+factors are rejected before integer conversion. Its
+`wavelength_window_mean` operation requires finite numeric bounds with
+`wavelength_min <= wavelength_max`. Band views are display products;
+they do not replace the stored samples used for extraction.
+
+Raw-to-reflectance conversion requires explicitly supplied finite
+numeric `white` and `dark` reference vectors. Each reference is a scalar
+or has one value per band; per-band values follow the third dimension of
+a `[y,x,band]` array, the columns of a pixel-by-band matrix, or the
+elements of a spectrum. Factors, strings, complex values, empty vectors
+and nonfinite references fail with `CALIBRATION_INVALID`, rather than
+being coerced to different numbers. A zero white-minus-dark denominator
+yields `NA`.
+
+``` r
+
+at_convert_values(c(100, 550, 1000), from = "raw", to = "reflectance",
+                  calibration = list(white = 1000, dark = 100))
+#> [1] 0.0 0.5 1.0
+#> attr(,"value_unit")
+#> [1] "reflectance"
+#> attr(,"conversion")
+#> [1] "raw->reflectance"
 ```
 
 ## Registering a custom backend
@@ -337,7 +390,7 @@ saveRDS(list(width = 64L, height = 48L, bands = 2L, value = 0.5), path)
 
 cimg <- at_read_image(path)
 cimg
-#> <annot_image> file2e3710c6e45d.const
+#> <annot_image> file2ef72449f952.const
 #> backend: "const"  |  dtype: "double"
 #> size: 64 x 48 px  |  levels: 1  |  bands: 2
 #> pixel size: 1 x 1 px
@@ -347,57 +400,87 @@ dim(at_tile(cimg, xrange = c(1, 8), yrange = c(1, 8)))
 
 ## Memory discipline
 
-Tile requests are bounded:
-[`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md)
-refuses a request larger than `options(hyperannotatR.max_tile_bytes)`
-(default 2 GiB) before reading any pixels. Windowed
-[`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md)
-calls bound the returned array and binary reader buffers by the
-requested window. ENVI BSQ/BIL use contiguous x runs; BIP and SpecCube
-use contiguous selected-band runs (complete band selections coalesce
-spatial runs). Sparse band selections can require many seeks. This is a
-bounded-memory claim, not a speed guarantee. OME delegates subset
+The limits below check particular arrays. They do not bound total
+process memory, temporary copies, native decoder buffers or filesystem
+cache use.
+
+| Option | Default | What is checked |
+|----|----|----|
+| `hyperannotatR.max_tile_bytes` | 2 GiB | Every [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md) request, estimated as eight bytes per returned sample, before reopening or reading pixels |
+| `hyperannotatR.max_read_bytes` | 1 GiB | Decoded double windows for ENVI, SpecCube and OME; for eager NPY imports, the larger of encoded payload bytes and eight bytes per element |
+| `hyperannotatR.cache_size` | 512 MiB | Retained R tile objects in the shared cache |
+
+Set a positive finite `hyperannotatR.max_read_bytes` value when a
+trusted array needs a larger limit. A valid windowed source is not
+rejected solely because its complete cube exceeds that budget. Plain
+TIFF and raster image opening is eager and has no predecode check
+against these tile/read budgets: the complete image or pyramid must fit
+in memory before a tile is requested. The isolated TIFF decoder protects
+the calling process from decoder failures; it does not make TIFF opening
+a windowed or memory-budgeted operation.
+
+Binary readers restrict spatial reads to the requested window, but
+encoded input buffers can include unrequested bands. ENVI BSQ uses
+contiguous runs per selected band. BIL uses band runs or full-band row
+chunks; BIP reads every band for the requested rows and columns.
+SpecCube reads every band for the requested rows of each selected
+column. Conversion buffers and reordered output copies need additional
+memory beyond the selected-band array budget. OME delegates subset
 decoding to BioFormats; compressed blocks may exceed the requested
-window and its native buffers are not directly controlled by the R array
-budget.
+window, and the R array budget does not control its native buffers.
 
 Full-image
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md)
 still requests a full image. Extraction reads one ROI bounding-box tile,
 without within-ROI streaming.
 [`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md)
-returns a full output matrix. Preview, queue and export memory require
-their own limits; windowing alone does not make every annotation
-workflow bounded.
+checks a full-grid estimate of 32 bytes per pixel against
+`hyperannotatR.max_read_bytes` before rasterisation. This covers an
+array-work allowance, not native/geometry memory;
+[`at_mask_stack()`](https://cttir.github.io/hyperannotatR/reference/at_mask_stack.md)
+can retain several layer masks and a combined array. Preview, queue and
+export memory require their own limits; windowing alone does not make
+every annotation workflow bounded.
 
-`at_close_image(img)` returns a copy with its handle released; assign it
-back. The next tile reopens a verified durable descriptor. Closing does
-not purge the shared tile cache; its byte limit still governs retained
-cache entries. Built-in window handles contain only paths/layout
-metadata, open each binary connection per read and close it on exit,
-including errors. No native pointer is serialized. Registered backends
-can supply optional `capabilities` and `close_fn=function(img)`
-arguments; existing positional registration calls remain valid.
-Per-image `meta$capabilities` may refine registry declarations. A
-retained in-memory array always reports a memory snapshot through
+`at_close_image(img)` returns a copy with its handle released and a
+fresh runtime identity; assign it back. The first subsequent tile
+reopens a verified durable descriptor. Repeated identical requests on
+that closed image can then use its cache without reopening again, after
+validating source freshness. Closing does not purge the shared cache,
+whose byte limit still governs retained entries; the fresh identity
+prevents reuse of the previous image’s tiles and counters. Built-in
+window handles contain only paths/layout metadata, open each binary
+connection per read and close it on exit, including errors. No native
+pointer is serialized. Registered backends can supply optional
+`capabilities` and `close_fn=function(img)` arguments; existing
+positional registration calls remain valid. Per-image
+`meta$capabilities` may refine registry declarations. A retained
+in-memory array always reports a memory snapshot through
 [`at_image_capabilities()`](https://cttir.github.io/hyperannotatR/reference/at_image_capabilities.md).
 
-ENVI descriptors fingerprint both header and payload by normalized path,
-byte size and modification time, regardless of which input path the
-caller supplied. Every file-backed tile validates all fingerprints
-before consulting the cache and again before caching a new result.
-Changed/missing files require explicit
-[`at_relink_source()`](https://cttir.github.io/hyperannotatR/reference/at_relink_source.md);
-cached pixels cannot hide replacement. These stat fingerprints detect
-ordinary replacements, not adversarial edits preserving size/mtime.
-Concurrent file writers are unsupported. Historical descriptors without
-the complete companion-file evidence stay unverified; today’s header is
-never used to backfill historical provenance. Mask alignment compares
-these composite descriptors and accepts an explicit alignment assertion
-when needed. Actual retained legacy pixel arrays remain usable even when
-sources change; saving such historical snapshots preserves their pixels.
-Releasing a snapshot may make those old pixels unavailable if its source
-cannot be revalidated.
+[`at_read_stats()`](https://cttir.github.io/hyperannotatR/reference/at_read_stats.md)
+counts backend tile reads, payload bytes and decoded-array bytes under
+the caller’s image identity, including after a closed image reopens.
+Cache hits do not count as backend reads; header/metadata I/O is not
+included in the payload counter. This example makes two identical
+requests but records one backend tile read:
+
+``` r
+
+cu <- at_close_image(at_example_image("cube"))
+invisible(at_read_stats(cu, reset = TRUE))
+invisible(at_tile(cu, xrange = c(1, 2), yrange = c(1, 2), bands = 1))
+invisible(at_tile(cu, xrange = c(1, 2), yrange = c(1, 2), bands = 1))
+at_read_stats(cu)[c("tiles", "file_bytes", "decoded_bytes")]
+#> $tiles
+#> [1] 1
+#> 
+#> $file_bytes
+#> [1] 8
+#> 
+#> $decoded_bytes
+#> [1] 32
+```
 
 For qualification, internal `.read_telemetry_reset()` /
 `.read_telemetry()` counters can bracket open and tile operations.

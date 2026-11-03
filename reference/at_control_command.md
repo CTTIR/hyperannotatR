@@ -60,7 +60,8 @@ Other control:
 ## Examples
 
 ``` r
-h <- at_control_start(at_example_session(3), serve = FALSE)
+sess <- at_session(rep(at_example_path("cube"), 3))
+h <- at_control_start(sess, serve = FALSE)
 st <- at_control_state(h)
 at_control_command(h, list(operation = "context.goto", payload = list(queue_index = 2),
                            expected_revision = st$state_revision))
@@ -68,13 +69,13 @@ at_control_command(h, list(operation = "context.goto", payload = list(queue_inde
 #> [1] 2
 #> 
 #> $entry_id
-#> [1] "entry_at_233f5c1f6b25_000000004"
+#> [1] "entry_at_23ce630f4f3c_000000003"
 #> 
 #> $image_id
-#> [1] "sha256:3fa00078c93c3a7d"
+#> [1] "sha256:1d88166731ea53f3"
 #> 
 #> $annotation_revision
-#> [1] "sha256:77f4c6171f87df36369045976bf6354c68d0041f4b136ac99fd91ab2e1100246"
+#> [1] "sha256:5bc1bd7e0c3c0fd142da3a2339181a5387521f41fa8f6e4417a19e2f77de5bc1"
 #> 
 #> attr(,"response")
 #> attr(,"response")$protocol
@@ -84,16 +85,16 @@ at_control_command(h, list(operation = "context.goto", payload = list(queue_inde
 #> [1] "1.1"
 #> 
 #> attr(,"response")$request_id
-#> [1] "request-d09fca10-dbd5-41ef-b439-7e73a99a9c51"
+#> [1] "request-8472b30c-0fed-4294-9bd0-61e7d579c2f8"
 #> 
 #> attr(,"response")$instance_id
-#> [1] "instance-8631b6f8-bc60-4945-832d-8c6deefd88ed"
+#> [1] "instance-89f5adea-047d-45db-92a0-a60aafb7532f"
 #> 
 #> attr(,"response")$state_revision
 #> [1] "1"
 #> 
 #> attr(,"response")$event_cursor
-#> [1] "instance-8631b6f8-bc60-4945-832d-8c6deefd88ed:2"
+#> [1] "instance-89f5adea-047d-45db-92a0-a60aafb7532f:2"
 #> 
 #> attr(,"response")$warnings
 #> list()

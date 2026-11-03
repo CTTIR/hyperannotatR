@@ -30,7 +30,7 @@ An
 ## Details
 
 The tissue example is a PNG and needs magick; the multiplex example
-needs magick or tiff; the cube needs nothing beyond hyperannotatR.
+needs tiff; the cube needs nothing beyond hyperannotatR.
 
 ## See also
 
@@ -59,7 +59,7 @@ Other images:
 ## Examples
 
 ``` r
-img <- at_example_image("tissue")
+img <- at_example_image("cube")
 at_dims(img)
-#> [1] 512 512
+#> [1] 128 128
 ```

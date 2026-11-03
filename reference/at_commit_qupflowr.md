@@ -10,7 +10,13 @@ while the same key with a different patch aborts with
 `destination` names one), the file is re-read and its revision
 re-checked immediately before writing; an existing file is only replaced
 with `overwrite = TRUE`. A `<file>.commit.json` receipt records the key
-across R sessions.
+across R sessions. The project and receipt are staged together; a failed
+publication restores both previous files, or reports retained recovery
+backups if restoration also fails. Writers to the same destination must
+be serialised; this is not a cross-file transaction against process or
+machine failure. A replay aborts with `REVISION_CONFLICT` if the saved
+project has changed since that receipt was written. Reusing a cached key
+for a different destination aborts with `IDEMPOTENCY_CONFLICT`.
 
 ## Usage
 
@@ -74,5 +80,5 @@ partner <- at_layer_add(at_layer("regions"), at_roi_rect(10, 10, 40, 40, label =
                                                          id = "partner-1"))
 rc <- at_commit_qupflowr(at_stage_qupflowr(proj, partner))
 rc$new_revision
-#> [1] "sha256:396c6f1b1c47c173d8b72b769cfb3ae37576c3fdad492f8ec656b05b6ca3a525"
+#> [1] "sha256:5aee176fe0392cfc56e9175e44bb42cc3ca48ed2d8842ca038e312ccdd2c9378"
 ```

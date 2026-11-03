@@ -298,14 +298,14 @@ first$settings$extraction
 #> [1] "raw-scalar-v1"
 first$settings$versions
 #> $R
-#> [1] "4.6.1"
+#> [1] "4.6.2"
 #> 
 #> $platform
 #> [1] "x86_64-pc-linux-gnu"
 #> 
 #> $packages
 #> $packages$hyperannotatR
-#> [1] "0.3.0"
+#> [1] "0.3.1"
 #> 
 #> $packages$sf
 #> [1] "1.1.3"

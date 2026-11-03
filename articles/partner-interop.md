@@ -17,12 +17,12 @@ that contract from the hyperannotatR side.
 
 caps <- at_interop_capabilities()
 caps
-#> <at_capabilities> hyperannotatR 0.3.0 for qupflowR
+#> <at_capabilities> hyperannotatR 0.3.1 for qupflowR
 #>   I0 supported   file interchange (handoff directory)
 #>   I1 supported   public R API
 #>   I2 planned     loopback control service - implemented and tested locally; no qualified qupflowR client run recorded
 #>   I3 planned     embeddable shiny.appobj - at_app() is implemented and tested locally; no qualified qupflowR embedding recorded
-#>   digest d635a2101a97788c784d52220c1c4e3ff211965d1cb7d93c85d0953b274f9410
+#>   digest 476406c284fc2a52fa03a08dd432631a376ece527cd8b28b4bae94f57e1a66ad
 caps$profiles$I2[c("status", "implemented", "available", "reason")]
 #> $status
 #> [1] "planned"
@@ -72,7 +72,7 @@ receipt$files[, c("path", "size_bytes", "format")]
 #> 4 masks/regions_labelled.tif                   2936 mask_tiff     
 #> 5 masks/regions_labelled.tif.legend.json       1811 legend_json
 receipt$handoff_digest
-#> [1] "5f523be7b354a5eee7c42cf6f54ae9de76ce109723561883921ee4e20894bf11"
+#> [1] "e04cc73aa626d2e0120b9b31873326b938fecfbf6ee5a7dfe95b2d1d7adbeab0"
 ```
 
 - `annotations_qupath.geojson` uses the QuPath 0.4+ dialect with a
@@ -206,10 +206,13 @@ patch$operations
 #> 4 create    from-partner  regions stroma   ""
 ```
 
-Committing is idempotent: the same key replays the original receipt, a
-reused key for a different patch is refused. When the patch targets a
-project file, the file’s revision is checked again immediately before it
-is replaced, and replacing an existing file requires `overwrite = TRUE`.
+Committing is idempotent: the same key and patch replay the original
+receipt, while a reused key for a different patch is refused with
+`IDEMPOTENCY_CONFLICT`. Within one R session, a key is also tied to its
+original destination; an equivalent canonical path is accepted, but
+redirecting that key to another destination is a conflict. When the
+patch targets a project file, its annotation revision is checked before
+replacement, and replacing an existing file requires `overwrite = TRUE`.
 
 ``` r
 
@@ -219,6 +222,27 @@ receipt$new_revision
 at_commit_qupflowr(patch, idempotency_key = "vignette-commit")$replayed
 #> [1] TRUE
 ```
+
+For a saved commit, a `<project>.commit.json` receipt records the key
+across R sessions. Every replay of a saved commit re-reads the project
+and compares its annotation revision with the receipt, including replays
+in the original R session. Later annotation edits cause
+`REVISION_CONFLICT`; the call does not return an old receipt paired with
+a different project or overwrite those edits. An in-memory commit with
+no destination can replay its retained project.
+
+The project and receipt are both staged before either destination is
+replaced. If publication fails, their previous files are restored. If
+restoration also fails, the error reports the retained backup paths for
+recovery. Callers must serialize writers to the same destination: paired
+publication uses multiple filesystem renames and does not guarantee an
+atomic result after a process or machine crash.
+
+Saved commits use the same image preparation as
+[`at_save_project()`](https://cttir.github.io/hyperannotatR/reference/at_save_project.md):
+a hand-built in-memory image keeps its pixels, while a file-backed image
+keeps the source descriptor needed to validate and reopen it. Annotation
+commits do not discard the only copy of an in-memory image.
 
 ## Hyperspectral metadata
 
@@ -378,11 +402,24 @@ Training itself remains an external, optional workflow.
 A partner process can drive a running app through the loopback service.
 It is off unless started, binds only to `127.0.0.1`, authenticates with
 a random bearer token that expires, rejects browser-origin requests and
-oversized bodies, resolves file references only below its root, and
-offers no endpoint that evaluates R, shell or Python code. Tokens come
-from the operating system’s random source (`/dev/urandom`) or, where
-that does not exist (Windows), from the optional `openssl` package;
-without either, the service refuses to start.
+oversized bodies, validates requested file paths against its negotiated
+root, and offers no endpoint that evaluates R, shell or Python code.
+Tokens come from the operating system’s random source (`/dev/urandom`)
+or, where that does not exist (Windows), from the optional `openssl`
+package; without either, the service refuses to start. The control root
+must be a directory. If startup fails after resources have been created,
+the service removes that attempt’s listener, expiry timer, registry
+entries and newly created token file. Existing files and unrelated
+listeners remain available.
+
+Before loading an image or import, the service also checks the canonical
+paths of known companion files, including ENVI headers and payloads,
+TIVITA profile sidecars, mask legends and handoff members. Each control
+instance uses its own negotiated root, independently of the app’s
+`app_root` option. These checks do not sandbox custom reader code or
+additional external references, and they do not prevent concurrent
+filesystem changes between validation and reading. Shared deployments
+need separate operating-system access controls.
 
 ``` r
 
@@ -392,7 +429,7 @@ state$state_revision
 #> [1] "0"
 at_control_command(handle, list(operation = "context.goto", payload = list(queue_index = 2),
                                 expected_revision = state$state_revision))$entry_id
-#> [1] "entry_at_2f1c6ea65622_000000005"
+#> [1] "entry_at_2fda7fa7d96_000000005"
 vapply(at_control_events(handle)$events, `[[`, character(1), "type")
 #> [1] "service.started" "image.changed"
 at_control_stop(handle)
@@ -412,9 +449,11 @@ Every mutation carries a `request_id`, the `expected_revision` it is
 based on, an `idempotency_key` and the SHA-256 of its canonical payload.
 A stale revision is a conflict; a lost response is resolved with
 [`at_control_request_status()`](https://cttir.github.io/hyperannotatR/reference/at_control_request_status.md),
-and re-sending with the same key never applies a command twice. Events
-are read with a cursor; a cursor from another instance or older than the
-retained buffer yields `resync_required = TRUE`.
+and re-sending with the same key never applies a command twice. Keys
+belong to a control instance: independent clients may use the same key
+in different instances without sharing commit receipts. Events are read
+with a cursor; a cursor from another instance or older than the retained
+buffer yields `resync_required = TRUE`.
 
 A few further rules matter to clients:
 

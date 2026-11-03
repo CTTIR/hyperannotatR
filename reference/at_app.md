@@ -87,9 +87,12 @@ first replaces an existing `_session.rds` that holds another queue or
 more ROIs, the app keeps a timestamped `_session-*.previous.rds` copy.
 
 The Data page reads folder and handoff paths on the machine running R.
-The app is meant for local use; for a shared deployment set
-`options(hyperannotatR.app_root = "/allowed/folder")` to refuse paths
-outside one folder.
+The app is meant for local use. Set
+`options(hyperannotatR.app_root = "/allowed/folder")` to restrict
+canonical image paths and known ENVI/TIVITA companions to that folder.
+This is not an operating-system sandbox: custom readers, external
+references and concurrent filesystem changes need separate controls in a
+shared deployment.
 
 ## See also
 
@@ -113,7 +116,7 @@ Other shiny:
 ## Examples
 
 ``` r
-app <- at_app(session = at_example_session(2))
+app <- at_app(input = at_example_path("cube"))
 class(app)
 #> [1] "shiny.appobj"
 if (FALSE) { # \dontrun{

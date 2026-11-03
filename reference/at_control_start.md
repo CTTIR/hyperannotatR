@@ -99,7 +99,9 @@ process reads the token from `token_file`, which is created exclusively
 with owner-only permissions (on Windows, file modes are not enforced;
 keep the file in a directory only the user can read). A sanitised
 lifecycle manifest `annotatr-control-<instance_id>.json` is written to
-`root` at start and rewritten when the service stops.
+`root` at start and rewritten when the service stops. If startup fails,
+its listener, expiry timer, registry entries and newly created token
+file are removed.
 
 The service stops itself when the token expires: either when the expiry
 timer runs or, if a request arrives first (for example after the
@@ -137,7 +139,8 @@ Other control:
 ## Examples
 
 ``` r
-h <- at_control_start(at_example_session(2), serve = FALSE)
+sess <- at_session(rep(at_example_path("cube"), 2))
+h <- at_control_start(sess, serve = FALSE)
 at_control_state(h)$state_revision
 #> [1] "0"
 at_control_stop(h)

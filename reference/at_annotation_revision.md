@@ -45,7 +45,7 @@ Other interop:
 ## Examples
 
 ``` r
-proj <- at_example_project()
+proj <- at_project(at_example_image("cube"))
 at_annotation_revision(proj)
-#> [1] "sha256:6b91babfc88f9fa8593075b60d31a11fb82d3fdb8c368c99e0fe76cffc065321"
+#> [1] "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
 ```
