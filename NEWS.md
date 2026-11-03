@@ -1,5 +1,12 @@
 # hyperannotatR 0.3.1 (unreleased)
 
+* Detect links in handoff and export paths on Windows, including dangling
+  links and directory junctions, without relying on `Sys.readlink()`.
+  Inspect resolved ENVI companions and source metadata before reading so
+  a valid linked payload is not mistaken for an empty file.
+* Support the metadata accessor's call-name convention in RBioFormats 1.2.0
+  without changing OME axes, calibration or source-identity checks. Keep
+  independent integrity oracles available on R versions before 4.5.
 * TIVITA source descriptors include the selected profile sidecar. Changing,
   removing or superseding that profile, or introducing a preferred ENVI
   header or payload, now refuses stale pixel access. Older projects whose

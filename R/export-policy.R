@@ -13,8 +13,7 @@
 }
 
 .export_exists <- function(path) {
-  link <- Sys.readlink(path)
-  file.exists(path) | (!is.na(link) & nzchar(link))
+  file.exists(path) | .is_symlink(path)
 }
 
 # The caller-selected root may itself resolve through a link. Descendants must
@@ -32,8 +31,7 @@
     current <- root
     for (part in components) {
       current <- file.path(current, part)
-      link <- Sys.readlink(current)
-      if (!is.na(link) && nzchar(link)) {
+      if (.is_symlink(current)) {
         .at_fail("Symlink violates export containment: ", current, class = "io", code = "PATH_OUTSIDE_ROOT")
       }
       if (file.exists(current) && !identical(current, path) && !dir.exists(current)) {
@@ -92,8 +90,7 @@
     .at_fail("Export bundle paths collide or alias.", class = "validation", code = "PATH_COLLISION")
   }
   if (any(dir.exists(paths))) .at_fail("Export target is a directory.", class = "io", code = "INVALID_PATH")
-  links <- Sys.readlink(paths)
-  if (any(!is.na(links) & nzchar(links))) .at_fail("Symlink export targets are not supported.", class = "io", code = "PATH_OUTSIDE_ROOT")
+  if (any(.is_symlink(paths))) .at_fail("Symlink export targets are not supported.", class = "io", code = "PATH_OUTSIDE_ROOT")
   if (any(.export_exists(paths)) && !overwrite) {
     .at_fail("Export bundle already exists; pass overwrite = TRUE to replace it.", class = "io", code = "ALREADY_EXISTS")
   }

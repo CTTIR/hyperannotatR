@@ -10,7 +10,7 @@ test_that("the project manifest describes identity, convention and annotations w
   expect_identical(m$coordinate_convention$y_axis, "down")
   img <- m$images[[1]]
   # Independent image id: sha256 over the canonical {"files":["<file sha256>"]}.
-  file_sha <- unname(tools::sha256sum(at_example_path("tissue")))
+  file_sha <- unname(independent_sha256(at_example_path("tissue")))
   expected <- substr(.sha256_bytes(sprintf('{"files":["%s"]}', file_sha)), 1, 16)
   expect_identical(img$image_id, paste0("sha256:", expected))
   expect_identical(img$source_name, "example_tissue.png")

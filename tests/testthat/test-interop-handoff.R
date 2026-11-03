@@ -15,10 +15,10 @@ independent_digest <- function(dir) {
                 method = "radix")
   parts <- vapply(files, function(f) {
     sprintf('{"path":"%s","sha256":"%s","size_bytes":%d}', f,
-            unname(tools::sha256sum(file.path(dir, f))), file.size(file.path(dir, f)))
+            unname(independent_sha256(file.path(dir, f))), file.size(file.path(dir, f)))
   }, character(1))
   canon <- sprintf('{"files":[%s],"format_version":"1.0"}', paste(parts, collapse = ","))
-  unname(tools::sha256sum(bytes = charToRaw(canon)))
+  unname(independent_sha256(bytes = charToRaw(canon)))
 }
 
 rewrite_integrity <- function(dir) {

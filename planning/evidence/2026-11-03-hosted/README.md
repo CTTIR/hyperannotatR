@@ -1,0 +1,82 @@
+# Hosted portability follow-up — 3 November 2026
+
+Baseline: `33094e4e2fd1`, hosted R check `41604959935`. Preserve the original
+working copy and its local changes. The Windows release job failed seven
+assertions/errors and warned eleven times; the informational R 4.3 row failed
+eight tests. These are observed hosted failures, not inferred platform risks.
+
+## Repairs and acceptance criteria
+
+1. Replace Windows' unavailable `Sys.readlink()` classification with `fs` for
+   handoff and export descendants, existing destinations and dangling links.
+   Do not permit aliases or traverse linked handoff directories.
+2. Inspect canonical ENVI header/payload metadata and source signatures so a
+   valid link is not mistaken for a zero-byte payload. Preserve the selected
+   companion and retarget checks. Replace only the affected test link lifecycle
+   with `fs` operations: base Windows unlink failed to remove reparse points,
+   leaving the intended valid recovery fixtures still pointing outside root.
+3. Call the exported OME accessor by its local name for RBioFormats 1.2.0's
+   introspection convention. Keep all series, axes and calibration checks.
+   Retain independent hash checks on older R using OpenSSL, distinct from the
+   package's digest fallback.
+4. Require affected and complete tests, a source package check, unchanged
+   fixture pins, independent code review and exact-head Windows CI before
+   claiming native Windows qualification. No workflow or R minimum is relaxed.
+
+The change introduces one mandatory dependency, fs, for portable link
+classification. It does not change schemas, annotation IDs, stored paths,
+scientific pixel values or supported in-root image links. It does not provide
+an operating-system sandbox or protection against concurrent hostile changes
+to path components.
+
+## Evidence recorded so far
+
+Logs are retained in the audit's local `hosted-followup/hyperannotatR` folder;
+machine paths are omitted here. Failed intermediate harness runs are retained.
+
+| File | Command or method | Result |
+| --- | --- | --- |
+| portable-links-baseline-canonical.log | Actual links with Windows readlink/zero-size metadata simulated | Five failures before the repair; initial noncanonical test-path run retained separately. |
+| ome-accessor-baseline.log | Actual OME image with a name-sensitive dependency accessor | Qualified-call failure reproduced before the repair. |
+| portable-final-smoke.log | Focused link, metadata and independent digest regressions | 17 assertions pass; one Windows-only junction test awaits that host. |
+| old-rbio-readers-final.log | Install official RBioFormats 1.2.0 in an isolated library; run reader correctness, windowing and accessor tests | 306 assertions pass, zero failures/warnings/skips. Bio-Formats 6.12.0 was downloaded by that dependency's installer. |
+| independent-app-review.json | Independent source and test review | No material finding; native Windows execution remains a separate gate. |
+
+An intermediate SHA oracle retained OpenSSL's hash class; its conversion to a
+plain character result was corrected. An intermediate dependency mock delegated
+under the wrong function name; that harness was corrected and the actual older
+dependency rerun successfully. Neither intermediate failure is counted as a
+passing test.
+
+Authoritative references: the [R readlink documentation](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Sys.readlink.html),
+[fs link classification](https://fs.r-lib.org/reference/is_file.html), and the
+[official RBioFormats 1.2.0 source](https://bioconductor.org/packages/3.18/bioc/src/contrib/RBioFormats_1.2.0.tar.gz).
+
+## Final local qualification
+
+The complete direct suite passes 5,523 assertions with zero failures or warnings.
+Eight named skips cover the Windows junction case, unrequested browser lanes,
+unavailable permitted workbench/Cubert data, and the absent-optional-reader case
+when RBioFormats is installed. No source data or fixture pins changed.
+
+The source archive passes `R CMD check --as-cran`: zero errors, zero warnings,
+one incoming new-submission NOTE. Its installed tests pass 5,479 assertions with
+14 named CRAN/platform/optional skips; examples, donttest examples, vignettes,
+PDF and HTML manuals pass. SHA-256:
+`00f66fe2a0d1bb0d8a5bd99b0289b98a24741364cbc1f34bb4487544c0993ab3`.
+All 552 comparable source payloads match; DESCRIPTION differences are standard
+build reflow and derived author/packaging fields. No Git metadata or diagnostic
+Rplots file is packaged.
+
+Actionlint and `git diff --check` pass. House lint remains report-only: 84 at the
+frozen baseline, 86 after these changes; the two additions are deliberate
+synthetic error fixtures. No check was disabled or weakened. An independent
+review found no material defect in the changed source and tests. These local
+results do not substitute for the pending exact-head Windows run; the browser
+lane was not rerun because no browser code changed.
+
+The first-use path remains `pak::pak("CTTIR/hyperannotatR")`, followed by
+`hyperannotatR::at_annotate(hyperannotatR::at_example_session())`; optional native
+readers retain their documented prerequisites. No release or submission was
+performed. Next publication step is the authorized normal main push and hosted
+matrix verification.

@@ -18,7 +18,7 @@ test_that("control staging confines import companions to its own negotiated root
   bad <- file.path(root, "bad")
   dir.create(bad)
   writeLines('{"format_version":"999.0"}', file.path(outside, "integrity.json"))
-  if (!isTRUE(file.symlink(file.path(outside, "integrity.json"),
+  if (!isTRUE(portable_test_link(file.path(outside, "integrity.json"),
                           file.path(bad, "integrity.json")))) {
     skip("Symbolic links are unavailable")
   }
@@ -29,7 +29,7 @@ test_that("control staging confines import companions to its own negotiated root
   at_write_npy(mask, path)
   side <- paste0(path, ".legend.json")
   expect_true(file.rename(side, file.path(outside, "legend.json")))
-  expect_true(file.symlink(file.path(outside, "legend.json"), side))
+  expect_true(portable_test_link(file.path(outside, "legend.json"), side))
   partner <- at_project(at_read_image(image), at_layer("regions", labels = "region"))
   partner <- at_add_roi(partner, "regions",
     at_roi_rect(0, 0, 2, 2, label = "region", id = "reviewed-1"))
@@ -70,7 +70,7 @@ test_that("control session loads preflight every image and optional handoff", {
   writeLines(c("ENVI", "samples = 2", "lines = 1", "bands = 1", "data type = 4",
                "interleave = bsq", "byte order = 0"), file.path(root, "cube.hdr"))
   writeBin(c(11, 22), file.path(outside, "cube.dat"), size = 4, endian = "little")
-  if (!isTRUE(file.symlink(file.path(outside, "cube.dat"), file.path(root, "cube.dat")))) {
+  if (!isTRUE(portable_test_link(file.path(outside, "cube.dat"), file.path(root, "cube.dat")))) {
     skip("Symbolic links are unavailable")
   }
   cube <- file.path(root, "tiny_SpecCube.dat")
@@ -80,11 +80,11 @@ test_that("control session loads preflight every image and optional handoff", {
     endian = "big", axis_order = "x,y,band", wavelengths = c(500, 600),
     wavelength_unit = "nm", value_unit = "raw")
   jsonlite::write_json(profile, file.path(outside, "profile.json"), auto_unbox = TRUE)
-  expect_true(file.symlink(file.path(outside, "profile.json"), paste0(cube, ".tivita.json")))
+  expect_true(portable_test_link(file.path(outside, "profile.json"), paste0(cube, ".tivita.json")))
   bad <- file.path(root, "bad")
   dir.create(bad)
   writeLines('{"format_version":"999.0"}', file.path(outside, "integrity.json"))
-  expect_true(file.symlink(file.path(outside, "integrity.json"), file.path(bad, "integrity.json")))
+  expect_true(portable_test_link(file.path(outside, "integrity.json"), file.path(bad, "integrity.json")))
   load <- function(payload) at_control_command(h, list(operation = "session.load",
     payload = payload, expected_revision = at_control_state(h)$state_revision))
   for (payload in list(list(images = list("image.png", "cube.hdr")),
@@ -100,9 +100,9 @@ test_that("control session loads preflight every image and optional handoff", {
     expect_identical(getOption("hyperannotatR.app_root"), outside)
   }
   # Moving the payload inside the root makes the same in-root link valid.
-  unlink(file.path(root, "cube.dat"))
+  fs::link_delete(file.path(root, "cube.dat"))
   expect_true(file.copy(file.path(outside, "cube.dat"), file.path(root, "payload.bin")))
-  expect_true(file.symlink(file.path(root, "payload.bin"), file.path(root, "cube.dat")))
+  expect_true(portable_test_link(file.path(root, "payload.bin"), file.path(root, "cube.dat")))
   result <- load(list(images = list("cube.hdr")))
   expect_identical(result$n_images, 1L)
   expect_identical(as.numeric(at_tile(at_current(.control_hub(h)$session)$image)), c(11, 22))

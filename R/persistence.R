@@ -10,7 +10,7 @@
 
 .source_signature <- function(path) {
   if (!file.exists(path)) return(NULL)
-  info <- file.info(path)
+  info <- file.info(normalizePath(path, winslash = "/", mustWork = TRUE))
   list(size = unname(info$size), mtime = unname(as.numeric(info$mtime)))
 }
 
