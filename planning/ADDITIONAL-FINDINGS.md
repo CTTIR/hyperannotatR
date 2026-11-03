@@ -65,3 +65,9 @@ Windows; directory fixtures retain junction coverage and fs cleanup. Added
 fixture type/readback checks preserve all existing containment assertions.
 Runtime code and source fixture payloads are unchanged. See the appended
 2026-11-03 hosted evidence record for the failed run and qualification limits.
+
+The corrected fixture reached native Windows with all production link tests
+passing, but its new dangling-link oracle used `file.exists(link)`, which R
+documents as unreliable for broken Windows links. The fixture now proves that
+the ordinary target is absent and that reading through the classified link
+fails. No runtime guard, containment assertion, or platform skip was changed.
