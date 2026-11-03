@@ -35,7 +35,7 @@ test_that("grouped splits are deterministic, independent of RNG, and leak-free",
                            fractions = c(train = 0.34, validation = 0.33, test = 0.33), seed = 7)
   # Independent assignment: rank groups by sha256("7:<group>") and cut 3 groups into thirds.
   g <- c("s1", "s2", "s3")
-  ranked <- g[order(vapply(g, function(x) unname(tools::sha256sum(bytes = charToRaw(paste0("7:", x)))),
+  ranked <- g[order(vapply(g, function(x) unname(independent_sha256(bytes = charToRaw(paste0("7:", x)))),
                            character(1)), method = "radix")]
   expected <- stats::setNames(c("train", "validation", "test"), ranked)
   split_of <- vapply(ds$manifest$images, `[[`, character(1), "split")
@@ -136,7 +136,7 @@ test_that("predictions import as staged, provenance-tagged ROIs and never overwr
   expect_identical(new[[1]]$attributes$review_status, "unreviewed")
   expect_identical(new[[1]]$attributes$prediction$model_sha256, strrep("a", 64))
   expect_identical(attr(st, "prediction_digest"),
-                   unname(tools::sha256sum(bytes = writeBin(as.integer(pred), raw(), size = 4L,
+                   unname(independent_sha256(bytes = writeBin(as.integer(pred), raw(), size = 4L,
                                                             endian = "little"))))
   stroma <- Filter(function(r) r$label == "stroma", new)[[1]]
   expect_equal(at_roi_area(stroma), 6 * 11)

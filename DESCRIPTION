@@ -25,6 +25,7 @@ Imports:
     cli,
     digest,
     dplyr,
+    fs,
     ggplot2,
     grDevices,
     jsonlite,

@@ -520,10 +520,9 @@
 
 .regex_escape <- function(x) gsub("([][{}()+*^$|\\\\?.])", "\\\\\\1", x)
 
-# Is `path` a symbolic link? (Sys.readlink returns "" for non-links.)
+# Use lstat-backed classification: Sys.readlink is a stub on Windows.
 .is_symlink <- function(path) {
-  link <- Sys.readlink(path)
-  !is.na(link) & nzchar(link)
+  unname(fs::is_link(path))
 }
 
 # ---- Package provenance ----------------------------------------------------

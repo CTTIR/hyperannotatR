@@ -44,14 +44,14 @@ test_that("ENVI sibling symlink retargets invalidate cached and closed images", 
   original <- file.path(root, "original.bin")
   replacement <- file.path(root, "replacement.bin")
   expect_true(file.rename(f$dat, original))
-  if (!isTRUE(suppressWarnings(file.symlink(original, f$dat)))) {
+  if (!isTRUE(suppressWarnings(portable_test_link(original, f$dat)))) {
     skip("Host cannot create symbolic links")
   }
   writeBin(c(99, 88), replacement, size = 4, endian = "little")
   img <- at_read_image(f$hdr)
   expect_identical(as.numeric(at_tile(img)), c(11, 22))
-  unlink(f$dat)
-  expect_true(file.symlink(replacement, f$dat))
+  fs::link_delete(f$dat)
+  expect_true(portable_test_link(replacement, f$dat))
   expect_true(file.exists(original))
   expect_identical(at_inspect_source(img)$status, "changed")
   err <- tryCatch(at_tile(img), error = identity)

@@ -10,7 +10,7 @@ boundary_tree <- function(envir = parent.frame()) {
 }
 
 boundary_link <- function(from, to) {
-  if (!isTRUE(file.symlink(from, to))) skip("Symbolic links are unavailable")
+  portable_test_link(from, to, envir = parent.frame())
 }
 
 test_that("folder discovery excludes escaped directory and image symlinks", {
@@ -54,7 +54,7 @@ test_that("folder discovery checks ENVI companion payloads and headers", {
   file.copy(dat, file.path(d$outside, "cube.dat"))
   boundary_link(file.path(d$outside, "cube.dat"), file.path(d$root, "cube.dat"))
   expect_length(.app_list_images(d$root), 0L)
-  unlink(file.path(d$root, "cube.dat"))
+  fs::link_delete(file.path(d$root, "cube.dat"))
   file.copy(dat, file.path(d$root, "cube.dat"))
   expect_identical(basename(as.character(.app_list_images(d$root))), "cube.hdr")
   file.copy(hdr, file.path(d$outside, "cube.hdr"))
@@ -71,7 +71,7 @@ test_that("folder discovery checks the selected TIVITA profile sidecar", {
   writeLines("{}", sidecar)
   boundary_link(sidecar, paste0(cube, ".tivita.json"))
   expect_length(.app_list_images(d$root), 0L)
-  unlink(paste0(cube, ".tivita.json"))
+  fs::link_delete(paste0(cube, ".tivita.json"))
   file.copy(sidecar, paste0(cube, ".tivita.json"))
   expect_identical(as.character(.app_list_images(d$root)), cube)
 })
@@ -156,7 +156,7 @@ test_that("staged handoffs check inventories and linked directories before readi
     session$setInputs(`data-stage` = event(valid))
     expect_match(output$`data-stage_msg`, "outside the folder")
     expect_null(rv$staged)
-    unlink(file.path(valid, "external"))
+    fs::link_delete(file.path(valid, "external"))
     session$setInputs(`data-stage` = event(valid))
     expect_s3_class(rv$staged, "at_staged_patch")
     expect_match(output$`data-stage_msg`, "Staged:")

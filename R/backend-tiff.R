@@ -198,7 +198,9 @@
   files <- .persisted_source_files(c(image = path))
   .read_telemetry_add(native_metadata_calls = 1, native_file_bytes = NA_real_)
   meta <- RBioFormats::read.metadata(path)
-  records <- RBioFormats::coreMetadata(meta)
+  # RBioFormats 1.2.0 derives its metadata key from the unqualified call name.
+  coreMetadata <- RBioFormats::coreMetadata
+  records <- coreMetadata(meta)
   if (!is.null(records$sizeX)) records <- list(records)
   available_series <- unique(vapply(records, function(x) as.integer(x$series), integer(1)))
   if (is.null(series)) {

@@ -101,7 +101,7 @@
 # Parse and validate the ENVI header into a list. The header is metadata, so
 # it is bounded (1 MiB) and read exactly once.
 .parse_envi_hdr <- function(hdr, call = rlang::caller_env()) {
-  size <- file.info(hdr)$size
+  size <- file.info(normalizePath(hdr, winslash = "/", mustWork = TRUE))$size
   if (!is.finite(size) || size > 1024^2) {
     .at_abort("ENVI header {.file {basename(hdr)}} exceeds the 1 MiB metadata limit.",
               class = "limit", code = "ENVI_HEADER_INVALID", call = call)
@@ -172,7 +172,7 @@
 # Validate the payload length against the header before any read.
 .envi_check_payload <- function(dat, h, spec, call = rlang::caller_env()) {
   expected <- h$header_offset + as.double(h$samples) * h$lines * h$bands * spec$size
-  size <- file.info(dat)$size
+  size <- file.info(normalizePath(dat, winslash = "/", mustWork = TRUE))$size
   if (is.na(size) || size < expected) {
     .at_abort(
       c("The ENVI payload {.file {basename(dat)}} is shorter than its header declares.",
