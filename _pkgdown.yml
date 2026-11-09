@@ -4,6 +4,10 @@ url: https://cttir.github.io/hyperannotatR/
 # Inter/JetBrains Mono, navbar/footer/sidebar) from the themakR template. The
 # default blue accent matches the hyperannotatR hex, so no per-package override is set.
 template:
+  includes:
+    in_header: |
+      <meta name="theme-color" content="#1565c0">
+      <script defer data-domain="cttir.github.io/hyperannotatr" src="https://analytics.hellebo.de/js/script.file-downloads.outbound-links.js"></script>
   package: themakR
 
 development:
