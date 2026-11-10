@@ -20,3 +20,7 @@ tests/testthat/testthat-problems.rds
 node_modules/
 /package.json
 /package-lock.json
+
+# Agent working files (kept local, never tracked)
+/AGENTS.md
+/planning/HANDOVER.md
