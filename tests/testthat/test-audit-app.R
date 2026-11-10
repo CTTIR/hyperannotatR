@@ -1,3 +1,5 @@
+# Full app-server scenarios take more than 30 seconds; they run in CI.
+skip_on_cran()
 skip_if_not_installed("shiny")
 skip_if_not_installed("bslib")
 skip_if_not_installed("shinyjs")

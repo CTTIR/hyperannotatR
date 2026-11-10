@@ -233,7 +233,7 @@
 #' Rasterise ROIs to a mask ("Schablone")
 #'
 #' Produce a binary, labelled, or multi-class integer mask from annotations.
-#' This is the package's core output artifact.
+#' This is the package's core output artefact.
 #'
 #' @details
 #' **Pixel-coverage contract.** Pixel `(i, j)` covers the half-open square
@@ -251,7 +251,7 @@
 #' `(5, 5)` selects row 6, column 6. Extraction uses the same membership and
 #' bounds. With `touches = TRUE`, polygon coverage uses the selected engine's
 #' all-touched rasterisation; lines and other geometry types also retain the
-#' selected engine's rasterisation behavior. Engine equality is guaranteed for
+#' selected engine's rasterisation behaviour. Engine equality is guaranteed for
 #' centre-based polygons and points. ROI coordinates use the image convention
 #' (top-left origin, y down).
 #'

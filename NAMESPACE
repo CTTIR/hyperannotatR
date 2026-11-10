@@ -188,10 +188,14 @@ export(at_write_npy)
 export(at_write_qupath)
 export(at_write_rois_csv)
 export(renderAtCanvas)
-importFrom(rlang,"%||%")
-importFrom(rlang,.data)
-importFrom(rlang,caller_arg)
-importFrom(rlang,caller_env)
+importFrom(rlang,
+  "%||%",
+  .data,
+  caller_arg,
+  caller_env
+)
 importFrom(sf,st_sfc)
-importFrom(stats,median)
-importFrom(stats,sd)
+importFrom(stats,
+  median,
+  sd
+)

@@ -1,4 +1,15 @@
-# hyperannotatR 0.3.1 (unreleased)
+# hyperannotatR 0.4.0
+
+This release collects the unreleased 0.3.1 changes below and prepares the
+package for a first CRAN submission.
+
+* The maintainer address is now raban.heller@uni-ulm.de, and the package
+  declares British English (`Language: en-GB`), which its documentation uses.
+* The version is consistent across `DESCRIPTION`, `CITATION.cff`,
+  `.zenodo.json`, the canvas style dependency and the README.
+* The source package ships only the logo files that the help pages and the
+  README use, and the full app-server test scenarios are skipped on CRAN
+  (they still run in continuous integration).
 
 * Detect links in handoff and export paths on Windows, including dangling
   links and directory junctions, without relying on `Sys.readlink()`.
