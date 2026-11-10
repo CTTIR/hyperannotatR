@@ -19,6 +19,13 @@ lazily by \code{\link[=at_current]{at_current()}}. Warns if written by a newer h
 \description{
 Load a session
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+path <- tempfile(fileext = ".rds")
+at_save_session(sess, path)
+at_load_session(path)
+unlink(path)
+}
 \seealso{
 \code{\link[=at_save_session]{at_save_session()}}, \code{\link[=at_resume]{at_resume()}}
 

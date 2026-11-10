@@ -29,6 +29,13 @@ invisibly.
 The session is written atomically, with each stored project's image saved
 as a source descriptor rather than pixels (see \code{\link[=at_save_project]{at_save_project()}}).
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+path <- tempfile(fileext = ".rds")
+at_save_session(sess, path)
+file.exists(path)
+unlink(path)
+}
 \seealso{
 \code{\link[=at_load_session]{at_load_session()}}, \code{\link[=at_resume]{at_resume()}}
 

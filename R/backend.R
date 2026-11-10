@@ -55,6 +55,35 @@ new_annot_backend <- function(name, read_fn, tile_fn, detect_fn, available_fn,
 #' @family backends
 #' @seealso [at_backend_list()], [at_read_image()]
 #' @export
+#' @examples
+#' # A toy backend for a ".const" file that stores only a size and a fill
+#' # value; the tile function synthesises the pixels on request.
+#' const_read <- function(path, ...) {
+#'   spec <- readRDS(path)
+#'   structure(
+#'     list(source = path, backend = "const", dims = c(spec$width, spec$height),
+#'          n_levels = 1L, level_dims = list(c(spec$width, spec$height)),
+#'          n_bands = 1L, band_names = "Band 1", pixel_size = c(1, 1),
+#'          pixel_unit = "px", dtype = "double",
+#'          handle = list(value = spec$value), meta = list()),
+#'     class = "annot_image"
+#'   )
+#' }
+#' const_tile <- function(img, level, xrange, yrange, bands) {
+#'   array(img$handle$value, dim = c(diff(yrange) + 1L, diff(xrange) + 1L, 1L))
+#' }
+#' at_backend_register(
+#'   "const", read_fn = const_read, tile_fn = const_tile,
+#'   detect_fn = function(path) endsWith(path, ".const"),
+#'   available_fn = function() TRUE,
+#'   description = "Constant-value demo backend", extensions = "const"
+#' )
+#' path <- tempfile(fileext = ".const")
+#' saveRDS(list(width = 8L, height = 6L, value = 0.5), path)
+#' img <- at_read_image(path)
+#' at_dims(img)
+#' dim(at_tile(img, xrange = c(1, 4), yrange = c(1, 3)))
+#' unlink(path)
 at_backend_register <- function(name, read_fn, tile_fn, detect_fn, available_fn,
                                 description = "", extensions = character(),
                                 call = rlang::caller_env(),
@@ -117,6 +146,9 @@ at_backend_list <- function(call = rlang::caller_env()) {
 #' @return The `annot_backend` object.
 #' @family backends
 #' @export
+#' @examples
+#' envi <- at_backend_get("envi")
+#' envi$extensions
 at_backend_get <- function(name, call = rlang::caller_env()) {
   .check_string(name, call = call)
   if (!exists(name, envir = .backend_registry, inherits = FALSE)) {
@@ -139,6 +171,8 @@ at_backend_get <- function(name, call = rlang::caller_env()) {
 #'   read `path`. Errors informatively if none can.
 #' @family backends
 #' @export
+#' @examples
+#' at_backend_detect(at_example_path("cube"))
 at_backend_detect <- function(path, call = rlang::caller_env()) {
   .check_string(path, call = call)
   registered <- ls(.backend_registry, sorted = FALSE)

@@ -23,6 +23,11 @@ The input is unchanged.
 \description{
 Add an ROI to a project layer
 }
+\examples{
+proj <- at_project(at_example_image("cube"), at_layer("tissue", labels = "tumour"))
+proj <- at_add_roi(proj, "tissue", at_roi_rect(10, 10, 40, 40, label = "tumour"))
+at_rois(proj)[, c("roi_id", "layer", "label", "area_px")]
+}
 \seealso{
 Other projects:
 \code{\link[=at_add_layer]{at_add_layer()}},

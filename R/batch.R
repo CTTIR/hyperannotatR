@@ -214,6 +214,12 @@ at_export_all <- function(session, dir,
 #'   there are no ROIs.
 #' @family batch
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+#' sess <- at_batch_apply(sess, function(project, image, idx, ...) {
+#'   at_add_roi(project, "annotations", at_roi_rect(5, 5, 5 + 10 * idx, 20, label = "tumour"))
+#' }, progress = FALSE)
+#' at_summary_table(sess, by = "label")
 at_summary_table <- function(session, by = c("image", "label", "layer"),
                              call = rlang::caller_env()) {
   .check_session(session, call = call)
@@ -276,6 +282,13 @@ at_summary_table <- function(session, by = c("image", "label", "layer"),
 #'   [tibble::tibble] with columns `idx`, `image` and `message`.
 #' @family batch
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+#' add_box <- function(project, image, idx, ...) {
+#'   at_add_roi(project, "annotations", at_roi_rect(5, 5, 20, 20, label = "tumour"))
+#' }
+#' sess <- at_batch_apply(sess, add_box, progress = FALSE)
+#' at_summary_table(sess)
 at_batch_apply <- function(session, fn, ..., scope = "all", progress = TRUE,
                            call = rlang::caller_env()) {
   .check_session(session, call = call)
@@ -334,6 +347,15 @@ at_batch_apply <- function(session, fn, ..., scope = "all", progress = TRUE,
 #' @family batch
 #' @seealso [at_check_geometry()]
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+#' # The second image gets an ROI reaching past its 128 x 128 pixel bounds.
+#' sess <- at_batch_apply(sess, function(project, image, idx, ...) {
+#'   roi <- if (idx == 2) at_roi_rect(100, 100, 150, 150, label = "tumour") else
+#'     at_roi_rect(5, 5, 20, 20, label = "tumour")
+#'   at_add_roi(project, "annotations", roi)
+#' }, progress = FALSE)
+#' at_batch_check_geometry(sess)
 at_batch_check_geometry <- function(session, call = rlang::caller_env()) {
   .check_session(session, call = call)
   empty <- tibble::tibble(image = character(0), roi_id = character(0),

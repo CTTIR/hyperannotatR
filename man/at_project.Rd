@@ -24,9 +24,10 @@ edit log).
 Create an annotation project
 }
 \examples{
-# An annot_image comes from at_read_image() or at_example_image():
-# proj <- at_project(at_example_image("tissue"),
-#                    at_layer("tissue", labels = "tissue"))
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr, name = "cube example")
+proj
 }
 \seealso{
 \code{\link[=at_add_layer]{at_add_layer()}}, \code{\link[=at_add_roi]{at_add_roi()}}, \code{\link[=at_rois]{at_rois()}}, \code{at_mask()}

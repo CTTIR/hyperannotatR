@@ -24,6 +24,9 @@ Report whether the file an image (or project) was read from is still
 available and unchanged, so a saved project can be reopened or relinked
 deliberately.
 }
+\examples{
+at_inspect_source(at_example_image("cube"))[c("status", "backend")]
+}
 \seealso{
 \code{\link[=at_relink_source]{at_relink_source()}}, \code{\link[=at_inspect_saved]{at_inspect_saved()}}
 

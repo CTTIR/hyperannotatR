@@ -20,6 +20,13 @@ not present and returns the layer unchanged.
 \description{
 Remove an ROI from a layer
 }
+\examples{
+lyr <- at_layer("tissue", labels = "tumour")
+lyr <- at_layer_add(lyr, at_roi_rect(0, 0, 10, 10, label = "tumour"))
+lyr <- at_layer_add(lyr, at_roi_rect(20, 20, 30, 30, label = "tumour"))
+first <- at_layer_rois(lyr)$roi_id[1]
+at_layer_n(at_layer_remove(lyr, first))
+}
 \seealso{
 Other layers:
 \code{\link[=at_layer]{at_layer()}},

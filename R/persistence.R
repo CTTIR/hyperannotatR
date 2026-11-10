@@ -200,6 +200,8 @@
 #' @family io
 #' @seealso [at_relink_source()], [at_inspect_saved()]
 #' @export
+#' @examples
+#' at_inspect_source(at_example_image("cube"))[c("status", "backend")]
 at_inspect_source <- function(x) {
   img <- if (inherits(x, "annot_project")) x$image else x
   img <- .migrate_image(img)
@@ -306,6 +308,11 @@ at_inspect_source <- function(x) {
 #' @family io
 #' @seealso [at_inspect_source()]
 #' @export
+#' @examples
+#' proj <- at_project(at_example_image("cube"))
+#' # Revalidate the recorded source; after moving the file, pass its new path.
+#' proj <- at_relink_source(proj, at_example_path("cube"))
+#' at_inspect_source(proj)$status
 at_relink_source <- function(x, path, backend = NULL, options = NULL) {
   project <- inherits(x, "annot_project")
   img <- if (project) x$image else x
@@ -551,6 +558,13 @@ at_relink_source <- function(x, path, backend = NULL, options = NULL) {
 #' @family io
 #' @seealso [at_inspect_source()], [at_load_session()]
 #' @export
+#' @examples
+#' path <- tempfile(fileext = ".rds")
+#' at_save_project(at_project(at_example_image("cube")), path)
+#' report <- at_inspect_saved(path)
+#' report$valid
+#' report$sources[[1]]$status
+#' unlink(path)
 at_inspect_saved <- function(path) {
   .check_file(path)
   obj <- tryCatch(readRDS(path), error = identity)

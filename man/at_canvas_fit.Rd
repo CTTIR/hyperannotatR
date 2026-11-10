@@ -20,6 +20,15 @@ The proxy, invisibly.
 \description{
 Zoom the canvas to a bounding box
 }
+\examples{
+\dontshow{if (requireNamespace("shiny", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# In an app, create the proxy with at_canvas_proxy("canvas") in the server
+# function; a mock session stands in for the browser here.
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+at_canvas_fit(proxy, bbox = c(0, 0, 64, 64))
+at_canvas_fit(proxy)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other shiny:
 \code{\link[=atCanvasOutput]{atCanvasOutput()}},

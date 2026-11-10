@@ -19,6 +19,10 @@ A new \link{annot_session} with the cursor at \code{i}.
 \description{
 Jump to a specific image
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 3))
+at_goto(sess, 3)
+}
 \seealso{
 Other sessions:
 \code{\link[=at_current]{at_current()}},

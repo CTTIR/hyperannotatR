@@ -17,6 +17,9 @@ A logical scalar. \code{TRUE} when more than one pyramid level exists.
 \description{
 Is the image pyramidal?
 }
+\examples{
+at_is_pyramidal(at_example_image("cube"))
+}
 \seealso{
 Other images:
 \code{\link[=at_bands]{at_bands()}},

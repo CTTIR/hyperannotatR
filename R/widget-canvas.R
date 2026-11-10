@@ -220,6 +220,9 @@
 #'   not applied, when it was not.
 #' @family shiny
 #' @export
+#' @examples
+#' src <- at_tile_source(at_example_image("cube"), embed = FALSE)
+#' str(src)
 at_tile_source <- function(img, level_max = NULL, tile_size = 512L, embed = TRUE,
                            view = NULL, call = rlang::caller_env()) {
   .check_image(img, call = call)
@@ -389,6 +392,14 @@ at_canvas <- function(img, project = NULL, tool = "pan", width = NULL,
 #' @return A Shiny output element.
 #' @family shiny
 #' @export
+#' @examplesIf requireNamespace("shiny", quietly = TRUE) && requireNamespace("htmlwidgets", quietly = TRUE)
+#' ui <- shiny::fluidPage(atCanvasOutput("canvas", height = "400px"))
+#' server <- function(input, output, session) {
+#'   output$canvas <- renderAtCanvas(at_canvas(at_example_image("cube")))
+#' }
+#' if (interactive()) {
+#'   shiny::runApp(shiny::shinyApp(ui, server))
+#' }
 atCanvasOutput <- function(outputId, width = "100%", height = "600px") {
   output <- htmlwidgets::shinyWidgetOutput(outputId, "atcanvas", width, height,
                                           package = "hyperannotatR")
@@ -402,6 +413,14 @@ atCanvasOutput <- function(outputId, width = "100%", height = "600px") {
 #' @return A Shiny render function.
 #' @family shiny
 #' @export
+#' @examplesIf requireNamespace("shiny", quietly = TRUE) && requireNamespace("htmlwidgets", quietly = TRUE)
+#' ui <- shiny::fluidPage(atCanvasOutput("canvas", height = "400px"))
+#' server <- function(input, output, session) {
+#'   output$canvas <- renderAtCanvas(at_canvas(at_example_image("cube")))
+#' }
+#' if (interactive()) {
+#'   shiny::runApp(shiny::shinyApp(ui, server))
+#' }
 renderAtCanvas <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) {
     expr <- substitute(expr)
@@ -423,6 +442,20 @@ renderAtCanvas <- function(expr, env = parent.frame(), quoted = FALSE) {
 #' @return An `atcanvas_proxy` object.
 #' @family shiny
 #' @export
+#' @examplesIf requireNamespace("shiny", quietly = TRUE)
+#' proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+#' class(proxy)
+#' if (interactive() && requireNamespace("htmlwidgets", quietly = TRUE)) {
+#'   ui <- shiny::fluidPage(
+#'     shiny::actionButton("rect", "Draw rectangles"),
+#'     atCanvasOutput("canvas")
+#'   )
+#'   server <- function(input, output, session) {
+#'     output$canvas <- renderAtCanvas(at_canvas(at_example_image("cube")))
+#'     shiny::observeEvent(input$rect, at_canvas_set_tool(at_canvas_proxy("canvas"), "rect"))
+#'   }
+#'   shiny::runApp(shiny::shinyApp(ui, server))
+#' }
 at_canvas_proxy <- function(id, session = shiny::getDefaultReactiveDomain()) {
   .check_string(id)
   id <- .proxy_ns_id(id, session)
@@ -459,6 +492,14 @@ at_canvas_proxy <- function(id, session = shiny::getDefaultReactiveDomain()) {
 #' @return The proxy, invisibly.
 #' @family shiny
 #' @export
+#' @examplesIf requireNamespace("shiny", quietly = TRUE)
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' proj <- at_project(at_example_image("cube"), lyr)
+#' # A mock session stands in for the browser; in an app use
+#' # at_canvas_proxy("canvas") in the server function.
+#' proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+#' at_canvas_set_annotations(proxy, proj)
 at_canvas_set_annotations <- function(proxy, project, layer = NULL,
                                       call = rlang::caller_env()) {
   .check_project(project, call = call)
@@ -473,6 +514,9 @@ at_canvas_set_annotations <- function(proxy, project, layer = NULL,
 #' @family shiny
 #' @return The proxy, invisibly.
 #' @export
+#' @examplesIf requireNamespace("shiny", quietly = TRUE)
+#' proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+#' at_canvas_set_tool(proxy, "polygon")
 at_canvas_set_tool <- function(proxy, tool, call = rlang::caller_env()) {
   tool <- .check_choice(tool, .canvas_tool_names, call = call)
   .canvas_msg(proxy, "set_tool", list(tool = tool), call = call)
@@ -484,6 +528,10 @@ at_canvas_set_tool <- function(proxy, tool, call = rlang::caller_env()) {
 #' @family shiny
 #' @return The proxy, invisibly.
 #' @export
+#' @examplesIf requireNamespace("shiny", quietly = TRUE)
+#' proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+#' at_canvas_set_selection(proxy, c("roi_000000001", "roi_000000002"))
+#' at_canvas_set_selection(proxy) # clear the selection
 at_canvas_set_selection <- function(proxy, roi_ids = character(), call = rlang::caller_env()) {
   if (!is.character(roi_ids)) {
     .at_abort("{.arg roi_ids} must be a character vector.", call = call)
@@ -504,6 +552,9 @@ at_canvas_set_selection <- function(proxy, roi_ids = character(), call = rlang::
 #' @family shiny
 #' @return The proxy, invisibly.
 #' @export
+#' @examplesIf requireNamespace("shiny", quietly = TRUE)
+#' proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+#' at_canvas_set_band(proxy, c(30, 20, 10))
 at_canvas_set_band <- function(proxy, band, call = rlang::caller_env()) {
   .canvas_msg(proxy, "set_band", list(band = as.integer(band)), call = call)
 }
@@ -515,6 +566,14 @@ at_canvas_set_band <- function(proxy, band, call = rlang::caller_env()) {
 #' @family shiny
 #' @return The proxy, invisibly.
 #' @export
+#' @examplesIf requireNamespace("shiny", quietly = TRUE)
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' mask <- at_mask(at_project(at_example_image("cube"), lyr), "labelled")
+#' # A mock session stands in for the browser; in an app use
+#' # at_canvas_proxy("canvas") in the server function.
+#' proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+#' at_canvas_set_overlay(proxy, mask, alpha = 0.4)
 at_canvas_set_overlay <- function(proxy, mask, alpha = 0.5,
                                   call = rlang::caller_env()) {
   .check_class(mask, "annot_mask", call = call)
@@ -558,6 +617,12 @@ at_canvas_set_overlay <- function(proxy, mask, alpha = 0.5,
 #' @family shiny
 #' @return The proxy, invisibly.
 #' @export
+#' @examplesIf requireNamespace("shiny", quietly = TRUE)
+#' # In an app, create the proxy with at_canvas_proxy("canvas") in the server
+#' # function; a mock session stands in for the browser here.
+#' proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+#' at_canvas_fit(proxy, bbox = c(0, 0, 64, 64))
+#' at_canvas_fit(proxy)
 at_canvas_fit <- function(proxy, bbox = NULL, call = rlang::caller_env()) {
   .canvas_msg(proxy, "fit_bounds", list(bbox = if (is.null(bbox)) NULL else as.numeric(bbox)),
               call = call)

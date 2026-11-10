@@ -206,6 +206,9 @@ at_roi_from_geojson <- function(feature, label = NULL, level = 0L,
 #'   property), or a single [annot_layer] when `layer_name` is supplied.
 #' @family io
 #' @export
+#' @examples
+#' path <- system.file("extdata", "example_annotations.geojson", package = "hyperannotatR")
+#' at_read_geojson(path, layer_name = "regions")
 at_read_geojson <- function(path, layer_name = NULL, level = 0L, flip_y = FALSE,
                             height = NULL, call = rlang::caller_env(),
                             coordinate_level = NULL, legacy_levels = c("error", "recorded")) {

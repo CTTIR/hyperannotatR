@@ -20,6 +20,13 @@ different value).
 \description{
 Object boundaries of a mask
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+mask <- at_mask(at_project(at_example_image("cube"), lyr), "labelled")
+edge <- at_mask_boundary(mask)
+sum(edge)
+}
 \seealso{
 Other masks:
 \code{\link[=at_mask]{at_mask()}},

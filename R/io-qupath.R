@@ -432,6 +432,13 @@ at_write_qupath <- function(project, path, layer = NULL, level = 0L,
 #' @return An [annot_layer].
 #' @family io
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' path <- tempfile(fileext = ".geojson")
+#' at_write_qupath(at_project(at_example_image("cube"), lyr), path)
+#' at_read_qupath(path)
+#' unlink(path)
 at_read_qupath <- function(path, layer_name = "qupath", level = 0L,
                            call = rlang::caller_env(), coordinate_level = NULL,
                            legacy_levels = c("error", "recorded")) {

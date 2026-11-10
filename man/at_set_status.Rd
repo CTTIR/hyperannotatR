@@ -22,6 +22,11 @@ A new \link{annot_session} with the status updated.
 \description{
 Set the status of a queued image
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 2))
+sess <- at_set_status(sess, 1, "complete")
+at_session_status(sess)$status
+}
 \seealso{
 Other sessions:
 \code{\link[=at_current]{at_current()}},

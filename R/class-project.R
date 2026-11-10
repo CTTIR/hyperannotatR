@@ -134,9 +134,10 @@ new_annot_project <- function(image,
 #' @seealso [at_add_layer()], [at_add_roi()], [at_rois()], `at_mask()`
 #' @export
 #' @examples
-#' # An annot_image comes from at_read_image() or at_example_image():
-#' # proj <- at_project(at_example_image("tissue"),
-#' #                    at_layer("tissue", labels = "tissue"))
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' proj <- at_project(at_example_image("cube"), lyr, name = "cube example")
+#' proj
 at_project <- function(image, layers = list(), ..., call = rlang::caller_env()) {
   .check_image(image, call = call)
   layers <- .normalize_layers(layers, call = call)
@@ -166,6 +167,10 @@ at_project <- function(image, layers = list(), ..., call = rlang::caller_env()) 
 #'   The input is unchanged.
 #' @family projects
 #' @export
+#' @examples
+#' proj <- at_project(at_example_image("cube"))
+#' proj <- at_add_layer(proj, at_layer("tissue", labels = c("tumour", "stroma")))
+#' at_layers(proj)
 at_add_layer <- function(project, layer, call = rlang::caller_env()) {
   .check_project(project, call = call)
   .check_layer(layer, call = call)
@@ -194,6 +199,10 @@ at_add_layer <- function(project, layer, call = rlang::caller_env()) {
 #' @return A new [annot_project] without the named layer. The input is unchanged.
 #' @family projects
 #' @export
+#' @examples
+#' proj <- at_project(at_example_image("cube"),
+#'                    list(at_layer("tissue"), at_layer("artefact")))
+#' at_layers(at_remove_layer(proj, "artefact"))$name
 at_remove_layer <- function(project, name, call = rlang::caller_env()) {
   .check_project(project, call = call)
   .check_string(name, call = call)
@@ -221,6 +230,10 @@ at_remove_layer <- function(project, name, call = rlang::caller_env()) {
 #'   The input is unchanged.
 #' @family projects
 #' @export
+#' @examples
+#' proj <- at_project(at_example_image("cube"), at_layer("tissue", labels = "tumour"))
+#' proj <- at_add_roi(proj, "tissue", at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' at_rois(proj)[, c("roi_id", "layer", "label", "area_px")]
 at_add_roi <- function(project, layer, roi, call = rlang::caller_env()) {
   .check_project(project, call = call)
   .check_string(layer, call = call)
@@ -255,6 +268,12 @@ at_add_roi <- function(project, layer, roi, call = rlang::caller_env()) {
 #'   the project unchanged if the identifier is not found.
 #' @family projects
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' proj <- at_project(at_example_image("cube"), lyr)
+#' id <- at_rois(proj)$roi_id[1]
+#' nrow(at_rois(at_remove_roi(proj, id)))
 at_remove_roi <- function(project, id, call = rlang::caller_env()) {
   .check_project(project, call = call)
   .check_string(id, call = call)
@@ -285,6 +304,11 @@ at_remove_roi <- function(project, id, call = rlang::caller_env()) {
 #'   columns when the project has no layers.
 #' @family projects
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(0, 0, 10, 10, label = "tumour"))
+#' proj <- at_project(at_example_image("cube"), list(lyr, at_layer("artefact")))
+#' at_layers(proj)
 at_layers <- function(project, call = rlang::caller_env()) {
   .check_project(project, call = call)
   Ls <- project$layers
@@ -339,8 +363,12 @@ at_layers <- function(project, call = rlang::caller_env()) {
 #' @seealso [at_layers()], `at_mask()`
 #' @export
 #' @examples
-#' # proj <- at_example_project()
-#' # at_rois(proj)
+#' lyr <- at_layer("tissue", labels = c("tumour", "stroma"))
+#' lyr <- at_layer_add(lyr, at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' lyr <- at_layer_add(lyr, at_roi_circle(90, 90, 15, label = "stroma"))
+#' proj <- at_project(at_example_image("cube"), lyr)
+#' at_rois(proj)
+#' at_rois(proj, label = "stroma")[, c("roi_id", "label", "area_px")]
 at_rois <- function(project, layer = NULL, label = NULL,
                     call = rlang::caller_env()) {
   .check_project(project, call = call)

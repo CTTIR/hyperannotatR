@@ -19,6 +19,12 @@ The proxy, invisibly.
 \description{
 Set the active drawing tool
 }
+\examples{
+\dontshow{if (requireNamespace("shiny", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+at_canvas_set_tool(proxy, "polygon")
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other shiny:
 \code{\link[=atCanvasOutput]{atCanvasOutput()}},

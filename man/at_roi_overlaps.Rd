@@ -20,6 +20,11 @@ ROIs that only touch along an edge or at a corner.
 \description{
 Test whether two ROIs intersect
 }
+\examples{
+a <- at_roi_rect(0, 0, 10, 10, label = "a")
+at_roi_overlaps(a, at_roi_rect(5, 5, 15, 15, label = "b"))
+at_roi_overlaps(a, at_roi_rect(20, 0, 30, 10, label = "c"))
+}
 \seealso{
 Other geometry:
 \code{\link[=at_check_containment]{at_check_containment()}},

@@ -23,6 +23,13 @@ The proxy, invisibly.
 \description{
 Highlight selected ROIs on a canvas
 }
+\examples{
+\dontshow{if (requireNamespace("shiny", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+at_canvas_set_selection(proxy, c("roi_000000001", "roi_000000002"))
+at_canvas_set_selection(proxy) # clear the selection
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other shiny:
 \code{\link[=atCanvasOutput]{atCanvasOutput()}},

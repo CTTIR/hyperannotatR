@@ -22,6 +22,12 @@ tibble with these columns when no ROIs overlap with positive area.
 \description{
 Pairwise ROI overlaps within a layer
 }
+\examples{
+lyr <- at_layer("tissue", labels = "tumour")
+lyr <- at_layer_add(lyr, at_roi_rect(0, 0, 10, 10, label = "tumour"))
+lyr <- at_layer_add(lyr, at_roi_rect(5, 5, 15, 15, label = "tumour"))
+at_rois_overlap(lyr)
+}
 \seealso{
 Other geometry:
 \code{\link[=at_check_containment]{at_check_containment()}},

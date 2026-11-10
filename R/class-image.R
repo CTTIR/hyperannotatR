@@ -63,7 +63,8 @@ new_annot_image <- function(source,
 #' @seealso [at_n_levels()], [at_is_pyramidal()]
 #' @export
 #' @examples
-#' # Image handles come from at_read_image(); see the images vignette.
+#' cube <- at_example_image("cube")
+#' at_dims(cube)
 at_dims <- function(x, level = 0L, call = rlang::caller_env()) {
   .check_image(x, call = call)
   level <- .check_count(level, call = call)
@@ -86,6 +87,8 @@ at_dims <- function(x, level = 0L, call = rlang::caller_env()) {
 #' @return An integer scalar; `1` when the image has no pyramid.
 #' @family images
 #' @export
+#' @examples
+#' at_n_levels(at_example_image("cube"))
 at_n_levels <- function(x, call = rlang::caller_env()) {
   .check_image(x, call = call)
   x$n_levels
@@ -98,6 +101,8 @@ at_n_levels <- function(x, call = rlang::caller_env()) {
 #' @return An integer scalar.
 #' @family images
 #' @export
+#' @examples
+#' at_n_bands(at_example_image("cube"))
 at_n_bands <- function(x, call = rlang::caller_env()) {
   .check_image(x, call = call)
   x$n_bands
@@ -126,6 +131,8 @@ at_n_bands <- function(x, call = rlang::caller_env()) {
 #'   from hyperannotatR 0.1; the remaining columns were added in 0.2.0.
 #' @family images
 #' @export
+#' @examples
+#' at_bands(at_example_image("cube"))
 at_bands <- function(x, call = rlang::caller_env()) {
   .check_image(x, call = call)
   n <- x$n_bands
@@ -167,6 +174,8 @@ at_bands <- function(x, call = rlang::caller_env()) {
 #' @family images
 #' @seealso [at_is_spectral()]
 #' @export
+#' @examples
+#' head(at_wavelengths(at_example_image("cube")))
 at_wavelengths <- function(x, call = rlang::caller_env()) {
   .check_image(x, call = call)
   if (!at_is_spectral(x)) {
@@ -182,6 +191,8 @@ at_wavelengths <- function(x, call = rlang::caller_env()) {
 #' @return A logical scalar. `TRUE` when the image carries per-band wavelengths.
 #' @family images
 #' @export
+#' @examples
+#' at_is_spectral(at_example_image("cube"))
 at_is_spectral <- function(x, call = rlang::caller_env()) {
   .check_image(x, call = call)
   !is.null(x$wavelengths) && length(x$wavelengths) > 0L &&
@@ -195,6 +206,8 @@ at_is_spectral <- function(x, call = rlang::caller_env()) {
 #' @return A logical scalar. `TRUE` when more than one pyramid level exists.
 #' @family images
 #' @export
+#' @examples
+#' at_is_pyramidal(at_example_image("cube"))
 at_is_pyramidal <- function(x, call = rlang::caller_env()) {
   .check_image(x, call = call)
   x$n_levels > 1L
@@ -208,6 +221,8 @@ at_is_pyramidal <- function(x, call = rlang::caller_env()) {
 #'   as `c(x, y)`, in the units given by `at_meta(x, "pixel_unit")`.
 #' @family images
 #' @export
+#' @examples
+#' at_pixel_size(at_example_image("cube"))
 at_pixel_size <- function(x, call = rlang::caller_env()) {
   .check_image(x, call = call)
   x[["pixel_size"]]
@@ -224,6 +239,10 @@ at_pixel_size <- function(x, call = rlang::caller_env()) {
 #'   `key` is supplied, the single element (or `NULL` if absent).
 #' @family images
 #' @export
+#' @examples
+#' cube <- at_example_image("cube")
+#' at_meta(cube, "backend")
+#' at_meta(cube, "interleave")
 at_meta <- function(x, key = NULL, call = rlang::caller_env()) {
   .check_image(x, call = call)
   base <- list(

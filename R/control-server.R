@@ -363,6 +363,12 @@ at_control_start <- function(session, control = "loopback", host = "127.0.0.1", 
 #'   already stopped.
 #' @family control
 #' @export
+#' @examplesIf requireNamespace("httpuv", quietly = TRUE)
+#' sess <- at_session(rep(at_example_path("cube"), 2))
+#' h <- at_control_start(sess, serve = FALSE)
+#' at_control_stop(h)
+#' at_control_stop(h) # already stopped
+#' unlink(sess$out_dir, recursive = TRUE)
 at_control_stop <- function(handle, call = rlang::caller_env()) {
   .check_class(handle, "at_control_handle", call = call)
   if (!identical(handle$kind, "local") || !identical(as.integer(handle$pid), Sys.getpid())) {
@@ -390,6 +396,11 @@ at_control_stop <- function(handle, call = rlang::caller_env()) {
 #' @return The close response (remote) or `TRUE` (local), invisibly.
 #' @family control
 #' @export
+#' @examplesIf requireNamespace("httpuv", quietly = TRUE)
+#' sess <- at_session(rep(at_example_path("cube"), 2))
+#' h <- at_control_start(sess, serve = FALSE)
+#' at_control_close(h)
+#' unlink(sess$out_dir, recursive = TRUE)
 at_control_close <- function(handle, call = rlang::caller_env()) {
   .check_class(handle, "at_control_handle", call = call)
   if (identical(handle$kind, "local")) {

@@ -17,6 +17,10 @@ A new \link{annot_session} with the cursor advanced (clamped at the end).
 \description{
 Advance to the next image
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 3))
+at_next(sess)
+}
 \seealso{
 Other sessions:
 \code{\link[=at_current]{at_current()}},

@@ -45,6 +45,10 @@ not applied, when it was not.
 \description{
 Build a tile-source descriptor for the canvas
 }
+\examples{
+src <- at_tile_source(at_example_image("cube"), embed = FALSE)
+str(src)
+}
 \seealso{
 Other shiny:
 \code{\link[=atCanvasOutput]{atCanvasOutput()}},

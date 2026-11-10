@@ -24,6 +24,8 @@ export, which hyperannotatR (and tools without the SDK) can then read through th
 \code{envi} backend. Requires \code{cuvis.r} and a usable CUVIS SDK.
 }
 \examples{
+# Needs the proprietary Cubert CUVIS SDK, the 'cuvis.r' package and a
+# Cubert .cu3s recording, none of which can be bundled with this package.
 \dontrun{
 at_cubert_export_envi("measurement.cu3s", tempfile("envi-"))
 }

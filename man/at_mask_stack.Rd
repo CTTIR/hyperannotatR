@@ -25,6 +25,15 @@ the third dimension is named by layer. Codes are local to each layer; the
 \description{
 Stack per-layer masks into a 3D array
 }
+\examples{
+tissue <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                       at_roi_rect(10, 10, 60, 60, label = "tumour"))
+artefact <- at_layer_add(at_layer("artefact", labels = "glare"),
+                         at_roi_circle(30, 30, 8, label = "glare"))
+stack <- at_mask_stack(at_project(at_example_image("cube"), list(tissue, artefact)))
+dim(stack)
+names(attr(stack, "legends"))
+}
 \seealso{
 Other masks:
 \code{\link[=at_mask]{at_mask()}},

@@ -22,6 +22,15 @@ from its lifecycle manifest and token file. The handshake is checked before
 the handle is returned: protocol, major version and instance id must match
 the manifest.
 }
+\examples{
+# Connecting needs a control service running in another R process, started
+# there with at_control_start(sess, token_file = "token").
+\dontrun{
+h <- at_control_connect("annotatr-control-<instance_id>.json", "token")
+at_control_state(h)$state_revision
+at_control_close(h)
+}
+}
 \seealso{
 Other control:
 \code{\link[=at_control_capabilities]{at_control_capabilities()}},

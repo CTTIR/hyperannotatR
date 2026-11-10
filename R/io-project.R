@@ -61,6 +61,14 @@ at_save_project <- function(project, path, overwrite = FALSE,
 #'   file was written by a newer hyperannotatR.
 #' @family io
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' path <- tempfile(fileext = ".rds")
+#' at_save_project(at_project(at_example_image("cube"), lyr), path)
+#' proj <- at_load_project(path)
+#' at_rois(proj)$label
+#' unlink(path)
 at_load_project <- function(path, call = rlang::caller_env()) {
   .check_file(path, call = call)
   obj <- readRDS(path)
@@ -84,6 +92,12 @@ at_load_project <- function(path, call = rlang::caller_env()) {
 #' @family io
 #' @seealso [at_load_session()], [at_resume()]
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+#' path <- tempfile(fileext = ".rds")
+#' at_save_session(sess, path)
+#' file.exists(path)
+#' unlink(path)
 at_save_session <- function(session, path = NULL, overwrite = FALSE,
                             call = rlang::caller_env()) {
   .check_session(session, call = call)
@@ -108,6 +122,12 @@ at_save_session <- function(session, path = NULL, overwrite = FALSE,
 #' @family io
 #' @seealso [at_save_session()], [at_resume()]
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+#' path <- tempfile(fileext = ".rds")
+#' at_save_session(sess, path)
+#' at_load_session(path)
+#' unlink(path)
 at_load_session <- function(path, call = rlang::caller_env()) {
   obj <- .session_load(path, call = call)
   obj <- .migrate_object(obj, obj$meta$annotatR_version, call = call)

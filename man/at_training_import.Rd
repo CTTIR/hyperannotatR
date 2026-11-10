@@ -64,6 +64,16 @@ which starts as \code{review_status = "unreviewed"}. Reviewed or locked
 annotations are never overwritten: with \code{replace = TRUE} they become staged
 conflicts.
 }
+\examples{
+proj <- at_project(at_example_image("cube"))
+# A 128 x 128 prediction with two classes (0 is background).
+pred <- matrix(0L, 128, 128)
+pred[20:50, 20:50] <- 1L
+pred[90:110, 60:100] <- 2L
+patch <- at_training_import(proj, pred, label_map = c(tumour = 1L, stroma = 2L))
+patch
+at_training_import(proj, pred, label_map = c(tumour = 1L, stroma = 2L), stage = FALSE)
+}
 \seealso{
 \code{\link[=at_commit_qupflowr]{at_commit_qupflowr()}}
 

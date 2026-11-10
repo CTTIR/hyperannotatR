@@ -275,6 +275,12 @@ at_plot_mask <- function(mask, legend = TRUE, call = rlang::caller_env()) {
 #' @return A [ggplot2::ggplot] object with one line per ROI and statistic.
 #' @family plots
 #' @export
+#' @examples
+#' lyr <- at_layer("tissue", labels = c("tumour", "stroma"))
+#' lyr <- at_layer_add(lyr, at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' lyr <- at_layer_add(lyr, at_roi_circle(90, 90, 15, label = "stroma"))
+#' spectra <- at_extract_spectrum(at_project(at_example_image("cube"), lyr))
+#' at_plot_spectrum(spectra)
 at_plot_spectrum <- function(spectra, colour_by = c("label", "roi_id", "layer"),
                              ribbon = TRUE, call = rlang::caller_env()) {
   colour_by <- .check_choice(colour_by, c("label", "roi_id", "layer"), default = missing(colour_by), call = call)
@@ -415,6 +421,12 @@ at_plot_overlay <- function(project, img = NULL, layer = NULL,
 #' @return A [ggplot2::ggplot] object of per-label ROI area distributions.
 #' @family plots
 #' @export
+#' @examples
+#' lyr <- at_layer("tissue", labels = c("tumour", "stroma"))
+#' lyr <- at_layer_add(lyr, at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' lyr <- at_layer_add(lyr, at_roi_rect(50, 50, 60, 60, label = "tumour"))
+#' lyr <- at_layer_add(lyr, at_roi_circle(90, 90, 15, label = "stroma"))
+#' at_plot_summary(at_project(at_example_image("cube"), lyr))
 at_plot_summary <- function(project, call = rlang::caller_env()) {
   .check_project(project, call = call)
   rt <- at_rois(project)

@@ -17,6 +17,10 @@ The \code{annot_backend} object.
 \description{
 Get a registered backend
 }
+\examples{
+envi <- at_backend_get("envi")
+envi$extensions
+}
 \seealso{
 Other backends:
 \code{\link[=at_backend_detect]{at_backend_detect()}},

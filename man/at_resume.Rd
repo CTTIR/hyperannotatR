@@ -17,6 +17,13 @@ The restored \link{annot_session}.
 \description{
 A more discoverable alias for \code{\link[=at_load_session]{at_load_session()}}.
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+path <- tempfile(fileext = ".rds")
+at_save_session(at_goto(sess, 2), path)
+at_resume(path)
+unlink(path)
+}
 \seealso{
 \code{\link[=at_save_session]{at_save_session()}}, \code{\link[=at_load_session]{at_load_session()}}
 

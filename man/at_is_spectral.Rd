@@ -17,6 +17,9 @@ A logical scalar. \code{TRUE} when the image carries per-band wavelengths.
 \description{
 Is the image a spectral cube?
 }
+\examples{
+at_is_spectral(at_example_image("cube"))
+}
 \seealso{
 Other images:
 \code{\link[=at_bands]{at_bands()}},

@@ -18,6 +18,9 @@ as \code{c(x, y)}, in the units given by \code{at_meta(x, "pixel_unit")}.
 \description{
 Physical pixel size
 }
+\examples{
+at_pixel_size(at_example_image("cube"))
+}
 \seealso{
 Other images:
 \code{\link[=at_bands]{at_bands()}},

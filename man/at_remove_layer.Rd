@@ -19,6 +19,11 @@ A new \link{annot_project} without the named layer. The input is unchanged.
 \description{
 Remove a layer from a project
 }
+\examples{
+proj <- at_project(at_example_image("cube"),
+                   list(at_layer("tissue"), at_layer("artefact")))
+at_layers(at_remove_layer(proj, "artefact"))$name
+}
 \seealso{
 Other projects:
 \code{\link[=at_add_layer]{at_add_layer()}},

@@ -30,7 +30,8 @@ level 0. Note the order: width first, unlike the \verb{[y, x, band]} arrays
 returned by \code{\link[=at_tile]{at_tile()}}, so \code{nrow()} gives the width.
 }
 \examples{
-# Image handles come from at_read_image(); see the images vignette.
+cube <- at_example_image("cube")
+at_dims(cube)
 }
 \seealso{
 \code{\link[=at_n_levels]{at_n_levels()}}, \code{\link[=at_is_pyramidal]{at_is_pyramidal()}}

@@ -41,6 +41,14 @@ An \link{annot_layer}.
 \description{
 Read ROIs from a CSV with WKT geometry
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+path <- tempfile(fileext = ".csv")
+at_write_rois_csv(at_project(at_example_image("cube"), lyr), path)
+at_read_rois_csv(path, layer_name = "tissue")
+unlink(path)
+}
 \seealso{
 Other io:
 \code{\link[=at_inspect_saved]{at_inspect_saved()}},

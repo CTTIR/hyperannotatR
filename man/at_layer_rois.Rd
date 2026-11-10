@@ -21,6 +21,11 @@ with the same columns when the layer has no ROIs.
 \description{
 Layer ROI table
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_circle(20, 20, 5, label = "tumour"))
+at_layer_rois(lyr)
+}
 \seealso{
 Other layers:
 \code{\link[=at_layer]{at_layer()}},

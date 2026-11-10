@@ -639,6 +639,14 @@ at_mask_legend <- function(mask, call = rlang::caller_env()) {
 #'   [at_mask_legend()]) that maps them back to labels.
 #' @family masks
 #' @export
+#' @examples
+#' tissue <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                        at_roi_rect(10, 10, 60, 60, label = "tumour"))
+#' artefact <- at_layer_add(at_layer("artefact", labels = "glare"),
+#'                          at_roi_circle(30, 30, 8, label = "glare"))
+#' stack <- at_mask_stack(at_project(at_example_image("cube"), list(tissue, artefact)))
+#' dim(stack)
+#' names(attr(stack, "legends"))
 at_mask_stack <- function(project, layers = NULL, level = 0L,
                           call = rlang::caller_env()) {
   .check_project(project, call = call)
@@ -742,6 +750,12 @@ at_mask_derive <- function(state, anatomy, artefact = NULL, keep_label = "wound"
 #'   different value).
 #' @family masks
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' mask <- at_mask(at_project(at_example_image("cube"), lyr), "labelled")
+#' edge <- at_mask_boundary(mask)
+#' sum(edge)
 at_mask_boundary <- function(mask, width = 1L, call = rlang::caller_env()) {
   .check_class(mask, "annot_mask", call = call)
   width <- .check_count(width, min = 1L, call = call)
@@ -782,6 +796,11 @@ at_mask_boundary <- function(mask, width = 1L, call = rlang::caller_env()) {
 #'   copied onto the sampled matrix.
 #' @family masks
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' mask <- at_mask(at_project(at_example_image("cube"), lyr), "labelled")
+#' dim(at_mask_preview(mask, max_dim = 32))
 at_mask_preview <- function(mask, max_dim = 1024L, call = rlang::caller_env()) {
   .check_class(mask, "annot_mask", call = call)
   max_dim <- .check_count(max_dim, min = 1L, call = call)

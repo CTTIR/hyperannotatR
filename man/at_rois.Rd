@@ -48,8 +48,12 @@ returning level-0 geometry. Consumers needing that provenance must now use
 \code{source_level}. The stored ROI geometry, level, and identifier are unchanged.
 }
 \examples{
-# proj <- at_example_project()
-# at_rois(proj)
+lyr <- at_layer("tissue", labels = c("tumour", "stroma"))
+lyr <- at_layer_add(lyr, at_roi_rect(10, 10, 40, 40, label = "tumour"))
+lyr <- at_layer_add(lyr, at_roi_circle(90, 90, 15, label = "stroma"))
+proj <- at_project(at_example_image("cube"), lyr)
+at_rois(proj)
+at_rois(proj, label = "stroma")[, c("roi_id", "label", "area_px")]
 }
 \seealso{
 \code{\link[=at_layers]{at_layers()}}, \code{at_mask()}

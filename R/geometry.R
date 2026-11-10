@@ -335,6 +335,10 @@ at_roi_contains <- function(roi, x, y, call = rlang::caller_env()) {
 #'   ROIs that only touch along an edge or at a corner.
 #' @family geometry
 #' @export
+#' @examples
+#' a <- at_roi_rect(0, 0, 10, 10, label = "a")
+#' at_roi_overlaps(a, at_roi_rect(5, 5, 15, 15, label = "b"))
+#' at_roi_overlaps(a, at_roi_rect(20, 0, 30, 10, label = "c"))
 at_roi_overlaps <- function(roi1, roi2, call = rlang::caller_env(), image = NULL) {
   .check_roi(roi1, arg = "roi1", call = call)
   .check_roi(roi2, arg = "roi2", call = call)
@@ -353,6 +357,10 @@ at_roi_overlaps <- function(roi1, roi2, call = rlang::caller_env(), image = NULL
 #' @return A numeric scalar distance in level-0 pixels.
 #' @family geometry
 #' @export
+#' @examples
+#' a <- at_roi_rect(0, 0, 10, 10, label = "a")
+#' b <- at_roi_rect(20, 0, 30, 10, label = "b")
+#' at_roi_distance(a, b)
 at_roi_distance <- function(roi1, roi2, call = rlang::caller_env(), image = NULL) {
   .check_roi(roi1, arg = "roi1", call = call)
   .check_roi(roi2, arg = "roi2", call = call)
@@ -372,6 +380,11 @@ at_roi_distance <- function(roi1, roi2, call = rlang::caller_env(), image = NULL
 #'   tibble with these columns when no ROIs overlap with positive area.
 #' @family geometry
 #' @export
+#' @examples
+#' lyr <- at_layer("tissue", labels = "tumour")
+#' lyr <- at_layer_add(lyr, at_roi_rect(0, 0, 10, 10, label = "tumour"))
+#' lyr <- at_layer_add(lyr, at_roi_rect(5, 5, 15, 15, label = "tumour"))
+#' at_rois_overlap(lyr)
 at_rois_overlap <- function(layer, call = rlang::caller_env(), image = NULL) {
   .check_layer(layer, call = call)
   empty <- tibble::tibble(
@@ -692,6 +705,14 @@ at_check_containment <- function(project, tol = 0, call = rlang::caller_env()) {
 #' @family geometry
 #' @seealso [at_check_geometry()]
 #' @export
+#' @examples
+#' # An ROI reaching past the 128 x 128 pixel image is clipped to its bounds.
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(100, 100, 150, 150, label = "tumour"))
+#' proj <- at_project(at_example_image("cube"), lyr)
+#' at_check_geometry(proj)
+#' fixed <- at_fix_geometry(proj)
+#' at_check_geometry(fixed)
 at_fix_geometry <- function(project, verbose = TRUE, call = rlang::caller_env()) {
   .check_project(project, call = call)
   .check_flag(verbose, call = call)

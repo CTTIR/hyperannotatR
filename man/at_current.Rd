@@ -20,6 +20,10 @@ image (and applying the session's layer template) if it has not been visited.
 A stored project whose pixel handle was not saved is reopened from its
 recorded source (see \code{\link[=at_inspect_source]{at_inspect_source()}} when that is impossible).
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+at_current(sess)
+}
 \seealso{
 Other sessions:
 \code{\link[=at_example_session]{at_example_session()}},

@@ -22,6 +22,19 @@ and the stored \code{response}.
 After a lost response, ask the service what happened to a request id. An
 unknown id raises \code{REQUEST_NOT_FOUND} and has no side effect.
 }
+\examples{
+\dontshow{if (requireNamespace("httpuv", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sess <- at_session(rep(at_example_path("cube"), 2))
+h <- at_control_start(sess, serve = FALSE)
+st <- at_control_state(h)
+res <- at_control_command(h, list(operation = "context.goto", payload = list(queue_index = 2),
+                                  expected_revision = st$state_revision,
+                                  request_id = "goto-example"))
+at_control_request_status(h, "goto-example")$status
+at_control_stop(h)
+unlink(sess$out_dir, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other control:
 \code{\link[=at_control_capabilities]{at_control_capabilities()}},
