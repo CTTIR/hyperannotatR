@@ -71,7 +71,7 @@
 #'
 #' @param a Reference `annot_mask` or integer matrix.
 #' @param b Comparison `annot_mask` or integer matrix, same dimensions as `a`.
-#' @param background Integer value treated as unlabeled/background and excluded
+#' @param background Integer value treated as unlabelled/background and excluded
 #'   from the per-class rows (still counted for overall accuracy/kappa).
 #'   Defaults to declared metadata background, or `0` for plain matrices.
 #'   Explicit values must agree with metadata; both inputs must share background.

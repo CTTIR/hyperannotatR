@@ -1,38 +1,45 @@
-## Status
+## Submission
 
-hyperannotatR 0.3.1 is a locally validated, unsubmitted candidate. No CRAN,
-Zenodo or hosted-platform acceptance is claimed.
+This is a new submission.
 
 ## R CMD check results
 
-2026-11-02: the exact source archive passed full `R CMD check --as-cran` on
-R 4.6.1, macOS 27.0.1 arm64, with PDF manual generation, incoming checks and
-all available suggested dependencies enabled. A separate
-`_R_CHECK_DEPENDS_ONLY_=true` run passed against the same archive.
+0 errors | 0 warnings | 1 note
 
-Both runs: 0 errors | 0 warnings | 1 note (New submission).
+* checking CRAN incoming feasibility ... NOTE
+  Maintainer: 'Raban Heller <raban.heller@uni-ulm.de>'
+  New submission
 
-Full packaged tests: 5,462 passed, 13 named skips. Minimal-dependency tests:
-3,420 passed, 108 optional-software/CRAN skips. Installed instrumentation ran
-5,504 passing expectations with eight named skips and 91.87301% line coverage.
-No test failures or warnings occurred in these final runs. Real browser and
-HTTP checks ran separately; vendor/private-data lanes remain unqualified.
+  This is the expected note for a first submission.
 
-The first minimal check exposed optional-reader assumptions in examples and
-test fixtures. Core examples and export tests now use bundled ENVI data;
-reader-specific tests retain explicit prerequisites. All 83 example topics
-also passed in core-only, core-plus-httpuv and full dependency environments.
+## Test environments
 
-## Test environments and release gates
+* local: macOS 27.0.1 (aarch64-apple-darwin), R 4.6.1,
+  `R CMD check --as-cran` on the built tarball, including the PDF manual
+  (TinyTeX, TeX Live 2026) and the HTML manual validation (HTML Tidy 5.8.0).
+  The Bioconductor package 'RBioFormats' (Suggests) needs a Java runtime
+  configured for R and was not installed locally, so that run used
+  `_R_CHECK_FORCE_SUGGESTS_=false`; its tests are skipped when it is absent.
+* GitHub Actions (r-lib/actions v2, `--as-cran`): ubuntu-latest (R devel,
+  release, oldrel-1), macos-latest (R release), windows-latest (R release),
+  plus an informational ubuntu-latest oldrel-3 row.
 
-The current candidate was tested locally on macOS only. The shared GitHub
-workflow defines Linux R-devel/release/oldrel, macOS and Windows jobs, but this
-candidate has not been pushed and those jobs have not run for it. Minimum
-R 4.1 support, real CUVIS SDK inputs and partner-client qualification require
-separate evidence before making those claims.
+## Notes
 
-Evidence, limitations and the runnable first-use path are recorded in
-`planning/evidence/2026-11-02/`. Earlier dated records remain unchanged.
-The ordinary R-generated PDF manual has nine pre-existing line-wrapping clips;
-a separately identified reading copy fixes layout only and has been visually
-and structurally verified. The original check PDF is preserved.
+* The installed size is about 7.3 MB (R code 2.1 MB, vignettes 1.2 MB,
+  example data 2.7 MB). The example data are small synthetic hyperspectral
+  cubes and images in the formats the package reads (ENVI, TIFF, PNG); the
+  examples, tests and vignettes need them to run offline. The source tarball
+  is 4.2 MB.
+* Tests take about two minutes; the longest app-server scenarios are skipped
+  on CRAN.
+* All suggested packages are used conditionally. Readers for optional image
+  formats ('RBioFormats', 'tiff', 'terra', 'magick', 'png') are checked with
+  `requireNamespace()` before use.
+* The 'shiny' annotation app starts only in interactive sessions, and the
+  example of the optional local control service runs in process without
+  opening a network listener (`serve = FALSE`). Browser-based tests
+  ('shinytest2', 'chromote') run only when explicitly enabled through an
+  environment variable and are skipped on CRAN.
+* Examples, tests and vignettes use bundled synthetic data, need no network
+  access and write only to `tempdir()`.

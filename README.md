@@ -48,7 +48,7 @@ install.packages(c("magick", "tiff", "shiny", "bslib", "htmlwidgets",
 ```
 
 The GitHub command installs the published branch. To test a locally
-prepared source package, use `R CMD INSTALL hyperannotatR_0.3.1.tar.gz`
+prepared source package, use `R CMD INSTALL hyperannotatR_0.4.0.tar.gz`
 after installing its dependencies. OME-TIFF additionally needs Java and
 the Bioconductor package `RBioFormats`; see
 `vignette("images-and-backends")` for backend requirements.
@@ -125,7 +125,7 @@ spectral units.
 
 ## The mask workflow
 
-A **mask** is the central output artifact: a binary, labelled, or
+A **mask** is the central output artefact: a binary, labelled, or
 multi-class integer raster derived from your annotations, exportable at
 any pyramid level and self-describing via a sidecar JSON legend. Masks
 feed segmentation, classification, and spectral-extraction pipelines in
@@ -183,7 +183,7 @@ send typed commands to a running app. See `vignette("partner-interop")`.
 Unlike QuPath, the ImageJ ROI Manager, napari, or Annotorious,
 hyperannotatR is R-native and script-first, focuses on hyperspectral
 cubes and their display rasters, and treats the batch **mask** export as
-a first-class, reproducible artifact.
+a first-class, reproducible artefact.
 
 ## Acknowledgements
 

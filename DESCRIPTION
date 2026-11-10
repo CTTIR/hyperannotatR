@@ -1,8 +1,8 @@
 Package: hyperannotatR
 Type: Package
 Title: Region-of-Interest Annotation for Hyperspectral Data
-Version: 0.3.1
-Authors@R: person("Raban", "Heller", email = "raban.heller@charite.de",
+Version: 0.4.0
+Authors@R: person("Raban", "Heller", email = "raban.heller@uni-ulm.de",
     role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8006-9742"))
 Description: Annotate multiple layers of regions of interest in hyperspectral
     data cubes and their associated display rasters.
@@ -19,6 +19,7 @@ License: MIT + file LICENSE
 URL: https://github.com/CTTIR/hyperannotatR, https://cttir.github.io/hyperannotatR/
 BugReports: https://github.com/CTTIR/hyperannotatR/issues
 Encoding: UTF-8
+Language: en-GB
 Roxygen: list(markdown = TRUE)
 Depends: R (>= 4.1.0)
 Imports:
@@ -64,5 +65,5 @@ Suggests:
     zip
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.1
 Config/Needs/website: CTTIR/themakR

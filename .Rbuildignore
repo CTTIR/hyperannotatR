@@ -11,7 +11,8 @@
 ^\.lintr$
 ^\.Rproj\.user$
 ^.*\.Rproj$
-^man/figures/logo\.svg$
+^man/figures/(icon-|hyperannotatR-hex|logo-dark|logo-light|logo-mono|logo-symbol|logo-with-name-mono|logo\.(png|pdf))
+^man/figures/logo-with-name(-dark)?\.(pdf|svg)$
 ^\.vscode$
 ^hyperannotatR_.*\.tar\.gz$
 ^hsi-workbench$

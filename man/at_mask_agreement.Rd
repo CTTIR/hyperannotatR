@@ -19,7 +19,7 @@ at_mask_agreement(
 
 \item{b}{Comparison \code{annot_mask} or integer matrix, same dimensions as \code{a}.}
 
-\item{background}{Integer value treated as unlabeled/background and excluded
+\item{background}{Integer value treated as unlabelled/background and excluded
 from the per-class rows (still counted for overall accuracy/kappa).
 Defaults to declared metadata background, or \code{0} for plain matrices.
 Explicit values must agree with metadata; both inputs must share background.}

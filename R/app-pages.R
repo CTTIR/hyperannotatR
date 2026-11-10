@@ -98,7 +98,7 @@ Three columns: the **queue** (left), the **canvas and tools** (middle), and
   places point/rectangle anchors or line endpoints. Space adds polygon vertices
   and Enter finishes.
   Escape cancels unfinished geometry. Shortcuts leave focused form controls their
-  native behavior.
+  native behaviour.
 - The canvas shows an image overview with pan/zoom, not streamed pyramid tiles.
   It reports missing display capabilities and decoding failures before editing.
   Locked layers and protected ROIs cannot be changed in the app. Hidden layers
