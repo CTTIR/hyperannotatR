@@ -2,8 +2,8 @@ Package: hyperannotatR
 Type: Package
 Title: Region-of-Interest Annotation for Hyperspectral Data
 Version: 0.4.0
-Authors@R: person("Raban", "Heller", email = "raban.heller@uni-ulm.de",
-    role = c("aut", "cre"), comment = c(ORCID = "0000-0001-8006-9742"))
+Authors@R: person("R.", "Heller", email = "raban.heller@uni-ulm.de",
+    role = c("aut", "cre", "cph"), comment = c(ORCID = "0000-0001-8006-9742"))
 Description: Annotate multiple layers of regions of interest in hyperspectral
     data cubes and their associated display rasters.
     Annotations are stored as validated simple-feature geometries in image pixel
