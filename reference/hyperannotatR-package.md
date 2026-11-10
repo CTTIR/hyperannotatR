@@ -24,10 +24,10 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Raban Heller <raban.heller@uni-ulm.de>
-([ORCID](https://orcid.org/0000-0001-8006-9742))
+**Maintainer**: R. Heller <raban.heller@uni-ulm.de>
+([ORCID](https://orcid.org/0000-0001-8006-9742)) \[copyright holder\]
 
 Authors:
 
-- Raban Heller <raban.heller@uni-ulm.de>
-  ([ORCID](https://orcid.org/0000-0001-8006-9742))
+- R. Heller <raban.heller@uni-ulm.de>
+  ([ORCID](https://orcid.org/0000-0001-8006-9742)) \[copyright holder\]
