@@ -314,8 +314,12 @@
 # system (/dev/urandom) or the optional openssl package, and generation is
 # refused when neither exists (Windows without openssl). Only identifiers that
 # need to be unique but not secret (`secure = FALSE`: staging directory
-# names, UUIDs for patches and requests) fall back to R's generator seeded
-# from the clock and process id.
+# names, UUIDs for patches and requests) fall back to SHA-256 digests of the
+# clock, the process id, a fresh temporary file name and a per-process
+# counter. That fallback does not use R's random-number generator at all.
+.random_state <- new.env(parent = emptyenv())
+.random_state$n <- 0
+
 .random_bytes <- function(n, secure = TRUE) {
   if (.urandom_available()) {
     con <- file("/dev/urandom", "rb", raw = TRUE)
@@ -333,17 +337,15 @@
       class = "capability", code = "CAPABILITY_UNAVAILABLE"
     )
   }
-  had_seed <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
-  old <- if (had_seed) get(".Random.seed", envir = globalenv()) else NULL
-  on.exit({
-    if (had_seed) {
-      assign(".Random.seed", old, envir = globalenv())
-    } else if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
-      rm(".Random.seed", envir = globalenv())
-    }
-  }, add = TRUE)
-  set.seed(NULL)
-  as.raw(sample.int(256L, n, replace = TRUE) - 1L)
+  out <- raw(0)
+  while (length(out) < n) {
+    .random_state$n <- .random_state$n + 1
+    key <- paste(format(Sys.time(), "%Y-%m-%d %H:%M:%OS6"), Sys.getpid(),
+                 basename(tempfile()), .random_state$n, sep = "|")
+    hex <- .sha256_bytes(key)
+    out <- c(out, as.raw(strtoi(substring(hex, seq(1L, 63L, 2L), seq(2L, 64L, 2L)), 16L)))
+  }
+  out[seq_len(n)]
 }
 
 .urandom_available <- function() file.exists("/dev/urandom")
