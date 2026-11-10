@@ -23,6 +23,12 @@ recompute bands in the browser. To change the displayed bands, re-render the
 widget with a \code{view} (see \code{\link[=at_canvas]{at_canvas()}} and \code{\link[=at_band_view]{at_band_view()}}), as the
 annotation app does.
 }
+\examples{
+\dontshow{if (requireNamespace("shiny", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+at_canvas_set_band(proxy, c(30, 20, 10))
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other shiny:
 \code{\link[=atCanvasOutput]{atCanvasOutput()}},

@@ -17,6 +17,10 @@ A new \link{annot_session} with the cursor decremented (clamped at 1).
 \description{
 Step back to the previous image
 }
+\examples{
+sess <- at_goto(at_session(rep(at_example_path("cube"), 3)), 3)
+at_prev(sess)
+}
 \seealso{
 Other sessions:
 \code{\link[=at_current]{at_current()}},

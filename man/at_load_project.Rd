@@ -21,6 +21,15 @@ file was written by a newer hyperannotatR.
 \description{
 Load a project
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+path <- tempfile(fileext = ".rds")
+at_save_project(at_project(at_example_image("cube"), lyr), path)
+proj <- at_load_project(path)
+at_rois(proj)$label
+unlink(path)
+}
 \seealso{
 Other io:
 \code{\link[=at_inspect_saved]{at_inspect_saved()}},

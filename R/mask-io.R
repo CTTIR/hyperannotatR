@@ -286,6 +286,14 @@ at_read_mask <- function(path, level = NULL, connectivity = c(8L, 4L),
 #'   preflight plus staged renames is not a race-free filesystem transaction.
 #' @family masks
 #' @export
+#' @examplesIf requireNamespace("tiff", quietly = TRUE) || requireNamespace("magick", quietly = TRUE)
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' dir <- file.path(tempdir(), "mask-example")
+#' receipt <- at_write_masks(at_project(at_example_image("cube"), lyr), dir, per = "layer")
+#' receipt[, c("type", "n_px", "status")]
+#' basename(receipt$path)
+#' unlink(dir, recursive = TRUE)
 at_write_masks <- function(project, dir, per = c("layer", "roi", "class", "project"),
                            type = c("labelled", "binary", "multiclass"),
                            level = 0L, overwrite = FALSE,

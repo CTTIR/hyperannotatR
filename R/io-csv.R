@@ -68,6 +68,13 @@ at_write_rois_csv <- function(project, path, overwrite = FALSE,
 #' @return An [annot_layer].
 #' @family io
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' path <- tempfile(fileext = ".csv")
+#' at_write_rois_csv(at_project(at_example_image("cube"), lyr), path)
+#' at_read_rois_csv(path, layer_name = "tissue")
+#' unlink(path)
 at_read_rois_csv <- function(path, layer_name = "csv", call = rlang::caller_env(),
                              coordinate_level = NULL, legacy_levels = c("error", "recorded")) {
   legacy_levels <- .check_choice(legacy_levels, c("error", "recorded"),

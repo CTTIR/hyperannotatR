@@ -22,6 +22,11 @@ When \code{key} is \code{NULL}, a list of all metadata (including \code{source},
 \description{
 Image metadata
 }
+\examples{
+cube <- at_example_image("cube")
+at_meta(cube, "backend")
+at_meta(cube, "interleave")
+}
 \seealso{
 Other images:
 \code{\link[=at_bands]{at_bands()}},

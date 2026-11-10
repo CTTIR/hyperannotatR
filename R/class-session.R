@@ -143,8 +143,8 @@ new_annot_session <- function(manifest,
 #' @seealso [at_next()], [at_current()], [at_resume()]
 #' @export
 #' @examples
-#' # Build a session over the bundled example image copied several times:
-#' # sess <- at_example_session(3)
+#' sess <- at_session(rep(at_example_path("cube"), 3), labels = c("tumour", "stroma"))
+#' sess
 at_session <- function(paths, labels = character(), layers = NULL,
                        out_dir = .session_out_dir(), autosave = TRUE, ...,
                        call = rlang::caller_env()) {
@@ -211,6 +211,9 @@ at_session <- function(paths, labels = character(), layers = NULL,
 #' @return A new [annot_session] with the cursor advanced (clamped at the end).
 #' @family sessions
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 3))
+#' at_next(sess)
 at_next <- function(session, call = rlang::caller_env()) {
   .check_session(session, call = call)
   session$cursor <- min(session$cursor + 1L, nrow(session$manifest))
@@ -222,6 +225,9 @@ at_next <- function(session, call = rlang::caller_env()) {
 #' @return A new [annot_session] with the cursor decremented (clamped at 1).
 #' @family sessions
 #' @export
+#' @examples
+#' sess <- at_goto(at_session(rep(at_example_path("cube"), 3)), 3)
+#' at_prev(sess)
 at_prev <- function(session, call = rlang::caller_env()) {
   .check_session(session, call = call)
   session$cursor <- max(session$cursor - 1L, 1L)
@@ -234,6 +240,9 @@ at_prev <- function(session, call = rlang::caller_env()) {
 #' @return A new [annot_session] with the cursor at `i`.
 #' @family sessions
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 3))
+#' at_goto(sess, 3)
 at_goto <- function(session, i, call = rlang::caller_env()) {
   .check_session(session, call = call)
   i <- .check_count(i, min = 1L, call = call)
@@ -259,6 +268,9 @@ at_goto <- function(session, i, call = rlang::caller_env()) {
 #' @return An [annot_project].
 #' @family sessions
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+#' at_current(sess)
 at_current <- function(session, call = rlang::caller_env()) {
   .check_session(session, call = call)
   .materialize_project(session, session$cursor)
@@ -273,6 +285,10 @@ at_current <- function(session, call = rlang::caller_env()) {
 #' @return A new [annot_session] with the status updated.
 #' @family sessions
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2))
+#' sess <- at_set_status(sess, 1, "complete")
+#' at_session_status(sess)$status
 at_set_status <- function(session, i, status, call = rlang::caller_env()) {
   .check_session(session, call = call)
   i <- .check_count(i, min = 1L, call = call)
@@ -295,6 +311,9 @@ at_set_status <- function(session, i, status, call = rlang::caller_env()) {
 #'   `modified`.
 #' @family sessions
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2))
+#' at_session_status(sess)[, c("idx", "status", "n_rois")]
 at_session_status <- function(session, call = rlang::caller_env()) {
   .check_session(session, call = call)
   session$manifest
@@ -311,6 +330,12 @@ at_session_status <- function(session, call = rlang::caller_env()) {
 #'   prefix.
 #' @family sessions
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2), labels = c("tumour", "stroma"))
+#' sess <- at_batch_apply(sess, function(project, image, idx, ...) {
+#'   at_add_roi(project, "annotations", at_roi_rect(5, 5, 20, 20, label = "tumour"))
+#' }, progress = FALSE)
+#' at_manifest(sess)[, c("idx", "status", "n_rois", "tumour", "stroma")]
 at_manifest <- function(session, call = rlang::caller_env()) {
   .check_session(session, call = call)
   m <- session$manifest
@@ -380,6 +405,12 @@ at_manifest <- function(session, call = rlang::caller_env()) {
 #' @family sessions
 #' @seealso [at_save_session()], [at_load_session()]
 #' @export
+#' @examples
+#' sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+#' path <- tempfile(fileext = ".rds")
+#' at_save_session(at_goto(sess, 2), path)
+#' at_resume(path)
+#' unlink(path)
 at_resume <- function(path, call = rlang::caller_env()) {
   at_load_session(path, call = call)
 }

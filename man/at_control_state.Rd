@@ -19,6 +19,17 @@ The state snapshot (a list) with \code{state_revision}, \code{event_cursor},
 \description{
 Read the state of a control service
 }
+\examples{
+\dontshow{if (requireNamespace("httpuv", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sess <- at_session(rep(at_example_path("cube"), 2))
+h <- at_control_start(sess, serve = FALSE)
+st <- at_control_state(h)
+st$state_revision
+length(st$queue)
+at_control_stop(h)
+unlink(sess$out_dir, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other control:
 \code{\link[=at_control_capabilities]{at_control_capabilities()}},

@@ -54,6 +54,10 @@ is accepted. Features without a geometry (\code{"geometry": null}) carry no
 region and are skipped with a warning; any other document is refused with
 an \code{at_validation_error} of code \code{INVALID_GEOJSON}.
 }
+\examples{
+path <- system.file("extdata", "example_annotations.geojson", package = "hyperannotatR")
+at_read_geojson(path, layer_name = "regions")
+}
 \seealso{
 Other io:
 \code{\link[=at_inspect_saved]{at_inspect_saved()}},

@@ -22,6 +22,11 @@ The input is unchanged.
 \description{
 Add a layer to a project
 }
+\examples{
+proj <- at_project(at_example_image("cube"))
+proj <- at_add_layer(proj, at_layer("tissue", labels = c("tumour", "stroma")))
+at_layers(proj)
+}
 \seealso{
 Other projects:
 \code{\link[=at_add_roi]{at_add_roi()}},

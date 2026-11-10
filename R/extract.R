@@ -240,6 +240,11 @@ at_extract_spectrum <- function(project, img = NULL, stat = "mean", layer = NULL
 #'   matches.
 #' @family extraction
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 20, 20, label = "tumour"))
+#' proj <- at_project(at_example_image("cube"), lyr)
+#' at_extract_pixels(proj, bands = 1:2)
 at_extract_pixels <- function(project, img = NULL, layer = NULL, level = 0L,
                               bands = NULL, max_px = 1e6,
                               call = rlang::caller_env()) {

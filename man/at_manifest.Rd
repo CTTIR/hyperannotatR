@@ -22,6 +22,13 @@ prefix.
 \description{
 Session progress manifest with per-label counts
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 2), labels = c("tumour", "stroma"))
+sess <- at_batch_apply(sess, function(project, image, idx, ...) {
+  at_add_roi(project, "annotations", at_roi_rect(5, 5, 20, 20, label = "tumour"))
+}, progress = FALSE)
+at_manifest(sess)[, c("idx", "status", "n_rois", "tumour", "stroma")]
+}
 \seealso{
 Other sessions:
 \code{\link[=at_current]{at_current()}},

@@ -17,6 +17,9 @@ An integer scalar; \code{1} when the image has no pyramid.
 \description{
 Number of pyramid levels
 }
+\examples{
+at_n_levels(at_example_image("cube"))
+}
 \seealso{
 Other images:
 \code{\link[=at_bands]{at_bands()}},

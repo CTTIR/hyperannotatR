@@ -19,6 +19,17 @@ A Shiny render function.
 \description{
 Render an annotation canvas in Shiny
 }
+\examples{
+\dontshow{if (requireNamespace("shiny", quietly = TRUE) && requireNamespace("htmlwidgets", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+ui <- shiny::fluidPage(atCanvasOutput("canvas", height = "400px"))
+server <- function(input, output, session) {
+  output$canvas <- renderAtCanvas(at_canvas(at_example_image("cube")))
+}
+if (interactive()) {
+  shiny::runApp(shiny::shinyApp(ui, server))
+}
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other shiny:
 \code{\link[=atCanvasOutput]{atCanvasOutput()}},

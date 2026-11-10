@@ -45,8 +45,8 @@ materialised.
 Create a batch annotation session
 }
 \examples{
-# Build a session over the bundled example image copied several times:
-# sess <- at_example_session(3)
+sess <- at_session(rep(at_example_path("cube"), 3), labels = c("tumour", "stroma"))
+sess
 }
 \seealso{
 \code{\link[=at_next]{at_next()}}, \code{\link[=at_current]{at_current()}}, \code{\link[=at_resume]{at_resume()}}

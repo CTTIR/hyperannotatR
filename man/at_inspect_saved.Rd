@@ -19,6 +19,14 @@ ambiguous structures are reported without guessing repairs.
 Validate a saved project or session file and report the state of its image
 sources, without repairing anything or reading pixels.
 }
+\examples{
+path <- tempfile(fileext = ".rds")
+at_save_project(at_project(at_example_image("cube")), path)
+report <- at_inspect_saved(path)
+report$valid
+report$sources[[1]]$status
+unlink(path)
+}
 \seealso{
 \code{\link[=at_inspect_source]{at_inspect_source()}}, \code{\link[=at_load_session]{at_load_session()}}
 

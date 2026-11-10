@@ -37,6 +37,16 @@ outside the verified inventory are never opened. A check that cannot run
 on a malformed manifest is reported as \code{"fail"} rather than raising an
 error; only an unsupported major version aborts (\code{PROTOCOL_MISMATCH}).
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr)
+dest <- file.path(tempdir(), "training-check-example")
+ds <- at_training_export(proj, dest, tile_size = 64, mask_format = "npy",
+                         overwrite = TRUE)
+at_training_check(dest, proj)
+unlink(dest, recursive = TRUE)
+}
 \seealso{
 Other training:
 \code{\link[=at_training_export]{at_training_export()}},

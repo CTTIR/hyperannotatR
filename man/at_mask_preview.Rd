@@ -23,6 +23,12 @@ copied onto the sampled matrix.
 Nearest-neighbour downsample only (interpolating a label mask would invent
 labels that do not exist).
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+mask <- at_mask(at_project(at_example_image("cube"), lyr), "labelled")
+dim(at_mask_preview(mask, max_dim = 32))
+}
 \seealso{
 Other masks:
 \code{\link[=at_mask]{at_mask()}},

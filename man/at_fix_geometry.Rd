@@ -25,6 +25,15 @@ vertices, re-orient holes that wind like their exterior ring, and clip
 out-of-bounds geometry to the image bounds (an intersection, so a polygon
 stays a polygon), reporting what changed.
 }
+\examples{
+# An ROI reaching past the 128 x 128 pixel image is clipped to its bounds.
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(100, 100, 150, 150, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr)
+at_check_geometry(proj)
+fixed <- at_fix_geometry(proj)
+at_check_geometry(fixed)
+}
 \seealso{
 \code{\link[=at_check_geometry]{at_check_geometry()}}
 

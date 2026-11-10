@@ -20,6 +20,11 @@ A numeric scalar distance in level-0 pixels.
 \description{
 Distance between two ROIs
 }
+\examples{
+a <- at_roi_rect(0, 0, 10, 10, label = "a")
+b <- at_roi_rect(20, 0, 30, 10, label = "b")
+at_roi_distance(a, b)
+}
 \seealso{
 Other geometry:
 \code{\link[=at_check_containment]{at_check_containment()}},

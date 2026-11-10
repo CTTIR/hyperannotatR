@@ -22,6 +22,14 @@ app keep running. Neither path terminates a process. A close is not
 revision-checked, so concurrent edits in an attached app never make it
 fail; unsaved app edits stay in the app.
 }
+\examples{
+\dontshow{if (requireNamespace("httpuv", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sess <- at_session(rep(at_example_path("cube"), 2))
+h <- at_control_start(sess, serve = FALSE)
+at_control_close(h)
+unlink(sess$out_dir, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other control:
 \code{\link[=at_control_capabilities]{at_control_capabilities()}},

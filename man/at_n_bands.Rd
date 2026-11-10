@@ -17,6 +17,9 @@ An integer scalar.
 \description{
 Number of bands (channels)
 }
+\examples{
+at_n_bands(at_example_image("cube"))
+}
 \seealso{
 Other images:
 \code{\link[=at_bands]{at_bands()}},

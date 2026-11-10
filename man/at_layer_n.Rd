@@ -17,6 +17,11 @@ An integer scalar.
 \description{
 Number of ROIs in a layer
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(0, 0, 10, 10, label = "tumour"))
+at_layer_n(lyr)
+}
 \seealso{
 Other layers:
 \code{\link[=at_layer]{at_layer()}},

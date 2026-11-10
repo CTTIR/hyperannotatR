@@ -26,6 +26,13 @@ there are no ROIs.
 \description{
 Session summary statistics
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+sess <- at_batch_apply(sess, function(project, image, idx, ...) {
+  at_add_roi(project, "annotations", at_roi_rect(5, 5, 5 + 10 * idx, 20, label = "tumour"))
+}, progress = FALSE)
+at_summary_table(sess, by = "label")
+}
 \seealso{
 Other batch:
 \code{\link[=at_batch_apply]{at_batch_apply()}},

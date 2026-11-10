@@ -27,6 +27,12 @@ the file moved, or accept a source that changed since it was saved. The
 replacement is read with the selected reader and must have the same
 geometry; annotations are never changed.
 }
+\examples{
+proj <- at_project(at_example_image("cube"))
+# Revalidate the recorded source; after moving the file, pass its new path.
+proj <- at_relink_source(proj, at_example_path("cube"))
+at_inspect_source(proj)$status
+}
 \seealso{
 \code{\link[=at_inspect_source]{at_inspect_source()}}
 

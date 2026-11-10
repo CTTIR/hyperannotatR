@@ -29,6 +29,13 @@ A \link[ggplot2:ggplot]{ggplot2::ggplot} object with one line per ROI and statis
 \description{
 Plot spectra
 }
+\examples{
+lyr <- at_layer("tissue", labels = c("tumour", "stroma"))
+lyr <- at_layer_add(lyr, at_roi_rect(10, 10, 40, 40, label = "tumour"))
+lyr <- at_layer_add(lyr, at_roi_circle(90, 90, 15, label = "stroma"))
+spectra <- at_extract_spectrum(at_project(at_example_image("cube"), lyr))
+at_plot_spectrum(spectra)
+}
 \seealso{
 Other plots:
 \code{\link[=at_plot]{at_plot()}},

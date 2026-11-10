@@ -20,6 +20,12 @@ columns when the project has no layers.
 \description{
 Layer summary table
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(0, 0, 10, 10, label = "tumour"))
+proj <- at_project(at_example_image("cube"), list(lyr, at_layer("artefact")))
+at_layers(proj)
+}
 \seealso{
 Other projects:
 \code{\link[=at_add_layer]{at_add_layer()}},

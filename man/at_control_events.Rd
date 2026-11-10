@@ -30,6 +30,20 @@ and \code{state_revision}.
 \description{
 Read control events after a cursor
 }
+\examples{
+\dontshow{if (requireNamespace("httpuv", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sess <- at_session(rep(at_example_path("cube"), 3))
+h <- at_control_start(sess, serve = FALSE)
+cursor <- at_control_events(h)$next_cursor
+st <- at_control_state(h)
+res <- at_control_command(h, list(operation = "context.goto", payload = list(queue_index = 2),
+                                  expected_revision = st$state_revision))
+ev <- at_control_events(h, after = cursor)
+vapply(ev$events, function(e) e$type, character(1))
+at_control_stop(h)
+unlink(sess$out_dir, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other control:
 \code{\link[=at_control_capabilities]{at_control_capabilities()}},

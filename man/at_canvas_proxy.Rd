@@ -20,6 +20,23 @@ re-rendering the whole widget. Inside a Shiny module, pass the module's
 (un-namespaced) output id; it is namespaced with the module session, as
 \code{leaflet::leafletProxy()} does.
 }
+\examples{
+\dontshow{if (requireNamespace("shiny", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+class(proxy)
+if (interactive() && requireNamespace("htmlwidgets", quietly = TRUE)) {
+  ui <- shiny::fluidPage(
+    shiny::actionButton("rect", "Draw rectangles"),
+    atCanvasOutput("canvas")
+  )
+  server <- function(input, output, session) {
+    output$canvas <- renderAtCanvas(at_canvas(at_example_image("cube")))
+    shiny::observeEvent(input$rect, at_canvas_set_tool(at_canvas_proxy("canvas"), "rect"))
+  }
+  shiny::runApp(shiny::shinyApp(ui, server))
+}
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other shiny:
 \code{\link[=atCanvasOutput]{atCanvasOutput()}},

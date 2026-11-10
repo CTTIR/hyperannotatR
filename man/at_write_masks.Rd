@@ -46,6 +46,17 @@ Output plans reject symlinked descendants and aliases before writing.
 Callers must serialize concurrent writes and keep destination paths stable;
 preflight plus staged renames is not a race-free filesystem transaction.
 }
+\examples{
+\dontshow{if (requireNamespace("tiff", quietly = TRUE) || requireNamespace("magick", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+dir <- file.path(tempdir(), "mask-example")
+receipt <- at_write_masks(at_project(at_example_image("cube"), lyr), dir, per = "layer")
+receipt[, c("type", "n_px", "status")]
+basename(receipt$path)
+unlink(dir, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other masks:
 \code{\link[=at_mask]{at_mask()}},

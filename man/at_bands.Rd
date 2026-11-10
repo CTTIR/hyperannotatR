@@ -33,6 +33,9 @@ from hyperannotatR 0.1; the remaining columns were added in 0.2.0.
 \description{
 Band (channel) table
 }
+\examples{
+at_bands(at_example_image("cube"))
+}
 \seealso{
 Other images:
 \code{\link[=at_close_image]{at_close_image()}},

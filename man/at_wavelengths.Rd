@@ -18,6 +18,9 @@ A numeric vector of length \code{at_n_bands(x)} for a spectral image, or
 \description{
 Band centre wavelengths
 }
+\examples{
+head(at_wavelengths(at_example_image("cube")))
+}
 \seealso{
 \code{\link[=at_is_spectral]{at_is_spectral()}}
 

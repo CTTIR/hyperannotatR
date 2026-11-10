@@ -556,6 +556,15 @@ print.at_training_export <- function(x, ...) {
 #'   (`"ok"`, `"warn"`, `"fail"`) and `detail`.
 #' @family training
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(10, 10, 40, 40, label = "tumour"))
+#' proj <- at_project(at_example_image("cube"), lyr)
+#' dest <- file.path(tempdir(), "training-check-example")
+#' ds <- at_training_export(proj, dest, tile_size = 64, mask_format = "npy",
+#'                          overwrite = TRUE)
+#' at_training_check(dest, proj)
+#' unlink(dest, recursive = TRUE)
 at_training_check <- function(dataset, x = NULL, max_roundtrip_tiles = 20L,
                               call = rlang::caller_env()) {
   .check_string(dataset, call = call)
@@ -786,6 +795,15 @@ at_training_check <- function(dataset, x = NULL, max_roundtrip_tiles = 20L,
 #' @family training
 #' @seealso [at_commit_qupflowr()]
 #' @export
+#' @examples
+#' proj <- at_project(at_example_image("cube"))
+#' # A 128 x 128 prediction with two classes (0 is background).
+#' pred <- matrix(0L, 128, 128)
+#' pred[20:50, 20:50] <- 1L
+#' pred[90:110, 60:100] <- 2L
+#' patch <- at_training_import(proj, pred, label_map = c(tumour = 1L, stroma = 2L))
+#' patch
+#' at_training_import(proj, pred, label_map = c(tumour = 1L, stroma = 2L), stage = FALSE)
 at_training_import <- function(x, predictions, label_map, level = 0L, source = "dnn_prediction",
                                model = list(name = NA_character_, version = NA_character_,
                                             sha256 = NA_character_),

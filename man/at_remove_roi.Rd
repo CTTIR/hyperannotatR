@@ -20,6 +20,13 @@ the project unchanged if the identifier is not found.
 \description{
 Remove an ROI from a project
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr)
+id <- at_rois(proj)$roi_id[1]
+nrow(at_rois(at_remove_roi(proj, id)))
+}
 \seealso{
 Other projects:
 \code{\link[=at_add_layer]{at_add_layer()}},

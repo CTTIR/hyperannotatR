@@ -26,6 +26,17 @@ The proxy, invisibly.
 \description{
 Replace the annotations on a canvas
 }
+\examples{
+\dontshow{if (requireNamespace("shiny", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr)
+# A mock session stands in for the browser; in an app use
+# at_canvas_proxy("canvas") in the server function.
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+at_canvas_set_annotations(proxy, proj)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other shiny:
 \code{\link[=atCanvasOutput]{atCanvasOutput()}},

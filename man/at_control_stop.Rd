@@ -22,6 +22,15 @@ stopped. A handle from another process (or a remote handle from
 \code{\link[=at_control_connect]{at_control_connect()}}) is refused with an \code{at_auth_error} (\code{NOT_OWNER}); no
 process is ever terminated.
 }
+\examples{
+\dontshow{if (requireNamespace("httpuv", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sess <- at_session(rep(at_example_path("cube"), 2))
+h <- at_control_start(sess, serve = FALSE)
+at_control_stop(h)
+at_control_stop(h) # already stopped
+unlink(sess$out_dir, recursive = TRUE)
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other control:
 \code{\link[=at_control_capabilities]{at_control_capabilities()}},

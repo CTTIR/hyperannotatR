@@ -164,6 +164,12 @@ at_layer_add <- function(layer, roi, call = rlang::caller_env()) {
 #'   not present and returns the layer unchanged.
 #' @family layers
 #' @export
+#' @examples
+#' lyr <- at_layer("tissue", labels = "tumour")
+#' lyr <- at_layer_add(lyr, at_roi_rect(0, 0, 10, 10, label = "tumour"))
+#' lyr <- at_layer_add(lyr, at_roi_rect(20, 20, 30, 30, label = "tumour"))
+#' first <- at_layer_rois(lyr)$roi_id[1]
+#' at_layer_n(at_layer_remove(lyr, first))
 at_layer_remove <- function(layer, id, call = rlang::caller_env()) {
   .check_layer(layer, call = call)
   .check_string(id, call = call)
@@ -187,6 +193,10 @@ at_layer_remove <- function(layer, id, call = rlang::caller_env()) {
 #'   with the same columns when the layer has no ROIs.
 #' @family layers
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_circle(20, 20, 5, label = "tumour"))
+#' at_layer_rois(lyr)
 at_layer_rois <- function(layer, image = NULL, call = rlang::caller_env()) {
   .check_layer(layer, call = call)
   .rois_to_tbl(layer$rois, rep(layer$name, length(layer$rois)), image = image)
@@ -199,6 +209,10 @@ at_layer_rois <- function(layer, image = NULL, call = rlang::caller_env()) {
 #' @return An integer scalar.
 #' @family layers
 #' @export
+#' @examples
+#' lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+#'                     at_roi_rect(0, 0, 10, 10, label = "tumour"))
+#' at_layer_n(lyr)
 at_layer_n <- function(layer, call = rlang::caller_env()) {
   .check_layer(layer, call = call)
   length(layer$rois)

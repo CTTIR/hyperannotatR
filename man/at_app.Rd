@@ -73,8 +73,8 @@ filesystem changes need separate controls in a shared deployment.
 \dontshow{if (requireNamespace("shiny", quietly = TRUE) && requireNamespace("bslib", quietly = TRUE) && requireNamespace("shinyjs", quietly = TRUE) && requireNamespace("htmlwidgets", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 app <- at_app(input = at_example_path("cube"))
 class(app)
-\dontrun{
-shiny::runApp(app)
+if (interactive()) {
+  shiny::runApp(app)
 }
 \dontshow{\}) # examplesIf}
 }

@@ -41,6 +41,12 @@ matches.
 \description{
 Extract per-pixel values under ROIs
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 20, 20, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr)
+at_extract_pixels(proj, bands = 1:2)
+}
 \seealso{
 Other extraction:
 \code{\link[=at_extract]{at_extract()}},

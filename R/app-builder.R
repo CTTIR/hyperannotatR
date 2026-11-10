@@ -382,8 +382,8 @@
 #' @examplesIf requireNamespace("shiny", quietly = TRUE) && requireNamespace("bslib", quietly = TRUE) && requireNamespace("shinyjs", quietly = TRUE) && requireNamespace("htmlwidgets", quietly = TRUE)
 #' app <- at_app(input = at_example_path("cube"))
 #' class(app)
-#' \dontrun{
-#' shiny::runApp(app)
+#' if (interactive()) {
+#'   shiny::runApp(app)
 #' }
 at_app <- function(input = NULL, session = NULL, control = "off", labels = character(),
                    layers = NULL, out_dir = NULL, read_only = FALSE, view = NULL, ...,

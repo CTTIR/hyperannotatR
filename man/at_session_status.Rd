@@ -19,6 +19,10 @@ The manifest \link[tibble:tibble]{tibble::tibble} with columns \code{idx}, \code
 \description{
 The session manifest
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 2))
+at_session_status(sess)[, c("idx", "status", "n_rois")]
+}
 \seealso{
 Other sessions:
 \code{\link[=at_current]{at_current()}},

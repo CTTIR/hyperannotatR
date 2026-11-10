@@ -60,6 +60,14 @@ QuPath 0.7.0 emits, are accepted), conflicting colours or object types for
 a feature, conflicting colours for one label, and repeated ROI ids are
 refused with an \code{at_validation_error} of code \code{INVALID_GEOJSON}.
 }
+\examples{
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+path <- tempfile(fileext = ".geojson")
+at_write_qupath(at_project(at_example_image("cube"), lyr), path)
+at_read_qupath(path)
+unlink(path)
+}
 \seealso{
 Other io:
 \code{\link[=at_inspect_saved]{at_inspect_saved()}},

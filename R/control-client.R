@@ -17,6 +17,14 @@
 #' @return An `at_control_handle` of kind `"remote"`.
 #' @family control
 #' @export
+#' @examples
+#' # Connecting needs a control service running in another R process, started
+#' # there with at_control_start(sess, token_file = "token").
+#' \dontrun{
+#' h <- at_control_connect("annotatr-control-<instance_id>.json", "token")
+#' at_control_state(h)$state_revision
+#' at_control_close(h)
+#' }
 at_control_connect <- function(manifest, token_file, call = rlang::caller_env()) {
   .check_file(manifest, call = call)
   .check_file(token_file, call = call)
@@ -169,6 +177,14 @@ at_control_connect <- function(manifest, token_file, call = rlang::caller_env())
 #'   `view`, `selection`, `staged`, `last_commit` and status fields.
 #' @family control
 #' @export
+#' @examplesIf requireNamespace("httpuv", quietly = TRUE)
+#' sess <- at_session(rep(at_example_path("cube"), 2))
+#' h <- at_control_start(sess, serve = FALSE)
+#' st <- at_control_state(h)
+#' st$state_revision
+#' length(st$queue)
+#' at_control_stop(h)
+#' unlink(sess$out_dir, recursive = TRUE)
 at_control_state <- function(handle, call = rlang::caller_env()) {
   .control_call(handle, "GET", "/v1/state", call = call)
 }
@@ -186,6 +202,17 @@ at_control_state <- function(handle, call = rlang::caller_env()) {
 #'   and `state_revision`.
 #' @family control
 #' @export
+#' @examplesIf requireNamespace("httpuv", quietly = TRUE)
+#' sess <- at_session(rep(at_example_path("cube"), 3))
+#' h <- at_control_start(sess, serve = FALSE)
+#' cursor <- at_control_events(h)$next_cursor
+#' st <- at_control_state(h)
+#' res <- at_control_command(h, list(operation = "context.goto", payload = list(queue_index = 2),
+#'                                   expected_revision = st$state_revision))
+#' ev <- at_control_events(h, after = cursor)
+#' vapply(ev$events, function(e) e$type, character(1))
+#' at_control_stop(h)
+#' unlink(sess$out_dir, recursive = TRUE)
 at_control_events <- function(handle, after = NULL, limit = 100L, call = rlang::caller_env()) {
   limit <- .check_count(limit, min = 1L, call = call)
   q <- paste0("limit=", limit)
@@ -272,6 +299,16 @@ at_control_command <- function(handle, command, call = rlang::caller_env()) {
 #'   and the stored `response`.
 #' @family control
 #' @export
+#' @examplesIf requireNamespace("httpuv", quietly = TRUE)
+#' sess <- at_session(rep(at_example_path("cube"), 2))
+#' h <- at_control_start(sess, serve = FALSE)
+#' st <- at_control_state(h)
+#' res <- at_control_command(h, list(operation = "context.goto", payload = list(queue_index = 2),
+#'                                   expected_revision = st$state_revision,
+#'                                   request_id = "goto-example"))
+#' at_control_request_status(h, "goto-example")$status
+#' at_control_stop(h)
+#' unlink(sess$out_dir, recursive = TRUE)
 at_control_request_status <- function(handle, request_id, call = rlang::caller_env()) {
   .check_string(request_id, call = call)
   if (!grepl("^[A-Za-z0-9._:-]{1,128}$", request_id)) {

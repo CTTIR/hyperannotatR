@@ -37,6 +37,14 @@ one warning and attached as the \code{"batch_errors"} attribute, a
 \description{
 Apply a function to every project in a session
 }
+\examples{
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+add_box <- function(project, image, idx, ...) {
+  at_add_roi(project, "annotations", at_roi_rect(5, 5, 20, 20, label = "tumour"))
+}
+sess <- at_batch_apply(sess, add_box, progress = FALSE)
+at_summary_table(sess)
+}
 \seealso{
 Other batch:
 \code{\link[=at_batch_check_geometry]{at_batch_check_geometry()}},

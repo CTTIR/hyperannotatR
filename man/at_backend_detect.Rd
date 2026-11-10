@@ -18,6 +18,9 @@ read \code{path}. Errors informatively if none can.
 \description{
 Detect the backend for a file
 }
+\examples{
+at_backend_detect(at_example_path("cube"))
+}
 \seealso{
 Other backends:
 \code{\link[=at_backend_get]{at_backend_get()}},
