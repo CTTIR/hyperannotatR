@@ -234,7 +234,7 @@ actual R and dependency versions and sf external library versions. The
 ENVI backend is implemented by hyperannotatR, whose version is recorded;
 separately unavailable plugin-version metadata is explicitly
 `"unknown"`. MD5 checks exact-byte integrity, not authenticity. The
-source tree or build artifact used for a study should also be archived
+source tree or build artefact used for a study should also be archived
 with these outputs.
 
 ``` r
@@ -305,7 +305,7 @@ first$settings$versions
 #> 
 #> $packages
 #> $packages$hyperannotatR
-#> [1] "0.3.1"
+#> [1] "0.4.0"
 #> 
 #> $packages$sf
 #> [1] "1.1.3"

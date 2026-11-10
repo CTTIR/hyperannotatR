@@ -34,7 +34,7 @@ at_mask_agreement(
 
 - background:
 
-  Integer value treated as unlabeled/background and excluded from the
+  Integer value treated as unlabelled/background and excluded from the
   per-class rows (still counted for overall accuracy/kappa). Defaults to
   declared metadata background, or `0` for plain matrices. Explicit
   values must agree with metadata; both inputs must share background.

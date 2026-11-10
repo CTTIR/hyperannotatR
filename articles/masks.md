@@ -139,12 +139,12 @@ Points use their half-open containing cell: point `(5,5)` selects matrix
 row 6, column 6, because its cell is `[5,6) x [5,6)`. Multipoints select
 the union of these cells. Extraction uses the same support and reads the
 corresponding bounded image tile. These boundary rules correct the
-earlier finite-shift behavior, which selected row 5, column 5 for an
+earlier finite-shift behaviour, which selected row 5, column 5 for an
 integer-coordinate point and could produce inconsistent diagonal polygon
 coverage.
 
 All-touched masks and line rasterisation retain the selected engine’s
-behavior; engine equality is guaranteed for centre-based polygons and
+behaviour; engine equality is guaranteed for centre-based polygons and
 points.
 
 The cleanest way to trust this is to compute a small case by eye. Take a
@@ -366,7 +366,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>         "schema_version": 1,
 #>         "signature": {
 #>           "size": 526756,
-#>           "mtime": 1794239025
+#>           "mtime": 1794311178
 #>         },
 #>         "files": null,
 #>         "path": "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png",
@@ -401,8 +401,8 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>     ]
 #>   },
 #>   "storage": null,
-#>   "annotatR_version": "0.3.1",
-#>   "created": "2026-11-09T15:45:37+0000",
+#>   "annotatR_version": "0.4.0",
+#>   "created": "2026-11-10T11:47:38+0000",
 #>   "mask_type": "multiclass",
 #>   "level": 0,
 #>   "dims": [512, 512],

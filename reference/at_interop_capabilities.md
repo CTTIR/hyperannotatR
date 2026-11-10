@@ -59,5 +59,5 @@ caps <- at_interop_capabilities()
 caps$profiles$I0$status
 #> [1] "supported"
 caps$digest
-#> [1] "476406c284fc2a52fa03a08dd432631a376ece527cd8b28b4bae94f57e1a66ad"
+#> [1] "ba490c62d751046c8645612dbb1a8bb1bc92771bcd905729fb7ce7aa7c41c5e3"
 ```

@@ -17,12 +17,12 @@ that contract from the hyperannotatR side.
 
 caps <- at_interop_capabilities()
 caps
-#> <at_capabilities> hyperannotatR 0.3.1 for qupflowR
+#> <at_capabilities> hyperannotatR 0.4.0 for qupflowR
 #>   I0 supported   file interchange (handoff directory)
 #>   I1 supported   public R API
 #>   I2 planned     loopback control service - implemented and tested locally; no qualified qupflowR client run recorded
 #>   I3 planned     embeddable shiny.appobj - at_app() is implemented and tested locally; no qualified qupflowR embedding recorded
-#>   digest 476406c284fc2a52fa03a08dd432631a376ece527cd8b28b4bae94f57e1a66ad
+#>   digest ba490c62d751046c8645612dbb1a8bb1bc92771bcd905729fb7ce7aa7c41c5e3
 caps$profiles$I2[c("status", "implemented", "available", "reason")]
 #> $status
 #> [1] "planned"
@@ -72,7 +72,7 @@ receipt$files[, c("path", "size_bytes", "format")]
 #> 4 masks/regions_labelled.tif                   2936 mask_tiff     
 #> 5 masks/regions_labelled.tif.legend.json       1811 legend_json
 receipt$handoff_digest
-#> [1] "b3548ef316208169a8dc5518e57b6e4054afca3ed48d04dab7e984911f7a9b3c"
+#> [1] "6584dc362dde0865ffcb81f5e1ecb11fedfa6cbbd92786a2f5613003919f2b85"
 ```
 
 - `annotations_qupath.geojson` uses the QuPath 0.4+ dialect with a
@@ -429,7 +429,7 @@ state$state_revision
 #> [1] "0"
 at_control_command(handle, list(operation = "context.goto", payload = list(queue_index = 2),
                                 expected_revision = state$state_revision))$entry_id
-#> [1] "entry_at_3ff9415023bc_000000005"
+#> [1] "entry_at_3f117b218528_000000005"
 vapply(at_control_events(handle)$events, `[[`, character(1), "type")
 #> [1] "service.started" "image.changed"
 at_control_stop(handle)
