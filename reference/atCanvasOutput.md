@@ -37,3 +37,15 @@ Other shiny:
 [`at_canvas_set_tool()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_tool.md),
 [`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md),
 [`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)
+
+## Examples
+
+``` r
+ui <- shiny::fluidPage(atCanvasOutput("canvas", height = "400px"))
+server <- function(input, output, session) {
+  output$canvas <- renderAtCanvas(at_canvas(at_example_image("cube")))
+}
+if (interactive()) {
+  shiny::runApp(shiny::shinyApp(ui, server))
+}
+```

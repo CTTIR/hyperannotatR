@@ -41,3 +41,12 @@ Other projects:
 [`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md),
 [`at_summary()`](https://cttir.github.io/hyperannotatR/reference/at_summary.md),
 [`at_validate()`](https://cttir.github.io/hyperannotatR/reference/at_validate.md)
+
+## Examples
+
+``` r
+proj <- at_project(at_example_image("cube"),
+                   list(at_layer("tissue"), at_layer("artefact")))
+at_layers(at_remove_layer(proj, "artefact"))$name
+#> [1] "tissue"
+```

@@ -142,12 +142,46 @@ these per image in meta$capabilities.</p></dd>
 <code><a href="at_tivita_profile.html">at_tivita_profile()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># A toy backend for a ".const" file that stores only a size and a fill</span></span></span>
+<span class="r-in"><span><span class="co"># value; the tile function synthesises the pixels on request.</span></span></span>
+<span class="r-in"><span><span class="va">const_read</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/structure.html" class="external-link">structure</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>source <span class="op">=</span> <span class="va">path</span>, backend <span class="op">=</span> <span class="st">"const"</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">spec</span><span class="op">$</span><span class="va">width</span>, <span class="va">spec</span><span class="op">$</span><span class="va">height</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>         n_levels <span class="op">=</span> <span class="fl">1L</span>, level_dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">spec</span><span class="op">$</span><span class="va">width</span>, <span class="va">spec</span><span class="op">$</span><span class="va">height</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>         n_bands <span class="op">=</span> <span class="fl">1L</span>, band_names <span class="op">=</span> <span class="st">"Band 1"</span>, pixel_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>         pixel_unit <span class="op">=</span> <span class="st">"px"</span>, dtype <span class="op">=</span> <span class="st">"double"</span>,</span></span>
+<span class="r-in"><span>         handle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>value <span class="op">=</span> <span class="va">spec</span><span class="op">$</span><span class="va">value</span><span class="op">)</span>, meta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    class <span class="op">=</span> <span class="st">"annot_image"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">const_tile</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">img</span>, <span class="va">level</span>, <span class="va">xrange</span>, <span class="va">yrange</span>, <span class="va">bands</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="va">img</span><span class="op">$</span><span class="va">handle</span><span class="op">$</span><span class="va">value</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">yrange</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1L</span>, <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">xrange</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1L</span>, <span class="fl">1L</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="fu">at_backend_register</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"const"</span>, read_fn <span class="op">=</span> <span class="va">const_read</span>, tile_fn <span class="op">=</span> <span class="va">const_tile</span>,</span></span>
+<span class="r-in"><span>  detect_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">path</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/startsWith.html" class="external-link">endsWith</a></span><span class="op">(</span><span class="va">path</span>, <span class="st">".const"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  available_fn <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  description <span class="op">=</span> <span class="st">"Constant-value demo backend"</span>, extensions <span class="op">=</span> <span class="st">"const"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".const"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">8L</span>, height <span class="op">=</span> <span class="fl">6L</span>, value <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>, <span class="va">path</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_read_image.html">at_read_image</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="at_dims.html">at_dims</a></span><span class="op">(</span><span class="va">img</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8 6</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="at_tile.html">at_tile</a></span><span class="op">(</span><span class="va">img</span>, xrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span>, yrange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 4 1</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by R. Heller.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">

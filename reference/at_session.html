@@ -126,8 +126,11 @@ materialised.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Build a session over the bundled example image copied several times:</span></span></span>
-<span class="r-in"><span><span class="co"># sess &lt;- at_example_session(3)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu">at_session</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="at_example_path.html">at_example_path</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tumour"</span>, <span class="st">"stroma"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sess</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;annot_session&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> images: 3  |  complete: 0  |  cursor: 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> out_dir: <span style="color: #0000BB;">/tmp/Rtmpr6MR9C/hyperannotatR-session-338a252508ff</span>  |  autosave: TRUE</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -135,7 +138,7 @@ materialised.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by R. Heller.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">

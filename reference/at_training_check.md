@@ -56,3 +56,27 @@ A tibble of class `at_training_check` with `check`, `status` (`"ok"`,
 Other training:
 [`at_training_export()`](https://cttir.github.io/hyperannotatR/reference/at_training_export.md),
 [`at_training_import()`](https://cttir.github.io/hyperannotatR/reference/at_training_import.md)
+
+## Examples
+
+``` r
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr)
+dest <- file.path(tempdir(), "training-check-example")
+ds <- at_training_export(proj, dest, tile_size = 64, mask_format = "npy",
+                         overwrite = TRUE)
+at_training_check(dest, proj)
+#> # A tibble: 8 × 3
+#>   check              status detail                                              
+#>   <chr>              <chr>  <chr>                                               
+#> 1 integrity          ok     inventory verified                                  
+#> 2 split_leakage      ok     1 groups, 1 images, no shared source across splits  
+#> 3 mask_dimensions    ok     0 of 4 tiles with wrong or unreadable dimensions; 0…
+#> 4 label_range        ok     0 of 4 tiles with codes outside the legend          
+#> 5 overlap            ok     0 ambiguous (overlapping) pixels in included tiles  
+#> 6 mask_roi_roundtrip ok     0 of 1 sampled tiles differ after mask -> ROI -> ma…
+#> 7 source_agreement   ok     0 of 1 sampled tiles differ from re-rasterised anno…
+#> 8 manifest_schema    ok     1.1                                                 
+unlink(dest, recursive = TRUE)
+```

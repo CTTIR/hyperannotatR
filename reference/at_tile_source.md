@@ -74,3 +74,17 @@ Other shiny:
 [`at_canvas_set_selection()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_selection.md),
 [`at_canvas_set_tool()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_tool.md),
 [`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)
+
+## Examples
+
+``` r
+src <- at_tile_source(at_example_image("cube"), embed = FALSE)
+str(src)
+#> List of 6
+#>  $ width   : int 128
+#>  $ height  : int 128
+#>  $ tileSize: int 512
+#>  $ minLevel: int 0
+#>  $ maxLevel: int 0
+#>  $ nBands  : int 40
+```

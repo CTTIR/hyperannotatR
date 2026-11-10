@@ -43,3 +43,16 @@ Other io:
 [`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md),
 [`at_write_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_write_qupath.md),
 [`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)
+
+## Examples
+
+``` r
+path <- tempfile(fileext = ".rds")
+at_save_project(at_project(at_example_image("cube")), path)
+report <- at_inspect_saved(path)
+report$valid
+#> [1] TRUE
+report$sources[[1]]$status
+#> [1] "available"
+unlink(path)
+```

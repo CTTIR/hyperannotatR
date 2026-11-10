@@ -113,12 +113,34 @@ matches.</p>
 <code><a href="at_extract_spectrum.html">at_extract_spectrum()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">lyr</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_layer_add.html">at_layer_add</a></span><span class="op">(</span><span class="fu"><a href="at_layer.html">at_layer</a></span><span class="op">(</span><span class="st">"tissue"</span>, labels <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                    <span class="fu"><a href="at_roi_rect.html">at_roi_rect</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">20</span>, <span class="fl">20</span>, label <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_project.html">at_project</a></span><span class="op">(</span><span class="fu"><a href="at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span>, <span class="va">lyr</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">at_extract_pixels</span><span class="op">(</span><span class="va">proj</span>, bands <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 200 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    roi_id        layer  label      x     y  band value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> roi_000000026 tissue tumour    11    11     1 <span style="text-decoration: underline;">33</span>073</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> roi_000000026 tissue tumour    11    12     1 <span style="text-decoration: underline;">33</span>300</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> roi_000000026 tissue tumour    11    13     1 <span style="text-decoration: underline;">33</span>412</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> roi_000000026 tissue tumour    11    14     1 <span style="text-decoration: underline;">32</span>984</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> roi_000000026 tissue tumour    11    15     1 <span style="text-decoration: underline;">32</span>311</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> roi_000000026 tissue tumour    11    16     1 <span style="text-decoration: underline;">32</span>858</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> roi_000000026 tissue tumour    11    17     1 <span style="text-decoration: underline;">33</span>694</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> roi_000000026 tissue tumour    11    18     1 <span style="text-decoration: underline;">32</span>458</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> roi_000000026 tissue tumour    11    19     1 <span style="text-decoration: underline;">31</span>874</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> roi_000000026 tissue tumour    11    20     1 <span style="text-decoration: underline;">33</span>421</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 190 more rows</span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by R. Heller.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">

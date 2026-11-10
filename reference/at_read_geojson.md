@@ -90,3 +90,13 @@ Other io:
 [`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md),
 [`at_write_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_write_qupath.md),
 [`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)
+
+## Examples
+
+``` r
+path <- system.file("extdata", "example_annotations.geojson", package = "hyperannotatR")
+at_read_geojson(path, layer_name = "regions")
+#> <annot_layer> regions
+#> ROIs: 3  |  labels: "tumour", "necrosis", and "stroma"
+#> visible: TRUE  |  locked: FALSE  |  z: 1
+```

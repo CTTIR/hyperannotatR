@@ -50,3 +50,19 @@ Other control:
 [`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
 [`at_control_state()`](https://cttir.github.io/hyperannotatR/reference/at_control_state.md),
 [`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 3))
+h <- at_control_start(sess, serve = FALSE)
+cursor <- at_control_events(h)$next_cursor
+st <- at_control_state(h)
+res <- at_control_command(h, list(operation = "context.goto", payload = list(queue_index = 2),
+                                  expected_revision = st$state_revision))
+ev <- at_control_events(h, after = cursor)
+vapply(ev$events, function(e) e$type, character(1))
+#> [1] "image.changed"
+at_control_stop(h)
+unlink(sess$out_dir, recursive = TRUE)
+```

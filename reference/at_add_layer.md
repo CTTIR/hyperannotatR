@@ -45,3 +45,15 @@ Other projects:
 [`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md),
 [`at_summary()`](https://cttir.github.io/hyperannotatR/reference/at_summary.md),
 [`at_validate()`](https://cttir.github.io/hyperannotatR/reference/at_validate.md)
+
+## Examples
+
+``` r
+proj <- at_project(at_example_image("cube"))
+proj <- at_add_layer(proj, at_layer("tissue", labels = c("tumour", "stroma")))
+at_layers(proj)
+#> # A tibble: 1 × 6
+#>   name   n_rois labels    visible locked     z
+#>   <chr>   <int> <list>    <lgl>   <lgl>  <int>
+#> 1 tissue      0 <chr [2]> TRUE    FALSE      1
+```

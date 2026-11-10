@@ -58,3 +58,14 @@ Other io:
 [`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md),
 [`at_write_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_write_qupath.md),
 [`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+path <- tempfile(fileext = ".rds")
+at_save_session(sess, path)
+file.exists(path)
+#> [1] TRUE
+unlink(path)
+```

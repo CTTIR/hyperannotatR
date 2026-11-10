@@ -61,3 +61,19 @@ Other batch:
 [`at_batch_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_batch_check_geometry.md),
 [`at_export_all()`](https://cttir.github.io/hyperannotatR/reference/at_export_all.md),
 [`at_summary_table()`](https://cttir.github.io/hyperannotatR/reference/at_summary_table.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+add_box <- function(project, image, idx, ...) {
+  at_add_roi(project, "annotations", at_roi_rect(5, 5, 20, 20, label = "tumour"))
+}
+sess <- at_batch_apply(sess, add_box, progress = FALSE)
+at_summary_table(sess)
+#> # A tibble: 2 × 6
+#>   image        entry_id                   n_rois total_area_px mean_area sd_area
+#>   <chr>        <chr>                       <int>         <dbl>     <dbl>   <dbl>
+#> 1 example_cube entry_at_338a54385950_000…      1           225       225      NA
+#> 2 example_cube entry_at_338a54385950_000…      1           225       225      NA
+```

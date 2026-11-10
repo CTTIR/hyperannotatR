@@ -48,3 +48,13 @@ Other images:
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
 [`at_wavelengths()`](https://cttir.github.io/hyperannotatR/reference/at_wavelengths.md),
 [`hyperannotatR-classes`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+
+## Examples
+
+``` r
+cube <- at_example_image("cube")
+at_meta(cube, "backend")
+#> [1] "envi"
+at_meta(cube, "interleave")
+#> [1] "bsq"
+```

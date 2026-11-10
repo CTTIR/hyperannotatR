@@ -44,3 +44,10 @@ Other images:
 [`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
 [`hyperannotatR-classes`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+
+## Examples
+
+``` r
+head(at_wavelengths(at_example_image("cube")))
+#> [1] 450.0 461.5 473.1 484.6 496.2 507.7
+```

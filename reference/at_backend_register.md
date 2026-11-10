@@ -89,3 +89,38 @@ Other backends:
 [`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
 [`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
+
+## Examples
+
+``` r
+# A toy backend for a ".const" file that stores only a size and a fill
+# value; the tile function synthesises the pixels on request.
+const_read <- function(path, ...) {
+  spec <- readRDS(path)
+  structure(
+    list(source = path, backend = "const", dims = c(spec$width, spec$height),
+         n_levels = 1L, level_dims = list(c(spec$width, spec$height)),
+         n_bands = 1L, band_names = "Band 1", pixel_size = c(1, 1),
+         pixel_unit = "px", dtype = "double",
+         handle = list(value = spec$value), meta = list()),
+    class = "annot_image"
+  )
+}
+const_tile <- function(img, level, xrange, yrange, bands) {
+  array(img$handle$value, dim = c(diff(yrange) + 1L, diff(xrange) + 1L, 1L))
+}
+at_backend_register(
+  "const", read_fn = const_read, tile_fn = const_tile,
+  detect_fn = function(path) endsWith(path, ".const"),
+  available_fn = function() TRUE,
+  description = "Constant-value demo backend", extensions = "const"
+)
+path <- tempfile(fileext = ".const")
+saveRDS(list(width = 8L, height = 6L, value = 0.5), path)
+img <- at_read_image(path)
+at_dims(img)
+#> [1] 8 6
+dim(at_tile(img, xrange = c(1, 4), yrange = c(1, 3)))
+#> [1] 3 4 1
+unlink(path)
+```

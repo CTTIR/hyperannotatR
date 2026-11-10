@@ -91,3 +91,17 @@ Other io:
 [`at_write_geojson()`](https://cttir.github.io/hyperannotatR/reference/at_write_geojson.md),
 [`at_write_qupath()`](https://cttir.github.io/hyperannotatR/reference/at_write_qupath.md),
 [`at_write_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_write_rois_csv.md)
+
+## Examples
+
+``` r
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+path <- tempfile(fileext = ".geojson")
+at_write_qupath(at_project(at_example_image("cube"), lyr), path)
+at_read_qupath(path)
+#> <annot_layer> qupath
+#> ROIs: 1  |  labels: "tumour"
+#> visible: TRUE  |  locked: FALSE  |  z: 1
+unlink(path)
+```

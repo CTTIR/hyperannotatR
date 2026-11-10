@@ -81,6 +81,6 @@ feat <- list(geometry = list(type = "Polygon",
   coordinates = list(list(c(0, 0), c(4, 0), c(4, 4), c(0, 4), c(0, 0)))))
 at_roi_from_geojson(feat, label = "region")
 #> <annot_roi> region (POLYGON)
-#> id: "roi_000000072"  |  level: 0  |  source: manual
+#> id: "roi_000000107"  |  level: 0  |  source: manual
 #> bbox: [0, 0] - [4, 4]
 ```

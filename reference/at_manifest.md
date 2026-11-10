@@ -40,3 +40,18 @@ Other sessions:
 [`at_session()`](https://cttir.github.io/hyperannotatR/reference/at_session.md),
 [`at_session_status()`](https://cttir.github.io/hyperannotatR/reference/at_session_status.md),
 [`at_set_status()`](https://cttir.github.io/hyperannotatR/reference/at_set_status.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2), labels = c("tumour", "stroma"))
+sess <- at_batch_apply(sess, function(project, image, idx, ...) {
+  at_add_roi(project, "annotations", at_roi_rect(5, 5, 20, 20, label = "tumour"))
+}, progress = FALSE)
+at_manifest(sess)[, c("idx", "status", "n_rois", "tumour", "stroma")]
+#> # A tibble: 2 × 5
+#>     idx status  n_rois tumour stroma
+#>   <int> <chr>    <int>  <int>  <int>
+#> 1     1 pending      1      1      0
+#> 2     2 pending      1      1      0
+```

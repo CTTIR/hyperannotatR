@@ -31,3 +31,12 @@ Other layers:
 [`at_layer_remove()`](https://cttir.github.io/hyperannotatR/reference/at_layer_remove.md),
 [`at_layer_rois()`](https://cttir.github.io/hyperannotatR/reference/at_layer_rois.md),
 [`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)
+
+## Examples
+
+``` r
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(0, 0, 10, 10, label = "tumour"))
+at_layer_n(lyr)
+#> [1] 1
+```

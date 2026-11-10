@@ -55,6 +55,6 @@ Other geometry:
 ``` r
 at_snap(at_roi_point(3.4, 5.6, label = "a"), grid = 1)
 #> <annot_roi> a (POINT)
-#> id: "roi_000000087"  |  level: 0  |  source: manual
+#> id: "roi_000000129"  |  level: 0  |  source: manual
 #> bbox: [3, 6] - [3, 6]
 ```

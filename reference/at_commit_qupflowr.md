@@ -80,5 +80,5 @@ partner <- at_layer_add(at_layer("regions"), at_roi_rect(10, 10, 40, 40, label =
                                                          id = "partner-1"))
 rc <- at_commit_qupflowr(at_stage_qupflowr(proj, partner))
 rc$new_revision
-#> [1] "sha256:5aee176fe0392cfc56e9175e44bb42cc3ca48ed2d8842ca038e312ccdd2c9378"
+#> [1] "sha256:5e2284fed48f5fa27babfbde08592ec9f33c1e00a227e22b72231c09e8aabaf7"
 ```

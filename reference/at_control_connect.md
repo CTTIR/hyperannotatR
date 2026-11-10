@@ -41,3 +41,15 @@ Other control:
 [`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
 [`at_control_state()`](https://cttir.github.io/hyperannotatR/reference/at_control_state.md),
 [`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md)
+
+## Examples
+
+``` r
+# Connecting needs a control service running in another R process, started
+# there with at_control_start(sess, token_file = "token").
+if (FALSE) { # \dontrun{
+h <- at_control_connect("annotatr-control-<instance_id>.json", "token")
+at_control_state(h)$state_revision
+at_control_close(h)
+} # }
+```

@@ -53,6 +53,6 @@ Other geometry:
 ``` r
 at_roi_buffer(at_roi_point(10, 10, label = "a"), dist = 5)
 #> <annot_roi> a (POLYGON)
-#> id: "roi_000000066"  |  level: 0  |  source: manual
+#> id: "roi_000000099"  |  level: 0  |  source: manual
 #> bbox: [5, 5] - [15, 15]
 ```

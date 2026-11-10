@@ -116,6 +116,21 @@ Other projects:
 ## Examples
 
 ``` r
-# proj <- at_example_project()
-# at_rois(proj)
+lyr <- at_layer("tissue", labels = c("tumour", "stroma"))
+lyr <- at_layer_add(lyr, at_roi_rect(10, 10, 40, 40, label = "tumour"))
+lyr <- at_layer_add(lyr, at_roi_circle(90, 90, 15, label = "stroma"))
+proj <- at_project(at_example_image("cube"), lyr)
+at_rois(proj)
+#> # A tibble: 2 × 15
+#>   roi_id  layer label geom_type level source_level area_px centroid_x centroid_y
+#>   <chr>   <chr> <chr> <chr>     <int>        <int>   <dbl>      <dbl>      <dbl>
+#> 1 roi_00… tiss… tumo… POLYGON       0            0    900          25         25
+#> 2 roi_00… tiss… stro… POLYGON       0            0    706.         90         90
+#> # ℹ 6 more variables: n_vertices <int>, created <dttm>, modified <dttm>,
+#> #   author <chr>, source <chr>, geometry <POLYGON>
+at_rois(proj, label = "stroma")[, c("roi_id", "label", "area_px")]
+#> # A tibble: 1 × 3
+#>   roi_id        label  area_px
+#>   <chr>         <chr>    <dbl>
+#> 1 roi_000000123 stroma    706.
 ```

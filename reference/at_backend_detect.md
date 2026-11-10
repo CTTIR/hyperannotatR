@@ -35,3 +35,10 @@ Other backends:
 [`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
 [`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
+
+## Examples
+
+``` r
+at_backend_detect(at_example_path("cube"))
+#> [1] "envi"
+```

@@ -47,3 +47,12 @@ Other geometry:
 [`at_rois_overlap()`](https://cttir.github.io/hyperannotatR/reference/at_rois_overlap.md),
 [`at_snap()`](https://cttir.github.io/hyperannotatR/reference/at_snap.md),
 [`at_transform()`](https://cttir.github.io/hyperannotatR/reference/at_transform.md)
+
+## Examples
+
+``` r
+a <- at_roi_rect(0, 0, 10, 10, label = "a")
+b <- at_roi_rect(20, 0, 30, 10, label = "b")
+at_roi_distance(a, b)
+#> [1] 10
+```

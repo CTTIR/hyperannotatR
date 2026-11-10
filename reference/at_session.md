@@ -82,6 +82,9 @@ Other sessions:
 ## Examples
 
 ``` r
-# Build a session over the bundled example image copied several times:
-# sess <- at_example_session(3)
+sess <- at_session(rep(at_example_path("cube"), 3), labels = c("tumour", "stroma"))
+sess
+#> <annot_session>
+#> images: 3  |  complete: 0  |  cursor: 1
+#> out_dir: /tmp/Rtmpr6MR9C/hyperannotatR-session-338a252508ff  |  autosave: TRUE
 ```

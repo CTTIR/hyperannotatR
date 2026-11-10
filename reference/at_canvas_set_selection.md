@@ -45,3 +45,11 @@ Other shiny:
 [`at_canvas_set_tool()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_tool.md),
 [`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md),
 [`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)
+
+## Examples
+
+``` r
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+at_canvas_set_selection(proxy, c("roi_000000001", "roi_000000002"))
+at_canvas_set_selection(proxy) # clear the selection
+```

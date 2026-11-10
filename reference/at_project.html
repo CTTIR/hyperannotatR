@@ -99,9 +99,14 @@ edit log).</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># An annot_image comes from at_read_image() or at_example_image():</span></span></span>
-<span class="r-in"><span><span class="co"># proj &lt;- at_project(at_example_image("tissue"),</span></span></span>
-<span class="r-in"><span><span class="co">#                    at_layer("tissue", labels = "tissue"))</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">lyr</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_layer_add.html">at_layer_add</a></span><span class="op">(</span><span class="fu"><a href="at_layer.html">at_layer</a></span><span class="op">(</span><span class="st">"tissue"</span>, labels <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                    <span class="fu"><a href="at_roi_rect.html">at_roi_rect</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">40</span>, <span class="fl">40</span>, label <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu">at_project</span><span class="op">(</span><span class="fu"><a href="at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span>, <span class="va">lyr</span>, name <span class="op">=</span> <span class="st">"cube example"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">proj</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">&lt;annot_project&gt;</span> <span style="color: #00BB00;">cube example</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> image: <span style="color: #0000BB;">"example_cube.hdr"</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> layers: 1  |  ROIs: 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">tissue</span>: 1 ROI, labels <span style="color: #0000BB;">"tumour"</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -109,7 +114,7 @@ edit log).</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by R. Heller.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">

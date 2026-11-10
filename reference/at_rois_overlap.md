@@ -50,3 +50,16 @@ Other geometry:
 [`at_roi_simplify()`](https://cttir.github.io/hyperannotatR/reference/at_roi_simplify.md),
 [`at_snap()`](https://cttir.github.io/hyperannotatR/reference/at_snap.md),
 [`at_transform()`](https://cttir.github.io/hyperannotatR/reference/at_transform.md)
+
+## Examples
+
+``` r
+lyr <- at_layer("tissue", labels = "tumour")
+lyr <- at_layer_add(lyr, at_roi_rect(0, 0, 10, 10, label = "tumour"))
+lyr <- at_layer_add(lyr, at_roi_rect(5, 5, 15, 15, label = "tumour"))
+at_rois_overlap(lyr)
+#> # A tibble: 1 × 4
+#>   id_a          id_b          overlap_px jaccard
+#>   <chr>         <chr>              <dbl>   <dbl>
+#> 1 roi_000000124 roi_000000125         25   0.143
+```

@@ -41,3 +41,10 @@ Other shiny:
 [`at_canvas_set_selection()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_selection.md),
 [`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md),
 [`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)
+
+## Examples
+
+``` r
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+at_canvas_set_tool(proxy, "polygon")
+```

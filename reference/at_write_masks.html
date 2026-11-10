@@ -129,12 +129,28 @@ preflight plus staged renames is not a race-free filesystem transaction.</p>
 <code><a href="at_write_npy.html">at_write_npy()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">lyr</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_layer_add.html">at_layer_add</a></span><span class="op">(</span><span class="fu"><a href="at_layer.html">at_layer</a></span><span class="op">(</span><span class="st">"tissue"</span>, labels <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                    <span class="fu"><a href="at_roi_rect.html">at_roi_rect</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">40</span>, <span class="fl">40</span>, label <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"mask-example"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">receipt</span> <span class="op">&lt;-</span> <span class="fu">at_write_masks</span><span class="op">(</span><span class="fu"><a href="at_project.html">at_project</a></span><span class="op">(</span><span class="fu"><a href="at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span>, <span class="va">lyr</span><span class="op">)</span>, <span class="va">dir</span>, per <span class="op">=</span> <span class="st">"layer"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">receipt</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"type"</span>, <span class="st">"n_px"</span>, <span class="st">"status"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   type      n_px status</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> labelled   900 ok    </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">receipt</span><span class="op">$</span><span class="va">path</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "project_tissue.tif"</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by R. Heller.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">

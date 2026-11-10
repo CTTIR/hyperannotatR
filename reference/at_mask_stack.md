@@ -51,3 +51,17 @@ Other masks:
 [`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md),
 [`at_write_masks()`](https://cttir.github.io/hyperannotatR/reference/at_write_masks.md),
 [`at_write_npy()`](https://cttir.github.io/hyperannotatR/reference/at_write_npy.md)
+
+## Examples
+
+``` r
+tissue <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                       at_roi_rect(10, 10, 60, 60, label = "tumour"))
+artefact <- at_layer_add(at_layer("artefact", labels = "glare"),
+                         at_roi_circle(30, 30, 8, label = "glare"))
+stack <- at_mask_stack(at_project(at_example_image("cube"), list(tissue, artefact)))
+dim(stack)
+#> [1] 128 128   2
+names(attr(stack, "legends"))
+#> [1] "tissue"   "artefact"
+```

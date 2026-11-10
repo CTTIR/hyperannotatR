@@ -67,5 +67,7 @@ Other images:
 ## Examples
 
 ``` r
-# Image handles come from at_read_image(); see the images vignette.
+cube <- at_example_image("cube")
+at_dims(cube)
+#> [1] 128 128
 ```

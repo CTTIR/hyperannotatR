@@ -51,3 +51,15 @@ Other shiny:
 [`at_canvas_set_tool()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_tool.md),
 [`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md),
 [`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)
+
+## Examples
+
+``` r
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr)
+# A mock session stands in for the browser; in an app use
+# at_canvas_proxy("canvas") in the server function.
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+at_canvas_set_annotations(proxy, proj)
+```

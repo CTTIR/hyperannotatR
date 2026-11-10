@@ -123,12 +123,35 @@ error; only an unsupported major version aborts (<code>PROTOCOL_MISMATCH</code>)
 <code><a href="at_training_import.html">at_training_import()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">lyr</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_layer_add.html">at_layer_add</a></span><span class="op">(</span><span class="fu"><a href="at_layer.html">at_layer</a></span><span class="op">(</span><span class="st">"tissue"</span>, labels <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                    <span class="fu"><a href="at_roi_rect.html">at_roi_rect</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">40</span>, <span class="fl">40</span>, label <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_project.html">at_project</a></span><span class="op">(</span><span class="fu"><a href="at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span>, <span class="va">lyr</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"training-check-example"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ds</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_training_export.html">at_training_export</a></span><span class="op">(</span><span class="va">proj</span>, <span class="va">dest</span>, tile_size <span class="op">=</span> <span class="fl">64</span>, mask_format <span class="op">=</span> <span class="st">"npy"</span>,</span></span>
+<span class="r-in"><span>                         overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">at_training_check</span><span class="op">(</span><span class="va">dest</span>, <span class="va">proj</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 8 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   check              status detail                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> integrity          ok     inventory verified                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> split_leakage      ok     1 groups, 1 images, no shared source across splits  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> mask_dimensions    ok     0 of 4 tiles with wrong or unreadable dimensions; 0…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> label_range        ok     0 of 4 tiles with codes outside the legend          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> overlap            ok     0 ambiguous (overlapping) pixels in included tiles  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> mask_roi_roundtrip ok     0 of 1 sampled tiles differ after mask -&gt; ROI -&gt; ma…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> source_agreement   ok     0 of 1 sampled tiles differ from re-rasterised anno…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">8</span> manifest_schema    ok     1.1                                                 </span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">dest</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by R. Heller.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">

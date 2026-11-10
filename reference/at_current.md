@@ -41,3 +41,14 @@ Other sessions:
 [`at_session()`](https://cttir.github.io/hyperannotatR/reference/at_session.md),
 [`at_session_status()`](https://cttir.github.io/hyperannotatR/reference/at_session_status.md),
 [`at_set_status()`](https://cttir.github.io/hyperannotatR/reference/at_set_status.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+at_current(sess)
+#> <annot_project> example_cube
+#> image: "example_cube.hdr"
+#> layers: 1  |  ROIs: 0
+#>   annotations: 0 ROIs, labels "tumour"
+```

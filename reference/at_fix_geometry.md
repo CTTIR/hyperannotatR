@@ -58,3 +58,22 @@ Other geometry:
 [`at_rois_overlap()`](https://cttir.github.io/hyperannotatR/reference/at_rois_overlap.md),
 [`at_snap()`](https://cttir.github.io/hyperannotatR/reference/at_snap.md),
 [`at_transform()`](https://cttir.github.io/hyperannotatR/reference/at_transform.md)
+
+## Examples
+
+``` r
+# An ROI reaching past the 128 x 128 pixel image is clipped to its bounds.
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(100, 100, 150, 150, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr)
+at_check_geometry(proj)
+#> # A tibble: 1 × 4
+#>   roi_id        issue         severity fixable
+#>   <chr>         <chr>         <chr>    <lgl>  
+#> 1 roi_000000028 out_of_bounds warning  TRUE   
+fixed <- at_fix_geometry(proj)
+#> ✔ Repaired 1 ROI.
+at_check_geometry(fixed)
+#> # A tibble: 0 × 4
+#> # ℹ 4 variables: roi_id <chr>, issue <chr>, severity <chr>, fixable <lgl>
+```

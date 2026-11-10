@@ -38,3 +38,15 @@ Other sessions:
 [`at_resume()`](https://cttir.github.io/hyperannotatR/reference/at_resume.md),
 [`at_session()`](https://cttir.github.io/hyperannotatR/reference/at_session.md),
 [`at_set_status()`](https://cttir.github.io/hyperannotatR/reference/at_set_status.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2))
+at_session_status(sess)[, c("idx", "status", "n_rois")]
+#> # A tibble: 2 × 3
+#>     idx status  n_rois
+#>   <int> <chr>    <int>
+#> 1     1 pending      0
+#> 2     2 pending      0
+```

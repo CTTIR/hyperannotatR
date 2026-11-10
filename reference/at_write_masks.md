@@ -82,3 +82,20 @@ Other masks:
 [`at_read_npy()`](https://cttir.github.io/hyperannotatR/reference/at_read_npy.md),
 [`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md),
 [`at_write_npy()`](https://cttir.github.io/hyperannotatR/reference/at_write_npy.md)
+
+## Examples
+
+``` r
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+dir <- file.path(tempdir(), "mask-example")
+receipt <- at_write_masks(at_project(at_example_image("cube"), lyr), dir, per = "layer")
+receipt[, c("type", "n_px", "status")]
+#> # A tibble: 1 × 3
+#>   type      n_px status
+#>   <chr>    <dbl> <chr> 
+#> 1 labelled   900 ok    
+basename(receipt$path)
+#> [1] "project_tissue.tif"
+unlink(dir, recursive = TRUE)
+```

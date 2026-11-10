@@ -47,7 +47,7 @@ at_mask_legend(at_mask(at_example_project(), "labelled"))
 #> # A tibble: 3 × 6
 #>   value label    layer   roi_id         n_px colour 
 #>   <int> <chr>    <chr>   <chr>         <int> <chr>  
-#> 1     1 tumour   regions roi_000000037 19600 #999999
-#> 2     2 necrosis regions roi_000000038 72704 #E69F00
-#> 3     3 stroma   regions roi_000000039 34200 #56B4E9
+#> 1     1 tumour   regions roi_000000055 19600 #999999
+#> 2     2 necrosis regions roi_000000056 72704 #E69F00
+#> 3     3 stroma   regions roi_000000057 34200 #56B4E9
 ```

@@ -119,7 +119,7 @@ Other shiny:
 app <- at_app(input = at_example_path("cube"))
 class(app)
 #> [1] "shiny.appobj"
-if (FALSE) { # \dontrun{
-shiny::runApp(app)
-} # }
+if (interactive()) {
+  shiny::runApp(app)
+}
 ```

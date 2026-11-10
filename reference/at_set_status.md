@@ -46,3 +46,12 @@ Other sessions:
 [`at_resume()`](https://cttir.github.io/hyperannotatR/reference/at_resume.md),
 [`at_session()`](https://cttir.github.io/hyperannotatR/reference/at_session.md),
 [`at_session_status()`](https://cttir.github.io/hyperannotatR/reference/at_session_status.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2))
+sess <- at_set_status(sess, 1, "complete")
+at_session_status(sess)$status
+#> [1] "complete" "pending" 
+```

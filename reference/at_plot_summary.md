@@ -33,3 +33,13 @@ Other plots:
 [`at_plot_overlay()`](https://cttir.github.io/hyperannotatR/reference/at_plot_overlay.md),
 [`at_plot_project()`](https://cttir.github.io/hyperannotatR/reference/at_plot_project.md),
 [`at_plot_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_plot_spectrum.md)
+
+## Examples
+
+``` r
+lyr <- at_layer("tissue", labels = c("tumour", "stroma"))
+lyr <- at_layer_add(lyr, at_roi_rect(10, 10, 40, 40, label = "tumour"))
+lyr <- at_layer_add(lyr, at_roi_rect(50, 50, 60, 60, label = "tumour"))
+lyr <- at_layer_add(lyr, at_roi_circle(90, 90, 15, label = "stroma"))
+at_plot_summary(at_project(at_example_image("cube"), lyr))
+```

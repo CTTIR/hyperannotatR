@@ -39,3 +39,12 @@ Other control:
 [`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
 [`at_control_state()`](https://cttir.github.io/hyperannotatR/reference/at_control_state.md),
 [`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2))
+h <- at_control_start(sess, serve = FALSE)
+at_control_close(h)
+unlink(sess$out_dir, recursive = TRUE)
+```

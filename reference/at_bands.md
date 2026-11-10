@@ -77,3 +77,23 @@ Other images:
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
 [`at_wavelengths()`](https://cttir.github.io/hyperannotatR/reference/at_wavelengths.md),
 [`hyperannotatR-classes`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+
+## Examples
+
+``` r
+at_bands(at_example_image("cube"))
+#> # A tibble: 40 × 7
+#>    index name    wavelength unit   fwhm order wavelength_status
+#>    <int> <chr>        <dbl> <chr> <dbl> <int> <chr>            
+#>  1     1 Band 1        450  nm       NA     1 ok               
+#>  2     2 Band 2        462. nm       NA     2 ok               
+#>  3     3 Band 3        473. nm       NA     3 ok               
+#>  4     4 Band 4        485. nm       NA     4 ok               
+#>  5     5 Band 5        496. nm       NA     5 ok               
+#>  6     6 Band 6        508. nm       NA     6 ok               
+#>  7     7 Band 7        519. nm       NA     7 ok               
+#>  8     8 Band 8        531. nm       NA     8 ok               
+#>  9     9 Band 9        542. nm       NA     9 ok               
+#> 10    10 Band 10       554. nm       NA    10 ok               
+#> # ℹ 30 more rows
+```

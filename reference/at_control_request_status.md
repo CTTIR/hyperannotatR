@@ -40,3 +40,18 @@ Other control:
 [`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
 [`at_control_state()`](https://cttir.github.io/hyperannotatR/reference/at_control_state.md),
 [`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2))
+h <- at_control_start(sess, serve = FALSE)
+st <- at_control_state(h)
+res <- at_control_command(h, list(operation = "context.goto", payload = list(queue_index = 2),
+                                  expected_revision = st$state_revision,
+                                  request_id = "goto-example"))
+at_control_request_status(h, "goto-example")$status
+#> [1] "completed"
+at_control_stop(h)
+unlink(sess$out_dir, recursive = TRUE)
+```

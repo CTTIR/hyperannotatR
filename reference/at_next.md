@@ -37,3 +37,13 @@ Other sessions:
 [`at_session()`](https://cttir.github.io/hyperannotatR/reference/at_session.md),
 [`at_session_status()`](https://cttir.github.io/hyperannotatR/reference/at_session_status.md),
 [`at_set_status()`](https://cttir.github.io/hyperannotatR/reference/at_set_status.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 3))
+at_next(sess)
+#> <annot_session>
+#> images: 3  |  complete: 0  |  cursor: 2
+#> out_dir: /tmp/Rtmpr6MR9C/hyperannotatR-session-338a4a1d1afe  |  autosave: TRUE
+```

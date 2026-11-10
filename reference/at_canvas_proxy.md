@@ -40,3 +40,22 @@ Other shiny:
 [`at_canvas_set_tool()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_tool.md),
 [`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md),
 [`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)
+
+## Examples
+
+``` r
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+class(proxy)
+#> [1] "atcanvas_proxy"
+if (interactive() && requireNamespace("htmlwidgets", quietly = TRUE)) {
+  ui <- shiny::fluidPage(
+    shiny::actionButton("rect", "Draw rectangles"),
+    atCanvasOutput("canvas")
+  )
+  server <- function(input, output, session) {
+    output$canvas <- renderAtCanvas(at_canvas(at_example_image("cube")))
+    shiny::observeEvent(input$rect, at_canvas_set_tool(at_canvas_proxy("canvas"), "rect"))
+  }
+  shiny::runApp(shiny::shinyApp(ui, server))
+}
+```

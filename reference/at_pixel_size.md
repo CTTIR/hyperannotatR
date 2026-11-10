@@ -42,3 +42,10 @@ Other images:
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
 [`at_wavelengths()`](https://cttir.github.io/hyperannotatR/reference/at_wavelengths.md),
 [`hyperannotatR-classes`](https://cttir.github.io/hyperannotatR/reference/hyperannotatR-classes.md)
+
+## Examples
+
+``` r
+at_pixel_size(at_example_image("cube"))
+#> [1] 1 1
+```

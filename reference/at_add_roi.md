@@ -47,3 +47,15 @@ Other projects:
 [`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md),
 [`at_summary()`](https://cttir.github.io/hyperannotatR/reference/at_summary.md),
 [`at_validate()`](https://cttir.github.io/hyperannotatR/reference/at_validate.md)
+
+## Examples
+
+``` r
+proj <- at_project(at_example_image("cube"), at_layer("tissue", labels = "tumour"))
+proj <- at_add_roi(proj, "tissue", at_roi_rect(10, 10, 40, 40, label = "tumour"))
+at_rois(proj)[, c("roi_id", "layer", "label", "area_px")]
+#> # A tibble: 1 × 4
+#>   roi_id        layer  label  area_px
+#>   <chr>         <chr>  <chr>    <dbl>
+#> 1 roi_000000001 tissue tumour     900
+```

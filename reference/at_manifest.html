@@ -91,12 +91,26 @@ prefix.</p>
 <code><a href="at_set_status.html">at_set_status()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_session.html">at_session</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="at_example_path.html">at_example_path</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tumour"</span>, <span class="st">"stroma"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sess</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_batch_apply.html">at_batch_apply</a></span><span class="op">(</span><span class="va">sess</span>, <span class="kw">function</span><span class="op">(</span><span class="va">project</span>, <span class="va">image</span>, <span class="va">idx</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="at_add_roi.html">at_add_roi</a></span><span class="op">(</span><span class="va">project</span>, <span class="st">"annotations"</span>, <span class="fu"><a href="at_roi_rect.html">at_roi_rect</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">5</span>, <span class="fl">20</span>, <span class="fl">20</span>, label <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">at_manifest</span><span class="op">(</span><span class="va">sess</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"idx"</span>, <span class="st">"status"</span>, <span class="st">"n_rois"</span>, <span class="st">"tumour"</span>, <span class="st">"stroma"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     idx status  n_rois tumour stroma</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1 pending      1      1      0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>     2 pending      1      1      0</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by R. Heller.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">

@@ -99,12 +99,22 @@ statistic) wherever the group holds more than one ROI. Default <code>TRUE</code>
 <code><a href="at_plot_summary.html">at_plot_summary()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">lyr</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_layer.html">at_layer</a></span><span class="op">(</span><span class="st">"tissue"</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tumour"</span>, <span class="st">"stroma"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lyr</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_layer_add.html">at_layer_add</a></span><span class="op">(</span><span class="va">lyr</span>, <span class="fu"><a href="at_roi_rect.html">at_roi_rect</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span>, <span class="fl">40</span>, <span class="fl">40</span>, label <span class="op">=</span> <span class="st">"tumour"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lyr</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_layer_add.html">at_layer_add</a></span><span class="op">(</span><span class="va">lyr</span>, <span class="fu"><a href="at_roi_circle.html">at_roi_circle</a></span><span class="op">(</span><span class="fl">90</span>, <span class="fl">90</span>, <span class="fl">15</span>, label <span class="op">=</span> <span class="st">"stroma"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">spectra</span> <span class="op">&lt;-</span> <span class="fu"><a href="at_extract_spectrum.html">at_extract_spectrum</a></span><span class="op">(</span><span class="fu"><a href="at_project.html">at_project</a></span><span class="op">(</span><span class="fu"><a href="at_example_image.html">at_example_image</a></span><span class="op">(</span><span class="st">"cube"</span><span class="op">)</span>, <span class="va">lyr</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">at_plot_spectrum</span><span class="op">(</span><span class="va">spectra</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="at_plot_spectrum-1.png" alt="" width="700" height="433"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by R. Heller.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">

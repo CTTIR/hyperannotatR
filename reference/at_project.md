@@ -58,7 +58,12 @@ Other projects:
 ## Examples
 
 ``` r
-# An annot_image comes from at_read_image() or at_example_image():
-# proj <- at_project(at_example_image("tissue"),
-#                    at_layer("tissue", labels = "tissue"))
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr, name = "cube example")
+proj
+#> <annot_project> cube example
+#> image: "example_cube.hdr"
+#> layers: 1  |  ROIs: 1
+#>   tissue: 1 ROI, labels "tumour"
 ```

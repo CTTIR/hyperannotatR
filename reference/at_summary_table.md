@@ -40,3 +40,17 @@ Other batch:
 [`at_batch_apply()`](https://cttir.github.io/hyperannotatR/reference/at_batch_apply.md),
 [`at_batch_check_geometry()`](https://cttir.github.io/hyperannotatR/reference/at_batch_check_geometry.md),
 [`at_export_all()`](https://cttir.github.io/hyperannotatR/reference/at_export_all.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+sess <- at_batch_apply(sess, function(project, image, idx, ...) {
+  at_add_roi(project, "annotations", at_roi_rect(5, 5, 5 + 10 * idx, 20, label = "tumour"))
+}, progress = FALSE)
+at_summary_table(sess, by = "label")
+#> # A tibble: 1 × 5
+#>   label  n_rois total_area_px mean_area sd_area
+#>   <chr>   <int>         <dbl>     <dbl>   <dbl>
+#> 1 tumour      2           450       225    106.
+```

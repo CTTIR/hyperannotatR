@@ -39,3 +39,16 @@ Other sessions:
 [`at_session()`](https://cttir.github.io/hyperannotatR/reference/at_session.md),
 [`at_session_status()`](https://cttir.github.io/hyperannotatR/reference/at_session_status.md),
 [`at_set_status()`](https://cttir.github.io/hyperannotatR/reference/at_set_status.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2), labels = "tumour")
+path <- tempfile(fileext = ".rds")
+at_save_session(at_goto(sess, 2), path)
+at_resume(path)
+#> <annot_session>
+#> images: 2  |  complete: 0  |  cursor: 2
+#> out_dir: /tmp/Rtmpr6MR9C/hyperannotatR-session-338a3fadbe65  |  autosave: TRUE
+unlink(path)
+```

@@ -35,3 +35,17 @@ Other control:
 [`at_control_request_status()`](https://cttir.github.io/hyperannotatR/reference/at_control_request_status.md),
 [`at_control_start()`](https://cttir.github.io/hyperannotatR/reference/at_control_start.md),
 [`at_control_stop()`](https://cttir.github.io/hyperannotatR/reference/at_control_stop.md)
+
+## Examples
+
+``` r
+sess <- at_session(rep(at_example_path("cube"), 2))
+h <- at_control_start(sess, serve = FALSE)
+st <- at_control_state(h)
+st$state_revision
+#> [1] "0"
+length(st$queue)
+#> [1] 2
+at_control_stop(h)
+unlink(sess$out_dir, recursive = TRUE)
+```

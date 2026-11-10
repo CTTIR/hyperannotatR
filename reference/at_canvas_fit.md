@@ -42,3 +42,13 @@ Other shiny:
 [`at_canvas_set_tool()`](https://cttir.github.io/hyperannotatR/reference/at_canvas_set_tool.md),
 [`at_tile_source()`](https://cttir.github.io/hyperannotatR/reference/at_tile_source.md),
 [`renderAtCanvas()`](https://cttir.github.io/hyperannotatR/reference/renderAtCanvas.md)
+
+## Examples
+
+``` r
+# In an app, create the proxy with at_canvas_proxy("canvas") in the server
+# function; a mock session stands in for the browser here.
+proxy <- at_canvas_proxy("canvas", session = shiny::MockShinySession$new())
+at_canvas_fit(proxy, bbox = c(0, 0, 64, 64))
+at_canvas_fit(proxy)
+```

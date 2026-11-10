@@ -98,12 +98,23 @@ the manifest.</p>
 <code><a href="at_control_stop.html">at_control_stop()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Connecting needs a control service running in another R process, started</span></span></span>
+<span class="r-in"><span><span class="co"># there with at_control_start(sess, token_file = "token").</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="va">h</span> <span class="op">&lt;-</span> <span class="fu">at_control_connect</span><span class="op">(</span><span class="st">"annotatr-control-&lt;instance_id&gt;.json"</span>, <span class="st">"token"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="at_control_state.html">at_control_state</a></span><span class="op">(</span><span class="va">h</span><span class="op">)</span><span class="op">$</span><span class="va">state_revision</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="at_control_close.html">at_control_close</a></span><span class="op">(</span><span class="va">h</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Raban Heller.</p>
+  <p>Developed by R. Heller.</p>
 </div>
 
 <div class="pkgdown-footer-center themakr-footer-suite">

@@ -42,3 +42,14 @@ Other projects:
 [`at_rois()`](https://cttir.github.io/hyperannotatR/reference/at_rois.md),
 [`at_summary()`](https://cttir.github.io/hyperannotatR/reference/at_summary.md),
 [`at_validate()`](https://cttir.github.io/hyperannotatR/reference/at_validate.md)
+
+## Examples
+
+``` r
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+proj <- at_project(at_example_image("cube"), lyr)
+id <- at_rois(proj)$roi_id[1]
+nrow(at_rois(at_remove_roi(proj, id)))
+#> [1] 0
+```

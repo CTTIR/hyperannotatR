@@ -45,3 +45,13 @@ Other masks:
 [`at_write_mask()`](https://cttir.github.io/hyperannotatR/reference/at_write_mask.md),
 [`at_write_masks()`](https://cttir.github.io/hyperannotatR/reference/at_write_masks.md),
 [`at_write_npy()`](https://cttir.github.io/hyperannotatR/reference/at_write_npy.md)
+
+## Examples
+
+``` r
+lyr <- at_layer_add(at_layer("tissue", labels = "tumour"),
+                    at_roi_rect(10, 10, 40, 40, label = "tumour"))
+mask <- at_mask(at_project(at_example_image("cube"), lyr), "labelled")
+dim(at_mask_preview(mask, max_dim = 32))
+#> [1] 32 32
+```

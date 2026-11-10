@@ -34,3 +34,11 @@ Other backends:
 [`at_read_image()`](https://cttir.github.io/hyperannotatR/reference/at_read_image.md),
 [`at_tile()`](https://cttir.github.io/hyperannotatR/reference/at_tile.md),
 [`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md)
+
+## Examples
+
+``` r
+envi <- at_backend_get("envi")
+envi$extensions
+#> [1] "hdr" "dat" "img" "raw"
+```
