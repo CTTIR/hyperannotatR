@@ -23,4 +23,5 @@ node_modules/
 
 # Agent working files (kept local, never tracked)
 /AGENTS.md
-/planning/HANDOVER.md
+# Development planning and evidence notes stay local
+/planning/
