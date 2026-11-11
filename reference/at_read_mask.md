@@ -112,7 +112,7 @@ at_read_mask(f)
 #> Registered S3 method overwritten by 'stars':
 #>   method                  from
 #>   st_interpolate_aw.stars sf  
-#> <annot_layer> file33fd5e801d50
+#> <annot_layer> file3421407b4818
 #> ROIs: 3  |  labels: "tumour", "necrosis", and "stroma"
 #> visible: TRUE  |  locked: FALSE  |  z: 1
 ```
