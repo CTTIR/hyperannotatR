@@ -1,5 +1,0 @@
-Registered S3 method overwritten by 'stars':
-  method                  from
-  st_interpolate_aw.stars sf
-Loading required package: shiny
-[ FAIL 0 | WARN 0 | SKIP 0 | PASS 236 ]
