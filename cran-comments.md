@@ -14,12 +14,12 @@ This is a new submission.
 
 ## Test environments
 
-* local: macOS 27.0.1 (aarch64-apple-darwin), R 4.6.1,
-  `R CMD check --as-cran` on the built tarball, including the PDF manual
-  (TinyTeX, TeX Live 2026) and the HTML manual validation (HTML Tidy 5.8.0).
-  The Bioconductor package 'RBioFormats' (Suggests) needs a Java runtime
-  configured for R and was not installed locally, so that run used
-  `_R_CHECK_FORCE_SUGGESTS_=false`; its tests are skipped when it is absent.
+* Local: macOS (aarch64-apple-darwin), R 4.6.1, 14 November 2026:
+  full `R CMD check --as-cran` on the built source tarball, including
+  PDF manual compilation with TinyTeX (TeX Live 2026) and HTML manual
+  validation. This supersedes the earlier local check environment.
+  The optional package 'RBioFormats' (1.12.0) was available locally; the
+  earlier missing-package limitation no longer describes this environment.
 * GitHub Actions (r-lib/actions v2, `--as-cran`): ubuntu-latest (R devel,
   release, oldrel-1), macos-latest (R release), windows-latest (R release),
   plus an informational ubuntu-latest oldrel-3 row.
