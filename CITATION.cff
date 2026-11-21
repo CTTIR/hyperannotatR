@@ -3,9 +3,14 @@ message: If you use this software, please cite it as below.
 type: software
 title: 'hyperannotatR: Region-of-Interest Annotation for Hyperspectral Data'
 version: 0.4.0
+doi: 10.5281/zenodo.21889921
 authors:
 - family-names: Heller
   given-names: Raban
   orcid: https://orcid.org/0000-0001-8006-9742
 repository-code: https://github.com/CTTIR/hyperannotatR
 license: MIT
+identifiers:
+- type: doi
+  value: 10.5281/zenodo.21889921
+  description: Zenodo DOI (reserved; resolves once the record is published)
