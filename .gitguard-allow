@@ -1,0 +1,8 @@
+# Reviewed exceptions to the owner's push guard (one glob per line).
+# Branding tables read by the logo and site tooling; no research data.
+tools/branding/*.csv
+# Small synthetic test fixtures used by the test suite.
+tests/testthat/fixtures/*
+tests/fixtures/*
+# Evidence files of the maintenance records; synthetic, no study data.
+planning/evidence/*
