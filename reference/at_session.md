@@ -86,5 +86,5 @@ sess <- at_session(rep(at_example_path("cube"), 3), labels = c("tumour", "stroma
 sess
 #> <annot_session>
 #> images: 3  |  complete: 0  |  cursor: 1
-#> out_dir: /tmp/RtmpylkAlR/hyperannotatR-session-230e5b7c40c  |  autosave: TRUE
+#> out_dir: /tmp/RtmpeddHka/hyperannotatR-session-23232733300d  |  autosave: TRUE
 ```

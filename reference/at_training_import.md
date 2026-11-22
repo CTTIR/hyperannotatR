@@ -107,7 +107,7 @@ pred[20:50, 20:50] <- 1L
 pred[90:110, 60:100] <- 2L
 patch <- at_training_import(proj, pred, label_map = c(tumour = 1L, stroma = 2L))
 patch
-#> <at_staged_patch> 6d64ff72-7312-4f51-9c3e-4cf7bc7816cd (staged)
+#> <at_staged_patch> ea1c1949-160d-4eef-baeb-07e7ceb83354 (staged)
 #>   create 2 | update 0 | unchanged 0 | delete 0 | conflict 0
 #>   base sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945
 #>   proposed sha256:0de7ec0ef2a821558cde199f5e2a7e98a54608c495d7b089f98554af33860327
