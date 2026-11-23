@@ -102,3 +102,8 @@ test_that("a style prints compactly instead of as a raw list", {
   lyr <- at_layer("t", labels = c("a", "b"))
   expect_match(format(lyr$style)[2], "a = #999999, b = #E69F00", fixed = TRUE)
 })
+
+test_that("the default palette is the Okabe-Ito palette with grey first", {
+  ref <- unname(grDevices::palette.colors(palette = "Okabe-Ito"))
+  expect_identical(.okabe_ito(), c(ref[9], ref[2:8]))
+})

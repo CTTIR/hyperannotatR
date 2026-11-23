@@ -39,6 +39,11 @@ new_annot_layer <- function(name,
 #' @param call The calling environment, for error reporting.
 #'
 #' @return A named list of class `annot_style`.
+#' @references
+#' Wong B (2011). "Points of view: Color blindness." *Nature Methods*, 8(6),
+#' 441. \doi{10.1038/nmeth.1618}. Figure 2 shows the eight-colour palette of
+#' Okabe and Ito; the default palette here uses its seven hues after a neutral
+#' grey (`#999999`) in place of black.
 #' @family layers
 #' @export
 #' @examples

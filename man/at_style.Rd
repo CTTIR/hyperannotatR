@@ -44,6 +44,12 @@ Construct a style specification for an \link{annot_layer}.
 \examples{
 at_style(fill_alpha = 0.5, z = 2)
 }
+\references{
+Wong B (2011). "Points of view: Color blindness." \emph{Nature Methods}, 8(6),
+441. \doi{10.1038/nmeth.1618}. Figure 2 shows the eight-colour palette of
+Okabe and Ito; the default palette here uses its seven hues after a neutral
+grey (\verb{#999999}) in place of black.
+}
 \seealso{
 Other layers:
 \code{\link[=at_layer]{at_layer()}},

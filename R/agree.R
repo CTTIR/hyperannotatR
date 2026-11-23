@@ -95,6 +95,16 @@
 #'   `n_px`, `encoding`, `alignment`, `code_alignment`, `background` and
 #'   `nonfinite` (always `"error"`). A `comparison` attribute retains validated
 #'   input metadata and legends for interpretation.
+#' @references
+#' Dice LR (1945). "Measures of the amount of ecologic association between
+#' species." *Ecology*, 26(3), 297-302. \doi{10.2307/1932409}.
+#'
+#' Jaccard P (1912). "The distribution of the flora in the alpine zone."
+#' *New Phytologist*, 11(2), 37-50. \doi{10.1111/j.1469-8137.1912.tb05611.x}.
+#'
+#' Cohen J (1960). "A coefficient of agreement for nominal scales."
+#' *Educational and Psychological Measurement*, 20(1), 37-46.
+#' \doi{10.1177/001316446002000104}.
 #' @family masks
 #' @seealso [at_mask()], [at_read_npy()]
 #' @export

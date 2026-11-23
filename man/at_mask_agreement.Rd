@@ -72,6 +72,17 @@ ag <- at_mask_agreement(m, m)
 attr(ag, "overall")$kappa
 \dontshow{\}) # examplesIf}
 }
+\references{
+Dice LR (1945). "Measures of the amount of ecologic association between
+species." \emph{Ecology}, 26(3), 297-302. \doi{10.2307/1932409}.
+
+Jaccard P (1912). "The distribution of the flora in the alpine zone."
+\emph{New Phytologist}, 11(2), 37-50. \doi{10.1111/j.1469-8137.1912.tb05611.x}.
+
+Cohen J (1960). "A coefficient of agreement for nominal scales."
+\emph{Educational and Psychological Measurement}, 20(1), 37-46.
+\doi{10.1177/001316446002000104}.
+}
 \seealso{
 \code{\link[=at_mask]{at_mask()}}, \code{\link[=at_read_npy]{at_read_npy()}}
 

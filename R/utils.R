@@ -252,6 +252,11 @@
 # The Okabe-Ito colourblind-safe qualitative palette (8 colours), used as the
 # default for ROI/label styling. Order is the canonical Okabe-Ito order,
 # beginning with a neutral grey.
+# Source: palette of Okabe and Ito as shown in Wong (2011), "Points of view:
+# Color blindness", Nature Methods 8(6), p. 441, Figure 2,
+# doi:10.1038/nmeth.1618. The seven hues equal
+# grDevices::palette.colors(palette = "Okabe-Ito")[2:8]; black is replaced by
+# that palette's grey (#999999), which leads here.
 .okabe_ito <- function() {
   c(
     "#999999", "#E69F00", "#56B4E9", "#009E73",
