@@ -454,8 +454,15 @@ at_plot_overlay <- function(project, img = NULL, layer = NULL,
     parts <- lapply(seq_len(nrow(rt)), function(k) .overlay_parts(rt$geometry[[k]], k, rt$label[k]))
     paths <- do.call(rbind, lapply(parts, `[[`, "paths"))
     points <- do.call(rbind, lapply(parts, `[[`, "points"))
+    # A white casing under each outline and marker keeps every label colour
+    # legible on any image, including the neutral grey that opens the default
+    # palette on mid-tone tissue.
     if (!is.null(paths) && nrow(paths) > 0L) {
       base <- base +
+        ggplot2::geom_path(data = paths,
+                           ggplot2::aes(x = .data$x, y = .data$y, group = .data$group),
+                           colour = "white", linewidth = 1.6, alpha = 0.8,
+                           inherit.aes = FALSE) +
         ggplot2::geom_path(data = paths,
                            ggplot2::aes(x = .data$x, y = .data$y,
                                         group = .data$group, colour = .data$label),
@@ -463,6 +470,10 @@ at_plot_overlay <- function(project, img = NULL, layer = NULL,
     }
     if (!is.null(points) && nrow(points) > 0L) {
       base <- base +
+        ggplot2::geom_point(data = points,
+                            ggplot2::aes(x = .data$x, y = .data$y),
+                            colour = "white", shape = 3, size = 2.5, stroke = 2,
+                            alpha = 0.8, inherit.aes = FALSE) +
         ggplot2::geom_point(data = points,
                             ggplot2::aes(x = .data$x, y = .data$y, colour = .data$label),
                             shape = 3, size = 2.5, stroke = 1, inherit.aes = FALSE)

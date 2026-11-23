@@ -62,6 +62,13 @@ test_that("the display level is the finest level within max_dim (W13)", {
   expect_identical(.display_level(img, 100L), 2L)
 })
 
+# Built data of the topmost layer of one geom in a plot (the coloured layer of
+# an overlay; its white casing lies beneath, drawn by the same geom).
+top_layer_data <- function(p, geom) {
+  k <- which(vapply(p$layers, function(l) inherits(l$geom, geom), logical(1)))
+  ggplot2::ggplot_build(p)$data[[max(k)]]
+}
+
 test_that("overlays draw mixed polygon, line and point ROIs (M14)", {
   img <- new_annot_image("k.tif", "raster", c(10L, 10L), 1L, list(c(10L, 10L)), 1L,
                          handle = list(data = array(1, c(10, 10, 1))))
@@ -69,16 +76,37 @@ test_that("overlays draw mixed polygon, line and point ROIs (M14)", {
   lyr <- at_layer_add(lyr, at_roi_point(6, 6, label = "p"))
   p <- at_plot_overlay(at_project(img, lyr))
   # Built data hold the reversed-scale y, i.e. -y.
-  built <- ggplot2::ggplot_build(p)$data
-  paths <- built[[2]]
-  points <- built[[3]]
+  paths <- top_layer_data(p, "GeomPath")
+  points <- top_layer_data(p, "GeomPoint")
   expect_equal(range(paths$x), c(1, 4))
   expect_equal(range(-paths$y), c(1, 4))
   expect_equal(c(points$x, -points$y), c(6, 6))
   # An all-point project draws markers only.
   only <- at_project(img, at_layer_add(at_layer("l"), at_roi_point(2, 3, label = "p")))
-  built <- ggplot2::ggplot_build(at_plot_overlay(only))$data
-  expect_equal(c(built[[2]]$x, -built[[2]]$y), c(2, 3))
+  only_plot <- at_plot_overlay(only)
+  marker <- top_layer_data(only_plot, "GeomPoint")
+  expect_equal(c(marker$x, -marker$y), c(2, 3))
+  expect_false(any(vapply(only_plot$layers, function(l) inherits(l$geom, "GeomPath"), logical(1))))
+})
+
+test_that("overlay outlines and markers sit on a white casing", {
+  img <- new_annot_image("k.tif", "raster", c(10L, 10L), 1L, list(c(10L, 10L)), 1L,
+                         handle = list(data = array(1, c(10, 10, 1))))
+  lyr <- at_layer_add(at_layer("l"), at_roi_rect(1, 1, 4, 4, label = "a"))
+  lyr <- at_layer_add(lyr, at_roi_point(6, 6, label = "p"))
+  p <- at_plot_overlay(at_project(img, lyr))
+  built <- ggplot2::ggplot_build(p)$data
+  for (geom in c("GeomPath", "GeomPoint")) {
+    k <- which(vapply(p$layers, function(l) inherits(l$geom, geom), logical(1)))
+    expect_length(k, 2L)
+    casing <- built[[k[1]]]
+    top <- built[[k[2]]]
+    expect_identical(unique(casing$colour), "white")
+    expect_false("white" %in% top$colour)
+    # Same vertices, drawn wider underneath.
+    expect_equal(casing[, c("x", "y")], top[, c("x", "y")])
+  }
+  expect_gt(built[[2]]$linewidth[1], built[[3]]$linewidth[1])
 })
 
 test_that("natural colour keeps channel balance and non-finite pixels are transparent (M18)", {
@@ -213,7 +241,8 @@ test_that("project, layer, overlay and summary plots use the layer's style colou
   expect_identical(layer_colours(at_plot_project(proj), 1L), c("#0000FF", "#FF0000"))
   expect_identical(layer_colours(at_plot(proj$layers$tissue), 1L), c("#0000FF", "#FF0000"))
   expect_identical(layer_colours(at_plot_summary(proj), 1L), c("#0000FF", "#FF0000"))
-  expect_identical(layer_colours(at_plot_overlay(proj), 2L, "colour"), c("#0000FF", "#FF0000"))
+  expect_identical(toupper(unique(top_layer_data(at_plot_overlay(proj), "GeomPath")$colour)),
+                   c("#0000FF", "#FF0000"))
   # The mask of the same project shows the same colours.
   lg <- at_mask_legend(at_mask(proj, "labelled"))
   expect_identical(toupper(lg$colour[match(c("stroma", "tumour"), lg$label)]),
