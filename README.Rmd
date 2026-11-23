@@ -83,7 +83,7 @@ path <- tempfile(fileext = ".tif")
 at_write_mask(mask, path)             # also writes <path>.legend.json
 ```
 
-```{r overlay, message = FALSE, fig.height = 4}
+```{r overlay, message = FALSE, fig.height = 4, fig.alt = "Tissue image with a tumour rectangle and a stroma circle outlined on top, each in its label colour."}
 at_plot_overlay(proj)
 ```
 

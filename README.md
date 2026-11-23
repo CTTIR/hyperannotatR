@@ -85,7 +85,7 @@ at_write_mask(mask, path)             # also writes <path>.legend.json
 at_plot_overlay(proj)
 ```
 
-<img src="man/figures/README-overlay-1.png" alt="" width="100%" />
+<img src="man/figures/README-overlay-1.png" alt="Tissue image with a tumour rectangle and a stroma circle outlined on top, each in its label colour." width="100%" />
 
 ## Supported formats
 

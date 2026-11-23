@@ -349,7 +349,7 @@ arguments are invalid.
 Finally, `at_plot_mask()` renders a mask with its legend for a quick visual
 check:
 
-```{r plot}
+```{r plot, fig.alt = "Multi-class mask of the example project: a tumour square, a stroma rectangle and a necrosis band, each in its legend colour."}
 at_plot_mask(mc)
 ```
 

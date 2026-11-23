@@ -116,6 +116,7 @@ package for a first CRAN submission.
 * `at_mask_agreement()` cites the primary sources of the Dice coefficient,
   the Jaccard index and Cohen's kappa, and `at_style()` the published source
   of the Okabe-Ito palette.
+* The figures of the README and of the masks vignette carry alternative text.
 * The backend availability tests expect the Cubert backend only where the
   `cuvis.r` package and its vendor SDK are both usable. They failed on a
   machine with `cuvis.r` installed but without the SDK.
