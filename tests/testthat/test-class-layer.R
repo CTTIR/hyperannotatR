@@ -88,3 +88,17 @@ test_that("a re-minted layer id is unique within the layer after a counter resta
   ids <- vapply(l$rois, `[[`, character(1), "id")
   expect_false(anyDuplicated(ids) > 0L)
 })
+
+test_that("a style prints compactly instead of as a raw list", {
+  expect_output(print(at_style()), "<annot_style>")
+  expect_output(print(at_style()), "colour: default palette")
+  out <- format(at_style(colour = c(tumour = "#FF0000"), fill_alpha = 0.5, z = 3L))
+  expect_length(out, 4L)
+  expect_match(out[2], "tumour = #FF0000", fixed = TRUE)
+  expect_match(out[3], "fill alpha: 0.5", fixed = TRUE)
+  expect_match(out[4], "z: 3", fixed = TRUE)
+  utils::capture.output(expect_invisible(print(at_style())))
+  # The resolved mapping of a layer prints label by label.
+  lyr <- at_layer("t", labels = c("a", "b"))
+  expect_match(format(lyr$style)[2], "a = #999999, b = #E69F00", fixed = TRUE)
+})

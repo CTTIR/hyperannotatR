@@ -238,3 +238,27 @@ print.annot_layer <- function(x, ...) {
   cat(format(x, ...), sep = "\n")
   invisible(x)
 }
+
+#' @export
+format.annot_style <- function(x, ...) {
+  col <- x$colour
+  colour <- if (is.null(col)) {
+    "default palette"
+  } else if (is.null(names(col))) {
+    paste(col, collapse = ", ")
+  } else {
+    paste(sprintf("%s = %s", names(col), col), collapse = ", ")
+  }
+  c(
+    cli::format_inline("{.cls annot_style}"),
+    paste0("colour: ", colour),
+    cli::format_inline("fill alpha: {x$fill_alpha}  |  stroke width: {x$stroke_width}"),
+    cli::format_inline("visible: {x$visible}  |  locked: {x$locked}  |  z: {x$z}")
+  )
+}
+
+#' @export
+print.annot_style <- function(x, ...) {
+  cat(format(x, ...), sep = "\n")
+  invisible(x)
+}

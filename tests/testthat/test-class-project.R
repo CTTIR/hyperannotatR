@@ -183,3 +183,10 @@ test_that("at_rois handles empty geometries and many ROIs", {
   expect_identical(rt$n_vertices[31], 0L)
   expect_equal(rt$centroid_x[1], 2)
 })
+
+test_that("the summary of an unnamed project prints a placeholder, not NA", {
+  out <- utils::capture.output(print(at_summary(at_project(small_image()))))
+  expect_match(out[1], "(unnamed)", fixed = TRUE)
+  expect_no_match(out[1], "NA")
+  expect_output(print(at_summary(demo_project())), "demo")
+})

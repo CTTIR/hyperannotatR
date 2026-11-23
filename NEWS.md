@@ -105,6 +105,11 @@ package for a first CRAN submission.
   extraction table. A wrong value now fails with a classified
   `at_validation_error` instead of a subscript or coercion error. A `rgb`
   vector that is not of length three is rejected; it was silently ignored.
+* `at_read_rois_csv()` reports an empty file and a `geometry` column that is
+  not valid WKT as validation errors that name the file.
+* A style from `at_style()` prints as a compact summary instead of a raw
+  list, and the summary of an unnamed project prints `(unnamed)` instead of
+  `NA`.
 
 # hyperannotatR 0.3.0
 

@@ -534,8 +534,9 @@ summary.annot_project <- function(object, ...) {
 
 #' @export
 print.annot_summary <- function(x, ...) {
+  nm <- if (length(x$name) == 1L && !is.na(x$name)) x$name else "(unnamed)"
   lines <- c(
-    cli::format_inline("{.cls annot_summary} {.field {x$name}}"),
+    cli::format_inline("{.cls annot_summary} {.field {nm}}"),
     cli::format_inline("layers: {x$n_layers}  |  ROIs: {x$n_rois}")
   )
   if (nrow(x$per_label) > 0L) {
