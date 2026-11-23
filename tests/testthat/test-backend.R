@@ -12,7 +12,7 @@ test_that("core backends are available; optional backends reflect installation",
   expect_identical(avail[["raster"]], requireNamespace("magick", quietly = TRUE))
   expect_identical(avail[["tiff"]], requireNamespace("tiff", quietly = TRUE))
   expect_true(avail[["envi"]])
-  expect_identical(avail[["cuvis"]], nzchar(system.file(package = "cuvis.r")))
+  expect_identical(avail[["cuvis"]], cuvis_expected_available())
   expect_identical(avail[["ometiff"]], requireNamespace("RBioFormats", quietly = TRUE))
 })
 

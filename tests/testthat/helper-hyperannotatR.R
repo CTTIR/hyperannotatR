@@ -15,6 +15,17 @@ clear_image_caches <- function() {
   invisible(NULL)
 }
 
+# ---- Optional backends -----------------------------------------------------
+
+# Whether the optional cuvis backend should report itself available here: the
+# cuvis.r package is installed and its vendor SDK library is usable. A machine
+# with cuvis.r but without the SDK is "unavailable", like one without cuvis.r.
+cuvis_expected_available <- function() {
+  nzchar(system.file(package = "cuvis.r")) &&
+    isTRUE(tryCatch(getExportedValue("cuvis.r", "cuvis_available")(),
+                    error = function(e) FALSE))
+}
+
 # ---- Image fixtures --------------------------------------------------------
 
 # 10x10 single-band image for exact pixel arithmetic (the mask reference case).

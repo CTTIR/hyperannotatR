@@ -38,12 +38,24 @@ test_that("the tivita backend reads ENVI-conformant cubes and rejects proprietar
 test_that("cuvis and ometiff report availability matching installation", {
   expect_identical(
     at_backend_get("cuvis")$available_fn(),
-    nzchar(system.file(package = "cuvis.r"))
+    cuvis_expected_available()
   )
   expect_identical(
     at_backend_get("ometiff")$available_fn(),
     requireNamespace("RBioFormats", quietly = TRUE)
   )
+})
+
+test_that("an installed cuvis.r without a usable SDK is unavailable, with the reason", {
+  skip_if_not(nzchar(system.file(package = "cuvis.r")), "cuvis.r is not installed")
+  local_mocked_bindings(.cuvis_fn = function(name) function(...) FALSE)
+  st <- .cuvis_status()
+  expect_false(st$available)
+  expect_match(st$reason, "SDK library is not usable")
+  expect_false(at_backend_get("cuvis")$available_fn())
+  local_mocked_bindings(.cuvis_fn = function(name) function(...) TRUE)
+  expect_true(.cuvis_status()$available)
+  expect_true(at_backend_get("cuvis")$available_fn())
 })
 
 test_that("Cubert processing modes the SDK does not report map to unknown values", {
