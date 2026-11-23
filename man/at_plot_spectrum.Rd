@@ -25,6 +25,8 @@ statistic) wherever the group holds more than one ROI. Default \code{TRUE}.}
 }
 \value{
 A \link[ggplot2:ggplot]{ggplot2::ggplot} object with one line per ROI and statistic.
+Lines and ribbons share one colour per group: the colour-blind-safe
+Okabe-Ito palette for up to eight groups, viridis for more.
 }
 \description{
 Plot spectra

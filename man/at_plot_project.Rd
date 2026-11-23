@@ -20,14 +20,15 @@ at_plot_project(
 
 \item{show_labels}{Logical; draw label text at centroids. Default \code{TRUE}.}
 
-\item{alpha}{Fill opacity; a sensible default when \code{NULL}.}
+\item{alpha}{Fill opacity between 0 and 1; \code{0.4} when \code{NULL}.}
 
 \item{call}{The calling environment, for error reporting.}
 }
 \value{
 A \link[ggplot2:ggplot]{ggplot2::ggplot} object in level-0 image coordinates with the
-y axis pointing down, as in the image. Empty projects give a valid empty
-plot.
+y axis pointing down, as in the image. Each label is filled with the
+colour of its layer's style (see \code{\link[=at_style]{at_style()}}), the colour the masks and
+the app use. Empty projects give a valid empty plot.
 }
 \description{
 Plot a project's ROIs

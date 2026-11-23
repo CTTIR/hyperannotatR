@@ -17,7 +17,8 @@ at_plot_overlay(project, img = NULL, layer = NULL, call = rlang::caller_env())
 }
 \value{
 A \link[ggplot2:ggplot]{ggplot2::ggplot} object with the image and ROI outlines (points
-as markers), both in level-0 image coordinates.
+as markers), both in level-0 image coordinates. Outlines take the colour
+of their label in the layer's style (see \code{\link[=at_style]{at_style()}}).
 }
 \description{
 Plot ROIs overlaid on the image

@@ -190,3 +190,96 @@ test_that("mask plots and previews frame the whole image in image coordinates", 
   expect_gt(max(tiles$x), 400)
   expect_lt(max(tiles$x), 520)
 })
+
+# A project on the bundled cube whose layer declares its own label colours.
+styled_cube_project <- function() {
+  lyr <- at_layer("tissue", labels = c("tumour", "stroma"),
+                  style = at_style(colour = c(tumour = "#FF0000", stroma = "#0000FF")))
+  lyr <- at_layer_add(lyr, at_roi_rect(10, 10, 40, 40, label = "stroma"))
+  lyr <- at_layer_add(lyr, at_roi_rect(50, 50, 60, 60, label = "stroma"))
+  lyr <- at_layer_add(lyr, at_roi_circle(90, 90, 15, label = "tumour"))
+  at_project(at_example_image("cube"), lyr)
+}
+
+layer_colours <- function(p, k, aes = "fill") {
+  d <- ggplot2::ggplot_build(p)$data[[k]]
+  toupper(unique(d[[aes]]))
+}
+
+test_that("project, layer, overlay and summary plots use the layer's style colours", {
+  proj <- styled_cube_project()
+  # ROI order is stroma, stroma, tumour: a palette keyed to ROI order would
+  # give stroma the first default colour instead of its declared blue.
+  expect_identical(layer_colours(at_plot_project(proj), 1L), c("#0000FF", "#FF0000"))
+  expect_identical(layer_colours(at_plot(proj$layers$tissue), 1L), c("#0000FF", "#FF0000"))
+  expect_identical(layer_colours(at_plot_summary(proj), 1L), c("#0000FF", "#FF0000"))
+  expect_identical(layer_colours(at_plot_overlay(proj), 2L, "colour"), c("#0000FF", "#FF0000"))
+  # The mask of the same project shows the same colours.
+  lg <- at_mask_legend(at_mask(proj, "labelled"))
+  expect_identical(toupper(lg$colour[match(c("stroma", "tumour"), lg$label)]),
+                   c("#0000FF", "#FF0000"))
+})
+
+test_that("plots of a project without declared colours keep the default palette by label", {
+  proj <- demo_project()
+  pal <- .project_palette(proj, c("tumour", "tissue"))
+  expect_identical(pal[["tissue"]], proj$layers$tissue$style$colour[["tissue"]])
+  expect_identical(pal[["tumour"]], proj$layers$tumour$style$colour[["tumour"]])
+  # A label unknown to every layer still gets a colour.
+  expect_false(anyNA(.project_palette(proj, c("tissue", "other"))))
+  # Restricting to one layer uses that layer's colours.
+  expect_identical(.project_palette(proj, "tumour", layer = "tumour")[["tumour"]],
+                   proj$layers$tumour$style$colour[["tumour"]])
+})
+
+test_that("a spectrum ribbon has the colour of its own lines", {
+  proj <- styled_cube_project()
+  sp <- at_extract_spectrum(proj)
+  b <- ggplot2::ggplot_build(at_plot_spectrum(sp))
+  ribbon <- b$data[[1]]
+  lines <- b$data[[2]]
+  # Only stroma holds two ROIs, so only stroma has a ribbon. A fill scale
+  # trained on the ribbon data alone would colour it like another group.
+  stroma <- .group_palette(sp$label)[["stroma"]]
+  expect_identical(unique(ribbon$fill), stroma)
+  expect_true(stroma %in% lines$colour)
+  expect_length(unique(lines$colour), 2L)
+  expect_true(all(unique(lines$colour) %in% .okabe_ito()))
+})
+
+test_that("spectrum groups beyond the palette size stay distinguishable", {
+  pal <- .group_palette(paste0("roi", 1:12))
+  expect_length(unique(pal), 12L)
+  expect_named(pal, paste0("roi", 1:12))
+  expect_identical(unname(.group_palette(c("a", "b"))), .okabe_ito()[1:2])
+})
+
+test_that("plot arguments are validated with classified errors", {
+  cube <- at_example_image("cube")
+  expect_error(at_plot_image(cube, bands = 99), class = "at_validation_error")
+  expect_error(at_plot_image(cube, bands = 0), class = "at_validation_error")
+  expect_error(at_plot_image(cube, bands = "a"), class = "at_validation_error")
+  expect_error(at_plot_image(cube, rgb = c(1, 2)), class = "at_validation_error")
+  expect_error(at_plot_image(cube, rgb = c(1, NA, 3)), class = "at_validation_error")
+  expect_error(at_plot_image(cube, rgb = c("a", "b", "c")), class = "at_validation_error")
+  expect_error(at_plot_image(cube, rgb = c(0, 1, 2)), class = "at_validation_error")
+  # A non-spectral image has no wavelengths to fall back on.
+  expect_error(at_plot_image(small_image(), rgb = c(1, 2, 9)), class = "at_validation_error")
+  # Valid selections still plot: band indices and wavelengths.
+  expect_true(is_gg(at_plot_image(cube, bands = 40)))
+  expect_true(is_gg(at_plot_image(cube, rgb = c(30, 20, 10))))
+  expect_true(is_gg(at_plot_image(cube, rgb = c(650, 550, 450))))
+
+  proj <- demo_project()
+  expect_error(at_plot_project(proj, alpha = 5), class = "at_validation_error")
+  expect_error(at_plot_project(proj, alpha = "a"), class = "at_validation_error")
+  expect_error(at_plot_project(proj, show_labels = NA), class = "at_validation_error")
+  expect_true(is_gg(at_plot_project(proj, alpha = 1, show_labels = FALSE)))
+  m <- at_mask(proj, "labelled")
+  expect_error(at_plot_mask(m, legend = NA), class = "at_validation_error")
+  expect_error(plot(m, legend = "yes"), class = "at_validation_error")
+
+  expect_error(at_plot_spectrum(NULL), class = "at_validation_error")
+  expect_error(at_plot_spectrum(data.frame(wavelength = 1)), class = "at_validation_error")
+  expect_error(at_plot_spectrum(.empty_extract_tbl(), ribbon = NA), class = "at_validation_error")
+})

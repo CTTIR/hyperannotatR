@@ -916,6 +916,7 @@ at_mask_stats <- function(mask, pixel_size = NULL, call = rlang::caller_env()) {
 #' @keywords internal
 #' @export
 plot.annot_mask <- function(x, legend = TRUE, ...) {
+  .check_flag(legend)
   m <- as.matrix(x)
   lg <- .mask_display(x)
   # Cells are placed in the coordinates of the mask's grid level: a preview

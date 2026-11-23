@@ -20,7 +20,8 @@ at_plot_image(
 Plot axes always use level-0 image coordinates, scaled independently by
 actual width and height ratios.}
 
-\item{bands}{Optional band index for single-band display.}
+\item{bands}{Optional band index (between 1 and the number of bands) for
+single-band display.}
 
 \item{rgb}{Optional length-3 vector of band indices, or wavelengths in nm for
 a spectral cube, for a false-colour composite. Each channel of an \code{rgb}

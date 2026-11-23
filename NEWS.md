@@ -89,6 +89,22 @@ package for a first CRAN submission.
   pixel. Tight, normal and broad extent settings are available. Proposals
   require explicit review and acceptance, preserve holes and pixel alignment,
   and are cleared when the image, annotation target or view changes.
+* `at_plot_project()`, `at_plot_overlay()`, `at_plot_summary()` and
+  `at_plot()` for a layer colour each label with the colour of its layer's
+  style, as masks and the app already do. Before, they cycled the default
+  palette in ROI order, so a colour set with `at_style()` was ignored and a
+  plot could disagree with the mask of the same project.
+* `at_plot_spectrum()` draws each min-max ribbon in the colour of its own
+  lines; the ribbon could take the colour of another group. Spectra and ROI
+  outlines use the colour-blind-safe Okabe-Ito palette instead of the default
+  hues (viridis for more than eight groups).
+* Plot functions validate their arguments: `bands` and `rgb` in
+  `at_plot_image()` must select existing bands (or wavelengths of a spectral
+  cube), `alpha` lies between 0 and 1, `show_labels`, `legend` and `ribbon`
+  are single logicals, and `at_plot_spectrum()` requires the columns of an
+  extraction table. A wrong value now fails with a classified
+  `at_validation_error` instead of a subscript or coercion error. A `rgb`
+  vector that is not of length three is rejected; it was silently ignored.
 
 # hyperannotatR 0.3.0
 

@@ -56,6 +56,45 @@
   as.integer(rgb)
 }
 
+# Validate the `bands` and `rgb` display arguments of at_plot_image() before
+# any pixel is read, so a wrong band fails with the valid range instead of a
+# subscript error from the tile array. `bands` is one band index (the first
+# element of a longer vector is displayed, as before); `rgb` is three band
+# indices, or three wavelengths for a spectral cube.
+.check_display_bands <- function(img, bands, rgb, call) {
+  nb <- as.integer(img$n_bands)
+  if (!is.null(bands)) {
+    b <- bands[1]
+    if (!is.numeric(bands) || length(bands) < 1L || is.na(b) || !is.finite(b) ||
+        b != round(b) || b < 1 || b > nb) {
+      .check_abort(
+        c("{.arg bands} must be a band index between 1 and {nb}.",
+          "x" = "You supplied {.val {utils::head(bands, 3)}}."),
+        call = call
+      )
+    }
+  }
+  if (!is.null(rgb)) {
+    if (!is.numeric(rgb) || length(rgb) != 3L || anyNA(rgb) || any(!is.finite(rgb))) {
+      .check_abort(
+        c("{.arg rgb} must be three band indices, or three wavelengths for a spectral cube.",
+          "x" = "You supplied {.cls {class(rgb)[1]}} of length {length(rgb)}."),
+        call = call
+      )
+    }
+    spectral <- at_is_spectral(img)
+    if (!(spectral && any(rgb > nb)) && (any(rgb != round(rgb)) || any(rgb < 1) || any(rgb > nb))) {
+      .check_abort(
+        c("{.arg rgb} must hold band indices between 1 and {nb}.",
+          "x" = "You supplied {.val {rgb}}.",
+          "i" = if (!spectral) "Wavelengths are accepted only for a spectral cube."),
+        call = call
+      )
+    }
+  }
+  invisible(NULL)
+}
+
 # Build a display data frame (x, y, and either fill hex or value) from an image.
 .image_display_df <- function(img, level, bands, rgb, max_dim) {
   tile <- at_tile(img, level = level)
@@ -154,7 +193,8 @@
 #' @param level Pyramid level to sample; chosen automatically when `NULL`.
 #'   Plot axes always use level-0 image coordinates, scaled independently by
 #'   actual width and height ratios.
-#' @param bands Optional band index for single-band display.
+#' @param bands Optional band index (between 1 and the number of bands) for
+#'   single-band display.
 #' @param rgb Optional length-3 vector of band indices, or wavelengths in nm for
 #'   a spectral cube, for a false-colour composite. Each channel of an `rgb`
 #'   composite is contrast-stretched on its own; the default natural-colour
@@ -175,6 +215,7 @@ at_plot_image <- function(img, level = NULL, bands = NULL, rgb = NULL,
                           max_dim = 1024L, call = rlang::caller_env()) {
   .check_image(img, call = call)
   max_dim <- .check_count(max_dim, min = 1L, call = call)
+  .check_display_bands(img, bands, rgb, call = call)
   if (is.null(level)) level <- .display_level(img, max_dim)
   df <- .image_display_df(img, level, bands, rgb, max_dim)
   p <- ggplot2::ggplot(df, ggplot2::aes(x = .data$x, y = .data$y)) +
@@ -203,10 +244,37 @@ at_plot_image <- function(img, level = NULL, bands = NULL, rgb = NULL,
   sf::st_sf(label = rt$label, layer = rt$layer, geometry = rt$geometry)
 }
 
-# Okabe-Ito fill scale keyed to a set of labels.
-.label_fill_scale <- function(labels) {
-  pal <- .resolve_palette(unique(labels))
-  ggplot2::scale_fill_manual(values = pal, drop = FALSE)
+# Label -> colour map for the plots of a project: every label takes the colour
+# of its layer's style (the colours the app and the masks use), so a plot and
+# a mask of the same project agree. A label that occurs in several layers
+# takes the colour of the first one; a label without a style colour cycles the
+# Okabe-Ito palette. `layer` restricts the lookup to one layer.
+.project_palette <- function(project, labels, layer = NULL) {
+  labels <- unique(as.character(labels))
+  layers <- project$layers
+  if (!is.null(layer)) layers <- layers[intersect(layer, names(layers))]
+  styled <- unlist(lapply(unname(layers), function(l) l$style$colour))
+  nms <- names(styled) %||% rep("", length(styled))
+  styled <- styled[!is.na(styled) & nzchar(nms) & !duplicated(nms)]
+  .resolve_palette(labels, if (length(styled)) styled else NULL)
+}
+
+# Manual discrete scale for a label -> colour map, on `aesthetics`.
+.label_scale <- function(palette, aesthetics = "fill") {
+  ggplot2::scale_discrete_manual(aesthetics, values = palette, drop = FALSE)
+}
+
+# Colours for the groups of a spectrum plot: Okabe-Ito while its eight colours
+# are enough to tell the groups apart, viridis beyond that (cycling the palette
+# would give two groups the same colour).
+.group_palette <- function(groups) {
+  groups <- unique(as.character(groups))
+  if (length(groups) <= length(.okabe_ito())) {
+    return(.resolve_palette(groups))
+  }
+  pal <- grDevices::hcl.colors(length(groups), "viridis")
+  names(pal) <- groups
+  pal
 }
 
 #' Plot a project's ROIs
@@ -214,11 +282,12 @@ at_plot_image <- function(img, level = NULL, bands = NULL, rgb = NULL,
 #' @param project An [annot_project].
 #' @param layer,label Optional filters.
 #' @param show_labels Logical; draw label text at centroids. Default `TRUE`.
-#' @param alpha Fill opacity; a sensible default when `NULL`.
+#' @param alpha Fill opacity between 0 and 1; `0.4` when `NULL`.
 #' @param call The calling environment, for error reporting.
 #' @return A [ggplot2::ggplot] object in level-0 image coordinates with the
-#'   y axis pointing down, as in the image. Empty projects give a valid empty
-#'   plot.
+#'   y axis pointing down, as in the image. Each label is filled with the
+#'   colour of its layer's style (see [at_style()]), the colour the masks and
+#'   the app use. Empty projects give a valid empty plot.
 #' @family plots
 #' @export
 #' @examplesIf requireNamespace("magick", quietly = TRUE)
@@ -227,15 +296,16 @@ at_plot_project <- function(project, layer = NULL, label = NULL,
                             show_labels = TRUE, alpha = NULL,
                             call = rlang::caller_env()) {
   .check_project(project, call = call)
+  .check_flag(show_labels, call = call)
+  a <- .check_number(alpha, min = 0, max = 1, allow_null = TRUE, call = call) %||% 0.4
   sfp <- .project_sf(project, layer, label)
-  a <- alpha %||% 0.4
   drawn <- .sf_display_data(sfp)
   p <- ggplot2::ggplot(sfp) +
     ggplot2::labs(title = project$meta$name %||% "project", x = "x (px)", y = "y (px)") +
     ggplot2::theme_minimal()
   if (nrow(sfp) > 0L) {
     p <- p + ggplot2::geom_sf(data = drawn, ggplot2::aes(fill = .data$label), alpha = a) +
-      .label_fill_scale(sfp$label)
+      .label_scale(.project_palette(project, sfp$label, layer))
     if (show_labels) {
       cent <- sf::st_coordinates(suppressWarnings(sf::st_point_on_surface(sf::st_geometry(drawn))))
       lab_df <- data.frame(x = cent[, 1], y = cent[, 2], label = sfp$label)
@@ -260,6 +330,7 @@ at_plot_project <- function(project, layer = NULL, label = NULL,
 #' at_plot_mask(at_mask(at_example_project(), "labelled"))
 at_plot_mask <- function(mask, legend = TRUE, call = rlang::caller_env()) {
   .check_class(mask, "annot_mask", call = call)
+  .check_flag(legend, call = call)
   plot(mask, legend = legend)
 }
 
@@ -273,6 +344,8 @@ at_plot_mask <- function(mask, legend = TRUE, call = rlang::caller_env()) {
 #'   statistic) wherever the group holds more than one ROI. Default `TRUE`.
 #' @param call The calling environment, for error reporting.
 #' @return A [ggplot2::ggplot] object with one line per ROI and statistic.
+#'   Lines and ribbons share one colour per group: the colour-blind-safe
+#'   Okabe-Ito palette for up to eight groups, viridis for more.
 #' @family plots
 #' @export
 #' @examples
@@ -284,12 +357,21 @@ at_plot_mask <- function(mask, legend = TRUE, call = rlang::caller_env()) {
 at_plot_spectrum <- function(spectra, colour_by = c("label", "roi_id", "layer"),
                              ribbon = TRUE, call = rlang::caller_env()) {
   colour_by <- .check_choice(colour_by, c("label", "roi_id", "layer"), default = missing(colour_by), call = call)
+  .check_flag(ribbon, call = call)
+  need <- c("roi_id", "wavelength", "value", colour_by)
+  if (!is.data.frame(spectra) || !all(need %in% names(spectra))) {
+    absent <- if (is.data.frame(spectra)) setdiff(need, names(spectra)) else need
+    .check_abort(
+      c("{.arg spectra} must be the table from {.fn at_extract_spectrum} or {.fn at_extract}.",
+        "x" = "Missing column{?s}: {.field {absent}}."),
+      call = call
+    )
+  }
   spectra <- spectra[!is.na(spectra$wavelength), , drop = FALSE]
   units <- unique(spectra$unit %||% NA_character_)
   if (!length(units)) units <- NA_character_
   if (length(units) > 1L) .at_abort("Spectrum wavelength units must agree; explicitly convert units before plotting.", call = call)
   axis <- if (is.na(units) || !nzchar(units)) "spectral coordinate (unit unknown)" else paste0("spectral coordinate (", units, ")")
-  .check_flag(ribbon, call = call)
   # One line per ROI and statistic: grouping by ROI alone zig-zags between the
   # statistics of a multi-statistic extraction.
   stat <- if ("stat" %in% names(spectra)) spectra$stat else rep("value", nrow(spectra))
@@ -313,7 +395,11 @@ at_plot_spectrum <- function(spectra, colour_by = c("label", "roi_id", "layer"),
     }
   }
   if (nrow(spectra) > 0L) {
-    p <- p + ggplot2::geom_line()
+    # One scale for the lines and their ribbons: a fill scale trained on the
+    # ribbon data alone (only groups with several ROIs) would colour a ribbon
+    # differently from its own lines.
+    p <- p + ggplot2::geom_line() +
+      .label_scale(.group_palette(spectra[[colour_by]]), aesthetics = c("colour", "fill"))
   }
   p
 }
@@ -348,7 +434,8 @@ at_plot_spectrum <- function(spectra, colour_by = c("label", "roi_id", "layer"),
 #' @param layer Optional layer filter.
 #' @param call The calling environment, for error reporting.
 #' @return A [ggplot2::ggplot] object with the image and ROI outlines (points
-#'   as markers), both in level-0 image coordinates.
+#'   as markers), both in level-0 image coordinates. Outlines take the colour
+#'   of their label in the layer's style (see [at_style()]).
 #' @family plots
 #' @export
 #' @examplesIf requireNamespace("magick", quietly = TRUE)
@@ -380,7 +467,8 @@ at_plot_overlay <- function(project, img = NULL, layer = NULL,
                             ggplot2::aes(x = .data$x, y = .data$y, colour = .data$label),
                             shape = 3, size = 2.5, stroke = 1, inherit.aes = FALSE)
     }
-    base <- base + ggplot2::labs(colour = "label")
+    base <- base + ggplot2::labs(colour = "label") +
+      .label_scale(.project_palette(project, rt$label, layer), aesthetics = "colour")
   }
   base
 }
@@ -439,7 +527,7 @@ at_plot_summary <- function(project, call = rlang::caller_env()) {
   if (nrow(rt) > 0L) {
     p <- p + ggplot2::geom_boxplot(alpha = 0.5) +
       ggplot2::geom_jitter(width = 0.15, height = 0, size = 1) +
-      .label_fill_scale(rt$label)
+      .label_scale(.project_palette(project, rt$label))
   }
   p
 }
@@ -473,7 +561,7 @@ at_plot <- function(x, ...) {
     if (nrow(sfp) > 0L) {
       p <- p + ggplot2::geom_sf(data = .sf_display_data(sfp),
                                 ggplot2::aes(fill = .data$label), alpha = 0.4) +
-        .label_fill_scale(sfp$label)
+        .label_scale(.resolve_palette(sfp$label, x$style$colour))
     }
     return(p + .sf_image_coord())
   }
