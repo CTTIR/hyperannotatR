@@ -177,7 +177,7 @@ An in-memory commit with no destination can replay its retained project.
 The project and receipt are both staged before either destination is replaced.
 If publication fails, their previous files are restored. If restoration also
 fails, the error reports the retained backup paths for recovery. Callers must
-serialize writers to the same destination: paired publication uses multiple
+serialise writers to the same destination: paired publication uses multiple
 filesystem renames and does not guarantee an atomic result after a process or
 machine crash.
 

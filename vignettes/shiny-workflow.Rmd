@@ -130,7 +130,7 @@ Annotations proposed by a partner package, such as a qupflowR handoff imported o
 
 ## Keyboard shortcuts
 
-The canvas is built for speed, so almost everything has a key. Pick a layer and a label (radio buttons, or a digit for the label), draw, then commit and advance; **Undo**, **Redo** and **Copy previous** are also buttons next to the tools. Shortcuts are inactive while a text field, list, button or link has focus (label and layer radios keep them), while a dialog is open, and, except for `?`, away from the Annotate page. The table below is the one the app shows when you press `?`:
+The canvas is built for speed, so almost everything has a key. Pick a layer and a label (radio buttons, or a digit for the label), draw, then commit and advance; **Undo**, **Redo** and **Copy previous** are also buttons next to the tools. Shortcuts are inactive while a text field, list, button or link has focus (label and layer radios keep them), while a dialogue is open, and, except for `?`, away from the Annotate page. The table below is the one the app shows when you press `?`:
 
 ```{r shortcuts, echo = FALSE, eval = TRUE}
 knitr::kable(hyperannotatR:::.shortcut_table(), col.names = c("Key", "Action"))

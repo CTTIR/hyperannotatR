@@ -43,11 +43,11 @@ TIFF exports preserve unsigned 8/16-bit codes; PNG exports are
 unsigned 8-bit only, regardless of \code{bits}. Samples must be finite integers
 in the selected unsigned range; invalid samples reject before writing.
 TIFF writing requires \code{tiff} or a capable \code{magick} build. PNG writing
-requires \code{magick} with exact grayscale support. Missing exact conversion
-capability produces an error rather than a quantized output. The caller's
+requires \code{magick} with exact greyscale support. Missing exact conversion
+capability produces an error rather than a quantised output. The caller's
 explicit path is respected. Mask and legend are staged before either is
-replaced; a preexisting sidecar also requires \code{overwrite=TRUE}. Publication
-failure rolls back prior files. Concurrent writers must be serialized.
+replaced; a pre-existing sidecar also requires \code{overwrite=TRUE}. Publication
+failure rolls back prior files. Concurrent writers must be serialised.
 }
 \examples{
 \dontshow{if (requireNamespace("magick", quietly = TRUE) && requireNamespace("tiff", quietly = TRUE)) withAutoprint(\{ # examplesIf}

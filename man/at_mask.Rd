@@ -35,7 +35,7 @@ names are an error.}
 
 \item{background}{Integer background value. Default \code{0}. Foreground codes
 must differ from background. Binary masks reject \code{1} (foreground), and
-normalize other accepted backgrounds to the stored logical \code{FALSE}/\code{0}.}
+normalise other accepted backgrounds to the stored logical \code{FALSE}/\code{0}.}
 
 \item{touches}{Logical; see the coverage contract. Default \code{FALSE}.}
 

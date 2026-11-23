@@ -276,7 +276,7 @@
 #' @param level Integer pyramid level at which to rasterise. Default `0`.
 #' @param background Integer background value. Default `0`. Foreground codes
 #'   must differ from background. Binary masks reject `1` (foreground), and
-#'   normalize other accepted backgrounds to the stored logical `FALSE`/`0`.
+#'   normalise other accepted backgrounds to the stored logical `FALSE`/`0`.
 #' @param touches Logical; see the coverage contract. Default `FALSE`.
 #' @param dims Optional `c(width, height)`; taken from the image (projects) or
 #'   the geometry bounding box otherwise, including containing cells for points.

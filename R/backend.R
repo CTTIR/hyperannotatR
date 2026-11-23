@@ -221,7 +221,7 @@ at_backend_detect <- function(path, call = rlang::caller_env()) {
 #'
 #' @param path Single string path to an image file.
 #' @param backend Optional backend name; auto-detected when `NULL`.
-#' @param ... Passed to the backend's reader. They must be plain serializable
+#' @param ... Passed to the backend's reader. They must be plain serialisable
 #'   values (numbers, strings, logicals and lists of them): they are recorded
 #'   in the image's source descriptor so a saved project can reopen the file
 #'   the same way.

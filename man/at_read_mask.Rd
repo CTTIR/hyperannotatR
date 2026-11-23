@@ -18,10 +18,10 @@ at_read_mask(
 \arguments{
 \item{path}{Path to a mask file (TIFF, PNG, RDS, or NPY). NPY sidecar storage
 orientation is recovered automatically for polygonisation. PNG input must
-be unsigned 8/16-bit grayscale without palette, colour, alpha channels or
+be unsigned 8/16-bit greyscale without palette, colour, alpha channels or
 \code{tRNS} transparency;
 original class codes are preserved. TIFF requires the raw \code{tiff} reader;
-PNG requires a \code{magick} build with exact grayscale capability.}
+PNG requires a \code{magick} build with exact greyscale capability.}
 
 \item{level}{Integer pyramid level to record on the ROIs. \code{NULL} (default)
 uses the RDS mask or legend sidecar level, falling back to 0 for an

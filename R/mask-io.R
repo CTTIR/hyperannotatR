@@ -20,11 +20,11 @@
 #'   unsigned 8-bit only, regardless of `bits`. Samples must be finite integers
 #'   in the selected unsigned range; invalid samples reject before writing.
 #'   TIFF writing requires `tiff` or a capable `magick` build. PNG writing
-#'   requires `magick` with exact grayscale support. Missing exact conversion
-#'   capability produces an error rather than a quantized output. The caller's
+#'   requires `magick` with exact greyscale support. Missing exact conversion
+#'   capability produces an error rather than a quantised output. The caller's
 #'   explicit path is respected. Mask and legend are staged before either is
-#'   replaced; a preexisting sidecar also requires `overwrite=TRUE`. Publication
-#'   failure rolls back prior files. Concurrent writers must be serialized.
+#'   replaced; a pre-existing sidecar also requires `overwrite=TRUE`. Publication
+#'   failure rolls back prior files. Concurrent writers must be serialised.
 #'
 #' @return The output path, invisibly.
 #' @family masks
@@ -175,10 +175,10 @@ at_write_mask <- function(mask, path, format = c("tiff", "png", "rds"),
 #'
 #' @param path Path to a mask file (TIFF, PNG, RDS, or NPY). NPY sidecar storage
 #'   orientation is recovered automatically for polygonisation. PNG input must
-#'   be unsigned 8/16-bit grayscale without palette, colour, alpha channels or
+#'   be unsigned 8/16-bit greyscale without palette, colour, alpha channels or
 #'   `tRNS` transparency;
 #'   original class codes are preserved. TIFF requires the raw `tiff` reader;
-#'   PNG requires a `magick` build with exact grayscale capability.
+#'   PNG requires a `magick` build with exact greyscale capability.
 #' @param level Integer pyramid level to record on the ROIs. `NULL` (default)
 #'   uses the RDS mask or legend sidecar level, falling back to 0 for an
 #'   external mask without level metadata. An explicit level overrides metadata.
@@ -282,7 +282,7 @@ at_read_mask <- function(path, level = NULL, connectivity = c(8L, 4L),
 #'   later items. A TIFF and its legend form one staged output bundle.
 #'
 #' @details Output plans reject symlinked descendants and aliases before writing.
-#'   Callers must serialize concurrent writes and keep destination paths stable;
+#'   Callers must serialise concurrent writes and keep destination paths stable;
 #'   preflight plus staged renames is not a race-free filesystem transaction.
 #' @family masks
 #' @export
