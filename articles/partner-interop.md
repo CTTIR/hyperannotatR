@@ -72,7 +72,7 @@ receipt$files[, c("path", "size_bytes", "format")]
 #> 4 masks/regions_labelled.tif                   2936 mask_tiff     
 #> 5 masks/regions_labelled.tif.legend.json       1811 legend_json
 receipt$handoff_digest
-#> [1] "19adb800d8384d3ffc33c003aec073049479478330ace123c3d0867e65b2cc69"
+#> [1] "3c4aa95443c969cd6b7f586d1929c3ea7466b7194bca32c6bc22ba2e700ba3b7"
 ```
 
 - `annotations_qupath.geojson` uses the QuPath 0.4+ dialect with a
@@ -234,7 +234,7 @@ no destination can replay its retained project.
 The project and receipt are both staged before either destination is
 replaced. If publication fails, their previous files are restored. If
 restoration also fails, the error reports the retained backup paths for
-recovery. Callers must serialize writers to the same destination: paired
+recovery. Callers must serialise writers to the same destination: paired
 publication uses multiple filesystem renames and does not guarantee an
 atomic result after a process or machine crash.
 
@@ -429,7 +429,7 @@ state$state_revision
 #> [1] "0"
 at_control_command(handle, list(operation = "context.goto", payload = list(queue_index = 2),
                                 expected_revision = state$state_revision))$entry_id
-#> [1] "entry_at_2eaea1bdab8_000000005"
+#> [1] "entry_at_2f0568b20337_000000005"
 vapply(at_control_events(handle)$events, `[[`, character(1), "type")
 #> [1] "service.started" "image.changed"
 at_control_stop(handle)

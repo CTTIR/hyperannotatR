@@ -33,7 +33,7 @@ sess <- at_example_session(3)
 sess
 #> <annot_session>
 #> images: 3  |  complete: 0  |  cursor: 1
-#> out_dir: /tmp/Rtmp8BFkrm/hyperannotatR-example-session-32721f1c25ef  |  autosave: TRUE
+#> out_dir: /tmp/Rtmp9gnlAZ/hyperannotatR-example-session-32c8643d4254  |  autosave: TRUE
 ```
 
 Every image starts with status `"pending"`, the cursor sits on the first
@@ -191,8 +191,8 @@ layer and a label (radio buttons, or a digit for the label), draw, then
 commit and advance; **Undo**, **Redo** and **Copy previous** are also
 buttons next to the tools. Shortcuts are inactive while a text field,
 list, button or link has focus (label and layer radios keep them), while
-a dialog is open, and, except for `?`, away from the Annotate page. The
-table below is the one the app shows when you press `?`:
+a dialogue is open, and, except for `?`, away from the Annotate page.
+The table below is the one the app shows when you press `?`:
 
 | Key | Action |
 |:---|:---|
@@ -317,7 +317,7 @@ recovered <- at_resume(file.path(sess$out_dir, "_session.rds"))
 recovered
 #> <annot_session>
 #> images: 3  |  complete: 1  |  cursor: 2
-#> out_dir: /tmp/Rtmp8BFkrm/hyperannotatR-example-session-32721f1c25ef  |  autosave: TRUE
+#> out_dir: /tmp/Rtmp9gnlAZ/hyperannotatR-example-session-32c8643d4254  |  autosave: TRUE
 ```
 
 The cursor, statuses, materialised projects, and templates all come back
@@ -398,9 +398,9 @@ at_session_status(sess)
 #> # A tibble: 3 × 9
 #>     idx entry_id              export_stem path  name  status project_path n_rois
 #>   <int> <chr>                 <chr>       <chr> <chr> <chr>  <chr>         <int>
-#> 1     1 entry_at_3272de72dbf… entry_at_3… /tmp… imag… compl… NA                0
-#> 2     2 entry_at_3272de72dbf… entry_at_3… /tmp… imag… pendi… NA                0
-#> 3     3 entry_at_3272de72dbf… entry_at_3… /tmp… imag… pendi… NA                0
+#> 1     1 entry_at_32c87c5efa7… entry_at_3… /tmp… imag… compl… NA                0
+#> 2     2 entry_at_32c87c5efa7… entry_at_3… /tmp… imag… pendi… NA                0
+#> 3     3 entry_at_32c87c5efa7… entry_at_3… /tmp… imag… pendi… NA                0
 #> # ℹ 1 more variable: modified <dttm>
 
 at_manifest(sess)

@@ -47,7 +47,7 @@ the package for a first CRAN submission.
   and receipt together. Ordinary publication failures roll back both
   files. Replays check the current saved revision and canonical
   destination; conflicting state is refused. Publication is not
-  crash-atomic, and callers must serialize writes to one destination.
+  crash-atomic, and callers must serialise writes to one destination.
 
 - Failed control-service startup cleans up its own listener, timer,
   token and registration. Independent control instances can use the same
@@ -82,7 +82,7 @@ the package for a first CRAN submission.
   unavailable-reader diagnostics are checked explicitly. CI coverage now
   has an 85% floor.
 
-- Standardize the named v5 package logo across README, documentation
+- Standardise the named v5 package logo across README, documentation
   pages and available application headers, with matching light and dark
   artwork.
 
@@ -193,6 +193,13 @@ the package for a first CRAN submission.
 - The backend availability tests expect the Cubert backend only where
   the `cuvis.r` package and its vendor SDK are both usable. They failed
   on a machine with `cuvis.r` installed but without the SDK.
+
+- Help pages and vignettes use British spelling throughout (“greyscale”,
+  “serialise”, “normalise”, “pre-existing”, “dialogue”). Values and
+  messages of the package, such as the `"grayscale"` image kind, and
+  quoted titles of references are unchanged.
+
+- `CITATION.cff` and `.zenodo.json` name the author as R. Heller.
 
 ## hyperannotatR 0.3.0
 

@@ -234,7 +234,7 @@ metadata</td>
 <td>Metadata / bounded binary runs</td>
 <td>ENVI exports, and big-endian float32 SpecCubes matched to a declared
 <code><a href="../reference/at_tivita_profile.html">at_tivita_profile()</a></code> or sidecar, including synthetic
-nonstandard dimensions</td>
+non-standard dimensions</td>
 </tr>
 <tr class="odd">
 <td><code>ometiff</code></td>
@@ -270,7 +270,7 @@ only, not in CI; no bounded-read claim</td>
 </table>
 <p>Plain TIFF remains the explicit eager fallback. Its pyramid
 directories are not silently replaced by a first-directory GDAL view.
-The qualified OME path uses BioFormats subsets with normalization
+The qualified OME path uses BioFormats subsets with normalisation
 disabled, preserving image orientation and actual per-level dimensions.
 Availability is not qualification of every vendor/qptiff layout or
 deployment. No vendor whole-slide fixture is qualified.</p>
@@ -298,7 +298,7 @@ have a fixed 1 MiB limit; NPY headers have a separate 1 MiB default
 configurable with <code>hyperannotatR.max_npy_header_bytes</code>. Array
 budgets and their limits are described under <strong>Memory
 discipline</strong> below.</p>
-<p>The <code>tiff</code> backend preserves raw grayscale uint8/uint16,
+<p>The <code>tiff</code> backend preserves raw greyscale uint8/uint16,
 signed int16 and float32 samples, and RGB uint16 samples. Sample type
 and photometric metadata determine decoding; integer display
 normalisation is reversed without scaling float samples. Unsupported
@@ -494,7 +494,7 @@ registry, is auto-detected from the file, and serves tiles through
 <span></span>
 <span><span class="va">cimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/at_read_image.html">at_read_image</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
 <span><span class="va">cimg</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file2dcb708a681d.const</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">&lt;annot_image&gt;</span> <span style="color: #00BB00;">file2e2110e44609.const</span></span></span>
 <span><span class="co">#&gt; backend: <span style="color: #0000BB;">"const"</span>  |  dtype: <span style="color: #0000BB;">"double"</span></span></span>
 <span><span class="co">#&gt; size: 64 x 48 px  |  levels: 1  |  bands: 2</span></span>
 <span><span class="co">#&gt; pixel size: 1 x 1 px</span></span>
@@ -574,7 +574,7 @@ purge the shared cache, whose byte limit still governs retained entries;
 the fresh identity prevents reuse of the previous image’s tiles and
 counters. Built-in window handles contain only paths/layout metadata,
 open each binary connection per read and close it on exit, including
-errors. No native pointer is serialized. Registered backends can supply
+errors. No native pointer is serialised. Registered backends can supply
 optional <code>capabilities</code> and
 <code>close_fn=function(img)</code> arguments; existing positional
 registration calls remain valid. Per-image
@@ -652,7 +652,7 @@ source descriptors, encodings and codebooks.
 assertion; <code>code_alignment = "by-label"</code> separately aligns
 categorical or bitfield codes by semantic labels. Instance alignment
 uses stable ROI IDs via <code>"by-id"</code>, never repeated class
-names. Display <code>labels</code> cannot authorize remapping. Binary
+names. Display <code>labels</code> cannot authorise remapping. Binary
 and categorical metrics compare equality; bitfield metrics compare
 memberships, with exact-set accuracy and no categorical kappa. Declared
 absent classes have NA Dice/IoU and do not contribute to macro means. A

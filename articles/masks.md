@@ -366,7 +366,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>         "schema_version": 1,
 #>         "signature": {
 #>           "size": 526756,
-#>           "mtime": 1795399522
+#>           "mtime": 1795430033
 #>         },
 #>         "files": null,
 #>         "path": "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png",
@@ -402,7 +402,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>   },
 #>   "storage": null,
 #>   "annotatR_version": "0.4.0",
-#>   "created": "2026-11-23T02:07:05+0000",
+#>   "created": "2026-11-23T10:35:11+0000",
 #>   "mask_type": "multiclass",
 #>   "level": 0,
 #>   "dims": [512, 512],
@@ -456,7 +456,7 @@ PNG export remains 8-bit only: values above 255 and all negative values
 reject before writing. `bits` controls TIFF only. Both formats reject
 fractional/nonfinite samples and out-of-range values before creating or
 overwriting the destination. TIFF writing needs `tiff` or a `magick`
-build with exact grayscale support; PNG needs the latter. An unavailable
+build with exact greyscale support; PNG needs the latter. An unavailable
 lossless writer produces a capability error. Single-choice arguments
 require a scalar: omitted defaults choose the first documented value,
 while explicitly supplied vectors are invalid.
@@ -512,10 +512,10 @@ instead. Their sampled arrays remain available through
 preview, and statistics APIs. TIFF masks must be a single
 two-dimensional integer plane; fractional samples and multiple planes
 are rejected before conversion. Raw TIFF import requires `tiff`; it does
-not fall back to display grayscale conversion. PNG import preserves
-unsigned 8/16-bit grayscale class codes, including 65535, using a
-`magick` build that passes an exact grayscale capability check. Palette,
-RGB, alpha-bearing, grayscale `tRNS` transparency and other-depth PNGs
+not fall back to display greyscale conversion. PNG import preserves
+unsigned 8/16-bit greyscale class codes, including 65535, using a
+`magick` build that passes an exact greyscale capability check. Palette,
+RGB, alpha-bearing, greyscale `tRNS` transparency and other-depth PNGs
 reject before polygonisation. A transparency key is rejected even if
 none of the stored samples use that key.
 

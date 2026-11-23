@@ -54,7 +54,7 @@ at_mask(
 - background:
 
   Integer background value. Default `0`. Foreground codes must differ
-  from background. Binary masks reject `1` (foreground), and normalize
+  from background. Binary masks reject `1` (foreground), and normalise
   other accepted backgrounds to the stored logical `FALSE`/`0`.
 
 - touches:

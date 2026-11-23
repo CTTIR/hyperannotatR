@@ -133,7 +133,7 @@ passing `backend =` explicitly.
 | Backend | Open / tile strategy | Qualified sample contract and limits |
 |----|----|----|
 | `envi` | Metadata / bounded binary runs | BSQ/BIL/BIP, both byte orders, uint8/int16/int32/uint16/uint32/float32/float64; offsets and trailing metadata |
-| `tivita` | Metadata / bounded binary runs | ENVI exports, and big-endian float32 SpecCubes matched to a declared [`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md) or sidecar, including synthetic nonstandard dimensions |
+| `tivita` | Metadata / bounded binary runs | ENVI exports, and big-endian float32 SpecCubes matched to a declared [`at_tivita_profile()`](https://cttir.github.io/hyperannotatR/reference/at_tivita_profile.md) or sidecar, including synthetic non-standard dimensions |
 | `ometiff` | Metadata / native subset windows | RBioFormats + xml2; uint8/uint16/int16/int32/uint32/float32/float64 scalar fixtures plus uint16 CYX/anisotropic pyramids; Z/time reject, explicit multiple-series selection |
 | `tiff` | Eager / memory subset | Qualified raw TIFF sample types below; no window claim, ambiguous directories reject |
 | `raster` | Eager / memory subset | Display conversion to 0–255; original high-bit-depth intensities are not preserved |
@@ -142,7 +142,7 @@ passing `backend =` explicitly.
 
 Plain TIFF remains the explicit eager fallback. Its pyramid directories
 are not silently replaced by a first-directory GDAL view. The qualified
-OME path uses BioFormats subsets with normalization disabled, preserving
+OME path uses BioFormats subsets with normalisation disabled, preserving
 image orientation and actual per-level dimensions. Availability is not
 qualification of every vendor/qptiff layout or deployment. No vendor
 whole-slide fixture is qualified.
@@ -169,7 +169,7 @@ have a fixed 1 MiB limit; NPY headers have a separate 1 MiB default
 configurable with `hyperannotatR.max_npy_header_bytes`. Array budgets
 and their limits are described under **Memory discipline** below.
 
-The `tiff` backend preserves raw grayscale uint8/uint16, signed int16
+The `tiff` backend preserves raw greyscale uint8/uint16, signed int16
 and float32 samples, and RGB uint16 samples. Sample type and photometric
 metadata determine decoding; integer display normalisation is reversed
 without scaling float samples. Unsupported encodings, including
@@ -390,7 +390,7 @@ saveRDS(list(width = 64L, height = 48L, bands = 2L, value = 0.5), path)
 
 cimg <- at_read_image(path)
 cimg
-#> <annot_image> file2dcb708a681d.const
+#> <annot_image> file2e2110e44609.const
 #> backend: "const"  |  dtype: "double"
 #> size: 64 x 48 px  |  levels: 1  |  bands: 2
 #> pixel size: 1 x 1 px
@@ -451,7 +451,7 @@ whose byte limit still governs retained entries; the fresh identity
 prevents reuse of the previous image’s tiles and counters. Built-in
 window handles contain only paths/layout metadata, open each binary
 connection per read and close it on exit, including errors. No native
-pointer is serialized. Registered backends can supply optional
+pointer is serialised. Registered backends can supply optional
 `capabilities` and `close_fn=function(img)` arguments; existing
 positional registration calls remain valid. Per-image
 `meta$capabilities` may refine registry declarations. A retained
@@ -535,7 +535,7 @@ codebooks. `alignment = "assert"` records an explicit registration
 assertion; `code_alignment = "by-label"` separately aligns categorical
 or bitfield codes by semantic labels. Instance alignment uses stable ROI
 IDs via `"by-id"`, never repeated class names. Display `labels` cannot
-authorize remapping. Binary and categorical metrics compare equality;
+authorise remapping. Binary and categorical metrics compare equality;
 bitfield metrics compare memberships, with exact-set accuracy and no
 categorical kappa. Declared absent classes have NA Dice/IoU and do not
 contribute to macro means. A background-only pair has accuracy 1 and

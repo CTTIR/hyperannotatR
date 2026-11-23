@@ -34,10 +34,10 @@ at_read_mask(
 
   Path to a mask file (TIFF, PNG, RDS, or NPY). NPY sidecar storage
   orientation is recovered automatically for polygonisation. PNG input
-  must be unsigned 8/16-bit grayscale without palette, colour, alpha
+  must be unsigned 8/16-bit greyscale without palette, colour, alpha
   channels or `tRNS` transparency; original class codes are preserved.
   TIFF requires the raw `tiff` reader; PNG requires a `magick` build
-  with exact grayscale capability.
+  with exact greyscale capability.
 
 - level:
 
@@ -112,7 +112,7 @@ at_read_mask(f)
 #> Registered S3 method overwritten by 'stars':
 #>   method                  from
 #>   st_interpolate_aw.stars sf  
-#> <annot_layer> file22d0576bd83e
+#> <annot_layer> file232f69faac5c
 #> ROIs: 3  |  labels: "tumour", "necrosis", and "stroma"
 #> visible: TRUE  |  locked: FALSE  |  z: 1
 ```

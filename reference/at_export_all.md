@@ -81,7 +81,7 @@ deterministic suffixes, including cross-format and sidecar collisions.
 The complete plan (including manifests) rejects descendant symlinks
 before writing outputs. Existing mask/legend bundles are skipped as a
 whole unless `overwrite=TRUE`. Files are staged and publication failures
-roll back prior files. Callers must serialize concurrent exports and
+roll back prior files. Callers must serialise concurrent exports and
 avoid changing the destination filesystem during a run: preflight and
 multiple renames are not a race-free filesystem transaction. Receipt
 files are replaced each run, independently of the item overwrite policy.

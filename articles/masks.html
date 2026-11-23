@@ -459,7 +459,7 @@ it:</p>
 <span><span class="co">#&gt;         "schema_version": 1,</span></span>
 <span><span class="co">#&gt;         "signature": {</span></span>
 <span><span class="co">#&gt;           "size": 526756,</span></span>
-<span><span class="co">#&gt;           "mtime": 1795399522</span></span>
+<span><span class="co">#&gt;           "mtime": 1795430033</span></span>
 <span><span class="co">#&gt;         },</span></span>
 <span><span class="co">#&gt;         "files": null,</span></span>
 <span><span class="co">#&gt;         "path": "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png",</span></span>
@@ -495,7 +495,7 @@ it:</p>
 <span><span class="co">#&gt;   },</span></span>
 <span><span class="co">#&gt;   "storage": null,</span></span>
 <span><span class="co">#&gt;   "annotatR_version": "0.4.0",</span></span>
-<span><span class="co">#&gt;   "created": "2026-11-23T02:07:05+0000",</span></span>
+<span><span class="co">#&gt;   "created": "2026-11-23T10:35:11+0000",</span></span>
 <span><span class="co">#&gt;   "mask_type": "multiclass",</span></span>
 <span><span class="co">#&gt;   "level": 0,</span></span>
 <span><span class="co">#&gt;   "dims": [512, 512],</span></span>
@@ -549,7 +549,7 @@ touching R.</p>
 writing. <code>bits</code> controls TIFF only. Both formats reject
 fractional/nonfinite samples and out-of-range values before creating or
 overwriting the destination. TIFF writing needs <code>tiff</code> or a
-<code>magick</code> build with exact grayscale support; PNG needs the
+<code>magick</code> build with exact greyscale support; PNG needs the
 latter. An unavailable lossless writer produces a capability error.
 Single-choice arguments require a scalar: omitted defaults choose the
 first documented value, while explicitly supplied vectors are
@@ -600,10 +600,10 @@ and zero origin instead. Their sampled arrays remain available through
 <code><a href="../reference/at_read_npy.html">at_read_npy()</a></code>, preview, and statistics APIs. TIFF masks
 must be a single two-dimensional integer plane; fractional samples and
 multiple planes are rejected before conversion. Raw TIFF import requires
-<code>tiff</code>; it does not fall back to display grayscale
-conversion. PNG import preserves unsigned 8/16-bit grayscale class
+<code>tiff</code>; it does not fall back to display greyscale
+conversion. PNG import preserves unsigned 8/16-bit greyscale class
 codes, including 65535, using a <code>magick</code> build that passes an
-exact grayscale capability check. Palette, RGB, alpha-bearing, grayscale
+exact greyscale capability check. Palette, RGB, alpha-bearing, greyscale
 <code>tRNS</code> transparency and other-depth PNGs reject before
 polygonisation. A transparency key is rejected even if none of the
 stored samples use that key.</p>

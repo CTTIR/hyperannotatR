@@ -63,7 +63,7 @@ legend form one staged output bundle.
 ## Details
 
 Output plans reject symlinked descendants and aliases before writing.
-Callers must serialize concurrent writes and keep destination paths
+Callers must serialise concurrent writes and keep destination paths
 stable; preflight plus staged renames is not a race-free filesystem
 transaction.
 

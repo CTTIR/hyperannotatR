@@ -205,7 +205,7 @@ zero with <code>touches=FALSE</code>, <code>engine="stars"</code> and
 <tr class="odd">
 <td><code>roi_statistics</code></td>
 <td>One ROI-band-statistic: 42 rows</td>
-<td>Each ROI is summarized separately</td>
+<td>Each ROI is summarised separately</td>
 </tr>
 <tr class="even">
 <td><code>spectra</code></td>
@@ -279,13 +279,13 @@ invalid pixel-band values but five invalid ROI-pixel-band records,
 because the positive infinity in the overlap belongs to both ROIs. The
 raw tables include <code>sample_status</code> (<code>finite</code>,
 <code>NA</code>, <code>NaN</code>, <code>+Inf</code>, <code>-Inf</code>)
-to preserve distinctions that CSV missing-value serialization could
+to preserve distinctions that CSV missing-value serialisation could
 collapse. The four unselected background cells are a spatial exclusion,
 separate from invalid selected samples. <code>n_excluded_rois</code>
 counts ROIs with no selected cells; it is zero here. The example applies
 no ROI or label filters.</p>
 <p>This workflow produces numerical spectra and tables. It generates no
-image preview. Display normalization for the mixed NaN/Inf RGB fixture
+image preview. Display normalisation for the mixed NaN/Inf RGB fixture
 remains outside this qualification; no RGB or native ImageMagick success
 is claimed.</p>
 </div>
@@ -343,7 +343,7 @@ cells, including background. Its nonfinite policy is
 entry/ROI IDs, the annotation revision digest, durable source descriptor
 and reader options, MD5 hashes of the project and all eight data inputs
 (including the ENVI payload), calibration, band coordinates/units,
-extraction and rasterization settings, mask codebook, both sides’
+extraction and rasterisation settings, mask codebook, both sides’
 validated agreement metadata/codebooks, estimands, and count
 definitions. It records the actual R and dependency versions and sf
 external library versions. The ENVI backend is implemented by

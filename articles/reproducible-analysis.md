@@ -98,7 +98,7 @@ first$tables$mask_codebook
 |----|----|----|
 | `pixel_memberships` | One ROI-pixel-band record: 54 rows | Shared cells appear once per ROI |
 | `unique_pixels` | One image-pixel-band record: 48 rows | Deduplicate `(x,y,band)` within this one image |
-| `roi_statistics` | One ROI-band-statistic: 42 rows | Each ROI is summarized separately |
+| `roi_statistics` | One ROI-band-statistic: 42 rows | Each ROI is summarised separately |
 | `spectra` | One ROI-band finite mean: 6 rows | Each ROI has its own spectrum |
 | `image_statistics` | One image-band summary: 3 rows | Each selected cell contributes once |
 | `counts` | One image: 16 unique cells, 18 ROI memberships, 2 ROIs | Two overlap cells counted explicitly |
@@ -162,14 +162,14 @@ The raw pixel API retains nonfinite samples. There are four unique
 invalid pixel-band values but five invalid ROI-pixel-band records,
 because the positive infinity in the overlap belongs to both ROIs. The
 raw tables include `sample_status` (`finite`, `NA`, `NaN`, `+Inf`,
-`-Inf`) to preserve distinctions that CSV missing-value serialization
+`-Inf`) to preserve distinctions that CSV missing-value serialisation
 could collapse. The four unselected background cells are a spatial
 exclusion, separate from invalid selected samples. `n_excluded_rois`
 counts ROIs with no selected cells; it is zero here. The example applies
 no ROI or label filters.
 
 This workflow produces numerical spectra and tables. It generates no
-image preview. Display normalization for the mixed NaN/Inf RGB fixture
+image preview. Display normalisation for the mixed NaN/Inf RGB fixture
 remains outside this qualification; no RGB or native ImageMagick success
 is claimed.
 
@@ -228,7 +228,7 @@ cells, including background. Its nonfinite policy is `error`.
 the annotation revision digest, durable source descriptor and reader
 options, MD5 hashes of the project and all eight data inputs (including
 the ENVI payload), calibration, band coordinates/units, extraction and
-rasterization settings, mask codebook, both sides’ validated agreement
+rasterisation settings, mask codebook, both sides’ validated agreement
 metadata/codebooks, estimands, and count definitions. It records the
 actual R and dependency versions and sf external library versions. The
 ENVI backend is implemented by hyperannotatR, whose version is recorded;

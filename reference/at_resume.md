@@ -49,6 +49,6 @@ at_save_session(at_goto(sess, 2), path)
 at_resume(path)
 #> <annot_session>
 #> images: 2  |  complete: 0  |  cursor: 2
-#> out_dir: /tmp/RtmpKvaqhl/hyperannotatR-session-22d01e048a73  |  autosave: TRUE
+#> out_dir: /tmp/RtmpG1eQUI/hyperannotatR-session-232f49586c21  |  autosave: TRUE
 unlink(path)
 ```

@@ -22,7 +22,7 @@ at_read_image(path, backend = NULL, ..., call = rlang::caller_env())
 
 - ...:
 
-  Passed to the backend's reader. They must be plain serializable values
+  Passed to the backend's reader. They must be plain serialisable values
   (numbers, strings, logicals and lists of them): they are recorded in
   the image's source descriptor so a saved project can reopen the file
   the same way.

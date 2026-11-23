@@ -57,7 +57,7 @@
 <li><p>TIVITA source descriptors include the selected profile sidecar. Changing, removing or superseding that profile, or introducing a preferred ENVI header or payload, now refuses stale pixel access. Older projects whose decoding provenance cannot be verified require <code><a href="../reference/at_relink_source.html">at_relink_source()</a></code>; their annotations remain available.</p></li>
 <li><p>Repeated reads of a closed image reuse its cache and update its read counters correctly. Source freshness is checked before cached pixels are returned.</p></li>
 <li><p>Band operations reject fractional or non-finite band indices. Raw-value conversion requires finite numeric dark and white reference vectors; factors and infinite references no longer produce misleading values.</p></li>
-<li><p>Partner commits retain in-memory image pixels and stage the project and receipt together. Ordinary publication failures roll back both files. Replays check the current saved revision and canonical destination; conflicting state is refused. Publication is not crash-atomic, and callers must serialize writes to one destination.</p></li>
+<li><p>Partner commits retain in-memory image pixels and stage the project and receipt together. Ordinary publication failures roll back both files. Replays check the current saved revision and canonical destination; conflicting state is refused. Publication is not crash-atomic, and callers must serialise writes to one destination.</p></li>
 <li><p>Failed control-service startup cleans up its own listener, timer, token and registration. Independent control instances can use the same client commit key without colliding.</p></li>
 <li><p>Restricted app folder loading checks canonical image and known companion paths before opening them. External symlinks are refused and directory cycles no longer duplicate queue entries. Rejected inputs preserve the existing queue and annotations.</p></li>
 <li><p>Restricted staged imports check handoff entries and mask legend sidecars before parsing them, refusing external companion links without reading their contents.</p></li>
@@ -65,7 +65,7 @@
 <li><p>Masks validate dimensions before allocation and apply a conservative 32-byte-per-pixel working-array estimate to <code>hyperannotatR.max_read_bytes</code> (default 1 GiB). This is a per-grid check, not an RSS or aggregate mask-stack limit. Trusted callers may raise it.</p></li>
 <li><p>Candidate citation metadata no longer claims an unregistered Zenodo DOI or a release date. Test development uses testthat 3.3.2 or newer.</p></li>
 <li><p>Core examples and export tests use the bundled ENVI cube without optional PNG/TIFF readers. Reader-specific prerequisites and unavailable-reader diagnostics are checked explicitly. CI coverage now has an 85% floor.</p></li>
-<li><p>Standardize the named v5 package logo across README, documentation pages and available application headers, with matching light and dark artwork.</p></li>
+<li><p>Standardise the named v5 package logo across README, documentation pages and available application headers, with matching light and dark artwork.</p></li>
 <li><p>The calibration panel now accepts a global reference length in mm and an image-specific override for each reference label. <strong>Use global default</strong> removes an override. Global changes preserve image overrides, reach existing and new queue images, and survive saving and reopening. Estimated scales show their source; blank, non-finite and non-positive entries are rejected.</p></li>
 <li><p>Calibration layers can store per-label assumed lengths with <code>reference_assumptions_mm = list(label = 2)</code>. From three valid repeats, the panel calculates an explicitly estimated mm/pixel scale for that image. Assumptions persist with the layer; geometry and image calibration stay in their original units. The estimate updates when measurements change.</p></li>
 <li><p>The annotation tools are grouped into Navigate, Draw &amp; mark, Measure &amp; detect, and Edit &amp; reuse. Every button has a local icon, a readable English name and a tooltip. Tool settings remain contextual, keyboard help is collapsible, and updated styles bypass older browser caches.</p></li>
@@ -84,6 +84,8 @@
 <li><p>App notifications wrap a long folder path inside the notification instead of clipping it at the right edge.</p></li>
 <li><p>The figures of the README and of the masks vignette carry alternative text.</p></li>
 <li><p>The backend availability tests expect the Cubert backend only where the <code>cuvis.r</code> package and its vendor SDK are both usable. They failed on a machine with <code>cuvis.r</code> installed but without the SDK.</p></li>
+<li><p>Help pages and vignettes use British spelling throughout (“greyscale”, “serialise”, “normalise”, “pre-existing”, “dialogue”). Values and messages of the package, such as the <code>"grayscale"</code> image kind, and quoted titles of references are unchanged.</p></li>
+<li><p><code>CITATION.cff</code> and <code>.zenodo.json</code> name the author as R. Heller.</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="hyperannotatr-030">hyperannotatR 0.3.0<a class="anchor" aria-label="anchor" href="#hyperannotatr-030"></a></h2>
