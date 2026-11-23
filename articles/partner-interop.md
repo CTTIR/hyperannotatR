@@ -72,7 +72,7 @@ receipt$files[, c("path", "size_bytes", "format")]
 #> 4 masks/regions_labelled.tif                   2936 mask_tiff     
 #> 5 masks/regions_labelled.tif.legend.json       1811 legend_json
 receipt$handoff_digest
-#> [1] "3c4aa95443c969cd6b7f586d1929c3ea7466b7194bca32c6bc22ba2e700ba3b7"
+#> [1] "b163e249c481aba60bfac7a41bc37d6a54ae3c688562df3646848e4f3612507d"
 ```
 
 - `annotations_qupath.geojson` uses the QuPath 0.4+ dialect with a
@@ -429,7 +429,7 @@ state$state_revision
 #> [1] "0"
 at_control_command(handle, list(operation = "context.goto", payload = list(queue_index = 2),
                                 expected_revision = state$state_revision))$entry_id
-#> [1] "entry_at_2f0568b20337_000000005"
+#> [1] "entry_at_3063aee139c_000000005"
 vapply(at_control_events(handle)$events, `[[`, character(1), "type")
 #> [1] "service.started" "image.changed"
 at_control_stop(handle)

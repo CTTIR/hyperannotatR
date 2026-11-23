@@ -74,6 +74,6 @@ at_summary_table(sess)
 #> # A tibble: 2 × 6
 #>   image        entry_id                   n_rois total_area_px mean_area sd_area
 #>   <chr>        <chr>                       <int>         <dbl>     <dbl>   <dbl>
-#> 1 example_cube entry_at_232f69991088_000…      1           225       225      NA
-#> 2 example_cube entry_at_232f69991088_000…      1           225       225      NA
+#> 1 example_cube entry_at_249075c7f298_000…      1           225       225      NA
+#> 2 example_cube entry_at_249075c7f298_000…      1           225       225      NA
 ```
