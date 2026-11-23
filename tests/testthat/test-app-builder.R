@@ -401,3 +401,10 @@ test_that("at_annotate builds through at_app and hands the app object to runApp"
   expect_true(.app_is_temp(file.path(tempdir(), "x")))
   expect_false(.app_is_temp(file.path(dirname(tempdir()), "hyperannotatR-not-temp")))
 })
+
+test_that("notification text wraps long paths inside the box", {
+  css <- readLines(file.path(.app_www(), "custom.css"), warn = FALSE)
+  rule <- grep("^\\.shiny-notification-content-text", css, value = TRUE)
+  expect_length(rule, 1L)
+  expect_match(rule, "overflow-wrap: anywhere", fixed = TRUE)
+})

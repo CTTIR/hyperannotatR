@@ -176,3 +176,6 @@ a, .nav-link.active { color: var(--at-blue-2); }
 /* Checkpoint time and folder next to the state badge. */
 .at-saved { margin-left: 8px; white-space: normal; overflow-wrap: anywhere; }
 .at-badge-unavailable { border-color: var(--at-muted); color: var(--at-muted); font-style: italic; }
+/* Notifications can carry a folder path: break it inside the box instead of
+   letting one long unbroken path run past the right edge. */
+.shiny-notification-content-text { overflow-wrap: anywhere; }
