@@ -89,7 +89,7 @@ at_read_rois_csv <- function(path, layer_name = "csv", call = rlang::caller_env(
     error = function(e) {
       .check_abort(
         c("{.path {basename(path)}} cannot be read as a CSV table.",
-          "x" = conditionMessage(e)),
+          "x" = "{conditionMessage(e)}"),
         call = call
       )
     }
@@ -111,7 +111,7 @@ at_read_rois_csv <- function(path, layer_name = "csv", call = rlang::caller_env(
     error = function(e) {
       .check_abort(
         c("The {.field geometry} column of {.path {basename(path)}} is not valid WKT.",
-          "x" = conditionMessage(e)),
+          "x" = "{conditionMessage(e)}"),
         call = call
       )
     }

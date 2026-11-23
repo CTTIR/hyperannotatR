@@ -98,6 +98,10 @@ test_that("at_read_rois_csv reports an empty file or broken WKT as a validation 
   bad <- withr::local_tempfile(fileext = ".csv")
   writeLines(c("label,geometry", "a,POLYGON ((0 0, 1"), bad)
   expect_error(at_read_rois_csv(bad), "not valid WKT", class = "at_validation_error")
+  # Braces in the underlying message are shown as text, not interpolated.
+  braces <- withr::local_tempfile(fileext = ".csv")
+  writeLines(c("label,geometry", "a,POLYGON {1 + 1} ((0 0, 1"), braces)
+  expect_error(at_read_rois_csv(braces), "not valid WKT", class = "at_validation_error")
   # A header without rows is still a valid, empty layer.
   header <- withr::local_tempfile(fileext = ".csv")
   writeLines("label,geometry", header)

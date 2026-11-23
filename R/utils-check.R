@@ -257,7 +257,7 @@
     error = function(e) {
       .check_abort(
         c("{.path {basename(path)}} is not a readable RDS file.",
-          "x" = conditionMessage(e)),
+          "x" = "{conditionMessage(e)}"),
         call = call
       )
     }

@@ -98,6 +98,7 @@ test_that("a style prints compactly instead of as a raw list", {
   expect_match(out[3], "fill alpha: 0.5", fixed = TRUE)
   expect_match(out[4], "z: 3", fixed = TRUE)
   utils::capture.output(expect_invisible(print(at_style())))
+  expect_identical(format(at_layer("empty")$style)[2], "colour: default palette")
   # The resolved mapping of a layer prints label by label.
   lyr <- at_layer("t", labels = c("a", "b"))
   expect_match(format(lyr$style)[2], "a = #999999, b = #E69F00", fixed = TRUE)

@@ -247,7 +247,7 @@ print.annot_layer <- function(x, ...) {
 #' @export
 format.annot_style <- function(x, ...) {
   col <- x$colour
-  colour <- if (is.null(col)) {
+  colour <- if (length(col) == 0L) {
     "default palette"
   } else if (is.null(names(col))) {
     paste(col, collapse = ", ")
