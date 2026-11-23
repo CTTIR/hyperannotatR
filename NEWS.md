@@ -129,6 +129,7 @@ package for a first CRAN submission.
   "serialise", "normalise", "pre-existing", "dialogue"). Values and messages of
   the package, such as the `"grayscale"` image kind, and quoted titles of
   references are unchanged.
+* `CITATION.cff` and `.zenodo.json` name the author as R. Heller.
 
 # hyperannotatR 0.3.0
 

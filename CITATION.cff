@@ -6,7 +6,7 @@ version: 0.4.0
 doi: 10.5281/zenodo.21889921
 authors:
 - family-names: Heller
-  given-names: Raban
+  given-names: R.
   orcid: https://orcid.org/0000-0001-8006-9742
 repository-code: https://github.com/CTTIR/hyperannotatR
 license: MIT
