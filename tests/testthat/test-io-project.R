@@ -168,3 +168,12 @@ test_that("a failed save keeps the previous checkpoint intact", {
   expect_identical(readRDS(path)$manifest$status, before$manifest$status)
   expect_length(list.files(sess$out_dir, pattern = "partial", all.files = TRUE), 0L)
 })
+
+test_that("a file that is not RDS is reported as a validation error naming the file", {
+  junk <- withr::local_tempfile(fileext = ".rds")
+  writeLines("not an RDS payload", junk)
+  expect_error(at_load_project(junk), "not a readable RDS file", class = "at_validation_error")
+  expect_error(at_load_session(junk), "not a readable RDS file", class = "at_validation_error")
+  expect_error(at_read_mask(junk), "not a readable RDS file", class = "at_validation_error")
+  expect_error(at_load_project(junk), basename(junk), fixed = TRUE)
+})

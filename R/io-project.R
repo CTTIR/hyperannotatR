@@ -71,7 +71,7 @@ at_save_project <- function(project, path, overwrite = FALSE,
 #' unlink(path)
 at_load_project <- function(path, call = rlang::caller_env()) {
   .check_file(path, call = call)
-  obj <- readRDS(path)
+  obj <- .read_rds(path, call = call)
   .check_project(obj, arg = "path", call = call)
   ver <- obj$provenance$saved_with %||% obj$provenance$annotatR_version
   .restore_project(.migrate_object(obj, ver, call = call))

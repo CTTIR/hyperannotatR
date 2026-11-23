@@ -135,7 +135,7 @@ at_write_mask <- function(mask, path, format = c("tiff", "png", "rds"),
 .read_mask_matrix <- function(path, call) {
   ext <- tolower(tools::file_ext(path))
   if (ext == "rds") {
-    obj <- readRDS(path)
+    obj <- .read_rds(path, call = call)
     return(list(m = as.matrix(obj), mask = obj))
   }
   if (ext == "npy") {

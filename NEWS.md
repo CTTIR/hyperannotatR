@@ -110,6 +110,9 @@ package for a first CRAN submission.
   that opens the default palette.
 * `at_read_rois_csv()` reports an empty file and a `geometry` column that is
   not valid WKT as validation errors that name the file.
+* `at_load_project()`, `at_load_session()` and `at_read_mask()` report a file
+  that is not RDS as a validation error that names the file, instead of
+  "unknown input format".
 * A style from `at_style()` prints as a compact summary instead of a raw
   list, and the summary of an unnamed project prints `(unnamed)` instead of
   `NA`.

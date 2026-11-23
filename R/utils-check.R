@@ -247,3 +247,19 @@
                            call = rlang::caller_env()) {
   .check_class(x, "annot_project", arg = arg, call = call)
 }
+
+# Read an RDS file a user named. A file that is not RDS (truncated, another
+# format) fails inside readRDS() with "unknown input format"; report it as a
+# validation error that names the file instead.
+.read_rds <- function(path, call = rlang::caller_env()) {
+  tryCatch(
+    readRDS(path),
+    error = function(e) {
+      .check_abort(
+        c("{.path {basename(path)}} is not a readable RDS file.",
+          "x" = conditionMessage(e)),
+        call = call
+      )
+    }
+  )
+}

@@ -389,7 +389,7 @@ at_manifest <- function(session, call = rlang::caller_env()) {
 
 .session_load <- function(path, call = rlang::caller_env()) {
   .check_file(path, call = call)
-  obj <- readRDS(path)
+  obj <- .read_rds(path, call = call)
   .check_session(obj, arg = "path", call = call)
   obj <- .migrate_session(obj)
   obj
