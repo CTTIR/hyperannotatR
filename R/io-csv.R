@@ -81,8 +81,19 @@ at_read_rois_csv <- function(path, layer_name = "csv", call = rlang::caller_env(
                                  default = missing(legacy_levels), call = call)
   if (!is.null(coordinate_level)) coordinate_level <- .check_count(coordinate_level, call = call)
   .check_file(path, call = call)
-  df <- utils::read.csv(path, colClasses = "character", na.strings = character(),
-                        stringsAsFactors = FALSE, check.names = FALSE)
+  # An empty file has no header line; read.csv() then fails with a message
+  # about the connection, not about the table.
+  df <- tryCatch(
+    utils::read.csv(path, colClasses = "character", na.strings = character(),
+                    stringsAsFactors = FALSE, check.names = FALSE),
+    error = function(e) {
+      .check_abort(
+        c("{.path {basename(path)}} cannot be read as a CSV table.",
+          "x" = conditionMessage(e)),
+        call = call
+      )
+    }
+  )
   if (!all(c("label", "geometry") %in% names(df))) {
     cli::cli_abort(
       c("The CSV must have {.field label} and {.field geometry} (WKT) columns.",
@@ -95,7 +106,16 @@ at_read_rois_csv <- function(path, layer_name = "csv", call = rlang::caller_env(
     return(lyr)
   }
   col <- function(nm, i) if (nm %in% names(df) && nzchar(df[[nm]][i])) df[[nm]][i] else NULL
-  geoms <- sf::st_as_sfc(df$geometry, crs = sf::NA_crs_)
+  geoms <- tryCatch(
+    sf::st_as_sfc(df$geometry, crs = sf::NA_crs_),
+    error = function(e) {
+      .check_abort(
+        c("The {.field geometry} column of {.path {basename(path)}} is not valid WKT.",
+          "x" = conditionMessage(e)),
+        call = call
+      )
+    }
+  )
   for (i in seq_len(nrow(df))) {
     recorded <- col("level", i)
     if (!is.null(recorded)) recorded <- suppressWarnings(as.numeric(recorded))

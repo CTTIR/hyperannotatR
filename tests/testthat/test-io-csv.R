@@ -89,3 +89,17 @@ test_that("CSV restores the created and modified stamps it wrote", {
   expect_equal(as.numeric(back$created), as.numeric(r$created))
   expect_equal(as.numeric(back$modified), as.numeric(r$modified))
 })
+
+test_that("at_read_rois_csv reports an empty file or broken WKT as a validation error", {
+  empty <- withr::local_tempfile(fileext = ".csv")
+  file.create(empty)
+  expect_error(at_read_rois_csv(empty), "cannot be read as a CSV table",
+               class = "at_validation_error")
+  bad <- withr::local_tempfile(fileext = ".csv")
+  writeLines(c("label,geometry", "a,POLYGON ((0 0, 1"), bad)
+  expect_error(at_read_rois_csv(bad), "not valid WKT", class = "at_validation_error")
+  # A header without rows is still a valid, empty layer.
+  header <- withr::local_tempfile(fileext = ".csv")
+  writeLines("label,geometry", header)
+  expect_identical(at_layer_n(at_read_rois_csv(header)), 0L)
+})
