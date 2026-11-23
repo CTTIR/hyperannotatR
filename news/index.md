@@ -128,6 +128,72 @@ the package for a first CRAN submission.
   pixel alignment, and are cleared when the image, annotation target or
   view changes.
 
+- [`at_plot_project()`](https://cttir.github.io/hyperannotatR/reference/at_plot_project.md),
+  [`at_plot_overlay()`](https://cttir.github.io/hyperannotatR/reference/at_plot_overlay.md),
+  [`at_plot_summary()`](https://cttir.github.io/hyperannotatR/reference/at_plot_summary.md)
+  and
+  [`at_plot()`](https://cttir.github.io/hyperannotatR/reference/at_plot.md)
+  for a layer colour each label with the colour of its layer’s style, as
+  masks and the app already do. Before, they cycled the default palette
+  in ROI order, so a colour set with
+  [`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)
+  was ignored and a plot could disagree with the mask of the same
+  project.
+
+- [`at_plot_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_plot_spectrum.md)
+  draws each min-max ribbon in the colour of its own lines; the ribbon
+  could take the colour of another group. Spectra and ROI outlines use
+  the colour-blind-safe Okabe-Ito palette instead of the default hues
+  (viridis for more than eight groups).
+
+- Plot functions validate their arguments: `bands` and `rgb` in
+  [`at_plot_image()`](https://cttir.github.io/hyperannotatR/reference/at_plot_image.md)
+  must select existing bands (or wavelengths of a spectral cube),
+  `alpha` lies between 0 and 1, `show_labels`, `legend` and `ribbon` are
+  single logicals, and
+  [`at_plot_spectrum()`](https://cttir.github.io/hyperannotatR/reference/at_plot_spectrum.md)
+  requires the columns of an extraction table. A wrong value now fails
+  with a classified `at_validation_error` instead of a subscript or
+  coercion error. A `rgb` vector that is not of length three is
+  rejected; it was silently ignored.
+
+- [`at_plot_overlay()`](https://cttir.github.io/hyperannotatR/reference/at_plot_overlay.md)
+  draws every outline and point marker on a white casing, so each label
+  colour stays legible on any image, including the neutral grey that
+  opens the default palette.
+
+- [`at_read_rois_csv()`](https://cttir.github.io/hyperannotatR/reference/at_read_rois_csv.md)
+  reports an empty file and a `geometry` column that is not valid WKT as
+  validation errors that name the file.
+
+- [`at_load_project()`](https://cttir.github.io/hyperannotatR/reference/at_load_project.md),
+  [`at_load_session()`](https://cttir.github.io/hyperannotatR/reference/at_load_session.md)
+  and
+  [`at_read_mask()`](https://cttir.github.io/hyperannotatR/reference/at_read_mask.md)
+  report a file that is not RDS as a validation error that names the
+  file, instead of “unknown input format”.
+
+- A style from
+  [`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)
+  prints as a compact summary instead of a raw list, and the summary of
+  an unnamed project prints `(unnamed)` instead of `NA`.
+
+- [`at_mask_agreement()`](https://cttir.github.io/hyperannotatR/reference/at_mask_agreement.md)
+  cites the primary sources of the Dice coefficient, the Jaccard index
+  and Cohen’s kappa, and
+  [`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)
+  the published source of the Okabe-Ito palette.
+
+- App notifications wrap a long folder path inside the notification
+  instead of clipping it at the right edge.
+
+- The figures of the README and of the masks vignette carry alternative
+  text.
+
+- The backend availability tests expect the Cubert backend only where
+  the `cuvis.r` package and its vendor SDK are both usable. They failed
+  on a machine with `cuvis.r` installed but without the SDK.
+
 ## hyperannotatR 0.3.0
 
 - Renamed the R package to hyperannotatR and focused its scope on HSI.

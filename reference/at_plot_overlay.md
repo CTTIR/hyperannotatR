@@ -33,7 +33,9 @@ at_plot_overlay(project, img = NULL, layer = NULL, call = rlang::caller_env())
 
 A [ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)
 object with the image and ROI outlines (points as markers), both in
-level-0 image coordinates.
+level-0 image coordinates. Outlines take the colour of their label in
+the layer's style (see
+[`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)).
 
 ## See also
 

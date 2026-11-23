@@ -57,6 +57,14 @@ at_style(
 
 A named list of class `annot_style`.
 
+## References
+
+Wong B (2011). "Points of view: Color blindness." *Nature Methods*,
+8(6), 441. [doi:10.1038/nmeth.1618](https://doi.org/10.1038/nmeth.1618)
+. Figure 2 shows the eight-colour palette of Okabe and Ito; the default
+palette here uses its seven hues after a neutral grey (`#999999`) in
+place of black.
+
 ## See also
 
 Other layers:
@@ -70,24 +78,8 @@ Other layers:
 
 ``` r
 at_style(fill_alpha = 0.5, z = 2)
-#> $colour
-#> NULL
-#> 
-#> $fill_alpha
-#> [1] 0.5
-#> 
-#> $stroke_width
-#> [1] 2
-#> 
-#> $visible
-#> [1] TRUE
-#> 
-#> $locked
-#> [1] FALSE
-#> 
-#> $z
-#> [1] 2
-#> 
-#> attr(,"class")
-#> [1] "annot_style"
+#> <annot_style>
+#> colour: default palette
+#> fill alpha: 0.5  |  stroke width: 2
+#> visible: TRUE  |  locked: FALSE  |  z: 2
 ```

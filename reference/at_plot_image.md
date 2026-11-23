@@ -30,7 +30,8 @@ at_plot_image(
 
 - bands:
 
-  Optional band index for single-band display.
+  Optional band index (between 1 and the number of bands) for
+  single-band display.
 
 - rgb:
 

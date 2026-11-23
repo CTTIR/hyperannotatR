@@ -41,7 +41,9 @@ at_plot_spectrum(
 ## Value
 
 A [ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)
-object with one line per ROI and statistic.
+object with one line per ROI and statistic. Lines and ribbons share one
+colour per group: the colour-blind-safe Okabe-Ito palette for up to
+eight groups, viridis for more.
 
 ## See also
 

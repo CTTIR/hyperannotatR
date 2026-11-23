@@ -366,7 +366,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>         "schema_version": 1,
 #>         "signature": {
 #>           "size": 526756,
-#>           "mtime": 1795355523
+#>           "mtime": 1795399522
 #>         },
 #>         "files": null,
 #>         "path": "/home/runner/work/_temp/Library/hyperannotatR/extdata/example_tissue.png",
@@ -402,7 +402,7 @@ cat(readLines(paste0(path, ".legend.json")), sep = "\n")
 #>   },
 #>   "storage": null,
 #>   "annotatR_version": "0.4.0",
-#>   "created": "2026-11-22T13:53:57+0000",
+#>   "created": "2026-11-23T02:07:05+0000",
 #>   "mask_type": "multiclass",
 #>   "level": 0,
 #>   "dims": [512, 512],
@@ -535,7 +535,9 @@ renders a mask with its legend for a quick visual check:
 at_plot_mask(mc)
 ```
 
-![](masks_files/figure-html/plot-1.png)
+![Multi-class mask of the example project: a tumour square, a stroma
+rectangle and a necrosis band, each in its legend
+colour.](masks_files/figure-html/plot-1.png)
 
 Next, see the **Interoperability** vignette for GeoJSON, QuPath, and CSV
 exchange with other tools.

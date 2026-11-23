@@ -80,7 +80,7 @@
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Fill opacity; a sensible default when <code>NULL</code>.</p></dd>
+<dd><p>Fill opacity between 0 and 1; <code>0.4</code> when <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>
@@ -90,8 +90,9 @@
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot2::ggplot</a> object in level-0 image coordinates with the
-y axis pointing down, as in the image. Empty projects give a valid empty
-plot.</p>
+y axis pointing down, as in the image. Each label is filled with the
+colour of its layer's style (see <code><a href="at_style.html">at_style()</a></code>), the colour the masks and
+the app use. Empty projects give a valid empty plot.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

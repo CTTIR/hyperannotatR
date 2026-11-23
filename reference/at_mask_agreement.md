@@ -85,6 +85,22 @@ classes retain rows with NA Dice/IoU; background-only accuracy is 1 and
 kappa is NA (zero Cohen denominator). Mean Dice/IoU exclude absent
 classes and are NA if none are defined.
 
+## References
+
+Dice LR (1945). "Measures of the amount of ecologic association between
+species." *Ecology*, 26(3), 297-302.
+[doi:10.2307/1932409](https://doi.org/10.2307/1932409) .
+
+Jaccard P (1912). "The distribution of the flora in the alpine zone."
+*New Phytologist*, 11(2), 37-50.
+[doi:10.1111/j.1469-8137.1912.tb05611.x](https://doi.org/10.1111/j.1469-8137.1912.tb05611.x)
+.
+
+Cohen J (1960). "A coefficient of agreement for nominal scales."
+*Educational and Psychological Measurement*, 20(1), 37-46.
+[doi:10.1177/001316446002000104](https://doi.org/10.1177/001316446002000104)
+.
+
 ## See also
 
 [`at_mask()`](https://cttir.github.io/hyperannotatR/reference/at_mask.md),

@@ -32,7 +32,7 @@ at_plot_project(
 
 - alpha:
 
-  Fill opacity; a sensible default when `NULL`.
+  Fill opacity between 0 and 1; `0.4` when `NULL`.
 
 - call:
 
@@ -42,7 +42,11 @@ at_plot_project(
 
 A [ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)
 object in level-0 image coordinates with the y axis pointing down, as in
-the image. Empty projects give a valid empty plot.
+the image. Each label is filled with the colour of its layer's style
+(see
+[`at_style()`](https://cttir.github.io/hyperannotatR/reference/at_style.md)),
+the colour the masks and the app use. Empty projects give a valid empty
+plot.
 
 ## See also
 
