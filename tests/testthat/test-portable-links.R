@@ -100,3 +100,9 @@ test_that("the independent digest oracle works without the newer tools API", {
   expect_identical(independent_sha256(path), expected)
   expect_identical(independent_sha256(bytes = charToRaw("abc")), expected)
 })
+
+test_that("the link probe finds file links where the system allows them", {
+  # A probe that failed everywhere would skip every link test without notice.
+  skip_on_os("windows")
+  expect_true(file_links_available())
+})

@@ -1,3 +1,23 @@
+# Whether R may create file symbolic links here. Windows allows them only with
+# the symbolic-link privilege or in developer mode; CRAN and win-builder run
+# without either. Probed once per test run with a throwaway link.
+file_links_available <- local({
+  available <- NULL
+  function() {
+    if (is.null(available)) {
+      probe <- tempfile("link-probe-")
+      dir.create(probe)
+      target <- file.path(probe, "target")
+      link <- file.path(probe, "link")
+      writeLines("probe", target)
+      available <<- isTRUE(suppressWarnings(file.symlink(target, link)))
+      if (available) fs::link_delete(link)
+      unlink(probe, recursive = TRUE)
+    }
+    available
+  }
+})
+
 # Remove genuine links before withr's recursive temporary-directory cleanup.
 # R's Windows unlink can reject a reparse point that it successfully created.
 portable_test_link <- function(from, to, envir = parent.frame()) {
@@ -5,6 +25,9 @@ portable_test_link <- function(from, to, envir = parent.frame()) {
   # fs uses directory junctions on Windows, including for file targets.
   # Base R creates genuine file symlinks; keep fs for directory junctions.
   if (.Platform$OS.type == "windows" && !dir.exists(from)) {
+    if (!file_links_available()) {
+      testthat::skip("file symbolic links are not available on this system")
+    }
     if (!isTRUE(file.symlink(from, to))) stop("Cannot create the required file symlink fixture.")
   } else {
     fs::link_create(from, to)

@@ -10,6 +10,9 @@ package for a first CRAN submission.
 * The source package ships only the logo files that the help pages and the
   README use, and the full app-server test scenarios are skipped on CRAN
   (they still run in continuous integration).
+* Tests that need a file symbolic link are skipped on Windows systems that
+  do not allow R to create one, such as the CRAN and win-builder machines,
+  instead of failing. They still run wherever such links can be made.
 
 * Detect links in handoff and export paths on Windows, including dangling
   links and directory junctions, without relying on `Sys.readlink()`.
