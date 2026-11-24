@@ -1,5 +1,8 @@
 # hyperannotatR ![hyperannotatR logo](reference/figures/logo-with-name.png)
 
+Zenodo DOI reserved for the release: `10.5281/zenodo.21889921` (not yet
+published).
+
 **hyperannotatR** provides multi-layer region-of-interest annotation for
 hyperspectral imaging (HSI), including spectral cubes, band views,
 spectral extraction, and associated display rasters. ROI geometries,

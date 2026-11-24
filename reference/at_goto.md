@@ -49,5 +49,5 @@ sess <- at_session(rep(at_example_path("cube"), 3))
 at_goto(sess, 3)
 #> <annot_session>
 #> images: 3  |  complete: 0  |  cursor: 3
-#> out_dir: /tmp/RtmpBf2kiL/hyperannotatR-session-24903e2231b2  |  autosave: TRUE
+#> out_dir: /tmp/RtmpeXU78N/hyperannotatR-session-236c273572f2  |  autosave: TRUE
 ```
